@@ -1,0 +1,11 @@
+---
+Name: elementalgrid
+---
+
+DNADesign\Elemental\ElementalEditor:
+  extensions:
+    - TWM\ElementalGrid\Extensions\ElementalEditorExtension
+
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    - TWM\ElementalGrid\Extensions\BaseElementExtension
