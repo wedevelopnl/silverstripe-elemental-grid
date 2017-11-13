@@ -1,14 +1,33 @@
+/* ROW FIX */
+tbody.row {
+    margin: 0;
+    padding: 10px;
+}
+/* COL STYLING */
 tbody.row tr {
-    outline: 1px solid black;
+    outline: 1px solid #ced3d9;
+    margin: 0 0 20px 0;
 }
 tbody.row tr td {
     white-space: nowrap;
 }
+
+/* STYLE TOOLBAR */
 .col-SizeMD {
     text-align: right;
     width: 100%;
     display: block;
+    padding: 10px 0!important;
+    border-bottom: none!important;
 }
 .col-EditorPreview {
     width: 100%;
+}
+
+/*ROW COLUMNS*/
+tr[data-class*="ElementRow"] {
+    background: #f0f4f7!important;
+}
+tr[data-class*="ElementRow"] .col-SizeMD {
+    display: none;
 }

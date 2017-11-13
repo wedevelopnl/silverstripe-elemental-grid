@@ -1,0 +1,4 @@
+nl:
+  TWM\ElementalGrid\Extensions\BaseElementExtension:
+    SIZE_MD: 'Formaat'
+    COLUMN: 'Kolom'

@@ -1,5 +1,7 @@
 ---
 Name: elementalgrid
+After:
+  - 'elemental'
 ---
 
 DNADesign\Elemental\ElementalEditor:
