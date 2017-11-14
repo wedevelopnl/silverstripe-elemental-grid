@@ -1,8 +1,11 @@
 ---
 Name: elementalgrid
-After:
+Before:
   - 'elemental'
 ---
+SilverStripe\Core\Manifest\ModuleManifest:
+  module_priority:
+    - twm/silverstripe-elemental-grid
 
 DNADesign\Elemental\ElementalEditor:
   extensions:

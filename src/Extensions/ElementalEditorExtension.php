@@ -5,6 +5,7 @@ namespace TWM\ElementalGrid\Extensions;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\Requirements;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
+use SilverStripe\Forms\DropdownField;
 
 class ElementalEditorExtension extends DataExtension {
 
@@ -24,9 +25,15 @@ class ElementalEditorExtension extends DataExtension {
         $editableColumns = new \Symbiote\GridFieldExtensions\GridFieldEditableColumns();
         $editableColumns->setDisplayFields(array(
             'SizeMD' => array(
-                'title' => _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size'),
+                'title' => _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'),
                 'callback' => function($record, $column, $grid) {
-                    return \SilverStripe\Forms\DropdownField::create('SizeMD', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size'), BaseElementExtension::getColSizeOptions())->addExtraClass('grideditor-sizefield');
+                    return DropdownField::create('SizeMD', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'), BaseElementExtension::getColSizeOptions())->addExtraClass('grideditor-sizefield')->setAttribute('data-title', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'));
+                }
+            ),
+            'OffsetMD' => array(
+                'title' => _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'),
+                'callback' => function($record, $column, $grid) {
+                    return DropdownField::create('OffsetMD', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'), BaseElementExtension::getColSizeOptions(false, true))->addExtraClass('grideditor-offsetfield')->setAttribute('data-title', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'));
                 }
             )
         ));
