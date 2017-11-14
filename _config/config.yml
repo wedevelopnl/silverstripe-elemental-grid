@@ -11,3 +11,7 @@ DNADesign\Elemental\ElementalEditor:
 DNADesign\Elemental\Models\BaseElement:
   extensions:
     - TWM\ElementalGrid\Extensions\BaseElementExtension
+
+DNADesign\Elemental\Models\ElementalArea:
+  extensions:
+    - TWM\ElementalGrid\Extensions\ElementalAreaExtension

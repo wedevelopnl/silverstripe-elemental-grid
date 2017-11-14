@@ -2,3 +2,11 @@ nl:
   TWM\ElementalGrid\Extensions\BaseElementExtension:
     SIZE_MD: 'Formaat'
     COLUMN: 'Kolom'
+  TWM\ElementalGrid\Models\ElementRow:
+    BlockType: Rij
+    ContentLabel: Rij
+    PLURALNAME: 'Rijen'
+    PLURALS:
+      one: 'Een rij'
+      other: '{count} rijen'
+    SINGULARNAME: 'rij'

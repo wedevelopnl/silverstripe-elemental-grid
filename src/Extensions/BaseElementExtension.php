@@ -18,6 +18,10 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
         'SizeMD' => 'Int'
     );
 
+    private static $defaults = array(
+        'SizeMD' => 6
+    );
+
     /**
      * Get the options for col sizes
      * @return array

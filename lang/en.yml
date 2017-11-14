@@ -1,3 +1,11 @@
 en:
   TWM\ElementalGrid\Extensions\BaseElementExtension:
     SIZE_MD: 'Size'
+  TWM\ElementalGrid\Models\ElementRow:
+    BlockType: Row
+    ContentLabel: Row
+    PLURALNAME: 'Rows'
+    PLURALS:
+      one: 'A row'
+      other: '{count} rows'
+    SINGULARNAME: 'row'

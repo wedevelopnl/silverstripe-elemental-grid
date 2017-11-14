@@ -31,3 +31,10 @@ tr[data-class*="ElementRow"] {
 tr[data-class*="ElementRow"] .col-SizeMD {
     display: none;
 }
+tr[data-class*="ElementRow"] .elemental-preview__detail h3,
+tr[data-class*="ElementRow"] .elemental-preview__detail p {
+    display: inline-block;
+}
+tr[data-class*="ElementRow"] .elemental-preview__detail p {
+    font-style: italic;
+}

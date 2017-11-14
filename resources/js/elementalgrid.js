@@ -4,9 +4,9 @@
     /**
      * Add row class to the grid table
      */
-    $('.grideditor').entwine({
+    $('.grideditor tbody').entwine({
       onmatch: function () {
-        this.find('tbody').addClass('row');
+        this.addClass('row');
       }
     });
 

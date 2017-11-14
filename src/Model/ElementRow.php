@@ -3,6 +3,7 @@
 namespace TWM\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
+use SilverStripe\Forms\TextField;
 use TWM\ElementalGrid\Controllers\ElementRowController;
 
 class ElementRow extends BaseElement
@@ -23,6 +24,7 @@ class ElementRow extends BaseElement
     {
         $fields = parent::getCMSFields();
         $fields->removeByName('TitleAndDisplayed');
+        $fields->addFieldToTab('Root.Main', TextField::create('Title'));
         return $fields;
     }
 
