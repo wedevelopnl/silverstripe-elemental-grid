@@ -32,3 +32,6 @@ To create nested rows or grids you need to create a grid element ss the elementa
 
 ## Disallow rows
 See the elemental documentation: https://github.com/dnadesign/silverstripe-elemental and add TheWebmen\ElementalGrid\Models\ElementRow to the disallowed_elements
+
+## TODO
+* Break point switch in grid view (lg,md,sm,xs)
