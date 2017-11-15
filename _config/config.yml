@@ -9,12 +9,12 @@ SilverStripe\Core\Manifest\ModuleManifest:
 
 DNADesign\Elemental\ElementalEditor:
   extensions:
-    - TWM\ElementalGrid\Extensions\ElementalEditorExtension
+    - TheWebmen\ElementalGrid\Extensions\ElementalEditorExtension
 
 DNADesign\Elemental\Models\BaseElement:
   extensions:
-    - TWM\ElementalGrid\Extensions\BaseElementExtension
+    - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
 
 DNADesign\Elemental\Models\ElementalArea:
   extensions:
-    - TWM\ElementalGrid\Extensions\ElementalAreaExtension
+    - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension

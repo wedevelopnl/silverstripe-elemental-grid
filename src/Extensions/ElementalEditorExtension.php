@@ -1,6 +1,6 @@
 <?php
 
-namespace TWM\ElementalGrid\Extensions;
+namespace TheWebmen\ElementalGrid\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\Requirements;
@@ -25,15 +25,15 @@ class ElementalEditorExtension extends DataExtension {
         $editableColumns = new \Symbiote\GridFieldExtensions\GridFieldEditableColumns();
         $editableColumns->setDisplayFields(array(
             'SizeMD' => array(
-                'title' => _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'),
+                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'),
                 'callback' => function($record, $column, $grid) {
-                    return DropdownField::create('SizeMD', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'), BaseElementExtension::getColSizeOptions())->addExtraClass('grideditor-sizefield')->setAttribute('data-title', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'));
+                    return DropdownField::create('SizeMD', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'), BaseElementExtension::getColSizeOptions())->addExtraClass('grideditor-sizefield')->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'));
                 }
             ),
             'OffsetMD' => array(
-                'title' => _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'),
+                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'),
                 'callback' => function($record, $column, $grid) {
-                    return DropdownField::create('OffsetMD', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'), BaseElementExtension::getColSizeOptions(false, true))->addExtraClass('grideditor-offsetfield')->setAttribute('data-title', _t('TWM\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'));
+                    return DropdownField::create('OffsetMD', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'), BaseElementExtension::getColSizeOptions(false, true))->addExtraClass('grideditor-offsetfield')->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'));
                 }
             )
         ));

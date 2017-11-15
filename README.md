@@ -15,20 +15,20 @@ This module converts the elemental module (https://github.com/dnadesign/silverst
 ## Installation
 
 ```
-composer require "twm/silverstripe-elemental-grid" "dev-master"
+composer require "thewebmen/silverstripe-elemental-grid" "dev-master"
 ```
 
 After that follow the steps from the elemental documentation installation section after the composer require: https://github.com/dnadesign/silverstripe-elemental
 
 ## Settings
-TWM\ElementalGrid\Extensions\BaseElementExtension num_columns (default: 12)
+TheWebmen\ElementalGrid\Extensions\BaseElementExtension num_columns (default: 12)
 
 ## Add settings to rows
-* Add a dataextension to TWM\ElementalGrid\Models\ElementRow
-* Copy the template TWM/ElementalGrid/Models/ElementRow.ss to your theme
+* Add a dataextension to TheWebmen\ElementalGrid\Models\ElementRow
+* Copy the template TheWebmen/ElementalGrid/Models/ElementRow.ss to your theme
 
 ## Nested rows/grids
 To create nested rows or grids you need to create a grid element ss the elemental documentation for more information. 
 
 ## Disallow rows
-See the elemental documentation: https://github.com/dnadesign/silverstripe-elemental and add TWM\ElementalGrid\Models\ElementRow to the disallowed_elements
+See the elemental documentation: https://github.com/dnadesign/silverstripe-elemental and add TheWebmen\ElementalGrid\Models\ElementRow to the disallowed_elements

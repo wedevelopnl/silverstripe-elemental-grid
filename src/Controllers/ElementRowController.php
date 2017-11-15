@@ -1,6 +1,6 @@
 <?php
 
-namespace TWM\ElementalGrid\Controllers;
+namespace TheWebmen\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
 

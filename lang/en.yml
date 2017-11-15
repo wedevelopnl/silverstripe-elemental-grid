@@ -1,5 +1,5 @@
 en:
-  TWM\ElementalGrid\Extensions\BaseElementExtension:
+  TheWebmen\ElementalGrid\Extensions\BaseElementExtension:
     SIZE_XS: 'Size XS'
     SIZE_SM: 'Size SM'
     SIZE_MD: 'Size MD'
@@ -17,7 +17,7 @@ en:
     HIDDEN: 'Onzichtbaar'
     COLUMN: 'Column'
     NONE: 'None'
-  TWM\ElementalGrid\Models\ElementRow:
+  TheWebmen\ElementalGrid\Models\ElementRow:
     BlockType: Row
     ContentLabel: Row
     PLURALNAME: 'Rows'

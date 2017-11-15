@@ -1,6 +1,6 @@
 <?php
 
-namespace TWM\ElementalGrid\Extensions;
+namespace TheWebmen\ElementalGrid\Extensions;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
@@ -72,7 +72,7 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
      */
     public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
     {
-        if( $this->owner->ClassName == 'TWM\ElementalGrid\Models\ElementRow' ) {
+        if( $this->owner->ClassName == 'TheWebmen\ElementalGrid\Models\ElementRow' ) {
             $fields->removeByName('SizeXS');
             $fields->removeByName('SizeSM');
             $fields->removeByName('SizeMD');

@@ -1,10 +1,10 @@
 <?php
 
-namespace TWM\ElementalGrid\Extensions;
+namespace TheWebmen\ElementalGrid\Extensions;
 
 use SilverStripe\ORM\DataExtension;
-use TWM\ElementalGrid\Controllers\ElementRowController;
-use TWM\ElementalGrid\Models\ElementRow;
+use TheWebmen\ElementalGrid\Controllers\ElementRowController;
+use TheWebmen\ElementalGrid\Models\ElementRow;
 
 class ElementalAreaExtension extends DataExtension {
 

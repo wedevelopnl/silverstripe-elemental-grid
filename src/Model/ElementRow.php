@@ -1,10 +1,10 @@
 <?php
 
-namespace TWM\ElementalGrid\Models;
+namespace TheWebmen\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\TextField;
-use TWM\ElementalGrid\Controllers\ElementRowController;
+use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 
 class ElementRow extends BaseElement
 {

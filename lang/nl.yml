@@ -1,5 +1,5 @@
 nl:
-  TWM\ElementalGrid\Extensions\BaseElementExtension:
+  TheWebmen\ElementalGrid\Extensions\BaseElementExtension:
     SIZE_XS: 'Formaat XS'
     SIZE_SM: 'Formaat SM'
     SIZE_MD: 'Formaat MD'
@@ -17,7 +17,7 @@ nl:
     HIDDEN: 'Onzichtbaar'
     COLUMN: 'Kolom'
     NONE: 'Geen'
-  TWM\ElementalGrid\Models\ElementRow:
+  TheWebmen\ElementalGrid\Models\ElementRow:
     BlockType: Rij
     ContentLabel: Rij
     PLURALNAME: 'Rijen'
