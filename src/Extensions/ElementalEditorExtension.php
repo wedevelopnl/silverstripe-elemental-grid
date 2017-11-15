@@ -14,8 +14,8 @@ class ElementalEditorExtension extends DataExtension {
      */
     public function updateField($gridField){
         //Require extra resources
-        Requirements::css('twm/silverstripe-elemental-grid:resources/css/elementalgrid.css');
-        Requirements::javascript('twm/silverstripe-elemental-grid:resources/js/elementalgrid.js');
+        Requirements::css('thewebmen/silverstripe-elemental-grid:resources/css/elementalgrid.css');
+        Requirements::javascript('thewebmen/silverstripe-elemental-grid:resources/js/elementalgrid.js');
 
         //Change the config
         $config = $gridField->getConfig();

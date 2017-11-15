@@ -5,7 +5,7 @@ Before:
 ---
 SilverStripe\Core\Manifest\ModuleManifest:
   module_priority:
-    - twm/silverstripe-elemental-grid
+    - thewebmen/silverstripe-elemental-grid
 
 DNADesign\Elemental\ElementalEditor:
   extensions:
