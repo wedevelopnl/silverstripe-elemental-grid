@@ -35,6 +35,9 @@ tbody.row tr td {
 .col-EditorPreview {
     width: 100%;
 }
+.col-EditorPreview .elemental-preview__detail p {
+    display: none;
+}
 
 /*ROW COLUMNS*/
 tr[data-class*="ElementRow"] {
