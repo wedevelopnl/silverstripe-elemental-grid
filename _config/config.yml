@@ -1,0 +1,20 @@
+---
+Name: elementalgrid
+Before:
+  - 'elemental'
+---
+SilverStripe\Core\Manifest\ModuleManifest:
+  module_priority:
+    - thewebmen/silverstripe-elemental-grid
+
+DNADesign\Elemental\ElementalEditor:
+  extensions:
+    - TheWebmen\ElementalGrid\Extensions\ElementalEditorExtension
+
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
+
+DNADesign\Elemental\Models\ElementalArea:
+  extensions:
+    - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension
