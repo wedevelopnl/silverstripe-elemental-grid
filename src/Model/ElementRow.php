@@ -20,6 +20,8 @@ class ElementRow extends BaseElement
 
     private static $controller_class = ElementRowController::class;
 
+    private static $block_type = 'full-width';
+
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -36,10 +38,6 @@ class ElementRow extends BaseElement
     public function getType()
     {
         return _t(__CLASS__ . '.BlockType', 'Row');
-    }
-
-    public function IsRow(){
-        return true;
     }
 
 }

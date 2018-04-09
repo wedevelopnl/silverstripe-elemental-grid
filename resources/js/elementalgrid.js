@@ -11,6 +11,15 @@
     });
 
     /**
+     * Types
+     */
+    $('.col-BlockType').entwine({
+      onmatch: function () {
+        this.closest('tr').addClass('block-type-' + this.find('input').val());
+      }
+    });
+
+    /**
      * Handle col size classes
      */
     $('select.grideditor-sizefield, select.grideditor-offsetfield').entwine({
@@ -35,7 +44,7 @@
         var _tr = _this.closest('tr');
         var _size = _tr.find('select.grideditor-sizefield').val();
         var _offset = _tr.find('select.grideditor-offsetfield').val();
-        if (_tr.data('class').indexOf('ElementRow') != -1) {
+        if (_tr.find('.col-BlockType input').val() == 'full-width') {
           _tr.addClass('col-md-12');
         } else {
           //Remove old col class

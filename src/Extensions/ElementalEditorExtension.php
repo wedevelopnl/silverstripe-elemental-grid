@@ -2,6 +2,7 @@
 
 namespace TheWebmen\ElementalGrid\Extensions;
 
+use SilverStripe\Forms\HiddenField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\Requirements;
 use Symbiote\GridFieldExtensions\GridFieldOrderableRows;
@@ -34,6 +35,11 @@ class ElementalEditorExtension extends DataExtension {
                 'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'),
                 'callback' => function($record, $column, $grid) {
                     return DropdownField::create('OffsetMD', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'), BaseElementExtension::getColSizeOptions(false, true))->addExtraClass('grideditor-offsetfield')->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'));
+                }
+            ),
+            'BlockType' => array(
+                'callback' => function($record, $column, $grid) {
+                    return HiddenField::create('BlockType', 'BlockType');
                 }
             )
         ));

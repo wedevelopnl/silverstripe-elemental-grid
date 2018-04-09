@@ -30,7 +30,9 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
         'VisibilityXS' => 'Varchar',
         'VisibilitySM' => 'Varchar',
         'VisibilityMD' => 'Varchar',
-        'VisibilityLG' => 'Varchar'
+        'VisibilityLG' => 'Varchar',
+
+        'BlockType' => 'Varchar'
     );
 
     private static $defaults = array(
@@ -72,7 +74,8 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
      */
     public function updateCMSFields(\SilverStripe\Forms\FieldList $fields)
     {
-        if( $this->owner->ClassName == 'TheWebmen\ElementalGrid\Models\ElementRow' ) {
+        $fields->removeByName('BlockType');
+        if( $this->getBlockType() == 'full-width' ) {
             $fields->removeByName('SizeXS');
             $fields->removeByName('SizeSM');
             $fields->removeByName('SizeMD');
@@ -152,6 +155,11 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
             $classes .= ' ' . $this->owner->VisibilityLG . '-lg';
         }
         return $classes;
+    }
+
+    public function getBlockType(){
+        $type = $this->owner->config()->get('block_type');
+        return $type ? $type : 'column';
     }
 
 }

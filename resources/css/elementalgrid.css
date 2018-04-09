@@ -29,6 +29,9 @@ tbody.row tr td {
 .col-OffsetMD {
     margin-left: 1%;
 }
+.col-BlockType {
+    display: none;
+}
 .grideditor-field-label {
     font-style: italic;
 }
@@ -38,23 +41,30 @@ tbody.row tr td {
 .col-EditorPreview .elemental-preview__detail p {
     display: none;
 }
-
-/*ROW COLUMNS*/
-tr[data-class*="ElementRow"] {
-    background: #f0f4f7 !important;
+.col-EditorPreview .elemental-preview__detail h3 small {
+    display: block;
 }
 
-tr[data-class*="ElementRow"] .col-OffsetMD,
-tr[data-class*="ElementRow"] .col-SizeMD {
+/*FULL WIDTH COLUMNS*/
+tr.block-type-full-width {
+    background: #f0f4f7 !important;
+}
+tr.block-type-full-width th,
+tr.block-type-full-width td {
+    border-bottom: none!important;
+}
+
+tr.block-type-full-width .col-OffsetMD,
+tr.block-type-full-width .col-SizeMD {
     display: none;
 }
 
-tr[data-class*="ElementRow"] .elemental-preview__detail h3,
-tr[data-class*="ElementRow"] .elemental-preview__detail p {
+tr.block-type-full-width .elemental-preview__detail h3,
+tr.block-type-full-width .elemental-preview__detail p {
     display: inline-block;
 }
 
-tr[data-class*="ElementRow"] .elemental-preview__detail p {
+tr.block-type-full-width .elemental-preview__detail p {
     font-style: italic;
 }
 
