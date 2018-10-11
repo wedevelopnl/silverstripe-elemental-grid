@@ -19,7 +19,7 @@
     "require": {
         "silverstripe/cms": "^4.0@dev",
         "silverstripe/vendor-plugin": "^1.0",
-        "dnadesign/silverstripe-elemental": "^2.0"
+        "dnadesign/silverstripe-elemental": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",
