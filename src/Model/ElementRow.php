@@ -3,6 +3,7 @@
 namespace TheWebmen\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 
@@ -24,10 +25,12 @@ class ElementRow extends BaseElement
 
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
-        $fields->removeByName('TitleAndDisplayed');
-        $fields->addFieldToTab('Root.Main', TextField::create('Title'));
-        return $fields;
+        $this->beforeUpdateCMSFields(function (FieldList $fields) {
+            $fields->removeByName('TitleAndDisplayed');
+            $fields->addFieldToTab('Root.Main', TextField::create('Title'));
+        });
+
+        return parent::getCMSFields();
     }
 
     public function getSummary()
