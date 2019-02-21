@@ -45,6 +45,9 @@ class ElementalAreaExtension extends DataExtension {
                 if($previousRow){
                     $controller->setPreviousRow($previousRow->getElement());
                 }
+                if($previousController && get_class($previousController) === ElementFullWidthController::class){
+                   $controller->setIsFirstRow(true);
+                }
                 $previousRow = $controller;
             }else if(get_class($controller) == ElementFullWidthController::class){
                 if($previousController && $previousController->ClassName == ElementRow::class){
