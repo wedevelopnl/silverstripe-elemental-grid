@@ -2,6 +2,7 @@
 
 namespace TheWebmen\ElementalGrid\Extensions;
 
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\Requirements;
@@ -23,18 +24,30 @@ class ElementalEditorExtension extends DataExtension {
         $config->getComponentByType(GridFieldOrderableRows::class)->setImmediateUpdate(false);
 
         //Add editable columns
+        $defaultSizeField = 'Size' . Config::forClass('TheWebmen\ElementalGrid')->get('defaultSizeField');
+        $defaultSizeFieldTitle = str_replace('Size', 'Size ', $defaultSizeField);
+        $defaultSizeFieldTranslateKey = strtoupper(str_replace(' ', '_', $defaultSizeFieldTitle));
+
+        $defaultOffsetField = 'Offset' . Config::forClass('TheWebmen\ElementalGrid')->get('defaultOffsetField');
+        $defaultOffsetFieldTitle = str_replace('Size', 'Size ', $defaultOffsetField);
+        $defaultOffsetFieldTranslateKey = strtoupper(str_replace(' ', '_', $defaultOffsetFieldTitle));
+
         $editableColumns = new \Symbiote\GridFieldExtensions\GridFieldEditableColumns();
         $editableColumns->setDisplayFields(array(
-            'SizeMD' => array(
-                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'),
-                'callback' => function($record, $column, $grid) {
-                    return DropdownField::create('SizeMD', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'), BaseElementExtension::getColSizeOptions())->addExtraClass('grideditor-sizefield')->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.SIZE_MD', 'Size MD'));
+            $defaultSizeField => array(
+                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultSizeFieldTranslateKey, $defaultSizeFieldTitle),
+                'callback' => function($record, $column, $grid) use($defaultSizeField, $defaultSizeFieldTranslateKey, $defaultSizeFieldTitle) {
+                    return DropdownField::create($defaultSizeField, _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultSizeFieldTranslateKey, $defaultSizeFieldTitle), BaseElementExtension::getColSizeOptions())
+                        ->addExtraClass('grideditor-sizefield')
+                        ->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultSizeFieldTranslateKey, $defaultSizeFieldTitle));
                 }
             ),
-            'OffsetMD' => array(
-                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'),
-                'callback' => function($record, $column, $grid) {
-                    return DropdownField::create('OffsetMD', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'), BaseElementExtension::getColSizeOptions(false, true))->addExtraClass('grideditor-offsetfield')->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.OFFSET_MD', 'Offset MD'));
+            $defaultOffsetField => array(
+                'title' => _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultOffsetFieldTranslateKey, $defaultOffsetFieldTitle),
+                'callback' => function($record, $column, $grid) use($defaultOffsetField, $defaultOffsetFieldTranslateKey, $defaultOffsetFieldTitle) {
+                    return DropdownField::create($defaultOffsetField, _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultOffsetFieldTranslateKey, $defaultOffsetFieldTitle), BaseElementExtension::getColSizeOptions(false, true))
+                        ->addExtraClass('grideditor-offsetfield')
+                        ->setAttribute('data-title', _t('TheWebmen\ElementalGrid\Extensions\BaseElementExtension.' . $defaultOffsetFieldTranslateKey, $defaultOffsetFieldTitle));
                 }
             ),
             'BlockType' => array(

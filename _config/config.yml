@@ -18,3 +18,7 @@ DNADesign\Elemental\Models\BaseElement:
 DNADesign\Elemental\Models\ElementalArea:
   extensions:
     - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension
+
+TheWebmen\ElementalGrid:
+  defaultSizeField: 'MD'
+  defaultOffsetField: 'MD'

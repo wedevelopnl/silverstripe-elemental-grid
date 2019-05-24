@@ -16,17 +16,17 @@ tbody.row tr td {
 }
 
 /* STYLE TOOLBAR */
-.col-OffsetMD,
-.col-SizeMD {
+.col-offsetfield,
+.col-sizefield {
     width: 49%;
     display: inline-block;
     padding: 10px 0 !important;
     border-bottom: none !important;
 }
-.col-SizeMD {
+.col-sizefield {
     margin-right: 1%;
 }
-.col-OffsetMD {
+.col-offsetfield {
     margin-left: 1%;
 }
 .col-BlockType {
@@ -54,8 +54,8 @@ tr.block-type-full-width td {
     border-bottom: none!important;
 }
 
-tr.block-type-full-width .col-OffsetMD,
-tr.block-type-full-width .col-SizeMD {
+tr.block-type-full-width .col-offsetfield,
+tr.block-type-full-width .col-sizefield {
     display: none;
 }
 

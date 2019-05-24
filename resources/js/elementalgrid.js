@@ -29,12 +29,12 @@
         var _tr = _this.closest('tr');
         var _sizeField = _tr.find('select.grideditor-sizefield');
         if(_sizeField.data('title')){
-          _tr.find('.col-SizeMD').prepend('<span class="grideditor-field-label">'+_sizeField.data('title')+'</span>');
+          _sizeField.closest('td').addClass('col-sizefield').prepend('<span class="grideditor-field-label">'+_sizeField.data('title')+'</span>');
           _sizeField.data('title', false);
         }
         var _offsetField = _tr.find('select.grideditor-offsetfield');
         if(_offsetField.data('title')){
-          _tr.find('.col-OffsetMD').prepend('<span class="grideditor-field-label">'+_offsetField.data('title')+'</span>');
+          _offsetField.closest('td').addClass('col-offsetfield').prepend('<span class="grideditor-field-label">'+_offsetField.data('title')+'</span>');
           _offsetField.data('title', false);
         }
       },

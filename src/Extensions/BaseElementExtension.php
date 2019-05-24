@@ -35,9 +35,11 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
         'BlockType' => 'Varchar'
     );
 
-    private static $defaults = array(
-        'SizeMD' => 6
-    );
+    public function populateDefaults()
+    {
+        $defaultSizeField = 'Size' . Config::forClass('TheWebmen\ElementalGrid')->get('defaultSizeField');
+        $this->owner->$defaultSizeField = 6;
+    }
 
     /**
      * Get the options for col sizes
@@ -118,12 +120,14 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
      */
     public function BootstrapColClasses(){
         //Col options
-        $classes = 'col-md-' . $this->owner->SizeMD;
         if($this->owner->SizeXS){
             $classes .= ' col-xs-' . $this->owner->SizeXS;
         }
         if($this->owner->SizeSM){
             $classes .= ' col-sm-' . $this->owner->SizeSM;
+        }
+        if($this->owner->SizeMD){
+            $classes .= ' col-md-' . $this->owner->SizeMD;
         }
         if($this->owner->SizeLG){
             $classes .= ' col-lg-' . $this->owner->SizeLG;
