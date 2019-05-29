@@ -120,6 +120,7 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
      */
     public function BootstrapColClasses(){
         //Col options
+        $classes = '';
         if($this->owner->SizeXS){
             $classes .= ' col-xs-' . $this->owner->SizeXS;
         }
