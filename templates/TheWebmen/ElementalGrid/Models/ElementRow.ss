@@ -2,5 +2,5 @@
     </div>
 <% end_if %>
 <% if not $Controller.IsLastRow %>
-<div class="row<% if $ExtraClass %> $ExtraClass<% end_if %>">
+<div class="$RowClass<% if $ExtraClass %> $ExtraClass<% end_if %>">
 <% end_if %>
