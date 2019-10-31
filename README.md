@@ -21,7 +21,12 @@ composer require "thewebmen/silverstripe-elemental-grid" "dev-master"
 After that follow the steps from the elemental documentation installation section after the composer require: https://github.com/dnadesign/silverstripe-elemental
 
 ## Settings
-TheWebmen\ElementalGrid\Extensions\BaseElementExtension num_columns (default: 12)
+```
+TheWebmen\ElementalGrid:
+  defaultSizeField: 'MD' (xs, sm, md, lg)
+  defaultOffsetField: 'MD' (xs, sm, md, lg)
+  cssFramework: 'bootstrap' (bootstrap, bulma)
+```
 
 ## Add settings to rows
 * Add a dataextension to TheWebmen\ElementalGrid\Models\ElementRow
@@ -35,3 +40,4 @@ See the elemental documentation: https://github.com/dnadesign/silverstripe-eleme
 
 ## TODO
 * Break point switch in grid view (lg,md,sm,xs)
+* Upgrade Elemental module
