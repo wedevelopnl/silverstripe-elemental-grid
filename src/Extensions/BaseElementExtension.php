@@ -122,29 +122,29 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
         //Col options
         $classes = '';
         if($this->owner->SizeXS){
-            $classes .= ' col-xs-' . $this->owner->SizeXS;
+            $classes .= 'col-xs-' . $this->owner->SizeXS;
         }
         if($this->owner->SizeSM){
-            $classes .= ' col-sm-' . $this->owner->SizeSM;
+            $classes .= 'col-sm-' . $this->owner->SizeSM;
         }
         if($this->owner->SizeMD){
-            $classes .= ' col-md-' . $this->owner->SizeMD;
+            $classes .= 'col-md-' . $this->owner->SizeMD;
         }
         if($this->owner->SizeLG){
-            $classes .= ' col-lg-' . $this->owner->SizeLG;
+            $classes .= 'col-lg-' . $this->owner->SizeLG;
         }
         //Offset options
         if($this->owner->OffsetXS){
-            $classes .= ' col-xs-offset-' . $this->owner->OffsetXS;
+            $classes .= 'col-xs-offset-' . $this->owner->OffsetXS;
         }
         if($this->owner->OffsetSM){
-            $classes .= ' col-sm-offset-' . $this->owner->OffsetSM;
+            $classes .= 'col-sm-offset-' . $this->owner->OffsetSM;
         }
         if($this->owner->OffsetMD){
-            $classes .= ' col-md-offset-' . $this->owner->OffsetMD;
+            $classes .= 'col-md-offset-' . $this->owner->OffsetMD;
         }
         if($this->owner->OffsetLG){
-            $classes .= ' col-lg-offset-' . $this->owner->OffsetLG;
+            $classes .= 'col-lg-offset-' . $this->owner->OffsetLG;
         }
         //Visibility options
         if($this->owner->VisibilityXS && $this->owner->VisibilityXS != 'default'){
@@ -160,6 +160,63 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
             $classes .= ' ' . $this->owner->VisibilityLG . '-lg';
         }
         return $classes;
+    }
+
+    /**
+     * @return string
+     */
+    public function BulmaColClasses(){
+        //Col options
+        $classes = '';
+        if($this->owner->SizeXS){
+            $classes .= 'column is-' . $this->owner->SizeXS . '-mobile';
+        }
+        if($this->owner->SizeSM){
+            $classes .= 'column is-' . $this->owner->SizeSM . '-tablet';
+        }
+        if($this->owner->SizeMD){
+            $classes .= 'column is-' . $this->owner->SizeMD . '-desktop';
+        }
+        if($this->owner->SizeLG){
+            $classes .= 'column is-' . $this->owner->SizeLG . '-widescreen';
+        }
+        //Offset options
+        if($this->owner->OffsetXS){
+            $classes .= 'column is-offset-' . $this->owner->OffsetXS . '-mobile';
+        }
+        if($this->owner->OffsetSM){
+            $classes .= 'column is-offset-' . $this->owner->OffsetSM . '-tablet';
+        }
+        if($this->owner->OffsetMD){
+            $classes .= 'column is-offset-' . $this->owner->OffsetMD . '-desktop';
+        }
+        if($this->owner->OffsetLG){
+            $classes .= 'column is-offset-' . $this->owner->OffsetLG . '-widescreen';
+        }
+        //Visibility options
+        if($this->owner->VisibilityXS && $this->owner->VisibilityXS != 'default'){
+            $classes .= 'column is-' . $this->owner->VisibilityXS . '-mobile';
+        }
+        if($this->owner->VisibilitySM && $this->owner->VisibilitySM != 'default'){
+            $classes .= 'column is-' . $this->owner->VisibilitySM . '-tablet';
+        }
+        if($this->owner->VisibilityMD && $this->owner->VisibilityMD != 'default'){
+            $classes .= 'column is-' . $this->owner->VisibilityMD . '-desktop';
+        }
+        if($this->owner->VisibilityLG && $this->owner->VisibilityLG != 'default'){
+            $classes .= 'column is-' . $this->owner->VisibilityLG . '-widescreen';
+        }
+        return $classes;
+    }
+
+    public function ColClasses() {
+        switch (Config::forClass('TheWebmen\ElementalGrid')->get('cssFramework')){
+            case 'bulma':
+                return $this->BulmaColClasses();
+                break;
+            default:
+                return $this->BootstrapColClasses();
+        }
     }
 
     public function getBlockType(){
