@@ -22,3 +22,4 @@ DNADesign\Elemental\Models\ElementalArea:
 TheWebmen\ElementalGrid:
   defaultSizeField: 'MD'
   defaultOffsetField: 'MD'
+  cssFramework: 'bootstrap'
