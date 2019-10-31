@@ -42,5 +42,16 @@ class ElementRow extends BaseElement
     {
         return _t(__CLASS__ . '.BlockType', 'Row');
     }
+    
+    public function RowClass()
+    {
+        switch (Config::forClass('TheWebmen\ElementalGrid')->get('cssFramework')){
+            case 'bulma':
+                return 'columns is-multiline';
+                break;
+            default:
+                return 'row';
+        }
+    }
 
 }
