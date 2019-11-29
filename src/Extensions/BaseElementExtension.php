@@ -12,6 +12,11 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
      * @config
      */
     private static $num_columns = 12;
+    
+    /**
+     * @config
+     */
+    private static $default_col_size = 6;
 
     /**
      * @var array
@@ -38,7 +43,7 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
     public function populateDefaults()
     {
         $defaultSizeField = 'Size' . Config::forClass('TheWebmen\ElementalGrid')->get('defaultSizeField');
-        $this->owner->$defaultSizeField = 6;
+        $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid')->get('default_col_size');
     }
 
     /**
@@ -103,7 +108,7 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
             $fields->addFieldToTab('Root.Column', DropdownField::create('VisibilitySM', _t(__CLASS__ . '.VISIBILITY_SM', 'Visibility SM'), self::getColVisibilityOptions()));
 
             $fields->addFieldToTab('Root.Column', HeaderField::create('HeadingMD', _t(__CLASS__ . '.MD', 'MD')));
-            $fields->addFieldToTab('Root.Column', DropdownField::create('SizeMD', _t(__CLASS__ . '.SIZE_MD', 'Size MD'), self::getColSizeOptions()));
+            $fields->addFieldToTab('Root.Column', DropdownField::create('SizeMD', _t(__CLASS__ . '.SIZE_MD', 'Size MD'), self::getColSizeOptions(true)));
             $fields->addFieldToTab('Root.Column', DropdownField::create('OffsetMD', _t(__CLASS__ . '.OFFSET_MD', 'Offset MD'), self::getColSizeOptions(false, true)));
             $fields->addFieldToTab('Root.Column', DropdownField::create('VisibilityMD', _t(__CLASS__ . '.VISIBILITY_MD', 'Visibility MD'), self::getColVisibilityOptions()));
 
