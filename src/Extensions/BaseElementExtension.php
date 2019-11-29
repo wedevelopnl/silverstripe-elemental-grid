@@ -43,7 +43,7 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
     public function populateDefaults()
     {
         $defaultSizeField = 'Size' . Config::forClass('TheWebmen\ElementalGrid')->get('defaultSizeField');
-        $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid')->get('default_col_size');
+        $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid\Extensions\BaseElementExtension')->get('default_col_size');
     }
 
     /**
