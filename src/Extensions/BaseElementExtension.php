@@ -203,13 +203,13 @@ class BaseElementExtension extends \SilverStripe\ORM\DataExtension {
             $classes .= ' column is-' . $this->owner->VisibilityXS . '-mobile';
         }
         if($this->owner->VisibilitySM && $this->owner->VisibilitySM != 'default'){
-            $classes .= ' column is-' . $this->owner->VisibilitySM . '-tablet';
+            $classes .= ' column is-' . $this->owner->VisibilitySM . '-tablet-only';
         }
         if($this->owner->VisibilityMD && $this->owner->VisibilityMD != 'default'){
-            $classes .= ' column is-' . $this->owner->VisibilityMD . '-desktop';
+            $classes .= ' column is-' . $this->owner->VisibilityMD . '-desktop-only';
         }
         if($this->owner->VisibilityLG && $this->owner->VisibilityLG != 'default'){
-            $classes .= ' column is-' . $this->owner->VisibilityLG . '-widescreen';
+            $classes .= ' column is-' . $this->owner->VisibilityLG . '-widescreen-only is-' . $this->owner->VisibilityLG . '-fullhd';
         }
         return $classes;
     }
