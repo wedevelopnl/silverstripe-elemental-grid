@@ -6,32 +6,31 @@ use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Core\Config\Config;
-use TheWebmen\ElementalGrid\Controllers\ElementRowController;
+//use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 
 class ElementRow extends BaseElement
 {
-    private static $icon = 'font-icon-menu';
+    private static string $icon = 'font-icon-menu';
 
-    private static $table_name = 'ElementRow';
+    private static string $table_name = 'ElementRow';
 
-    private static $singular_name = 'row';
+    private static string $singular_name = 'row';
 
-    private static $plural_name = 'rows';
+    private static string $plural_name = 'rows';
 
-    private static $description = 'Row element';
+    private static string $description = 'Row element';
 
-    private static $controller_class = ElementRowController::class;
+//    private static string $controller_class = ElementRowController::class;
 
-    private static $block_type = 'full-width';
+    private static string $block_type = 'full-width';
 
-    public function getCMSFields()
+    public function getCMSFields(): FieldList
     {
-        $this->beforeUpdateCMSFields(function (FieldList $fields) {
-            $fields->removeByName('TitleAndDisplayed');
-            $fields->addFieldToTab('Root.Main', TextField::create('Title'));
-        });
+        $fields =  parent::getCMSFields();
 
-        return parent::getCMSFields();
+        $fields->removeByName('Column');
+
+        return $fields;
     }
 
     public function getSummary()
@@ -43,7 +42,7 @@ class ElementRow extends BaseElement
     {
         return _t(__CLASS__ . '.BlockType', 'Row');
     }
-    
+
     public function RowClass()
     {
         switch (Config::forClass('TheWebmen\ElementalGrid')->get('cssFramework')){
@@ -54,5 +53,4 @@ class ElementRow extends BaseElement
                 return 'row';
         }
     }
-
 }
