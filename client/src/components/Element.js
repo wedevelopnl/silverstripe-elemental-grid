@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { elementType } from 'types/elementType';
 import { elementTypeType } from 'types/elementTypeType';
 import { compose } from 'redux';
-import { inject } from 'lib/Injector';
+import { inject, withInjector } from 'lib/Injector';
 import i18n from 'i18n';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
@@ -34,8 +34,6 @@ class Element extends Component {
     this.handleTabClick = this.handleTabClick.bind(this);
     this.updateFormTab = this.updateFormTab.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.mapFieldsToComponents = this.mapFieldsToComponents.bind(this);
-    this.mapActionsToComponents = this.mapActionsToComponents.bind(this);
 
     this.state = {
       previewExpanded: false,
@@ -44,12 +42,6 @@ class Element extends Component {
       childRenderingError: false,
       size: props.element.blockSchema.grid.md.size,
     };
-  }
-
-  handleChange(e) {
-    this.setState({
-      size: e.target.value
-    });
   }
 
   componentDidMount() {
@@ -190,12 +182,10 @@ class Element extends Component {
     }
   }
 
-  mapFieldsToComponents(fields) {
-    console.log(fields);
-  }
-
-  mapActionsToComponents(actions) {
-    console.log(actions);
+  handleChange(e) {
+    this.setState({
+      size: e.target.value
+    });
   }
 
   render() {
@@ -206,7 +196,6 @@ class Element extends Component {
       HeaderComponent,
       ContentComponent,
       ColumnSizeComponent,
-      ReduxForm,
       link,
       activeTab,
       connectDragSource,
@@ -282,17 +271,12 @@ class Element extends Component {
 
       {!element.blockSchema.grid.isRow &&
         <ColumnSizeComponent
+          elementId={element.id}
           size={element.blockSchema.grid.md.size}
           offset={element.blockSchema.grid.md.offset}
           handleChange={this.handleChange}
         />
       }
-
-      <ReduxForm
-        fields={[]}
-        mapFieldsToComponents={this.mapFieldsToComponents}
-        mapActionsToComponents={this.mapActionsToComponents}
-      />
     </div>);
 
     if (isDragging) {
@@ -406,9 +390,9 @@ export default compose(
   })),
   connect(mapStateToProps, mapDispatchToProps),
   inject(
-    ['ElementHeader', 'ElementContent', 'ColumnSize', 'ReduxForm'],
-    (HeaderComponent, ContentComponent, ColumnSizeComponent, ReduxForm) => ({
-      HeaderComponent, ContentComponent, ColumnSizeComponent, ReduxForm,
+    ['ElementHeader', 'ElementContent', 'ColumnSize',],
+    (HeaderComponent, ContentComponent, ColumnSizeComponent,) => ({
+      HeaderComponent, ContentComponent, ColumnSizeComponent,
     }),
     () => 'ElementEditor.ElementList.Element'
   )

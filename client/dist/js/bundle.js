@@ -90,18 +90,13 @@ var _ColumnSize = __webpack_require__("./client/src/components/ColumnSize.js");
 
 var _ColumnSize2 = _interopRequireDefault(_ColumnSize);
 
-var _InlineEditForm = __webpack_require__("./client/src/components/InlineEditForm.js");
-
-var _InlineEditForm2 = _interopRequireDefault(_InlineEditForm);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 window.document.addEventListener('DOMContentLoaded', function () {
   _Injector2.default.component.registerMany({
     ElementList: _ElementList2.default,
     Element: _Element2.default,
-    ColumnSize: _ColumnSize2.default,
-    ElementInlineEditForm: _InlineEditForm2.default
+    ColumnSize: _ColumnSize2.default
   }, { force: true });
 });
 
@@ -119,13 +114,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _redux = __webpack_require__(4);
+
+var _reactRedux = __webpack_require__(6);
+
+var _SchemaActions = __webpack_require__(12);
+
+var schemaActions = _interopRequireWildcard(_SchemaActions);
+
+var _reduxForm = __webpack_require__(11);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -144,72 +151,81 @@ var ColumnSize = function (_PureComponent) {
     var _this = _possibleConstructorReturn(this, (ColumnSize.__proto__ || Object.getPrototypeOf(ColumnSize)).call(this, props));
 
     _this.handleClick = _this.handleClick.bind(_this);
+    _this.handleChange = _this.handleChange.bind(_this);
+
+    _this.state = {
+      size: _this.props.size
+    };
     return _this;
   }
 
   _createClass(ColumnSize, [{
     key: 'handleClick',
-    value: function handleClick(e) {
-      e.stopPropagation();
+    value: function handleClick(event) {
+      event.stopPropagation();
+    }
+  }, {
+    key: 'handleChange',
+    value: function handleChange(event) {
+      var elementId = this.props.elementId;
+
+      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_SizeMD', event.target.value);
+      this.props.handleChange(event);
     }
   }, {
     key: 'render',
     value: function render() {
-      var colSizes = [{
-        name: 'Column 1/12',
+      var source = [{
+        title: 'Column 1/12',
         value: 1
       }, {
-        name: 'Column 2/12',
+        title: 'Column 2/12',
         value: 2
       }, {
-        name: 'Column 3/12',
+        title: 'Column 3/12',
         value: 3
       }, {
-        name: 'Column 4/12',
+        title: 'Column 4/12',
         value: 4
       }, {
-        name: 'Column 5/12',
+        title: 'Column 5/12',
         value: 5
       }, {
-        name: 'Column 6/12',
+        title: 'Column 6/12',
         value: 6
       }, {
-        name: 'Column 7/12',
+        title: 'Column 7/12',
         value: 7
       }, {
-        name: 'Column 8/12',
+        title: 'Column 8/12',
         value: 8
       }, {
-        name: 'Column 9/12',
+        title: 'Column 9/12',
         value: 9
       }, {
-        name: 'Column 10/12',
+        title: 'Column 10/12',
         value: 10
       }, {
-        name: 'Column 11/12',
+        title: 'Column 11/12',
         value: 11
       }, {
-        name: 'Column 12/12',
+        title: 'Column 12/12',
         value: 12
       }];
 
       return _react2.default.createElement(
-        'div',
-        { className: 'element-editor-column-size' },
-        _react2.default.createElement(
-          'select',
-          { name: 'colMDWidth', defaultValue: this.props.size, onChange: this.props.handleChange, onClick: this.handleClick },
-          colSizes.map(function (_ref) {
-            var name = _ref.name,
-                id = _ref.id,
-                value = _ref.value;
-            return _react2.default.createElement(
-              'option',
-              { key: id, value: value },
-              name
-            );
-          })
-        )
+        'select',
+        { name: 'colMDWidth', defaultValue: this.props.size, onChange: this.handleChange, onClick: this.handleClick },
+        source.map(function (_ref) {
+          var title = _ref.title,
+              id = _ref.id,
+              value = _ref.value;
+          return _react2.default.createElement(
+            'option',
+            { key: id, value: value },
+            title
+          );
+        })
       );
     }
   }]);
@@ -217,15 +233,29 @@ var ColumnSize = function (_PureComponent) {
   return ColumnSize;
 }(_react.PureComponent);
 
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      schema: (0, _redux.bindActionCreators)(schemaActions, dispatch),
+      reduxForm: (0, _redux.bindActionCreators)({ autofill: _reduxForm.autofill }, dispatch)
+    }
+  };
+}
+
 ColumnSize.defaultProps = {};
 
 ColumnSize.propTypes = {
+  actions: _propTypes2.default.shape({
+    schema: _propTypes2.default.object,
+    reduxFrom: _propTypes2.default.object
+  }),
+  elementId: _propTypes2.default.number,
   size: _propTypes2.default.number,
   offset: _propTypes2.default.number,
   handleChange: _propTypes2.default.func
 };
 
-exports.default = ColumnSize;
+exports.default = (0, _redux.compose)((0, _reactRedux.connect)(function () {}, mapDispatchToProps))(ColumnSize);
 
 /***/ }),
 
@@ -242,7 +272,7 @@ exports.Component = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -254,7 +284,7 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(6);
+var _redux = __webpack_require__(4);
 
 var _Injector = __webpack_require__(1);
 
@@ -266,17 +296,17 @@ var _classnames = __webpack_require__(7);
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
-var _reactRedux = __webpack_require__(10);
+var _reactRedux = __webpack_require__(6);
 
 var _loadElementFormStateName = __webpack_require__("./client/src/state/editor/loadElementFormStateName.js");
 
 var _loadElementSchemaValue = __webpack_require__("./client/src/state/editor/loadElementSchemaValue.js");
 
-var _TabsActions = __webpack_require__(11);
+var _TabsActions = __webpack_require__(13);
 
 var TabsActions = _interopRequireWildcard(_TabsActions);
 
-var _reactDnd = __webpack_require__(4);
+var _reactDnd = __webpack_require__(5);
 
 var _reactDndHtml5Backend = __webpack_require__(9);
 
@@ -315,8 +345,6 @@ var Element = function (_Component) {
     _this.handleTabClick = _this.handleTabClick.bind(_this);
     _this.updateFormTab = _this.updateFormTab.bind(_this);
     _this.handleChange = _this.handleChange.bind(_this);
-    _this.mapFieldsToComponents = _this.mapFieldsToComponents.bind(_this);
-    _this.mapActionsToComponents = _this.mapActionsToComponents.bind(_this);
 
     _this.state = {
       previewExpanded: false,
@@ -329,13 +357,6 @@ var Element = function (_Component) {
   }
 
   _createClass(Element, [{
-    key: 'handleChange',
-    value: function handleChange(e) {
-      this.setState({
-        size: e.target.value
-      });
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var connectDragPreview = this.props.connectDragPreview;
@@ -452,14 +473,11 @@ var Element = function (_Component) {
       }
     }
   }, {
-    key: 'mapFieldsToComponents',
-    value: function mapFieldsToComponents(fields) {
-      console.log(fields);
-    }
-  }, {
-    key: 'mapActionsToComponents',
-    value: function mapActionsToComponents(actions) {
-      console.log(actions);
+    key: 'handleChange',
+    value: function handleChange(e) {
+      this.setState({
+        size: e.target.value
+      });
     }
   }, {
     key: 'render',
@@ -473,7 +491,6 @@ var Element = function (_Component) {
           HeaderComponent = _props3.HeaderComponent,
           ContentComponent = _props3.ContentComponent,
           ColumnSizeComponent = _props3.ColumnSizeComponent,
-          ReduxForm = _props3.ReduxForm,
           link = _props3.link,
           activeTab = _props3.activeTab,
           connectDragSource = _props3.connectDragSource,
@@ -539,14 +556,10 @@ var Element = function (_Component) {
           _i18n2.default._t('ElementalElement.CHILD_RENDERING_ERROR', 'Something went wrong with this block. Please try saving and refreshing the CMS.')
         ),
         !element.blockSchema.grid.isRow && _react2.default.createElement(ColumnSizeComponent, {
+          elementId: element.id,
           size: element.blockSchema.grid.md.size,
           offset: element.blockSchema.grid.md.offset,
           handleChange: this.handleChange
-        }),
-        _react2.default.createElement(ReduxForm, {
-          fields: [],
-          mapFieldsToComponents: this.mapFieldsToComponents,
-          mapActionsToComponents: this.mapActionsToComponents
         })
       ));
 
@@ -654,9 +667,9 @@ exports.default = (0, _redux.compose)((0, _reactDnd.DropTarget)('element', eleme
     connectDragPreview: connector.dragPreview(),
     isDragging: monitor.isDragging()
   };
-}), (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps), (0, _Injector.inject)(['ElementHeader', 'ElementContent', 'ColumnSize', 'ReduxForm'], function (HeaderComponent, ContentComponent, ColumnSizeComponent, ReduxForm) {
+}), (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps), (0, _Injector.inject)(['ElementHeader', 'ElementContent', 'ColumnSize'], function (HeaderComponent, ContentComponent, ColumnSizeComponent) {
   return {
-    HeaderComponent: HeaderComponent, ContentComponent: ContentComponent, ColumnSizeComponent: ColumnSizeComponent, ReduxForm: ReduxForm
+    HeaderComponent: HeaderComponent, ContentComponent: ContentComponent, ColumnSizeComponent: ColumnSizeComponent
   };
 }, function () {
   return 'ElementEditor.ElementList.Element';
@@ -679,7 +692,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -691,7 +704,7 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(6);
+var _redux = __webpack_require__(4);
 
 var _Injector = __webpack_require__(1);
 
@@ -703,7 +716,7 @@ var _i18n = __webpack_require__(8);
 
 var _i18n2 = _interopRequireDefault(_i18n);
 
-var _reactDnd = __webpack_require__(4);
+var _reactDnd = __webpack_require__(5);
 
 var _dragHelpers = __webpack_require__("./client/src/lib/dragHelpers.js");
 
@@ -896,150 +909,6 @@ exports.default = (0, _redux.compose)((0, _reactDnd.DropTarget)('element', eleme
 
 /***/ }),
 
-/***/ "./client/src/components/InlineEditForm.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(2);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(0);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = __webpack_require__(7);
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _FormBuilderLoader = __webpack_require__(12);
-
-var _FormBuilderLoader2 = _interopRequireDefault(_FormBuilderLoader);
-
-var _loadElementSchemaValue = __webpack_require__("./client/src/state/editor/loadElementSchemaValue.js");
-
-var _i18n = __webpack_require__(8);
-
-var _i18n2 = _interopRequireDefault(_i18n);
-
-var _loadElementFormStateName = __webpack_require__("./client/src/state/editor/loadElementFormStateName.js");
-
-var _reactRedux = __webpack_require__(10);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var InlineEditForm = function (_PureComponent) {
-  _inherits(InlineEditForm, _PureComponent);
-
-  function InlineEditForm(props) {
-    _classCallCheck(this, InlineEditForm);
-
-    var _this = _possibleConstructorReturn(this, (InlineEditForm.__proto__ || Object.getPrototypeOf(InlineEditForm)).call(this, props));
-
-    _this.handleLoadingError = _this.handleLoadingError.bind(_this);
-
-    _this.state = {
-      loadingError: null
-    };
-    return _this;
-  }
-
-  _createClass(InlineEditForm, [{
-    key: 'handleLoadingError',
-    value: function handleLoadingError() {
-      var _window = window,
-          $ = _window.jQuery;
-      var handleLoadingError = this.props.handleLoadingError;
-
-
-      this.setState({
-        loadingError: true
-      });
-
-      $.noticeAdd({
-        text: _i18n2.default.inject(_i18n2.default._t('ElementEditForm.ERROR_NOTIFICATION', 'Error displaying the edit form for this block')),
-        stay: true,
-        type: 'notice'
-      });
-
-      handleLoadingError();
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _props = this.props,
-          elementId = _props.elementId,
-          extraClass = _props.extraClass,
-          onClick = _props.onClick,
-          onFormInit = _props.onFormInit,
-          formHasState = _props.formHasState;
-      var loadingError = this.state.loadingError;
-
-
-      var classNames = (0, _classnames2.default)('element-editor-editform', extraClass);
-      var schemaUrl = (0, _loadElementSchemaValue.loadElementSchemaValue)('schemaUrl', elementId);
-
-      var formProps = {
-        formTag: 'div',
-        schemaUrl: schemaUrl,
-        identifier: 'element',
-        refetchSchemaOnMount: !formHasState,
-        onLoadingError: this.handleLoadingError
-      };
-
-      if (loadingError) {
-        formProps.loading = false;
-      }
-
-      if (typeof onFormInit === 'function') {
-        formProps.onReduxFormInit = onFormInit;
-      }
-
-      return _react2.default.createElement(
-        'div',
-        { className: classNames, onClick: onClick, role: 'presentation' },
-        JSON.stringify(formProps),
-        _react2.default.createElement(_FormBuilderLoader2.default, formProps)
-      );
-    }
-  }]);
-
-  return InlineEditForm;
-}(_react.PureComponent);
-
-InlineEditForm.propTypes = {
-  extraClass: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.object]),
-  onClick: _propTypes2.default.func,
-  elementId: _propTypes2.default.string,
-  handleLoadingError: _propTypes2.default.func
-};
-
-function mapStateToProps(state, ownProps) {
-  var formName = (0, _loadElementFormStateName.loadElementFormStateName)(ownProps.elementId);
-
-  return {
-    formHasState: state.form.formState && state.form.formState.element && !!state.form.formState.element[formName]
-  };
-}
-
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(InlineEditForm);
-
-/***/ }),
-
 /***/ "./client/src/lib/dragHelpers.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1051,7 +920,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.elementDragSource = exports.getDragIndicatorIndex = exports.isOverTop = undefined;
 
-var _reactDom = __webpack_require__(5);
+var _reactDom = __webpack_require__(10);
 
 var isOverTop = exports.isOverTop = function isOverTop(monitor, component) {
   var clientOffset = monitor.getClientOffset();
@@ -1118,7 +987,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getElementTypeConfig = exports.getConfig = undefined;
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(2);
 
 var _Config2 = _interopRequireDefault(_Config);
 
@@ -1151,7 +1020,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.loadElementFormStateName = undefined;
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(2);
 
 var _Config2 = _interopRequireDefault(_Config);
 
@@ -1183,7 +1052,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.loadElementSchemaValue = undefined;
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(2);
 
 var _Config2 = _interopRequireDefault(_Config);
 
@@ -1290,56 +1159,63 @@ module.exports = Injector;
 /***/ 10:
 /***/ (function(module, exports) {
 
-module.exports = ReactRedux;
+module.exports = ReactDom;
 
 /***/ }),
 
 /***/ 11:
 /***/ (function(module, exports) {
 
-module.exports = TabsActions;
+module.exports = ReduxForm;
 
 /***/ }),
 
 /***/ 12:
 /***/ (function(module, exports) {
 
-module.exports = FormBuilderLoader;
+module.exports = SchemaActions;
+
+/***/ }),
+
+/***/ 13:
+/***/ (function(module, exports) {
+
+module.exports = TabsActions;
 
 /***/ }),
 
 /***/ 2:
 /***/ (function(module, exports) {
 
-module.exports = React;
+module.exports = Config;
 
 /***/ }),
 
 /***/ 3:
 /***/ (function(module, exports) {
 
-module.exports = Config;
+module.exports = React;
 
 /***/ }),
 
 /***/ 4:
 /***/ (function(module, exports) {
 
-module.exports = ReactDND;
+module.exports = Redux;
 
 /***/ }),
 
 /***/ 5:
 /***/ (function(module, exports) {
 
-module.exports = ReactDom;
+module.exports = ReactDND;
 
 /***/ }),
 
 /***/ 6:
 /***/ (function(module, exports) {
 
-module.exports = Redux;
+module.exports = ReactRedux;
 
 /***/ }),
 
