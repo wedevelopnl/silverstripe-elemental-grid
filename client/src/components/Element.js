@@ -33,7 +33,8 @@ class Element extends Component {
     this.handleLoadingError = this.handleLoadingError.bind(this);
     this.handleTabClick = this.handleTabClick.bind(this);
     this.updateFormTab = this.updateFormTab.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChangeSize = this.handleChangeSize.bind(this);
+    this.handleChangeOffset = this.handleChangeOffset.bind(this);
 
     this.state = {
       previewExpanded: false,
@@ -41,6 +42,7 @@ class Element extends Component {
       loadingError: false,
       childRenderingError: false,
       size: props.element.blockSchema.grid.md.size,
+      offset: props.element.blockSchema.grid.md.offset,
     };
   }
 
@@ -83,7 +85,7 @@ class Element extends Component {
 
     return {
       [`col-md-${this.state.size}`]: true,
-      [`offset-md-${element.blockSchema.grid.md.offset}`]: true,
+      [`offset-md-${this.state.offset}`]: true,
       'is-row': element.blockSchema.grid.isRow === true
     }
   }
@@ -182,9 +184,15 @@ class Element extends Component {
     }
   }
 
-  handleChange(e) {
+  handleChangeSize(e) {
     this.setState({
       size: e.target.value
+    });
+  }
+
+  handleChangeOffset(e) {
+    this.setState({
+      offset: e.target.value
     });
   }
 
@@ -274,7 +282,8 @@ class Element extends Component {
           elementId={element.id}
           size={element.blockSchema.grid.md.size}
           offset={element.blockSchema.grid.md.offset}
-          handleChange={this.handleChange}
+          handleChangeSize={this.handleChangeSize}
+          handleChangeOffset={this.handleChangeOffset}
         />
       }
     </div>);

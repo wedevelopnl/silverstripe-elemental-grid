@@ -2,7 +2,8 @@
 @import "variables";
 
 .element-editor__element {
-  box-shadow: 1px 0 $border-color-light;
+  outline: 1px solid $border-color-light;
+  border: 0;
 
   &.is-row {
     display: block;

@@ -73,16 +73,16 @@ class BaseElementExtension extends DataExtension
         return $out;
     }
 
-    public static function getColVisibilityOptions()
+    public static function getColVisibilityOptions(): array
     {
-        $out = array();
-        $out['default'] = _t(__CLASS__ . '.DEFAULT', 'Default');
-        $out['visible'] = _t(__CLASS__ . '.VISIBLE', 'Visible');
-        $out['hidden'] = _t(__CLASS__ . '.HIDDEN', 'Hidden');
-        return $out;
+        return [
+            'default' => _t(__CLASS__ . '.DEFAULT', 'Default'),
+            'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
+            'hidden' => _t(__CLASS__ . '.HIDDEN', 'Hidden'),
+        ];
     }
 
-    public function updateBlockSchema(&$blockSchema)
+    public function updateBlockSchema(&$blockSchema): void
     {
         $blockSchema['grid'] = [
             'isRow' => $this->owner->ClassName === ElementRow::class,

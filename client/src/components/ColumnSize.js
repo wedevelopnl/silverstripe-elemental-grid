@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { compose, bindActionCreators } from 'redux';
-import { connect } from "react-redux";
-import * as schemaActions from 'state/schema/SchemaActions';
+import { connect } from 'react-redux';
 import { autofill } from 'redux-form';
 
 class ColumnSize extends PureComponent {
@@ -10,87 +9,119 @@ class ColumnSize extends PureComponent {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-
-    this.state = {
-      size: this.props.size,
-    };
+    this.handleChangeSize = this.handleChangeSize.bind(this);
+    this.handleChangeOffset = this.handleChangeOffset.bind(this);
   }
 
   handleClick(event) {
     event.stopPropagation();
   }
 
-  handleChange(event) {
+  handleChangeSize(event) {
     const {elementId} = this.props;
     this.props.actions.reduxForm.autofill(
       `element.ElementForm_${elementId}`,
       `PageElements_${elementId}_SizeMD`,
       event.target.value
     );
-    this.props.handleChange(event);
+    this.props.handleChangeSize(event);
+  }
+
+  handleChangeOffset(event) {
+    const {elementId} = this.props;
+    this.props.actions.reduxForm.autofill(
+      `element.ElementForm_${elementId}`,
+      `PageElements_${elementId}_OffsetMD`,
+      event.target.value
+    );
+    this.props.handleChangeOffset(event);
   }
 
   render() {
     const source = [
       {
-        title: 'Column 1/12',
+        label: 'Column 1/12',
         value: 1
       },
       {
-        title: 'Column 2/12',
+        label: 'Column 2/12',
         value: 2
       },
       {
-        title: 'Column 3/12',
+        label: 'Column 3/12',
         value: 3
       },
       {
-        title: 'Column 4/12',
+        label: 'Column 4/12',
         value: 4
       },
       {
-        title: 'Column 5/12',
+        label: 'Column 5/12',
         value: 5
       },
       {
-        title: 'Column 6/12',
+        label: 'Column 6/12',
         value: 6
       },
       {
-        title: 'Column 7/12',
+        label: 'Column 7/12',
         value: 7
       },
       {
-        title: 'Column 8/12',
+        label: 'Column 8/12',
         value: 8
       },
       {
-        title: 'Column 9/12',
+        label: 'Column 9/12',
         value: 9
       },
       {
-        title: 'Column 10/12',
+        label: 'Column 10/12',
         value: 10
       },
       {
-        title: 'Column 11/12',
+        label: 'Column 11/12',
         value: 11
       },
       {
-        title: 'Column 12/12',
+        label: 'Column 12/12',
         value: 12
       },
     ];
 
     return (
-      <select name="colMDWidth" defaultValue={this.props.size} onChange={this.handleChange} onClick={this.handleClick}>
-        {
-          source.map(({title, id, value}) => (
-            <option key={id} value={value}>{title}</option>
-          ))
-        }
-      </select>
+      <div>
+        <hr />
+
+        <label class="mb-0 font-italic">
+          Size
+          <select
+            defaultValue={this.props.size}
+            onChange={this.handleChangeSize}
+            onClick={this.handleClick}
+          >
+            {
+              [1,2,3,4,5,6,7,8,9,10,11,12].map((value, index) => (
+                <option key={index} value={value}>{value}/12</option>
+              ))
+            }
+          </select>
+        </label>
+        <label class="mb-0 ml-2 font-italic">
+          Offset
+          <select
+            defaultValue={this.props.offset}
+            onChange={this.handleChangeOffset}
+            onClick={this.handleClick}
+          >
+            {
+              [0,1,2,3,4,5,6,7,8,9,10,11,12].map((value, index) => (
+                <option key={index} value={value}>{value}/12</option>
+              ))
+            }
+          </select>
+        </label>
+      </div>
     );
   }
 }
@@ -98,8 +129,7 @@ class ColumnSize extends PureComponent {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      schema: bindActionCreators(schemaActions, dispatch),
-      reduxForm: bindActionCreators({ autofill }, dispatch),
+      reduxForm: bindActionCreators({autofill}, dispatch),
     },
   };
 }
@@ -108,13 +138,13 @@ ColumnSize.defaultProps = {};
 
 ColumnSize.propTypes = {
   actions: PropTypes.shape({
-    schema: PropTypes.object,
     reduxFrom: PropTypes.object,
   }),
   elementId: PropTypes.number,
   size: PropTypes.number,
   offset: PropTypes.number,
-  handleChange: PropTypes.func,
+  handleChangeSize: PropTypes.func,
+  handleChangeOffset: PropTypes.func,
 };
 
 export default compose(

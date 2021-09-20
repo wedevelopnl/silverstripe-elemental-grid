@@ -126,13 +126,7 @@ var _redux = __webpack_require__(4);
 
 var _reactRedux = __webpack_require__(6);
 
-var _SchemaActions = __webpack_require__(12);
-
-var schemaActions = _interopRequireWildcard(_SchemaActions);
-
 var _reduxForm = __webpack_require__(11);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -151,11 +145,8 @@ var ColumnSize = function (_PureComponent) {
     var _this = _possibleConstructorReturn(this, (ColumnSize.__proto__ || Object.getPrototypeOf(ColumnSize)).call(this, props));
 
     _this.handleClick = _this.handleClick.bind(_this);
-    _this.handleChange = _this.handleChange.bind(_this);
-
-    _this.state = {
-      size: _this.props.size
-    };
+    _this.handleChangeSize = _this.handleChangeSize.bind(_this);
+    _this.handleChangeOffset = _this.handleChangeOffset.bind(_this);
     return _this;
   }
 
@@ -165,67 +156,108 @@ var ColumnSize = function (_PureComponent) {
       event.stopPropagation();
     }
   }, {
-    key: 'handleChange',
-    value: function handleChange(event) {
+    key: 'handleChangeSize',
+    value: function handleChangeSize(event) {
       var elementId = this.props.elementId;
 
       this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_SizeMD', event.target.value);
-      this.props.handleChange(event);
+      this.props.handleChangeSize(event);
+    }
+  }, {
+    key: 'handleChangeOffset',
+    value: function handleChangeOffset(event) {
+      var elementId = this.props.elementId;
+
+      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_OffsetMD', event.target.value);
+      this.props.handleChangeOffset(event);
     }
   }, {
     key: 'render',
     value: function render() {
       var source = [{
-        title: 'Column 1/12',
+        label: 'Column 1/12',
         value: 1
       }, {
-        title: 'Column 2/12',
+        label: 'Column 2/12',
         value: 2
       }, {
-        title: 'Column 3/12',
+        label: 'Column 3/12',
         value: 3
       }, {
-        title: 'Column 4/12',
+        label: 'Column 4/12',
         value: 4
       }, {
-        title: 'Column 5/12',
+        label: 'Column 5/12',
         value: 5
       }, {
-        title: 'Column 6/12',
+        label: 'Column 6/12',
         value: 6
       }, {
-        title: 'Column 7/12',
+        label: 'Column 7/12',
         value: 7
       }, {
-        title: 'Column 8/12',
+        label: 'Column 8/12',
         value: 8
       }, {
-        title: 'Column 9/12',
+        label: 'Column 9/12',
         value: 9
       }, {
-        title: 'Column 10/12',
+        label: 'Column 10/12',
         value: 10
       }, {
-        title: 'Column 11/12',
+        label: 'Column 11/12',
         value: 11
       }, {
-        title: 'Column 12/12',
+        label: 'Column 12/12',
         value: 12
       }];
 
       return _react2.default.createElement(
-        'select',
-        { name: 'colMDWidth', defaultValue: this.props.size, onChange: this.handleChange, onClick: this.handleClick },
-        source.map(function (_ref) {
-          var title = _ref.title,
-              id = _ref.id,
-              value = _ref.value;
-          return _react2.default.createElement(
-            'option',
-            { key: id, value: value },
-            title
-          );
-        })
+        'div',
+        null,
+        _react2.default.createElement('hr', null),
+        _react2.default.createElement(
+          'label',
+          { 'class': 'mb-0 font-italic' },
+          'Size',
+          _react2.default.createElement(
+            'select',
+            {
+              defaultValue: this.props.size,
+              onChange: this.handleChangeSize,
+              onClick: this.handleClick
+            },
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (value, index) {
+              return _react2.default.createElement(
+                'option',
+                { key: index, value: value },
+                value,
+                '/12'
+              );
+            })
+          )
+        ),
+        _react2.default.createElement(
+          'label',
+          { 'class': 'mb-0 ml-2 font-italic' },
+          'Offset',
+          _react2.default.createElement(
+            'select',
+            {
+              defaultValue: this.props.offset,
+              onChange: this.handleChangeOffset,
+              onClick: this.handleClick
+            },
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (value, index) {
+              return _react2.default.createElement(
+                'option',
+                { key: index, value: value },
+                value,
+                '/12'
+              );
+            })
+          )
+        )
       );
     }
   }]);
@@ -236,7 +268,6 @@ var ColumnSize = function (_PureComponent) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      schema: (0, _redux.bindActionCreators)(schemaActions, dispatch),
       reduxForm: (0, _redux.bindActionCreators)({ autofill: _reduxForm.autofill }, dispatch)
     }
   };
@@ -246,13 +277,13 @@ ColumnSize.defaultProps = {};
 
 ColumnSize.propTypes = {
   actions: _propTypes2.default.shape({
-    schema: _propTypes2.default.object,
     reduxFrom: _propTypes2.default.object
   }),
   elementId: _propTypes2.default.number,
   size: _propTypes2.default.number,
   offset: _propTypes2.default.number,
-  handleChange: _propTypes2.default.func
+  handleChangeSize: _propTypes2.default.func,
+  handleChangeOffset: _propTypes2.default.func
 };
 
 exports.default = (0, _redux.compose)((0, _reactRedux.connect)(function () {}, mapDispatchToProps))(ColumnSize);
@@ -302,7 +333,7 @@ var _loadElementFormStateName = __webpack_require__("./client/src/state/editor/l
 
 var _loadElementSchemaValue = __webpack_require__("./client/src/state/editor/loadElementSchemaValue.js");
 
-var _TabsActions = __webpack_require__(13);
+var _TabsActions = __webpack_require__(12);
 
 var TabsActions = _interopRequireWildcard(_TabsActions);
 
@@ -344,14 +375,16 @@ var Element = function (_Component) {
     _this.handleLoadingError = _this.handleLoadingError.bind(_this);
     _this.handleTabClick = _this.handleTabClick.bind(_this);
     _this.updateFormTab = _this.updateFormTab.bind(_this);
-    _this.handleChange = _this.handleChange.bind(_this);
+    _this.handleChangeSize = _this.handleChangeSize.bind(_this);
+    _this.handleChangeOffset = _this.handleChangeOffset.bind(_this);
 
     _this.state = {
       previewExpanded: false,
       initialTab: '',
       loadingError: false,
       childRenderingError: false,
-      size: props.element.blockSchema.grid.md.size
+      size: props.element.blockSchema.grid.md.size,
+      offset: props.element.blockSchema.grid.md.offset
     };
     return _this;
   }
@@ -393,7 +426,7 @@ var Element = function (_Component) {
       var element = this.props.element;
 
 
-      return _ref = {}, _defineProperty(_ref, 'col-md-' + this.state.size, true), _defineProperty(_ref, 'offset-md-' + element.blockSchema.grid.md.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _ref;
+      return _ref = {}, _defineProperty(_ref, 'col-md-' + this.state.size, true), _defineProperty(_ref, 'offset-md-' + this.state.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _ref;
     }
   }, {
     key: 'handleLoadingError',
@@ -473,10 +506,17 @@ var Element = function (_Component) {
       }
     }
   }, {
-    key: 'handleChange',
-    value: function handleChange(e) {
+    key: 'handleChangeSize',
+    value: function handleChangeSize(e) {
       this.setState({
         size: e.target.value
+      });
+    }
+  }, {
+    key: 'handleChangeOffset',
+    value: function handleChangeOffset(e) {
+      this.setState({
+        offset: e.target.value
       });
     }
   }, {
@@ -559,7 +599,8 @@ var Element = function (_Component) {
           elementId: element.id,
           size: element.blockSchema.grid.md.size,
           offset: element.blockSchema.grid.md.offset,
-          handleChange: this.handleChange
+          handleChangeSize: this.handleChangeSize,
+          handleChangeOffset: this.handleChangeOffset
         })
       ));
 
@@ -1171,13 +1212,6 @@ module.exports = ReduxForm;
 /***/ }),
 
 /***/ 12:
-/***/ (function(module, exports) {
-
-module.exports = SchemaActions;
-
-/***/ }),
-
-/***/ 13:
 /***/ (function(module, exports) {
 
 module.exports = TabsActions;

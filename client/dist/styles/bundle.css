@@ -1,2 +1,2 @@
-.element-editor__element{-webkit-box-shadow:1px 0 #dbe0e9;box-shadow:1px 0 #dbe0e9}.element-editor__element.is-row{display:block;width:100%;max-width:none;-webkit-flex:none;-webkit-box-flex:0;flex:none;background:#f4f6f8}.element-editor__hover-bar{display:none}
+.element-editor__element{outline:1px solid #dbe0e9;border:none}.element-editor__element.is-row{display:block;width:100%;max-width:none;-webkit-flex:none;-webkit-box-flex:0;flex:none;background:#f4f6f8}.element-editor__hover-bar{display:none}
 /*# sourceMappingURL=bundle.css.map*/
