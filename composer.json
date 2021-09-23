@@ -11,8 +11,8 @@
     ],
     "license": "BSD-3-Clause",
     "authors": [{
-        "name": "Michel van der Steege",
-        "email": "michel@thewebmen.com"
+        "name": "Webmen",
+        "email": "development@webmen.nl"
     }],
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -23,6 +23,9 @@
         "dnadesign/silverstripe-elemental": "^4.7"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.19",
+        "symbiote/silverstripe-phpstan": "^4.0",
+        "phpstan/phpstan": "^0.11"
     },
     "extra": {
         "expose": [
