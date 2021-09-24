@@ -10,7 +10,9 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
 
     private const COLUMN_CLASSNAME = 'column';
 
-    public const ROW_CLASSNAME = 'columns is-multiline';
+    private const ROW_CLASSNAME = 'columns is-multiline';
+
+    private const FLUID_CONTAINER_CLASSNAME = 'is-fluid';
 
     public function __construct(BaseElement $baseElement)
     {
@@ -120,5 +122,10 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
             default:
                 return 'div';
         }
+    }
+
+    public function getFluidContainerClass(): string
+    {
+        return self::FLUID_CONTAINER_CLASSNAME;
     }
 }

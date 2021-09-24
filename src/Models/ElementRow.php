@@ -46,4 +46,9 @@ class ElementRow extends BaseElement
     {
         return $this->owner->ExtraClass ? implode(' ', [$this->getCSSFramework()->getRowClasses(), $this->owner->ExtraClass]) : $this->getCSSFramework()->getRowClasses();
     }
+
+    public function getFluidContainerClass(): string
+    {
+        return $this->getCSSFramework()->getFluidContainerClass();
+    }
 }

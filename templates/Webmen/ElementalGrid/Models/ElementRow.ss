@@ -8,6 +8,6 @@
         <% if $RowID %>
              id="$RowID"
         <% end_if %>>
-    <div class="container">
+    <div class="container<% if $IsFluid %> $FluidContainerClass<% end_if %>">
     <div class="$RowClasses">
 <% end_if %>

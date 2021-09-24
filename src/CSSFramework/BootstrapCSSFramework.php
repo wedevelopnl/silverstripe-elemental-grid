@@ -12,6 +12,8 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
     private const ROW_CLASSNAME = 'row';
 
+    private const FLUID_CONTAINER_CLASSNAME = 'container-fluid';
+
     public function __construct(BaseElement $baseElement)
     {
         $this->baseElement = $baseElement;
@@ -109,5 +111,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     public function getTitleSizeClass(): string
     {
         return $this->baseElement->TitleSize;
+    }
+
+    public function getFluidContainerClass(): string
+    {
+        return self::FLUID_CONTAINER_CLASSNAME;
     }
 }
