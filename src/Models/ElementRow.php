@@ -3,6 +3,7 @@
 namespace Webmen\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use Webmen\ElementalGrid\Controllers\ElementRowController;
 
@@ -28,11 +29,19 @@ class ElementRow extends BaseElement
 
     private static string $block_type = 'full-width';
 
+    private static array $db = [
+        'IsFluid' => 'Boolean'
+    ];
+
     public function getCMSFields(): FieldList
     {
         $fields = parent::getCMSFields();
 
         $fields->removeByName('Column');
+
+        $fields->addFieldsToTab('Root.Main', [
+            CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
+        ]);
 
         return $fields;
     }
