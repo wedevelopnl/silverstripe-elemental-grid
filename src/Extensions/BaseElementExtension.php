@@ -40,9 +40,6 @@ class BaseElementExtension extends DataExtension
         }
     }
 
-    /**
-     * Set the default column size for newly created elements
-     */
     public function populateDefaults(): void
     {
         $defaultSizeField = 'Size' . $this->getDefaultViewport();
@@ -174,7 +171,7 @@ class BaseElementExtension extends DataExtension
         return implode(' ', [$this->cssFramework->getColumnClasses(), $this->owner->ExtraClass]);
     }
 
-    public function getCSSFramework()
+    public function getCSSFramework(): CSSFrameworkInterface
     {
         return $this->cssFramework;
     }
@@ -182,8 +179,6 @@ class BaseElementExtension extends DataExtension
     /***
      * Add the extra data to the blockSchema object, to be taken up by
      * GraphQL and used in the react component in the CMS admin
-     *
-     * @param $blockSchema
      */
     public function updateBlockSchema(&$blockSchema): void
     {

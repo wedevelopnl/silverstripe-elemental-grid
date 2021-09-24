@@ -7,7 +7,7 @@ use SilverStripe\Forms\FieldList;
 use Webmen\ElementalGrid\Controllers\ElementRowController;
 
 /***
- * Class BaseElementExtension
+ * Class ElementRow
  * @package Webmen\ElementalGrid\Extensions
  *
  * @property BaseElement $owner

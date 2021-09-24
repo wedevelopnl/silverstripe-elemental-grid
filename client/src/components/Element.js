@@ -213,8 +213,6 @@ class Element extends Component {
       onDragEnd,
     } = this.props;
 
-    console.log(this.props);
-
     const { childRenderingError, previewExpanded } = this.state;
 
     if (!element.id) {

@@ -105,4 +105,9 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
         return $classes;
     }
+
+    public function getTitleSizeClass(): string
+    {
+        return $this->baseElement->TitleSize;
+    }
 }

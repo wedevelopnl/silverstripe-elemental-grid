@@ -50,7 +50,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
             array_push($classes, 'is-' . $this->baseElement->VisibilityLG . '-widescreen-only');
         }
         if ($this->baseElement->VisibilityXL !== 'visible') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilityXL . '-fullhd-only');
+            array_push($classes, 'is-' . $this->baseElement->VisibilityXL . '-fullhd');
         }
 
         return $classes;
@@ -100,5 +100,25 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         }
 
         return $classes;
+    }
+
+    public function getTitleSizeClass(): string
+    {
+        switch($this->baseElement->TitleSize) {
+            case 'h1':
+                return 'is-size-1';
+            case 'h2':
+                return 'is-size-2';
+            case 'h3':
+                return 'is-size-3';
+            case 'h4':
+                return 'is-size-4';
+            case 'h5':
+                return 'is-size-5';
+            case 'h6':
+                return 'is-size-6';
+            default:
+                return 'div';
+        }
     }
 }
