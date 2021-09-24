@@ -28,8 +28,6 @@ class ElementRow extends BaseElement
 
     private static string $block_type = 'full-width';
 
-    private static bool $inline_editable = true;
-
     public function getCMSFields(): FieldList
     {
         $fields = parent::getCMSFields();
