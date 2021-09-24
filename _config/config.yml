@@ -3,6 +3,10 @@ Name: elementalgrid
 After:
   - 'elemental'
 ---
+SilverStripe\Core\Manifest\ModuleManifest:
+  module_priority:
+    - thewebmen/silverstripe-elemental-grid
+
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
     - 'thewebmen/silverstripe-elemental-grid:client/dist/js/bundle.js'
@@ -10,5 +14,15 @@ SilverStripe\Admin\LeftAndMain:
     - 'thewebmen/silverstripe-elemental-grid:client/dist/styles/bundle.css'
 
 DNADesign\Elemental\Models\BaseElement:
+  inline_editable: false
   extensions:
-    - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
+    - Webmen\ElementalGrid\Extensions\BaseElementExtension
+
+DNADesign\Elemental\Models\ElementalArea:
+  extensions:
+    - Webmen\ElementalGrid\Extensions\ElementalAreaExtension
+
+Webmen\ElementalGrid:
+  default_column_size: 12
+  default_viewport: 'SM'
+  css_framework: 'bulma'

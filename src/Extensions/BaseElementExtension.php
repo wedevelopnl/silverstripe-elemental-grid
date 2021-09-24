@@ -1,96 +1,248 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Extensions;
+namespace Webmen\ElementalGrid\Extensions;
 
+use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\Tab;
-use SilverStripe\Forms\TabSet;
 use SilverStripe\ORM\DataExtension;
-use TheWebmen\ElementalGrid\Models\ElementRow;
+use Webmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
+use Webmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
+use Webmen\ElementalGrid\CSSFramework\CSSFrameworkInterface;
+use Webmen\ElementalGrid\Models\ElementRow;
 
+/***
+ * Class BaseElementExtension
+ * @package Webmen\ElementalGrid\Extensions
+ *
+ * @property BaseElement $owner
+ */
 class BaseElementExtension extends DataExtension
 {
-    private static int $num_columns = 12;
+    private const GRID_COLUMNS_COUNT = 12;
 
-    private static int $default_col_size = 6;
+    private static bool $inline_editable = false;
+
+    private CSSFrameworkInterface $cssFramework;
+
+    public function setOwner($owner)
+    {
+        parent::setOwner($owner);
+
+        switch ($this->getCSSFrameworkName()) {
+            case 'bulma':
+                $this->cssFramework = new BulmaCSSFramework($this->owner);
+                break;
+            default:
+                $this->cssFramework = new BootstrapCSSFramework($this->owner);
+        }
+    }
+
+    /**
+     * Set the default column size for newly created elements
+     */
+    public function populateDefaults(): void
+    {
+        $defaultSizeField = 'Size' . $this->getDefaultViewport();
+        $this->owner->$defaultSizeField = Config::forClass('Webmen\ElementalGrid')->get('default_column_size');
+    }
 
     private static array $db = [
         'SizeXS' => 'Int',
         'SizeSM' => 'Int',
         'SizeMD' => 'Int',
         'SizeLG' => 'Int',
+        'SizeXL' => 'Int',
         'OffsetXS' => 'Int',
         'OffsetSM' => 'Int',
         'OffsetMD' => 'Int',
         'OffsetLG' => 'Int',
-        'VisibilityXS' => 'Varchar',
-        'VisibilitySM' => 'Varchar',
-        'VisibilityMD' => 'Varchar',
-        'VisibilityLG' => 'Varchar',
+        'OffsetXL' => 'Int',
+        'VisibilityXS' => 'Varchar(10)',
+        'VisibilitySM' => 'Varchar(10)',
+        'VisibilityMD' => 'Varchar(10)',
+        'VisibilityLG' => 'Varchar(10)',
+        'VisibilityXL' => 'Varchar(10)',
     ];
 
+    /**
+     * Update the default CMS fields with our custom fields
+     *
+     * @param FieldList $fields
+     */
     public function updateCMSFields(FieldList $fields)
     {
         $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
-        $fields->addFieldsToTab('Root.Column', [
-            HeaderField::create('HeadingXS', _t(__CLASS__ . '.XS', 'XS')),
-            DropdownField::create('SizeXS', _t(__CLASS__ . '.SIZE_XS', 'Size XS'), self::getColSizeOptions(true)),
-            DropdownField::create('OffsetXS', _t(__CLASS__ . '.OFFSET_XS', 'Offset XS'), self::getColSizeOptions(false, true)),
-            DropdownField::create('VisibilityXS', _t(__CLASS__ . '.VISIBILITY_XS', 'Visibility XS'), self::getColVisibilityOptions()),
-            HeaderField::create('HeadingSM', _t(__CLASS__ . '.SM', 'SM')),
-            DropdownField::create('SizeSM', _t(__CLASS__ . '.SIZE_SM', 'Size SM'), self::getColSizeOptions(true)),
-            DropdownField::create('OffsetSM', _t(__CLASS__ . '.OFFSET_SM', 'Offset SM'), self::getColSizeOptions(false, true)),
-            DropdownField::create('VisibilitySM', _t(__CLASS__ . '.VISIBILITY_SM', 'Visibility SM'), self::getColVisibilityOptions()),
-            HeaderField::create('HeadingMD', _t(__CLASS__ . '.MD', 'MD')),
-            DropdownField::create('SizeMD', _t(__CLASS__ . '.SIZE_MD', 'Size MD'), self::getColSizeOptions(true))
-                ->addExtraClass('sizing')
-                ->setAttribute('data-column-size', 'md'),
-            DropdownField::create('OffsetMD', _t(__CLASS__ . '.OFFSET_MD', 'Offset MD'), self::getColSizeOptions(false, true)),
-            DropdownField::create('VisibilityMD', _t(__CLASS__ . '.VISIBILITY_MD', 'Visibility MD'), self::getColVisibilityOptions()),
-            HeaderField::create('HeadingLG', _t(__CLASS__ . '.LG', 'LG')),
-            DropdownField::create('SizeLG', _t(__CLASS__ . '.SIZE_LG', 'Size LG'), self::getColSizeOptions(true)),
-            DropdownField::create('OffsetLG', _t(__CLASS__ . '.OFFSET_LG', 'Offset LG'), self::getColSizeOptions(false, true)),
-            DropdownField::create('VisibilityLG', _t(__CLASS__ . '.VISIBILITY_LG', 'Visibility LG'), self::getColVisibilityOptions()),
-        ]);
+
+        $fields->addFieldsToTab(
+            'Root.Column',
+            [
+                HeaderField::create('HeadingXS', _t(__CLASS__ . '.XS', 'Extra small (e.g. mobile)')),
+                DropdownField::create(
+                    'SizeXS',
+                    _t(__CLASS__ . '.SIZE_XS', 'Size XS'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
+                ),
+                DropdownField::create(
+                    'OffsetXS',
+                    _t(__CLASS__ . '.OFFSET_XS', 'Offset XS'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
+                ),
+                DropdownField::create(
+                    'VisibilityXS',
+                    _t(__CLASS__ . '.VISIBILITY_XS', 'Visibility XS'),
+                    self::getColumnVisibilityOptions()
+                ),
+
+                HeaderField::create('HeadingSM', _t(__CLASS__ . '.SM', 'Small (e.g. portrait tablet)')),
+                DropdownField::create(
+                    'SizeSM',
+                    _t(__CLASS__ . '.SIZE_SM', 'Size SM'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
+                ),
+                DropdownField::create(
+                    'OffsetSM',
+                    _t(__CLASS__ . '.OFFSET_SM', 'Offset SM'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
+                ),
+                DropdownField::create(
+                    'VisibilitySM',
+                    _t(__CLASS__ . '.VISIBILITY_SM', 'Visibility SM'),
+                    self::getColumnVisibilityOptions()
+                ),
+
+                HeaderField::create('HeadingMD', _t(__CLASS__ . '.MD', 'Medium (e.g. landscape tablet)')),
+                DropdownField::create(
+                    'SizeMD',
+                    _t(__CLASS__ . '.SIZE_MD', 'Size MD'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
+                )
+                    ->addExtraClass('sizing')
+                    ->setAttribute('data-column-size', 'md'),
+                DropdownField::create(
+                    'OffsetMD',
+                    _t(__CLASS__ . '.OFFSET_MD', 'Offset MD'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
+                ),
+                DropdownField::create(
+                    'VisibilityMD',
+                    _t(__CLASS__ . '.VISIBILITY_MD', 'Visibility MD'),
+                    self::getColumnVisibilityOptions()
+                ),
+
+                HeaderField::create('HeadingLG', _t(__CLASS__ . '.LG', 'Large (e.g. normal desktop)')),
+                DropdownField::create(
+                    'SizeLG',
+                    _t(__CLASS__ . '.SIZE_LG', 'Size LG'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
+                ),
+                DropdownField::create(
+                    'OffsetLG',
+                    _t(__CLASS__ . '.OFFSET_LG', 'Offset LG'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
+                ),
+                DropdownField::create(
+                    'VisibilityLG',
+                    _t(__CLASS__ . '.VISIBILITY_LG', 'Visibility LG'),
+                    self::getColumnVisibilityOptions()
+                ),
+
+                HeaderField::create('HeadingXL', _t(__CLASS__ . '.XL', 'Extra large (e.g. full HD monitor)')),
+                DropdownField::create(
+                    'SizeXL',
+                    _t(__CLASS__ . '.SIZE_XL', 'Size XL'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
+                ),
+                DropdownField::create(
+                    'OffsetXL',
+                    _t(__CLASS__ . '.OFFSET_XL', 'Offset XL'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
+                ),
+                DropdownField::create(
+                    'VisibilityXL',
+                    _t(__CLASS__ . '.VISIBILITY_XL', 'Visibility XL'),
+                    self::getColumnVisibilityOptions()
+                ),
+            ]
+        );
     }
 
-    public static function getColSizeOptions($includeDefault = false, $includeNone = false)
+    public function getColumnClasses(): string
     {
-        $config = Config::inst()->get(__CLASS__);
-        $numColumns = $config['num_columns'];
-        $out = array();
-        if ($includeDefault) {
-            $out[0] = _t(__CLASS__ . '.DEFAULT', 'Default');
-        } else if ($includeNone) {
-            $out[0] = _t(__CLASS__ . '.NONE', 'None');
-        }
-        for ($i = 1; $i < $numColumns + 1; $i++) {
-            $out[$i] = _t(__CLASS__ . '.COLUMN', 'Column') . ' ' . $i . '/' . $numColumns;
-        }
-        return $out;
+        return implode(' ', [$this->cssFramework->getColumnClasses(), $this->owner->ExtraClass]);
     }
 
-    public static function getColVisibilityOptions(): array
+    public function getCSSFramework()
+    {
+        return $this->cssFramework;
+    }
+
+    /***
+     * Add the extra data to the blockSchema object, to be taken up by
+     * GraphQL and used in the react component in the CMS admin
+     *
+     * @param $blockSchema
+     */
+    public function updateBlockSchema(&$blockSchema): void
+    {
+        $defaultViewportSize = 'Size' . $this->getDefaultViewport();
+        $defaultViewportOffset = 'Offset' . $this->getDefaultViewport();
+        $defaultViewportVisibility = 'Visibility' . $this->getDefaultViewport();
+
+        $blockSchema['grid'] = [
+            'isRow' => $this->owner->ClassName === ElementRow::class,
+            'gridColumns' => $this->getGridColumnsCount(),
+            'column' => [
+                'defaultViewport' => $this->getDefaultViewport(),
+                'size' => $this->owner->$defaultViewportSize ?? Config::forClass('Webmen\ElementalGrid')->get(
+                        'default_column_size'
+                    ),
+                'offset' => $this->owner->$defaultViewportOffset,
+                'visibility' => $this->owner->$defaultViewportVisibility,
+            ],
+        ];
+    }
+
+    /***
+     * Returns an array of all possibile column widths
+     */
+    private function getColumnSizeOptions(?string $defaultValue = null): array
+    {
+        $columns = [];
+
+        if ($defaultValue) {
+            $columns[0] = $defaultValue;
+        }
+
+        for ($i = 1; $i < $this->getGridColumnsCount() + 1; $i++) {
+            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, $this->getGridColumnsCount());
+        }
+
+        return $columns;
+    }
+
+    private function getColumnVisibilityOptions(): array
     {
         return [
-            'default' => _t(__CLASS__ . '.DEFAULT', 'Default'),
             'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
             'hidden' => _t(__CLASS__ . '.HIDDEN', 'Hidden'),
         ];
     }
 
-    public function updateBlockSchema(&$blockSchema): void
+    private function getGridColumnsCount(): int
     {
-        $blockSchema['grid'] = [
-            'isRow' => $this->owner->ClassName === ElementRow::class,
-            'md' => [
-                'size' => $this->owner->SizeMD ?: $this->owner->config()->get('default_col_size'),
-                'offset' => $this->owner->OffsetMD,
-                'visibility' => $this->owner->VisibilityMD,
-            ],
-        ];
+        return self::GRID_COLUMNS_COUNT;
+    }
+
+    private function getDefaultViewport(): string
+    {
+        return Config::forClass('Webmen\ElementalGrid')->get('default_viewport');
+    }
+
+    private function getCSSFrameworkName()
+    {
+        return Config::forClass('Webmen\ElementalGrid')->get('css_framework');
     }
 }

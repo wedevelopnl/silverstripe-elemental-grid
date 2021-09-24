@@ -3,8 +3,15 @@ import { findDOMNode } from 'react-dom';
 export const isOverTop = (monitor, component) => {
   const clientOffset = monitor.getClientOffset();
   const componentRect = findDOMNode(component).getBoundingClientRect();
+  const componentIsRow = component.props.element.blockSchema.grid.isRow === true;
 
-  return clientOffset.y < componentRect.y + (componentRect.height / 2);
+  if (componentIsRow)
+  {
+    return clientOffset.y < componentRect.y + (componentRect.height / 2);
+  }
+
+  return clientOffset.x < componentRect.x + (componentRect.width / 2);
+
 };
 
 export const getDragIndicatorIndex = (items, dragTarget, draggedItem, dragSpot) => {

@@ -4,6 +4,16 @@
 .element-editor__element {
   outline: 1px solid $border-color-light;
   border: 0;
+  min-height: 4rem;
+  transition: all 100ms linear;
+
+  &--dragging {
+    transform: scale(0.8);
+    flex-basis: 10%;
+    width: 0;
+    overflow: hidden;
+    opacity: 0.5;
+  }
 
   &.is-row {
     display: block;
@@ -12,10 +22,14 @@
     -webkit-flex: none;
     flex: none;
     background: $body-bg-dark;
+    padding: 1.5rem 1.5385rem;
+
+    .element-editor-summary {
+      display: none;
+    }
   }
 }
 
 .element-editor__hover-bar {
   display: none;
 }
-

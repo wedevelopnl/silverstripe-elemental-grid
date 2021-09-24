@@ -122,11 +122,11 @@ var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _redux = __webpack_require__(4);
+var _redux = __webpack_require__(5);
 
-var _reactRedux = __webpack_require__(6);
+var _reactRedux = __webpack_require__(4);
 
-var _reduxForm = __webpack_require__(11);
+var _reduxForm = __webpack_require__(9);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -151,6 +151,39 @@ var ColumnSize = function (_PureComponent) {
   }
 
   _createClass(ColumnSize, [{
+    key: 'getColSizeSource',
+    value: function getColSizeSource() {
+      var colSizes = [];
+
+      for (var size = 1; size <= this.props.gridColumns; size++) {
+        colSizes.push({
+          label: 'Column ' + size + '/' + this.props.gridColumns,
+          value: size
+        });
+      }
+
+      return colSizes;
+    }
+  }, {
+    key: 'getOffsetSizeSource',
+    value: function getOffsetSizeSource() {
+      var offsetSizes = [];
+
+      offsetSizes.push({
+        label: 'None',
+        value: 0
+      });
+
+      for (var size = 1; size <= this.props.gridColumns; size++) {
+        offsetSizes.push({
+          label: 'Column ' + size + '/' + this.props.gridColumns,
+          value: size
+        });
+      }
+
+      return offsetSizes;
+    }
+  }, {
     key: 'handleClick',
     value: function handleClick(event) {
       event.stopPropagation();
@@ -158,59 +191,41 @@ var ColumnSize = function (_PureComponent) {
   }, {
     key: 'handleChangeSize',
     value: function handleChangeSize(event) {
-      var elementId = this.props.elementId;
+      var _props = this.props,
+          elementId = _props.elementId,
+          defaultViewport = _props.defaultViewport;
 
-      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_SizeMD', event.target.value);
+      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_Size' + defaultViewport, event.target.value);
       this.props.handleChangeSize(event);
     }
   }, {
     key: 'handleChangeOffset',
     value: function handleChangeOffset(event) {
-      var elementId = this.props.elementId;
+      var _props2 = this.props,
+          elementId = _props2.elementId,
+          defaultViewport = _props2.defaultViewport;
 
-      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_OffsetMD', event.target.value);
+      this.props.actions.reduxForm.autofill('element.ElementForm_' + elementId, 'PageElements_' + elementId + '_Offset' + defaultViewport, event.target.value);
       this.props.handleChangeOffset(event);
     }
   }, {
     key: 'render',
     value: function render() {
-      var source = [{
-        label: 'Column 1/12',
-        value: 1
-      }, {
-        label: 'Column 2/12',
-        value: 2
-      }, {
-        label: 'Column 3/12',
-        value: 3
-      }, {
-        label: 'Column 4/12',
-        value: 4
-      }, {
-        label: 'Column 5/12',
-        value: 5
-      }, {
-        label: 'Column 6/12',
-        value: 6
-      }, {
-        label: 'Column 7/12',
-        value: 7
-      }, {
-        label: 'Column 8/12',
-        value: 8
-      }, {
-        label: 'Column 9/12',
-        value: 9
-      }, {
-        label: 'Column 10/12',
-        value: 10
-      }, {
-        label: 'Column 11/12',
-        value: 11
-      }, {
-        label: 'Column 12/12',
-        value: 12
-      }];
+      var colSizes = [];
+
+      var offsetSizes = [];
+
+      offsetSizes.push({
+        label: 'None',
+        value: 0
+      });
+
+      for (var size = 1; size <= this.props.gridColumns; size++) {
+        offsetSizes.push({
+          label: 'Column ' + size + '/' + this.props.gridColumns,
+          value: size
+        });
+      }
 
       return _react2.default.createElement(
         'div',
@@ -219,7 +234,8 @@ var ColumnSize = function (_PureComponent) {
         _react2.default.createElement(
           'label',
           { 'class': 'mb-0 font-italic' },
-          'Size',
+          'Size ',
+          this.props.defaultViewport,
           _react2.default.createElement(
             'select',
             {
@@ -227,12 +243,11 @@ var ColumnSize = function (_PureComponent) {
               onChange: this.handleChangeSize,
               onClick: this.handleClick
             },
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (value, index) {
+            this.getColSizeSource().map(function (columnObject, index) {
               return _react2.default.createElement(
                 'option',
-                { key: index, value: value },
-                value,
-                '/12'
+                { key: index, value: columnObject.value },
+                columnObject.label
               );
             })
           )
@@ -240,7 +255,8 @@ var ColumnSize = function (_PureComponent) {
         _react2.default.createElement(
           'label',
           { 'class': 'mb-0 ml-2 font-italic' },
-          'Offset',
+          'Offset ',
+          this.props.defaultViewport,
           _react2.default.createElement(
             'select',
             {
@@ -248,12 +264,11 @@ var ColumnSize = function (_PureComponent) {
               onChange: this.handleChangeOffset,
               onClick: this.handleClick
             },
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (value, index) {
+            this.getOffsetSizeSource().map(function (columnObject, index) {
               return _react2.default.createElement(
                 'option',
-                { key: index, value: value },
-                value,
-                '/12'
+                { key: index, value: columnObject.value },
+                columnObject.label
               );
             })
           )
@@ -281,7 +296,9 @@ ColumnSize.propTypes = {
   }),
   elementId: _propTypes2.default.number,
   size: _propTypes2.default.number,
+  defaultViewport: _propTypes2.default.string,
   offset: _propTypes2.default.number,
+  gridColumns: _propTypes2.default.number,
   handleChangeSize: _propTypes2.default.func,
   handleChangeOffset: _propTypes2.default.func
 };
@@ -315,31 +332,31 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(4);
+var _redux = __webpack_require__(5);
 
 var _Injector = __webpack_require__(1);
 
-var _i18n = __webpack_require__(8);
+var _i18n = __webpack_require__(12);
 
 var _i18n2 = _interopRequireDefault(_i18n);
 
-var _classnames = __webpack_require__(7);
+var _classnames = __webpack_require__(11);
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
-var _reactRedux = __webpack_require__(6);
+var _reactRedux = __webpack_require__(4);
 
 var _loadElementFormStateName = __webpack_require__("./client/src/state/editor/loadElementFormStateName.js");
 
 var _loadElementSchemaValue = __webpack_require__("./client/src/state/editor/loadElementSchemaValue.js");
 
-var _TabsActions = __webpack_require__(12);
+var _TabsActions = __webpack_require__(10);
 
 var TabsActions = _interopRequireWildcard(_TabsActions);
 
-var _reactDnd = __webpack_require__(5);
+var _reactDnd = __webpack_require__(6);
 
-var _reactDndHtml5Backend = __webpack_require__(9);
+var _reactDndHtml5Backend = __webpack_require__(7);
 
 var _dragHelpers = __webpack_require__("./client/src/lib/dragHelpers.js");
 
@@ -383,8 +400,8 @@ var Element = function (_Component) {
       initialTab: '',
       loadingError: false,
       childRenderingError: false,
-      size: props.element.blockSchema.grid.md.size,
-      offset: props.element.blockSchema.grid.md.offset
+      size: props.element.blockSchema.grid.column.size,
+      offset: props.element.blockSchema.grid.column.offset
     };
     return _this;
   }
@@ -426,7 +443,7 @@ var Element = function (_Component) {
       var element = this.props.element;
 
 
-      return _ref = {}, _defineProperty(_ref, 'col-md-' + this.state.size, true), _defineProperty(_ref, 'offset-md-' + this.state.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _ref;
+      return _ref = {}, _defineProperty(_ref, 'col-lg-' + this.state.size, true), _defineProperty(_ref, 'offset-lg-' + this.state.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _ref;
     }
   }, {
     key: 'handleLoadingError',
@@ -538,6 +555,10 @@ var Element = function (_Component) {
           isDragging = _props3.isDragging,
           isOver = _props3.isOver,
           onDragEnd = _props3.onDragEnd;
+
+
+      console.log(this.props);
+
       var _state = this.state,
           childRenderingError = _state.childRenderingError,
           previewExpanded = _state.previewExpanded;
@@ -597,8 +618,10 @@ var Element = function (_Component) {
         ),
         !element.blockSchema.grid.isRow && _react2.default.createElement(ColumnSizeComponent, {
           elementId: element.id,
-          size: element.blockSchema.grid.md.size,
-          offset: element.blockSchema.grid.md.offset,
+          size: element.blockSchema.grid.column.size,
+          defaultViewport: element.blockSchema.grid.column.defaultViewport,
+          gridColumns: element.blockSchema.grid.gridColumns,
+          offset: element.blockSchema.grid.column.offset,
           handleChangeSize: this.handleChangeSize,
           handleChangeOffset: this.handleChangeOffset
         })
@@ -745,19 +768,19 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(4);
+var _redux = __webpack_require__(5);
 
 var _Injector = __webpack_require__(1);
 
-var _classnames = __webpack_require__(7);
+var _classnames = __webpack_require__(11);
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
-var _i18n = __webpack_require__(8);
+var _i18n = __webpack_require__(12);
 
 var _i18n2 = _interopRequireDefault(_i18n);
 
-var _reactDnd = __webpack_require__(5);
+var _reactDnd = __webpack_require__(6);
 
 var _dragHelpers = __webpack_require__("./client/src/lib/dragHelpers.js");
 
@@ -875,6 +898,7 @@ var ElementList = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      console.log(this.props);
       var blocks = this.props.blocks;
 
       var listClassNames = (0, _classnames2.default)('elemental-editor-list', 'row', { 'elemental-editor-list--empty': !blocks || !blocks.length });
@@ -961,13 +985,18 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.elementDragSource = exports.getDragIndicatorIndex = exports.isOverTop = undefined;
 
-var _reactDom = __webpack_require__(10);
+var _reactDom = __webpack_require__(8);
 
 var isOverTop = exports.isOverTop = function isOverTop(monitor, component) {
   var clientOffset = monitor.getClientOffset();
   var componentRect = (0, _reactDom.findDOMNode)(component).getBoundingClientRect();
+  var componentIsRow = component.props.element.blockSchema.grid.isRow === true;
 
-  return clientOffset.y < componentRect.y + componentRect.height / 2;
+  if (componentIsRow) {
+    return clientOffset.y < componentRect.y + componentRect.height / 2;
+  }
+
+  return clientOffset.x < componentRect.x + componentRect.width / 2;
 };
 
 var getDragIndicatorIndex = exports.getDragIndicatorIndex = function getDragIndicatorIndex(items, dragTarget, draggedItem, dragSpot) {
@@ -1200,21 +1229,21 @@ module.exports = Injector;
 /***/ 10:
 /***/ (function(module, exports) {
 
-module.exports = ReactDom;
+module.exports = TabsActions;
 
 /***/ }),
 
 /***/ 11:
 /***/ (function(module, exports) {
 
-module.exports = ReduxForm;
+module.exports = classnames;
 
 /***/ }),
 
 /***/ 12:
 /***/ (function(module, exports) {
 
-module.exports = TabsActions;
+module.exports = i18n;
 
 /***/ }),
 
@@ -1235,42 +1264,42 @@ module.exports = React;
 /***/ 4:
 /***/ (function(module, exports) {
 
-module.exports = Redux;
+module.exports = ReactRedux;
 
 /***/ }),
 
 /***/ 5:
 /***/ (function(module, exports) {
 
-module.exports = ReactDND;
+module.exports = Redux;
 
 /***/ }),
 
 /***/ 6:
 /***/ (function(module, exports) {
 
-module.exports = ReactRedux;
+module.exports = ReactDND;
 
 /***/ }),
 
 /***/ 7:
 /***/ (function(module, exports) {
 
-module.exports = classnames;
+module.exports = ReactDNDHtml5Backend;
 
 /***/ }),
 
 /***/ 8:
 /***/ (function(module, exports) {
 
-module.exports = i18n;
+module.exports = ReactDom;
 
 /***/ }),
 
 /***/ 9:
 /***/ (function(module, exports) {
 
-module.exports = ReactDNDHtml5Backend;
+module.exports = ReduxForm;
 
 /***/ })
 

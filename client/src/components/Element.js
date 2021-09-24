@@ -41,8 +41,8 @@ class Element extends Component {
       initialTab: '',
       loadingError: false,
       childRenderingError: false,
-      size: props.element.blockSchema.grid.md.size,
-      offset: props.element.blockSchema.grid.md.offset,
+      size: props.element.blockSchema.grid.column.size,
+      offset: props.element.blockSchema.grid.column.offset,
     };
   }
 
@@ -84,8 +84,8 @@ class Element extends Component {
     const { element } = this.props;
 
     return {
-      [`col-md-${this.state.size}`]: true,
-      [`offset-md-${this.state.offset}`]: true,
+      [`col-lg-${this.state.size}`]: true,
+      [`offset-lg-${this.state.offset}`]: true,
       'is-row': element.blockSchema.grid.isRow === true
     }
   }
@@ -213,6 +213,8 @@ class Element extends Component {
       onDragEnd,
     } = this.props;
 
+    console.log(this.props);
+
     const { childRenderingError, previewExpanded } = this.state;
 
     if (!element.id) {
@@ -280,8 +282,10 @@ class Element extends Component {
       {!element.blockSchema.grid.isRow &&
         <ColumnSizeComponent
           elementId={element.id}
-          size={element.blockSchema.grid.md.size}
-          offset={element.blockSchema.grid.md.offset}
+          size={element.blockSchema.grid.column.size}
+          defaultViewport={element.blockSchema.grid.column.defaultViewport}
+          gridColumns={element.blockSchema.grid.gridColumns}
+          offset={element.blockSchema.grid.column.offset}
           handleChangeSize={this.handleChangeSize}
           handleChangeOffset={this.handleChangeOffset}
         />
