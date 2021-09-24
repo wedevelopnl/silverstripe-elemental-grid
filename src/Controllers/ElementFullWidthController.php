@@ -14,7 +14,7 @@ class ElementFullWidthController extends ElementController
         return $this->renderWith(
             [
                 'type' => 'Layout',
-                'Webmen\\ElementalGrid\\ElementFullWidthHolder'
+                'Webmen\\ElementalGrid\\ElementFullWidthHolder',
             ]
         );
     }
@@ -38,5 +38,4 @@ class ElementFullWidthController extends ElementController
     {
         $this->after = $after;
     }
-
 }

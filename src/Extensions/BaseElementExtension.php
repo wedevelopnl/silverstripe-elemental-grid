@@ -197,8 +197,8 @@ class BaseElementExtension extends DataExtension
             'column' => [
                 'defaultViewport' => $this->getDefaultViewport(),
                 'size' => $this->owner->$defaultViewportSize ?? Config::forClass('Webmen\ElementalGrid')->get(
-                        'default_column_size'
-                    ),
+                    'default_column_size'
+                ),
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
             ],

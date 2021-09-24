@@ -76,5 +76,4 @@ class ElementalAreaExtension extends DataExtension
 
         return $controllers;
     }
-
 }

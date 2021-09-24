@@ -47,5 +47,4 @@ class ElementRowController extends ElementController
     {
         $this->previousRow = $value;
     }
-
 }
