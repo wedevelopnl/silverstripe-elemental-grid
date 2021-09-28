@@ -6,8 +6,10 @@ Use the following yaml configuration to set defaults;
 Webmen\ElementalGrid:
     default_column_size: 12
     default_viewport: 'SM'
-    css_framework: 'bulma' (currently supported are bootstrap and bulma)
+    css_framework: 'bulma'
 ```
+## Supported CSS frameworks
+Currently Bulma and Bootstrap (5) are the supported CSS frameworks that can be combined with this module.
 
 ## Add settings to rows
 It is possbile to extend a row.
