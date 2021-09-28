@@ -34,7 +34,7 @@
     },
     "autoload": {
         "psr-4": {
-            "TheWebmen\\ElementalGrid\\": "src/"
+            "Webmen\\ElementalGrid\\": "src/"
         }
     }
 }
