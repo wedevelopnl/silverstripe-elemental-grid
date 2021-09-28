@@ -1,6 +1,6 @@
 <?php
 
-namespace Webmen\ElementalGrid\Pages;
+namespace TheWebmen\ElementalGrid\Pages;
 
 class GridPage extends \Page
 {

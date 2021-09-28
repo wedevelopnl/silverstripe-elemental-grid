@@ -1,6 +1,6 @@
 <?php
 
-namespace Webmen\ElementalGrid\Extensions;
+namespace TheWebmen\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Core\Config\Config;
@@ -8,14 +8,14 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\ORM\DataExtension;
-use Webmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
-use Webmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
-use Webmen\ElementalGrid\CSSFramework\CSSFrameworkInterface;
-use Webmen\ElementalGrid\Models\ElementRow;
+use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
+use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
+use TheWebmen\ElementalGrid\CSSFramework\CSSFrameworkInterface;
+use TheWebmen\ElementalGrid\Models\ElementRow;
 
 /***
  * Class BaseElementExtension
- * @package Webmen\ElementalGrid\Extensions
+ * @package TheWebmen\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
  */
@@ -43,8 +43,18 @@ class BaseElementExtension extends DataExtension
     public function populateDefaults(): void
     {
         $defaultSizeField = 'Size' . $this->getDefaultViewport();
-        $this->owner->$defaultSizeField = Config::forClass('Webmen\ElementalGrid')->get('default_column_size');
+        $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid')->get('default_column_size');
     }
+
+    private static array $titleOptions = [
+        'div' => 'Default',
+        'h1' => 'H1',
+        'h2' => 'H2',
+        'h3' => 'H3',
+        'h4' => 'H4',
+        'h5' => 'H5',
+        'h6' => 'H6',
+    ];
 
     private static array $db = [
         'SizeXS' => 'Int',
@@ -62,6 +72,8 @@ class BaseElementExtension extends DataExtension
         'VisibilityMD' => 'Varchar(10)',
         'VisibilityLG' => 'Varchar(10)',
         'VisibilityXL' => 'Varchar(10)',
+        'TitleClass' => 'Varchar(100)',
+        'TitleTag' => 'Varchar(100)',
     ];
 
     /**
@@ -71,6 +83,18 @@ class BaseElementExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
+        $fields->insertBefore(
+            'Title',
+            DropdownField::create('TitleClass', 'Title size', self::$titleOptions)
+                ->setDescription('Set the title tag to be <b>shown</b> as a H1, H2, etc...')
+        );
+
+        $fields->insertBefore(
+            'TitleClass',
+            DropdownField::create('TitleTag', 'Title tag', self::$titleOptions)
+                ->setDescription('Set the title tag to be <b>an actual</b> H1, H2, etc...')
+        );
+
         $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
 
         $fields->addFieldsToTab(
@@ -191,9 +215,9 @@ class BaseElementExtension extends DataExtension
             'gridColumns' => $this->getGridColumnsCount(),
             'column' => [
                 'defaultViewport' => $this->getDefaultViewport(),
-                'size' => $this->owner->$defaultViewportSize ?? Config::forClass('Webmen\ElementalGrid')->get(
-                    'default_column_size'
-                ),
+                'size' => $this->owner->$defaultViewportSize ?? Config::forClass('TheWebmen\ElementalGrid')->get(
+                        'default_column_size'
+                    ),
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
             ],
@@ -233,11 +257,16 @@ class BaseElementExtension extends DataExtension
 
     private function getDefaultViewport(): string
     {
-        return Config::forClass('Webmen\ElementalGrid')->get('default_viewport');
+        return Config::forClass('TheWebmen\ElementalGrid')->get('default_viewport');
     }
 
-    private function getCSSFrameworkName()
+    private function getCSSFrameworkName(): string
     {
-        return Config::forClass('Webmen\ElementalGrid')->get('css_framework');
+        return Config::forClass('TheWebmen\ElementalGrid')->get('css_framework');
+    }
+
+    public function getTitleSizeClass(): string
+    {
+        return $this->owner->getCSSFramework()->getTitleSizeClass();
     }
 }

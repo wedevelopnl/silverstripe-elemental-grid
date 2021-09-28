@@ -1,5 +1,5 @@
 nl:
-  Webmen\ElementalGrid\Extensions\BaseElementExtension:
+  TheWebmen\ElementalGrid\Extensions\BaseElementExtension:
     XS: 'Large (e.g. normal desktop)'
     SM: 'Small (e.g. portrait tablet)'
     MD: 'Medium (e.g. landscape tablet)'
@@ -25,7 +25,7 @@ nl:
     HIDDEN: 'Onzichtbaar'
     COLUMN: 'Kolom'
     NONE: 'Geen'
-  Webmen\ElementalGrid\Models\ElementRow:
+  TheWebmen\ElementalGrid\Models\ElementRow:
     BlockType: 'Rij'
     ContentLabel: 'Rij'
     PLURALNAME: 'Rijen'

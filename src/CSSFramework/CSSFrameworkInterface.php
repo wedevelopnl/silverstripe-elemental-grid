@@ -1,6 +1,6 @@
 <?php
 
-namespace Webmen\ElementalGrid\CSSFramework;
+namespace TheWebmen\ElementalGrid\CSSFramework;
 
 interface CSSFrameworkInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Webmen\ElementalGrid\Extensions;
+namespace TheWebmen\ElementalGrid\Extensions;
 
 use App\Services\SpotlerService;
 use App\Spotler\Exceptions\SpotlerException;
@@ -9,13 +9,13 @@ use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
-use Webmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
-use Webmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
-use Webmen\ElementalGrid\Models\ElementRow;
+use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
+use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
+use TheWebmen\ElementalGrid\Models\ElementRow;
 
 /***
  * Class ElementalAreaExtension
- * @package Webmen\ElementalGrid\Extensions
+ * @package TheWebmen\ElementalGrid\Extensions
  *
  * @property ElementalArea $owner
  */
@@ -40,8 +40,6 @@ class ElementalAreaExtension extends DataExtension
 
     public function ElementControllersWithRows()
     {
-        $this->controllers = $this->owner->ElementControllers();
-
         if (!$this->controllers->count()) {
             return false;
         }
@@ -51,12 +49,15 @@ class ElementalAreaExtension extends DataExtension
         if ($first->ClassName == ElementRow::class) {
             $first->setIsFirstRow(true);
         } else {
-            $createdFirst = ElementRow::create()->getController()->setIsFirstRow(true);
+            $createdFirstElement = ElementRow::create();
+            $createdFirst = $createdFirstElement->getController();
+            $createdFirst->setIsFirstRow(true);
             $this->controllers->unshift($createdFirst);
         }
 
-        //Check for last row
+        // Check for last row
         $last = $this->controllers->last();
+
         if ($last->ClassName == ElementRow::class) {
             $last->setIsLastRow(true);
         } else {
@@ -68,11 +69,13 @@ class ElementalAreaExtension extends DataExtension
 
         $previousRow = false;
         foreach ($this->controllers as $key => $controller) {
-            if ($controller->ClassName == ElementRow::class) {
-                if ($previousRow) {
-                    $controller->setPreviousRow($previousRow->getElement());
+            if($controller) {
+                if ($controller->ClassName == ElementRow::class) {
+                    if ($previousRow) {
+                        $controller->setPreviousRow($previousRow->getElement());
+                    }
+                    $previousRow = $controller;
                 }
-                $previousRow = $controller;
             }
         }
 

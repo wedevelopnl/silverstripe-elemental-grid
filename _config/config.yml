@@ -15,22 +15,22 @@ SilverStripe\Admin\LeftAndMain:
 
 DNADesign\Elemental\Models\ElementalArea:
   extensions:
-    - Webmen\ElementalGrid\Extensions\ElementalAreaExtension
+    - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension
 
 DNADesign\Elemental\Models\ElementContent:
   extensions:
-    - Webmen\ElementalGrid\Extensions\ElementContentExtension
+    - TheWebmen\ElementalGrid\Extensions\ElementContentExtension
 
 DNADesign\Elemental\Models\BaseElement:
   inline_editable: false
   extensions:
-    - Webmen\ElementalGrid\Extensions\BaseElementExtension
+    - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
 
-Webmen\ElementalGrid:
+TheWebmen\ElementalGrid:
   default_column_size: 12
-  default_viewport: 'SM'
+  default_viewport: 'MD'
   css_framework: 'bulma'
 
-Webmen\ElementalGrid\Pages\GridPage:
+TheWebmen\ElementalGrid\Pages\GridPage:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalPageExtension

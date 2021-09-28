@@ -1,15 +1,15 @@
 <?php
 
-namespace Webmen\ElementalGrid\Models;
+namespace TheWebmen\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
-use Webmen\ElementalGrid\Controllers\ElementRowController;
+use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 
 /***
  * Class ElementRow
- * @package Webmen\ElementalGrid\Extensions
+ * @package TheWebmen\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
  */
@@ -38,6 +38,11 @@ class ElementRow extends BaseElement
         $fields = parent::getCMSFields();
 
         $fields->removeByName('Column');
+
+        if (!$fields->fieldPosition('Title')) {
+            $fields->removeByName('TitleTag');
+            $fields->removeByName('TitleClass');
+        }
 
         $fields->addFieldsToTab('Root.Main', [
             CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
