@@ -17,22 +17,7 @@ There's currently only partial translations in this module. The translations nee
 ```
 composer require thewebmen/silverstripe-elemental-grid:^2.0
 ```
-
-In the following example we create a new GridPage typo to use the Grid.\
-
-**app/src/Model/GridPage.php**
-```php
-<?php
-class GridPage extends Page
-{
-}
-```
-**app/_config/grid.yml**
-```yaml
-GridPage:
-    extensions:
-        - DNADesign\Elemental\Extensions\ElementalPageExtension
-```
+An initial GridPage pagetype will be provided via this module.
 
 ## Further configuration
 For more information about configuration, check out the documentation in the `docs` directory.
