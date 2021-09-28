@@ -10,7 +10,6 @@ This module converts the elemental module (https://github.com/silverstripe/silve
 
 * SilverStripe CMS ^4.0
 * dnadesign/silverstripe-elemental ^4
-* Frontend css supporting a grid system (col-xs-X col-sm-X col-md-X col-lg-X visible-XS/SM/MD/LG hidden-XS/SM/MD/LG and col-xs-offset-X etc)
 
 ## Installation
 ```
@@ -56,7 +55,7 @@ Fix issues:\
 See [License](LICENSE)
 
 ## Maintainers
-* [Webmen](https://www.webmen.nl/) <developement@webmen.nl>
+* [Webmen](https://www.webmen.nl/) <development@webmen.nl>
 
 ## Development and contribution
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.\
