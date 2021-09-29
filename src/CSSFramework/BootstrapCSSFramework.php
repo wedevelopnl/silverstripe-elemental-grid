@@ -56,19 +56,19 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     {
         $classes = [];
 
-        if ($this->baseElement->VisibilityXS !== 'visible') {
+        if ($this->baseElement->VisibilityXS === 'hidden') {
             array_push($classes, 'd-none d-sm-block');
         }
-        if ($this->baseElement->VisibilitySM !== 'visible') {
+        if ($this->baseElement->VisibilitySM === 'hidden') {
             array_push($classes, 'd-sm-none d-md-block');
         }
-        if ($this->baseElement->VisibilityMD !== 'visible') {
+        if ($this->baseElement->VisibilityMD === 'hidden') {
             array_push($classes, 'd-md-none d-lg-block');
         }
-        if ($this->baseElement->VisibilityLG !== 'visible') {
+        if ($this->baseElement->VisibilityLG === 'hidden') {
             array_push($classes, 'd-lg-none d-xl-block');
         }
-        if ($this->baseElement->VisibilityXL !== 'visible') {
+        if ($this->baseElement->VisibilityXL === 'hidden') {
             array_push($classes, 'd-xl-none');
         }
 

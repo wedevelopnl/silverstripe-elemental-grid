@@ -56,19 +56,19 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     {
         $classes = [];
 
-        if ($this->baseElement->VisibilityXS !== 'visible') {
+        if ($this->baseElement->VisibilityXS === 'hidden') {
             array_push($classes, 'is-' . $this->baseElement->VisibilityXS . '-mobile');
         }
-        if ($this->baseElement->VisibilitySM !== 'visible') {
+        if ($this->baseElement->VisibilitySM === 'hidden') {
             array_push($classes, 'is-' . $this->baseElement->VisibilitySM . '-tablet-only');
         }
-        if ($this->baseElement->VisibilityMD !== 'visible') {
+        if ($this->baseElement->VisibilityMD === 'hidden') {
             array_push($classes, 'is-' . $this->baseElement->VisibilityMD . '-desktop-only');
         }
-        if ($this->baseElement->VisibilityLG !== 'visible') {
+        if ($this->baseElement->VisibilityLG === 'hidden') {
             array_push($classes, 'is-' . $this->baseElement->VisibilityLG . '-widescreen-only');
         }
-        if ($this->baseElement->VisibilityXL !== 'visible') {
+        if ($this->baseElement->VisibilityXL === 'hidden') {
             array_push($classes, 'is-' . $this->baseElement->VisibilityXL . '-fullhd');
         }
 
