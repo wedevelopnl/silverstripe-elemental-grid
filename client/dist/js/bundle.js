@@ -122,11 +122,11 @@ var _propTypes = __webpack_require__(0);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _redux = __webpack_require__(5);
+var _redux = __webpack_require__(4);
 
-var _reactRedux = __webpack_require__(4);
+var _reactRedux = __webpack_require__(6);
 
-var _reduxForm = __webpack_require__(9);
+var _reduxForm = __webpack_require__(11);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -332,31 +332,31 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(5);
+var _redux = __webpack_require__(4);
 
 var _Injector = __webpack_require__(1);
 
-var _i18n = __webpack_require__(12);
+var _i18n = __webpack_require__(8);
 
 var _i18n2 = _interopRequireDefault(_i18n);
 
-var _classnames = __webpack_require__(11);
+var _classnames = __webpack_require__(7);
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
-var _reactRedux = __webpack_require__(4);
+var _reactRedux = __webpack_require__(6);
 
 var _loadElementFormStateName = __webpack_require__("./client/src/state/editor/loadElementFormStateName.js");
 
 var _loadElementSchemaValue = __webpack_require__("./client/src/state/editor/loadElementSchemaValue.js");
 
-var _TabsActions = __webpack_require__(10);
+var _TabsActions = __webpack_require__(12);
 
 var TabsActions = _interopRequireWildcard(_TabsActions);
 
-var _reactDnd = __webpack_require__(6);
+var _reactDnd = __webpack_require__(5);
 
-var _reactDndHtml5Backend = __webpack_require__(7);
+var _reactDndHtml5Backend = __webpack_require__(9);
 
 var _dragHelpers = __webpack_require__("./client/src/lib/dragHelpers.js");
 
@@ -443,7 +443,7 @@ var Element = function (_Component) {
       var element = this.props.element;
 
 
-      return _ref = {}, _defineProperty(_ref, 'col-lg-' + this.state.size, true), _defineProperty(_ref, 'offset-lg-' + this.state.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _ref;
+      return _ref = {}, _defineProperty(_ref, 'col-lg-' + this.state.size, true), _defineProperty(_ref, 'offset-lg-' + this.state.offset, true), _defineProperty(_ref, 'is-row', element.blockSchema.grid.isRow === true), _defineProperty(_ref, 'is-dragged-top', this.props.isDraggedOver && this.props.isDraggedOverPosition === 'top'), _defineProperty(_ref, 'is-dragged-bottom', this.props.isDraggedOver && this.props.isDraggedOverPosition === 'bottom'), _ref;
     }
   }, {
     key: 'handleLoadingError',
@@ -555,10 +555,6 @@ var Element = function (_Component) {
           isDragging = _props3.isDragging,
           isOver = _props3.isOver,
           onDragEnd = _props3.onDragEnd;
-
-
-      console.log(this.props);
-
       var _state = this.state,
           childRenderingError = _state.childRenderingError,
           previewExpanded = _state.previewExpanded;
@@ -690,7 +686,10 @@ Element.propTypes = {
   isOver: _propTypes2.default.bool.isRequired,
   onDragOver: _propTypes2.default.func,
   onDragEnd: _propTypes2.default.func,
-  onDragStart: _propTypes2.default.func };
+  onDragStart: _propTypes2.default.func,
+  isDraggedOver: _propTypes2.default.bool,
+  isDraggedOverPosition: _propTypes2.default.string
+};
 
 Element.defaultProps = {
   element: null
@@ -703,10 +702,9 @@ var elementTarget = {
   drop: function drop(props, monitor, component) {
     var element = props.element;
 
-
     return {
       target: element.id,
-      dropSpot: (0, _dragHelpers.isOverTop)(monitor, component) ? 'top' : 'bottom'
+      dropSpot: (0, _dragHelpers.isOverTop)(monitor, component, element) ? 'top' : 'bottom'
     };
   },
   hover: function hover(props, monitor, component) {
@@ -715,7 +713,7 @@ var elementTarget = {
 
 
     if (onDragOver) {
-      onDragOver(element, (0, _dragHelpers.isOverTop)(monitor, component));
+      onDragOver(element, (0, _dragHelpers.isOverTop)(monitor, component, element));
     }
   }
 };
@@ -768,19 +766,19 @@ var _elementType = __webpack_require__("./client/src/types/elementType.js");
 
 var _elementTypeType = __webpack_require__("./client/src/types/elementTypeType.js");
 
-var _redux = __webpack_require__(5);
+var _redux = __webpack_require__(4);
 
 var _Injector = __webpack_require__(1);
 
-var _classnames = __webpack_require__(11);
+var _classnames = __webpack_require__(7);
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
-var _i18n = __webpack_require__(12);
+var _i18n = __webpack_require__(8);
 
 var _i18n2 = _interopRequireDefault(_i18n);
 
-var _reactDnd = __webpack_require__(6);
+var _reactDnd = __webpack_require__(5);
 
 var _dragHelpers = __webpack_require__("./client/src/lib/dragHelpers.js");
 
@@ -819,6 +817,8 @@ var ElementList = function (_Component) {
   }, {
     key: 'renderBlocks',
     value: function renderBlocks() {
+      var _this2 = this;
+
       var _props2 = this.props,
           ElementComponent = _props2.ElementComponent,
           HoverBarComponent = _props2.HoverBarComponent,
@@ -855,7 +855,9 @@ var ElementList = function (_Component) {
             link: element.blockSchema.actions.edit,
             onDragOver: onDragOver,
             onDragEnd: onDragEnd,
-            onDragStart: onDragStart
+            onDragStart: onDragStart,
+            isDraggedOver: _this2.props.dragTargetElementId === element.id && _this2.props.draggedItem && _this2.props.draggedItem.id !== element.id,
+            isDraggedOverPosition: _this2.props.dragSpot
           },
           isDraggingOver || _react2.default.createElement(HoverBarComponent, {
             key: 'create-after-' + element.id,
@@ -873,11 +875,6 @@ var ElementList = function (_Component) {
           elementId: 0,
           elementTypes: allowedElementTypes
         })].concat(output);
-      }
-
-      var dragIndicatorIndex = this.getDragIndicatorIndex();
-      if (isDraggingOver && dragIndicatorIndex !== null) {
-        output.splice(dragIndicatorIndex, 0, _react2.default.createElement(DragIndicatorComponent, { key: 'DropIndicator' }));
       }
 
       return output;
@@ -898,7 +895,6 @@ var ElementList = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      console.log(this.props);
       var blocks = this.props.blocks;
 
       var listClassNames = (0, _classnames2.default)('elemental-editor-list', 'row', { 'elemental-editor-list--empty': !blocks || !blocks.length });
@@ -940,7 +936,6 @@ var elementListTarget = {
     var blocks = props.blocks;
 
     var elementTargetDropResult = monitor.getDropResult();
-
     if (!elementTargetDropResult) {
       return {};
     }
@@ -985,9 +980,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.elementDragSource = exports.getDragIndicatorIndex = exports.isOverTop = undefined;
 
-var _reactDom = __webpack_require__(8);
+var _reactDom = __webpack_require__(10);
 
-var isOverTop = exports.isOverTop = function isOverTop(monitor, component) {
+var isOverTop = exports.isOverTop = function isOverTop(monitor, component, draggedOverElement) {
   var clientOffset = monitor.getClientOffset();
   var componentRect = (0, _reactDom.findDOMNode)(component).getBoundingClientRect();
   var componentIsRow = component.props.element.blockSchema.grid.isRow === true;
@@ -1229,21 +1224,21 @@ module.exports = Injector;
 /***/ 10:
 /***/ (function(module, exports) {
 
-module.exports = TabsActions;
+module.exports = ReactDom;
 
 /***/ }),
 
 /***/ 11:
 /***/ (function(module, exports) {
 
-module.exports = classnames;
+module.exports = ReduxForm;
 
 /***/ }),
 
 /***/ 12:
 /***/ (function(module, exports) {
 
-module.exports = i18n;
+module.exports = TabsActions;
 
 /***/ }),
 
@@ -1264,42 +1259,42 @@ module.exports = React;
 /***/ 4:
 /***/ (function(module, exports) {
 
-module.exports = ReactRedux;
+module.exports = Redux;
 
 /***/ }),
 
 /***/ 5:
 /***/ (function(module, exports) {
 
-module.exports = Redux;
+module.exports = ReactDND;
 
 /***/ }),
 
 /***/ 6:
 /***/ (function(module, exports) {
 
-module.exports = ReactDND;
+module.exports = ReactRedux;
 
 /***/ }),
 
 /***/ 7:
 /***/ (function(module, exports) {
 
-module.exports = ReactDNDHtml5Backend;
+module.exports = classnames;
 
 /***/ }),
 
 /***/ 8:
 /***/ (function(module, exports) {
 
-module.exports = ReactDom;
+module.exports = i18n;
 
 /***/ }),
 
 /***/ 9:
 /***/ (function(module, exports) {
 
-module.exports = ReduxForm;
+module.exports = ReactDNDHtml5Backend;
 
 /***/ })
 

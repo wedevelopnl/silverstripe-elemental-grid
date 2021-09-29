@@ -86,7 +86,9 @@ class Element extends Component {
     return {
       [`col-lg-${this.state.size}`]: true,
       [`offset-lg-${this.state.offset}`]: true,
-      'is-row': element.blockSchema.grid.isRow === true
+      'is-row': element.blockSchema.grid.isRow === true,
+      [`is-dragged-top`]: this.props.isDraggedOver && this.props.isDraggedOverPosition === 'top',
+      ['is-dragged-bottom']: this.props.isDraggedOver && this.props.isDraggedOverPosition === 'bottom'
     }
   }
 
@@ -362,6 +364,8 @@ Element.propTypes = {
   onDragOver: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   onDragEnd: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   onDragStart: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
+  isDraggedOver: PropTypes.bool,
+  isDraggedOverPosition: PropTypes.string
 };
 
 Element.defaultProps = {
@@ -373,10 +377,9 @@ export { Element as Component };
 const elementTarget = {
   drop(props, monitor, component) {
     const { element } = props;
-
     return {
       target: element.id,
-      dropSpot: isOverTop(monitor, component) ? 'top' : 'bottom',
+      dropSpot: isOverTop(monitor, component, element) ? 'top' : 'bottom',
     };
   },
 
@@ -384,7 +387,7 @@ const elementTarget = {
     const { element, onDragOver } = props;
 
     if (onDragOver) {
-      onDragOver(element, isOverTop(monitor, component));
+      onDragOver(element, isOverTop(monitor, component, element));
     }
   },
 };

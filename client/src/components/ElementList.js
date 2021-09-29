@@ -60,6 +60,8 @@ class ElementList extends Component {
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
+        isDraggedOver={this.props.dragTargetElementId === element.id && this.props.draggedItem && this.props.draggedItem.id !== element.id}
+        isDraggedOverPosition={this.props.dragSpot}
       >
         {isDraggingOver || <HoverBarComponent
           key={`create-after-${element.id}`}
@@ -80,11 +82,6 @@ class ElementList extends Component {
           elementTypes={allowedElementTypes}
         />
       ].concat(output);
-    }
-
-    const dragIndicatorIndex = this.getDragIndicatorIndex();
-    if (isDraggingOver && dragIndicatorIndex !== null) {
-      output.splice(dragIndicatorIndex, 0, <DragIndicatorComponent key="DropIndicator" />);
     }
 
     return output;
@@ -145,7 +142,6 @@ const elementListTarget = {
   drop(props, monitor) {
     const { blocks } = props;
     const elementTargetDropResult = monitor.getDropResult();
-
     if (!elementTargetDropResult) {
       return {};
     }
