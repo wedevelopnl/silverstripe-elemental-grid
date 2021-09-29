@@ -71,9 +71,11 @@ class ElementRow extends BaseElement
             $fields->removeByName('TitleClass');
         }
 
-        $fields->addFieldsToTab('Root.Main', [
-            CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
-        ]);
+        if (!$fields->fieldPosition('FullWidth')) {
+            $fields->addFieldsToTab('Root.Main', [
+                CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
+            ]);
+        }
 
         return $fields;
     }
