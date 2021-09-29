@@ -14,12 +14,12 @@ class ElementRowController extends ElementController
     /**
      * @var bool
      */
-    private bool $isLastRow = false;
+    private $isLastRow = false;
 
     /**
      * @var bool
      */
-    private bool $isFirstRow = false;
+    private $isFirstRow = false;
 
     /**
      * @var BaseElement
