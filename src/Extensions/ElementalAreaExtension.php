@@ -21,9 +21,15 @@ use TheWebmen\ElementalGrid\Models\ElementRow;
  */
 class ElementalAreaExtension extends DataExtension
 {
-    private ArrayList $controllers;
+    /**
+     * @var ArrayList
+     */
+    private $controllers;
 
-    public function setOwner($owner): void
+    /**
+     * @param object $owner
+     */
+    public function setOwner($owner)
     {
         parent::setOwner($owner);
 
@@ -38,6 +44,10 @@ class ElementalAreaExtension extends DataExtension
         }
     }
 
+    /**
+     * @return false|ArrayList
+     * @throws \Exception
+     */
     public function ElementControllersWithRows()
     {
         if (!$this->controllers->count()) {

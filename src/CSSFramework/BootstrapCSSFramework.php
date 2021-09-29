@@ -6,7 +6,10 @@ use DNADesign\Elemental\Models\BaseElement;
 
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
-    private BaseElement $baseElement;
+    /**
+     * @var BaseElement
+     */
+    private $baseElement;
 
     private const COLUMN_CLASSNAME = 'col';
 
@@ -14,17 +17,28 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
     private const FLUID_CONTAINER_CLASSNAME = 'container-fluid';
 
-    public function __construct(BaseElement $baseElement)
+    /**
+     * BootstrapCSSFramework constructor.
+     *
+     * @param BaseElement $baseElement
+     */
+    public function __construct($baseElement)
     {
         $this->baseElement = $baseElement;
     }
 
-    public function getRowClasses(): string
+    /**
+     * @return string
+     */
+    public function getRowClasses()
     {
         return self::ROW_CLASSNAME;
     }
 
-    public function getColumnClasses(): string
+    /**
+     * @return string
+     */
+    public function getColumnClasses()
     {
         $sizeClasses = $this->getSizeClasses();
         $offsetClasses = $this->getOffsetClasses();
@@ -35,7 +49,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return implode(' ', $classes);
     }
 
-    private function getVisibilityClasses(): array
+    /**
+     * @return array
+     */
+    private function getVisibilityClasses()
     {
         $classes = [];
 
@@ -58,7 +75,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    private function getSizeClasses(): array
+    /**
+     * @return array
+     */
+    private function getSizeClasses()
     {
         $classes = [];
 
@@ -85,7 +105,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    private function getOffsetClasses(): array
+    /**
+     * @return array
+     */
+    private function getOffsetClasses()
     {
         $classes = [];
 
@@ -108,12 +131,18 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    public function getTitleSizeClass(): string
+    /**
+     * @return string
+     */
+    public function getTitleSizeClass()
     {
         return $this->baseElement->TitleSize;
     }
 
-    public function getFluidContainerClass(): string
+    /**
+     * @return string
+     */
+    public function getFluidContainerClass()
     {
         return self::FLUID_CONTAINER_CLASSNAME;
     }

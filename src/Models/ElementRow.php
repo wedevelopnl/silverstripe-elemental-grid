@@ -15,25 +15,52 @@ use TheWebmen\ElementalGrid\Controllers\ElementRowController;
  */
 class ElementRow extends BaseElement
 {
-    private static string $icon = 'font-icon-menu';
+    /**
+     * @var string
+     */
+    private static $icon = 'font-icon-menu';
 
-    private static string $table_name = 'ElementRow';
+    /**
+     * @var string
+     */
+    private static $table_name = 'ElementRow';
 
-    private static string $singular_name = 'row';
+    /**
+     * @var string
+     */
+    private static $singular_name = 'row';
 
-    private static string $plural_name = 'rows';
+    /**
+     * @var string
+     */
+    private static $plural_name = 'rows';
 
-    private static string $description = 'Row element';
+    /**
+     * @var string
+     */
+    private static $description = 'Row element';
 
-    private static string $controller_class = ElementRowController::class;
+    /**
+     * @var string
+     */
+    private static $controller_class = ElementRowController::class;
 
-    private static string $block_type = 'full-width';
+    /**
+     * @var string
+     */
+    private static $block_type = 'full-width';
 
-    private static array $db = [
+    /**
+     * @var array|string[]
+     */
+    private static $db = [
         'IsFluid' => 'Boolean'
     ];
 
-    public function getCMSFields(): FieldList
+    /**
+     * @return FieldList
+     */
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
@@ -51,17 +78,26 @@ class ElementRow extends BaseElement
         return $fields;
     }
 
-    public function getType(): string
+    /**
+     * @return string
+     */
+    public function getType()
     {
         return _t(__CLASS__ . '.BlockType', 'Row');
     }
 
-    public function getRowClasses(): string
+    /**
+     * @return string
+     */
+    public function getRowClasses()
     {
         return $this->owner->ExtraClass ? implode(' ', [$this->getCSSFramework()->getRowClasses(), $this->owner->ExtraClass]) : $this->getCSSFramework()->getRowClasses();
     }
 
-    public function getFluidContainerClass(): string
+    /**
+     * @return string
+     */
+    public function getFluidContainerClass()
     {
         return $this->getCSSFramework()->getFluidContainerClass();
     }

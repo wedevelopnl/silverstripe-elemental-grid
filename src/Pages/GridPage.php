@@ -2,11 +2,24 @@
 
 namespace TheWebmen\ElementalGrid\Pages;
 
+/**
+ * Class GridPage
+ * @package TheWebmen\ElementalGrid\Pages
+ */
 class GridPage extends \Page
 {
-    private static string $singular_name = 'Grid page';
+    /**
+     * @var string
+     */
+    private static $singular_name = 'Grid page';
 
-    private static string $plural_name = 'Grid pages';
+    /**
+     * @var string
+     */
+    private static $plural_name = 'Grid pages';
 
-    private static string $icon_class = 'font-icon-thumbnails';
+    /**
+     * @var string
+     */
+    private static $icon_class = 'font-icon-thumbnails';
 }

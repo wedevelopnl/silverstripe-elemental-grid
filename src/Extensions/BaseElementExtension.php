@@ -23,9 +23,15 @@ class BaseElementExtension extends DataExtension
 {
     private const GRID_COLUMNS_COUNT = 12;
 
-    private static bool $inline_editable = false;
+    /**
+     * @var bool
+     */
+    private static $inline_editable = false;
 
-    private CSSFrameworkInterface $cssFramework;
+    /**
+     * @var CSSFrameworkInterface
+     */
+    private $cssFramework;
 
     public function setOwner($owner)
     {
@@ -40,13 +46,16 @@ class BaseElementExtension extends DataExtension
         }
     }
 
-    public function populateDefaults(): void
+    public function populateDefaults()
     {
         $defaultSizeField = 'Size' . $this->getDefaultViewport();
         $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid')->get('default_column_size');
     }
 
-    private static array $titleOptions = [
+    /**
+     * @var array|string[]
+     */
+    private static $titleOptions = [
         'div' => 'Default',
         'h1' => 'H1',
         'h2' => 'H2',
@@ -56,7 +65,10 @@ class BaseElementExtension extends DataExtension
         'h6' => 'H6',
     ];
 
-    private static array $db = [
+    /**
+     * @var array|string[]
+     */
+    private static $db = [
         'SizeXS' => 'Int',
         'SizeSM' => 'Int',
         'SizeMD' => 'Int',
@@ -190,12 +202,18 @@ class BaseElementExtension extends DataExtension
         );
     }
 
-    public function getColumnClasses(): string
+    /**
+     * @return string
+     */
+    public function getColumnClasses()
     {
         return implode(' ', [$this->cssFramework->getColumnClasses(), $this->owner->ExtraClass]);
     }
 
-    public function getCSSFramework(): CSSFrameworkInterface
+    /**
+     * @return CSSFrameworkInterface
+     */
+    public function getCSSFramework()
     {
         return $this->cssFramework;
     }
@@ -204,7 +222,7 @@ class BaseElementExtension extends DataExtension
      * Add the extra data to the blockSchema object, to be taken up by
      * GraphQL and used in the react component in the CMS admin
      */
-    public function updateBlockSchema(&$blockSchema): void
+    public function updateBlockSchema(&$blockSchema)
     {
         $defaultViewportSize = 'Size' . $this->getDefaultViewport();
         $defaultViewportOffset = 'Offset' . $this->getDefaultViewport();
@@ -226,8 +244,11 @@ class BaseElementExtension extends DataExtension
 
     /***
      * Returns an array of all possibile column widths
+     *
+     * @param string|null $defaultValue
+     * @return array
      */
-    private function getColumnSizeOptions(?string $defaultValue = null): array
+    private function getColumnSizeOptions($defaultValue = null)
     {
         $columns = [];
 
@@ -242,7 +263,10 @@ class BaseElementExtension extends DataExtension
         return $columns;
     }
 
-    private function getColumnVisibilityOptions(): array
+    /**
+     * @return array
+     */
+    private function getColumnVisibilityOptions()
     {
         return [
             'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
@@ -250,22 +274,34 @@ class BaseElementExtension extends DataExtension
         ];
     }
 
-    private function getGridColumnsCount(): int
+    /**
+     * @return int
+     */
+    private function getGridColumnsCount()
     {
         return self::GRID_COLUMNS_COUNT;
     }
 
-    private function getDefaultViewport(): string
+    /**
+     * @return string
+     */
+    private function getDefaultViewport()
     {
         return Config::forClass('TheWebmen\ElementalGrid')->get('default_viewport');
     }
 
-    private function getCSSFrameworkName(): string
+    /**
+     * @return string
+     */
+    private function getCSSFrameworkName()
     {
         return Config::forClass('TheWebmen\ElementalGrid')->get('css_framework');
     }
 
-    public function getTitleSizeClass(): string
+    /**
+     * @return string
+     */
+    public function getTitleSizeClass()
     {
         return $this->owner->getCSSFramework()->getTitleSizeClass();
     }

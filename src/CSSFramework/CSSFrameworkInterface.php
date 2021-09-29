@@ -4,9 +4,18 @@ namespace TheWebmen\ElementalGrid\CSSFramework;
 
 interface CSSFrameworkInterface
 {
-    public function getColumnClasses(): string;
+    /**
+     * @return string
+     */
+    public function getColumnClasses();
 
-    public function getTitleSizeClass(): string;
+    /**
+     * @return string
+     */
+    public function getTitleSizeClass();
 
-    public function getFluidContainerClass(): string;
+    /**
+     * @return string
+     */
+    public function getFluidContainerClass();
 }

@@ -5,45 +5,79 @@ namespace TheWebmen\ElementalGrid\Controllers;
 use DNADesign\Elemental\Controllers\ElementController;
 use DNADesign\Elemental\Models\BaseElement;
 
+/**
+ * Class ElementRowController
+ * @package TheWebmen\ElementalGrid\Controllers
+ */
 class ElementRowController extends ElementController
 {
+    /**
+     * @var bool
+     */
     private bool $isLastRow = false;
 
+    /**
+     * @var bool
+     */
     private bool $isFirstRow = false;
 
-    private BaseElement $previousRow;
+    /**
+     * @var BaseElement
+     */
+    private $previousRow;
 
-    public function forTemplate(): string
+    /**
+     * @return string
+     */
+    public function forTemplate()
     {
         return $this->element->forTemplate(false);
     }
 
-    public function getIsLastRow(): bool
+    /**
+     * @return bool
+     */
+    public function getIsLastRow()
     {
         return $this->isLastRow;
     }
 
-    public function setIsLastRow(bool $value): void
+    /**
+     * @param bool $value
+     */
+    public function setIsLastRow($value)
     {
         $this->isLastRow = $value;
     }
 
-    public function getIsFirstRow(): bool
+    /**
+     * @return bool
+     */
+    public function getIsFirstRow()
     {
         return $this->isFirstRow;
     }
 
-    public function setIsFirstRow(bool $value): void
+    /**
+     * @param bool $value
+     */
+    public function setIsFirstRow($value)
     {
         $this->isFirstRow = $value;
     }
 
-    public function getPreviousRow(): BaseElement
+    /**
+     * @return BaseElement
+     */
+    public function getPreviousRow()
     {
         return $this->previousRow;
     }
 
-    public function setPreviousRow(BaseElement $value): void
+    /**
+     * @param BaseElement $value
+     */
+    public function setPreviousRow($value)
     {
         $this->previousRow = $value;
     }
