@@ -27,10 +27,5 @@ DNADesign\Elemental\Models\BaseElement:
     - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
 
 TheWebmen\ElementalGrid:
-  default_column_size: 12
   default_viewport: 'MD'
   css_framework: 'bulma'
-
-TheWebmen\ElementalGrid\Pages\GridPage:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalPageExtension

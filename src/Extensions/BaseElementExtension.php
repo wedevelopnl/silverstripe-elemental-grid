@@ -4,9 +4,12 @@ namespace TheWebmen\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
 use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
@@ -49,7 +52,7 @@ class BaseElementExtension extends DataExtension
     public function populateDefaults()
     {
         $defaultSizeField = 'Size' . $this->getDefaultViewport();
-        $this->owner->$defaultSizeField = Config::forClass('TheWebmen\ElementalGrid')->get('default_column_size');
+        $this->owner->$defaultSizeField = self::GRID_COLUMNS_COUNT;
     }
 
     /**
@@ -88,6 +91,26 @@ class BaseElementExtension extends DataExtension
         'TitleTag' => 'Varchar(100)',
     ];
 
+    /***
+     * @var array|string[]
+     */
+    private static $defaults = [
+        'ShowTitle' => true,
+    ];
+
+    public function getTitleHTMLTags(): array
+    {
+        return self::$titleOptions;
+    }
+
+    public function getTitleClasses(): array
+    {
+        $classes = self::$titleOptions;
+
+        $this->owner->extend('updateTitleClasses', $classes);
+
+        return $classes;
+    }
     /**
      * Update the default CMS fields with our custom fields
      *
@@ -95,16 +118,27 @@ class BaseElementExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->insertBefore(
-            'Title',
-            DropdownField::create('TitleClass', 'Title size', self::$titleOptions)
-                ->setDescription('Set the title tag to be <b>shown</b> as a H1, H2, etc...')
-        );
+        $fields->removeByName('Title');
+        $fields->removeByName('TitleClass');
+        $fields->removeByName('TitleTag');
 
-        $fields->insertBefore(
-            'TitleClass',
-            DropdownField::create('TitleTag', 'Title tag', self::$titleOptions)
-                ->setDescription('Set the title tag to be <b>an actual</b> H1, H2, etc...')
+        $fields->addFieldsToTab(
+            'Root.Main',
+            [
+                FieldGroup::create(
+                    [
+                        TextField::create('Title', 'Title text')
+                            ->addExtraClass('flexbox-area-grow'),
+                        DropdownField::create('TitleTag', 'HTML Tag', $this->getTitleHTMLTags()),
+                        DropdownField::create('TitleClass', 'Display as', $this->getTitleClasses()),
+                        CheckboxField::create('ShowTitle', 'Displayed')
+                            ->addExtraClass('align-self-end'),
+                    ]
+                )
+                    ->setName('TitleSettings')
+                    ->setTitle('Title')
+                    ->addExtraClass('d-lg-flex')
+            ],
         );
 
         $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
@@ -233,9 +267,7 @@ class BaseElementExtension extends DataExtension
             'gridColumns' => $this->getGridColumnsCount(),
             'column' => [
                 'defaultViewport' => $this->getDefaultViewport(),
-                'size' => $this->owner->$defaultViewportSize ?? Config::forClass('TheWebmen\ElementalGrid')->get(
-                        'default_column_size'
-                    ),
+                'size' => $this->owner->$defaultViewportSize ?? self::GRID_COLUMNS_COUNT,
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
             ],

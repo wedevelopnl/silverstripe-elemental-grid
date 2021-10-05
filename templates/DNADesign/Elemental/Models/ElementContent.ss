@@ -1,6 +1,6 @@
 <div class="content-element__content<% if $Style %> $StyleVariant<% end_if %>">
 	<% if $ShowTitle %>
-        <$TitlePriority class="$TitleSizeClass content-element__title">$Title</$TitlePriority>
+        <$TitleTag class="$TitleClass content-element__title">$Title.RAW</$TitleTag>
     <% end_if %>
     $HTML
 </div>

@@ -4,7 +4,9 @@ namespace TheWebmen\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
 use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 
 /***
@@ -54,7 +56,8 @@ class ElementRow extends BaseElement
      * @var array|string[]
      */
     private static $db = [
-        'IsFluid' => 'Boolean'
+        'IsFluid' => 'Boolean',
+        'CustomSectionClass' => 'Varchar(255)',
     ];
 
     /**
@@ -66,10 +69,11 @@ class ElementRow extends BaseElement
 
         $fields->removeByName('Column');
 
-        if (!$fields->fieldPosition('Title')) {
-            $fields->removeByName('TitleTag');
-            $fields->removeByName('TitleClass');
-        }
+        $fields->renameField('ExtraClass', 'Custom row classes');
+
+        $fields->addFieldsToTab('Root.Settings', [
+            TextField::create('CustomSectionClass', 'Custom section classes'),
+        ]);
 
         if (!$fields->fieldPosition('FullWidth')) {
             $fields->addFieldsToTab('Root.Main', [
@@ -93,14 +97,51 @@ class ElementRow extends BaseElement
      */
     public function getRowClasses()
     {
-        return $this->owner->ExtraClass ? implode(' ', [$this->getCSSFramework()->getRowClasses(), $this->owner->ExtraClass]) : $this->getCSSFramework()->getRowClasses();
+        $classes = [];
+
+        array_push($classes, $this->getCSSFramework()->getRowClasses());
+
+        $this->extend('updateRowClasses', $classes);
+
+        if ($this->owner->ExtraClass) {
+            array_push($classes, $this->owner->ExtraClass);
+        }
+
+        return implode(' ', $classes);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getSectionClasses()
+    {
+        $classes = [];
+
+        $this->extend('updateSectionClasses', $classes);
+
+        if ($this->owner->CustomSectionClass) {
+            array_push($classes, $this->owner->CustomSectionClass);
+        }
+
+        return implode(' ', $classes);
     }
 
     /**
      * @return string
      */
-    public function getFluidContainerClass()
+    public function getContainerClasses()
     {
-        return $this->getCSSFramework()->getFluidContainerClass();
+        $classes = [];
+
+        if($this->owner->IsFluid) {
+            array_push($classes, $this->getCSSFramework()->getFluidContainerClass());
+        } else {
+            array_push($classes, $this->getCSSFramework()->getContainerClass());
+        }
+
+        $this->extend('updateContainerClasses', $classes);
+
+        return implode(' ', $classes);
     }
 }

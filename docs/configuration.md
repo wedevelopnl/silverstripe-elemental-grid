@@ -4,7 +4,6 @@
 Use the following yaml configuration to set defaults;
 ```yaml
 TheWebmen\ElementalGrid:
-    default_column_size: 12
     default_viewport: 'SM'
     css_framework: 'bulma'
 ```

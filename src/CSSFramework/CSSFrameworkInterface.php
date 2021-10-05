@@ -17,5 +17,10 @@ interface CSSFrameworkInterface
     /**
      * @return string
      */
+    public function getContainerClass();
+
+    /**
+     * @return string
+     */
     public function getFluidContainerClass();
 }
