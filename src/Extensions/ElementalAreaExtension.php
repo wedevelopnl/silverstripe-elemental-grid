@@ -79,7 +79,7 @@ class ElementalAreaExtension extends DataExtension
 
         $previousRow = false;
         foreach ($this->controllers as $key => $controller) {
-            if($controller) {
+            if ($controller) {
                 if ($controller->ClassName == ElementRow::class) {
                     if ($previousRow) {
                         $controller->setPreviousRow($previousRow->getElement());

@@ -122,10 +122,12 @@ class BaseElementExtension extends DataExtension
         $fields->removeByName('TitleClass');
         $fields->removeByName('TitleTag');
 
-        $fields->addFieldsToTab(
-            'Root.Main',
-            [
-                FieldGroup::create(
+        /***
+         * Used insert before with an empty string as argument here, to force the
+         * TitleSettings group to always appear first in the fieldorder
+         */
+        $fields->insertBefore(
+            FieldGroup::create(
                     [
                         TextField::create('Title', 'Title text')
                             ->addExtraClass('flexbox-area-grow'),
@@ -137,8 +139,8 @@ class BaseElementExtension extends DataExtension
                 )
                     ->setName('TitleSettings')
                     ->setTitle('Title')
-                    ->addExtraClass('d-lg-flex')
-            ],
+                    ->addExtraClass('d-lg-flex'),
+            ''
         );
 
         $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
