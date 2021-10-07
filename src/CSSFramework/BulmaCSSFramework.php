@@ -20,8 +20,6 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     private const FLUID_CONTAINER_CLASSNAME = 'container is-fluid';
 
     /**
-     * BulmaCSSFramework constructor.
-     *
      * @param BaseElement $baseElement
      */
     public function __construct($baseElement)
@@ -151,7 +149,6 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
                 return 'div';
         }
     }
-
 
     /***
      * @param bool $fluid

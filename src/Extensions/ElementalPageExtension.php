@@ -31,6 +31,9 @@ class ElementalPageExtension extends DataExtension
         'UseElementalGrid' => true,
     ];
 
+    /***
+     * @param FieldList $fields
+     */
     public function updateCMSFields(FieldList $fields)
     {
         parent::updateCMSFields($fields);

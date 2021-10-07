@@ -17,10 +17,6 @@ DNADesign\Elemental\Models\ElementalArea:
   extensions:
     - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension
 
-DNADesign\Elemental\Models\ElementContent:
-  extensions:
-    - TheWebmen\ElementalGrid\Extensions\ElementContentExtension
-
 DNADesign\Elemental\Models\BaseElement:
   inline_editable: false
   extensions:

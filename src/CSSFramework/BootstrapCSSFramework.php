@@ -20,8 +20,6 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     private const FLUID_CONTAINER_CLASSNAME = 'container-fluid';
 
     /**
-     * BootstrapCSSFramework constructor.
-     *
      * @param BaseElement $baseElement
      */
     public function __construct($baseElement)

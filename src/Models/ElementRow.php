@@ -53,7 +53,7 @@ class ElementRow extends BaseElement
     private static $block_type = 'full-width';
 
     /**
-     * @var array|string[]
+     * @var array
      */
     private static $db = [
         'IsFluid' => 'Boolean',
@@ -71,14 +71,20 @@ class ElementRow extends BaseElement
 
         $fields->renameField('ExtraClass', 'Custom row classes');
 
-        $fields->addFieldsToTab('Root.Settings', [
-            TextField::create('CustomSectionClass', 'Custom section classes'),
-        ]);
+        $fields->addFieldsToTab(
+            'Root.Settings',
+            [
+                TextField::create('CustomSectionClass', 'Custom section classes'),
+            ]
+        );
 
         if (!$fields->fieldPosition('FullWidth')) {
-            $fields->addFieldsToTab('Root.Main', [
-                CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
-            ]);
+            $fields->addFieldsToTab(
+                'Root.Main',
+                [
+                    CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
+                ]
+            );
         }
 
         return $fields;

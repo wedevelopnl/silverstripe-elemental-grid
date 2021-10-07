@@ -15,7 +15,6 @@ interface CSSFrameworkInterface
     public function getTitleSizeClass();
 
     /***
-     * Kan param ook gedefinieerd worden?
      * @param bool $fluid
      * @return mixed
      */

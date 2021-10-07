@@ -24,6 +24,9 @@ use TheWebmen\ElementalGrid\Models\ElementRow;
  */
 class BaseElementExtension extends DataExtension
 {
+    /***
+     * @var int
+     */
     private const GRID_COLUMNS_COUNT = 12;
 
     /**
@@ -36,6 +39,9 @@ class BaseElementExtension extends DataExtension
      */
     private $cssFramework;
 
+    /***
+     * @param object $owner
+     */
     public function setOwner($owner)
     {
         parent::setOwner($owner);
@@ -49,6 +55,9 @@ class BaseElementExtension extends DataExtension
         }
     }
 
+    /***
+     * @return void
+     */
     public function populateDefaults()
     {
         $defaultSizeField = 'Size' . $this->getDefaultViewport();
@@ -56,7 +65,7 @@ class BaseElementExtension extends DataExtension
     }
 
     /**
-     * @var array|string[]
+     * @var array
      */
     private static $titleOptions = [
         'div' => 'Default',
@@ -69,7 +78,7 @@ class BaseElementExtension extends DataExtension
     ];
 
     /**
-     * @var array|string[]
+     * @var array
      */
     private static $db = [
         'SizeXS' => 'Int',
@@ -92,18 +101,24 @@ class BaseElementExtension extends DataExtension
     ];
 
     /***
-     * @var array|string[]
+     * @var array
      */
     private static $defaults = [
         'ShowTitle' => true,
     ];
 
-    public function getTitleHTMLTags(): array
+    /***
+     * @return array
+     */
+    public function getTitleHTMLTags()
     {
         return self::$titleOptions;
     }
 
-    public function getTitleClasses(): array
+    /***
+     * @return array
+     */
+    public function getTitleClasses()
     {
         $classes = self::$titleOptions;
 
@@ -111,6 +126,7 @@ class BaseElementExtension extends DataExtension
 
         return $classes;
     }
+
     /**
      * Update the default CMS fields with our custom fields
      *
@@ -128,18 +144,18 @@ class BaseElementExtension extends DataExtension
          */
         $fields->insertBefore(
             FieldGroup::create(
-                    [
-                        TextField::create('Title', 'Title text')
-                            ->addExtraClass('flexbox-area-grow'),
-                        DropdownField::create('TitleTag', 'HTML Tag', $this->getTitleHTMLTags()),
-                        DropdownField::create('TitleClass', 'Display as', $this->getTitleClasses()),
-                        CheckboxField::create('ShowTitle', 'Displayed')
-                            ->addExtraClass('align-self-end'),
-                    ]
-                )
-                    ->setName('TitleSettings')
-                    ->setTitle('Title')
-                    ->addExtraClass('d-lg-flex'),
+                [
+                    TextField::create('Title', 'Title text')
+                        ->addExtraClass('flexbox-area-grow'),
+                    DropdownField::create('TitleTag', 'HTML Tag', $this->getTitleHTMLTags()),
+                    DropdownField::create('TitleClass', 'Display as', $this->getTitleClasses()),
+                    CheckboxField::create('ShowTitle', 'Displayed')
+                        ->addExtraClass('align-self-end'),
+                ]
+            )
+                ->setName('TitleSettings')
+                ->setTitle('Title')
+                ->addExtraClass('d-lg-flex'),
             ''
         );
 
