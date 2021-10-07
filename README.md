@@ -9,15 +9,13 @@ This module converts the elemental module (https://github.com/silverstripe/silve
 There's currently only partial translations in this module. The translations need to be extended through the whole module. Will be fixed as soon as possible.
 
 ## Requirements
-
-* SilverStripe CMS ^4.0
+* silverstripe/cms ^4.0
 * dnadesign/silverstripe-elemental ^4
 
 ## Installation
 ```
 composer require thewebmen/silverstripe-elemental-grid:^2.0
 ```
-An initial GridPage pagetype will be provided via this module.
 
 ## Further configuration
 For more information about configuration, check out the documentation in the `docs` directory.

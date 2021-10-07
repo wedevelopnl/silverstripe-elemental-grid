@@ -29,3 +29,22 @@ DNADesign\Elemental\Models\BaseElement:
 TheWebmen\ElementalGrid:
   default_viewport: 'MD'
   css_framework: 'bulma'
+
+---
+Only:
+  classexists:
+    - 'GridPage'
+---
+GridPage:
+  extensions:
+    - DNADesign\Elemental\Extensions\ElementalPageExtension
+
+---
+Except:
+  classexists:
+    - 'GridPage'
+---
+Page:
+  extensions:
+    - DNADesign\Elemental\Extensions\ElementalPageExtension
+    - TheWebmen\ElementalGrid\Extensions\ElementalPageExtension

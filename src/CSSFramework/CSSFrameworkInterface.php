@@ -14,13 +14,10 @@ interface CSSFrameworkInterface
      */
     public function getTitleSizeClass();
 
-    /**
-     * @return string
+    /***
+     * Kan param ook gedefinieerd worden?
+     * @param bool $fluid
+     * @return mixed
      */
-    public function getContainerClass();
-
-    /**
-     * @return string
-     */
-    public function getFluidContainerClass();
+    public function getContainerClass($fluid);
 }

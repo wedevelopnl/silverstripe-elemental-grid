@@ -134,11 +134,7 @@ class ElementRow extends BaseElement
     {
         $classes = [];
 
-        if ($this->owner->IsFluid) {
-            array_push($classes, $this->getCSSFramework()->getFluidContainerClass());
-        } else {
-            array_push($classes, $this->getCSSFramework()->getContainerClass());
-        }
+        array_push($classes, $this->getCSSFramework()->getContainerClass($this->IsFluid));
 
         $this->extend('updateContainerClasses', $classes);
 

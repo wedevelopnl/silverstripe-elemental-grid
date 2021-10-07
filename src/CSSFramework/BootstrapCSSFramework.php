@@ -141,19 +141,16 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $this->baseElement->TitleSize;
     }
 
-    /**
+    /***
+     * @param bool $fluid
      * @return string
      */
-    public function getContainerClass()
+    public function getContainerClass($fluid)
     {
-        return self::CONTAINER_CLASSNAME;
-    }
+        if ($fluid) {
+            return self::FLUID_CONTAINER_CLASSNAME;
+        }
 
-    /**
-     * @return string
-     */
-    public function getFluidContainerClass()
-    {
-        return self::FLUID_CONTAINER_CLASSNAME;
+        return self::CONTAINER_CLASSNAME;
     }
 }

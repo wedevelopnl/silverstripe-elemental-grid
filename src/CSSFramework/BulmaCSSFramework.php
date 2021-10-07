@@ -152,19 +152,17 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getContainerClass()
-    {
-        return self::CONTAINER_CLASSNAME;
-    }
 
-    /**
+    /***
+     * @param bool $fluid
      * @return string
      */
-    public function getFluidContainerClass()
+    public function getContainerClass($fluid)
     {
-        return self::FLUID_CONTAINER_CLASSNAME;
+        if ($fluid) {
+            return self::FLUID_CONTAINER_CLASSNAME;
+        }
+
+        return self::CONTAINER_CLASSNAME;
     }
 }
