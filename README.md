@@ -22,20 +22,6 @@ For more information about configuration, check out the documentation in the `do
 
 * [Configuration](docs/configuration.md)
 
-## PHPCS Fixer/PHPStan
-PHPCSFixer and PHPStan are included to resolve codestyle fixes and do static analytic on the code.
-
-You can run the following commands in your **project root directory**.
-
-### PHP CodeStyle fixer
-Dry-run to spot codestyle issues:\
-`./vendor/bin/php-cs-fixer fix ./vendor/thewebmen/silverstripe-elemental-grid --diff --dry-run`\
-Fix issues:\
-`./vendor/bin/php-cs-fixer ./vendor/thewebmen/silverstripe-elemental-grid fix`
-
-### PHPStan
-`./vendor/bin/phpstan analyse -c ./vendor/thewebmen/silverstripe-elemental-grid/phpstan.neon ./vendor/thewebmen/silverstripe-elemental-grid`
-
 # License
 See [License](LICENSE)
 

@@ -48,11 +48,6 @@ class ElementRow extends BaseElement
     private static $controller_class = ElementRowController::class;
 
     /**
-     * @var string
-     */
-    private static $block_type = 'full-width';
-
-    /**
      * @var array
      */
     private static $db = [
