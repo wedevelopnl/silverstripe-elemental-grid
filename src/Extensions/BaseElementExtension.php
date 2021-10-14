@@ -159,6 +159,10 @@ class BaseElementExtension extends DataExtension
             ''
         );
 
+        if (!Config::forClass('TheWebmen\ElementalGrid')->get('enable_custom_title_classes')) {
+            $fields->removeByName('TitleClass');
+        }
+
         $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
 
         $fields->addFieldsToTab(
@@ -346,6 +350,18 @@ class BaseElementExtension extends DataExtension
     private function getCSSFrameworkName()
     {
         return Config::forClass('TheWebmen\ElementalGrid')->get('css_framework');
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitleTag()
+    {
+        if(is_null($this->owner->getField('TitleTag'))) {
+            return $this->owner->TitleSize ?? 'h2';
+        }
+
+        return $this->owner->getField('TitleTag');
     }
 
     /**

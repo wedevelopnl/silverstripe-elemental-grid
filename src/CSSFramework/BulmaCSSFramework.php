@@ -132,7 +132,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
      */
     public function getTitleSizeClass()
     {
-        switch ($this->baseElement->TitleSize) {
+        switch ($this->baseElement->TitleClass) {
             case 'h1':
                 return 'title is-size-1';
             case 'h2':
@@ -145,8 +145,10 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
                 return 'title is-size-5';
             case 'h6':
                 return 'title is-size-6';
-            default:
+            case 'div':
                 return 'div';
+            default:
+                return $this->baseElement->TitleClass;
         }
     }
 

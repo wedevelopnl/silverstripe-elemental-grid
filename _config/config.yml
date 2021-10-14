@@ -25,6 +25,7 @@ DNADesign\Elemental\Models\BaseElement:
 TheWebmen\ElementalGrid:
   default_viewport: 'MD'
   css_framework: 'bulma'
+  enable_custom_title_classes: true
 
 ---
 Only:
