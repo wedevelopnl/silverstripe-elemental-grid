@@ -64,12 +64,12 @@ class ElementRow extends BaseElement
 
         $fields->removeByName('Column');
 
-        $fields->renameField('ExtraClass', 'Custom row classes');
+        $fields->renameField('ExtraClass', _t('Row.CustomRowClasses', 'Custom row classes'));
 
         $fields->addFieldsToTab(
             'Root.Settings',
             [
-                TextField::create('CustomSectionClass', 'Custom section classes'),
+                TextField::create('CustomSectionClass', _t('Section.CustomSectionClasses', 'Custom section classes')),
             ]
         );
 
@@ -77,7 +77,7 @@ class ElementRow extends BaseElement
             $fields->addFieldsToTab(
                 'Root.Main',
                 [
-                    CheckboxField::create('IsFluid', 'The row uses the full width of the page'),
+                    CheckboxField::create('IsFluid', _t('Row.IsFluid', 'The row uses the full width of the page')),
                 ]
             );
         }
@@ -90,7 +90,7 @@ class ElementRow extends BaseElement
      */
     public function getType()
     {
-        return _t(__CLASS__ . '.BlockType', 'Row');
+        return _t('Row.Label', 'Row');
     }
 
     /**

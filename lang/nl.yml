@@ -1,33 +1,52 @@
 nl:
-  TheWebmen\ElementalGrid\Extensions\BaseElementExtension:
-    XS: 'Large (e.g. normal desktop)'
-    SM: 'Small (e.g. portrait tablet)'
-    MD: 'Medium (e.g. landscape tablet)'
-    LG: 'Large (e.g. normal desktop)'
-    XL: 'Extra large (e.g. full HD monitor)'
-    SIZE_XS: 'Formaat extra small'
-    SIZE_SM: 'Formaat small'
-    SIZE_MD: 'Formaat medium'
-    SIZE_LG: 'Formaat large'
-    SIZE_XL: 'Formaat extra large'
-    OFFSET_XS: 'Inspring extra small'
-    OFFSET_SM: 'Inspring small'
-    OFFSET_MD: 'Inspring medium'
-    OFFSET_LG: 'Inspring extra large'
-    OFFSET_XL: 'Inspring extra extra large'
-    VISIBILITY_XS: 'Zichtbaarheid extra small'
-    VISIBILITY_SM: 'Zichtbaarheid small'
-    VISIBILITY_MD: 'Zichtbaarheid medium'
-    VISIBILITY_LG: 'Zichtbaarheid extra large'
-    VISIBILITY_XL: 'Zichtbaarheid extra extra large'
-    DEFAULT: 'Standaard'
-    VISIBLE: 'Zichtbaar'
-    HIDDEN: 'Onzichtbaar'
-    COLUMN: 'Kolom'
-    NONE: 'Geen'
+  ElementalGrid:
+    UseElementalGrid:
+      Label: 'Gebruik elemental grid'
+      Description: 'Sla de pagina eerst op nadat je deze instelling aanpast.'
+  Element:
+    Title:
+      Title: 'Titel'
+      Tag: 'Titel tag'
+      DisplayAs: 'Weergeven als'
+      Displayed: 'Weergeven'
+  Column:
+    Label: 'Kolom'
+    Default: 'Standaard'
+    None: 'Geen'
+    Viewport:
+      XS: 'Extra klein (voorbeeld: smartphone)'
+      SM: 'Klein (voorbeeld: staande tablet)'
+      MD: 'Medium (voorbeeld: liggende tablet)'
+      LG: 'Groot (voorbeeld: normale desktop)'
+      XL: 'Extra groot (voorbeeld: full HD monitor)'
+    Size:
+      XS: 'Formaat extra klein'
+      SM: 'Formaat klein'
+      MD: 'Formaat medium'
+      LG: 'Formaat groot'
+      XL: 'Formaat extra groot'
+    Offset:
+      XS: 'Inspring extra klein'
+      SM: 'Inspring klein'
+      MD: 'Inspring medium'
+      LG: 'Inspring groot'
+      XL: 'Inspring extra groot'
+    Visibility:
+      XS: 'Zichtbaarheid extra klein'
+      SM: 'Zichtbaarheid klein'
+      MD: 'Zichtbaarheid medium'
+      LG: 'Zichtbaarheid groot'
+      XL: 'Zichtbaarheid extra groot'
+      Visible: 'Zichtbaar'
+      Hidden: 'Onzichtbaar'
+  Row:
+    Label: 'Rij'
+    CustomRowClasses: 'Aangepaste rij classes'
+    IsFluid: 'Deze rij gebruikt de volledige breedte'
+  Section:
+    Section: 'Sectie'
+    CustomSectionClasses: 'Aangepaste sectie classes'
   TheWebmen\ElementalGrid\Models\ElementRow:
-    BlockType: 'Rij'
-    ContentLabel: 'Rij'
     PLURALNAME: 'Rijen'
     PLURALS:
       one: 'Een rij'

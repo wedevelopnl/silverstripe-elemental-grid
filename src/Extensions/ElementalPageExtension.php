@@ -48,8 +48,8 @@ class ElementalPageExtension extends DataExtension
 
         $fields->insertBefore(
             $insertBefore,
-            CheckboxField::create('UseElementalGrid', 'Use grid on this page')
-                ->setDescription('Make sure to save this page right after changing this setting')
+            CheckboxField::create('UseElementalGrid', _t('ElementalGrid.UseElementalGrid.Label', 'Use grid on this page'))
+                ->setDescription(_t('ElementalGrid.UseElementalGrid.Description', 'Make sure to save this page right after changing this setting'))
         );
     }
 }
