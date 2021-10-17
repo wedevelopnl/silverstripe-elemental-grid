@@ -1,7 +1,7 @@
 en:
   TheWebmen\ElementalGrid\Models\ElementRow:
-    PLURALNAME: 'Rijen'
+    PLURALNAME: 'Rows'
     PLURALS:
-      one: 'Een rij'
-      other: '{count} rijen'
-    SINGULARNAME: 'rij'
+      one: 'A row'
+      other: '{count} rows'
+    SINGULARNAME: 'row'
