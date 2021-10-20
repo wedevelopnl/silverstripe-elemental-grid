@@ -9,7 +9,7 @@ TheWebmen\ElementalGrid\Config:
     css_framework: 'bulma'
 ```
 
-## Set the right extensions
+## Add the extension
 To use the Grid extension on the page you want in your project, copy the following code and paste it to your extensions.yml
 
 ```yaml
@@ -18,7 +18,8 @@ Page\That\Uses\Grid:
         - DNADesign\Elemental\Extensions\ElementalPageExtension
 ```
 
-Note: if you want to have the possibility to switch between a normal Content field or the ElementalArea, place the following extension on the page that also uses the grid:
+### Switching between ElementalArea and default Content per page
+If you want to have the possibility to switch between a normal Content field or the ElementalArea, place the following extension on the page that also uses the grid:
 
 ```yaml
 Page\That\Uses\Grid:
@@ -26,11 +27,46 @@ Page\That\Uses\Grid:
         - TheWebmen\ElementalGrid\Extensions\ElementalPageExtension
 ```
 
+In your template, you can then use the following check to display the right content:
+
+```silverstripe
+<% if $UseElementalGrid && $ElementalArea %>
+    $ElementalArea
+<% else %>
+    $Content
+<% end_if %>
+```
+
 ## Supported CSS frameworks
 Currently Bulma and Bootstrap (5) are the supported CSS frameworks that can be combined with this module.
 
-## Add settings to rows
-It is possbile to extend a row.
+## Customizing the row, section and container CSS classes
+There are 3 extension point you can use to update which row, section and container CSS classes will be rendered in the templates.
 
-* Add a dataextension to TheWebmen\ElementalGrid\Models\ElementRow
-* Copy the template TheWebmen/ElementalGrid/Models/ElementRow.ss to your theme
+### Step 1. Extend the ElementRow
+In your own project, extend the ElementRow that lives in this module
+```yaml
+TheWebmen\ElementalGrid\Models\ElementRow:
+  extensions:
+    - Your\ElementRow\Extension
+```
+
+### Step 2. Add the methods
+Add these methods to your own ElementRow extension
+
+```php
+public function updateSectionClasses(&$classes)
+{
+    array_push($classes, 'add-your-own-css-class')
+}
+
+public function updateRowClasses(&$classes)
+{
+    array_push($classes, 'add-your-own-css-class')
+}
+
+public function updateContainerClasses(&$classes)
+{
+    array_push($classes, 'add-your-own-css-class')
+}
+```
