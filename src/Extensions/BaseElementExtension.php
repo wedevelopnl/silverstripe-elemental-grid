@@ -3,7 +3,6 @@
 namespace TheWebmen\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\BaseElement;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
@@ -15,6 +14,7 @@ use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
 use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
 use TheWebmen\ElementalGrid\CSSFramework\CSSFrameworkInterface;
 use TheWebmen\ElementalGrid\Models\ElementRow;
+use TheWebmen\ElementalGrid\ElementalConfig;
 
 /***
  * Class BaseElementExtension
@@ -46,7 +46,7 @@ class BaseElementExtension extends DataExtension
     {
         parent::setOwner($owner);
 
-        switch ($this->getCSSFrameworkName()) {
+        switch (ElementalConfig::getCSSFrameworkName()) {
             case 'bulma':
                 $this->cssFramework = new BulmaCSSFramework($this->owner);
                 break;
@@ -60,7 +60,7 @@ class BaseElementExtension extends DataExtension
      */
     public function populateDefaults()
     {
-        $defaultSizeField = 'Size' . $this->getDefaultViewport();
+        $defaultSizeField = 'Size' . ElementalConfig::getDefaultViewport();
         $this->owner->$defaultSizeField = self::GRID_COLUMNS_COUNT;
     }
 
@@ -159,7 +159,7 @@ class BaseElementExtension extends DataExtension
             ''
         );
 
-        if (!Config::forClass('TheWebmen\ElementalGrid')->get('enable_custom_title_classes')) {
+        if (!ElementalConfig::getEnableCustomTitleClasses()) {
             $fields->removeByName('TitleClass');
         }
 
@@ -280,15 +280,15 @@ class BaseElementExtension extends DataExtension
      */
     public function updateBlockSchema(&$blockSchema)
     {
-        $defaultViewportSize = 'Size' . $this->getDefaultViewport();
-        $defaultViewportOffset = 'Offset' . $this->getDefaultViewport();
-        $defaultViewportVisibility = 'Visibility' . $this->getDefaultViewport();
+        $defaultViewportSize = 'Size' . ElementalConfig::getDefaultViewport();
+        $defaultViewportOffset = 'Offset' . ElementalConfig::getDefaultViewport();
+        $defaultViewportVisibility = 'Visibility' . ElementalConfig::getDefaultViewport();
 
         $blockSchema['grid'] = [
             'isRow' => $this->owner->ClassName === ElementRow::class,
             'gridColumns' => $this->getGridColumnsCount(),
             'column' => [
-                'defaultViewport' => $this->getDefaultViewport(),
+                'defaultViewport' => ElementalConfig::getDefaultViewport(),
                 'size' => $this->owner->$defaultViewportSize ?? self::GRID_COLUMNS_COUNT,
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
@@ -334,22 +334,6 @@ class BaseElementExtension extends DataExtension
     private function getGridColumnsCount()
     {
         return self::GRID_COLUMNS_COUNT;
-    }
-
-    /**
-     * @return string
-     */
-    private function getDefaultViewport()
-    {
-        return Config::forClass('TheWebmen\ElementalGrid')->get('default_viewport');
-    }
-
-    /**
-     * @return string
-     */
-    private function getCSSFrameworkName()
-    {
-        return Config::forClass('TheWebmen\ElementalGrid')->get('css_framework');
     }
 
     /**

@@ -22,26 +22,7 @@ DNADesign\Elemental\Models\BaseElement:
   extensions:
     - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
 
-TheWebmen\ElementalGrid:
+TheWebmen\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
   css_framework: 'bulma'
   enable_custom_title_classes: true
-
----
-Only:
-  classexists:
-    - 'GridPage'
----
-GridPage:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalPageExtension
-
----
-Except:
-  classexists:
-    - 'GridPage'
----
-Page:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalPageExtension
-    - TheWebmen\ElementalGrid\Extensions\ElementalPageExtension

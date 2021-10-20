@@ -2,13 +2,9 @@
 
 namespace TheWebmen\ElementalGrid\Extensions;
 
-use DNADesign\Elemental\Forms\ElementalAreaField;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\FormField;
 use SilverStripe\ORM\DataExtension;
-use UncleCheese\DisplayLogic\Extensions\DisplayLogic;
-use UncleCheese\DisplayLogic\Forms\Wrapper;
 
 class ElementalPageExtension extends DataExtension
 {
