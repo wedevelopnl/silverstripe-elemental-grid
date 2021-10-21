@@ -3,7 +3,7 @@
 ## Default settings
 Use the following yaml configuration to override defaults;
 ```yaml
-TheWebmen\ElementalGrid\Config:
+TheWebmen\ElementalGrid\ElementalConfig:
     default_viewport: 'MD'
     use_custom_title_classes: true'
     css_framework: 'bulma'

@@ -14,7 +14,7 @@ There's currently only partial translations in this module. The translations nee
 
 ## Installation
 ```
-composer require thewebmen/silverstripe-elemental-grid:^2.0
+composer require thewebmen/silverstripe-elemental-grid
 ```
 
 ## Further configuration
