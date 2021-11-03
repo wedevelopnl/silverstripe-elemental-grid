@@ -5,7 +5,7 @@ Use the following yaml configuration to override defaults;
 ```yaml
 TheWebmen\ElementalGrid\ElementalConfig:
     default_viewport: 'MD'
-    use_custom_title_classes: true'
+    use_custom_title_classes: true
     css_framework: 'bulma'
 ```
 
@@ -40,6 +40,7 @@ In your template, you can then use the following check to display the right cont
 ## Supported CSS frameworks
 Currently Bulma and Bootstrap (5) are the supported CSS frameworks that can be combined with this module.
 
+
 ## Customizing the row, section and container CSS classes
 There are 3 extension point you can use to update which row, section and container CSS classes will be rendered in the templates.
 
@@ -70,3 +71,7 @@ public function updateContainerClasses(&$classes)
     array_push($classes, 'add-your-own-css-class')
 }
 ```
+
+## Override ElementRow template
+Copy the file `templates/TheWebmen/ElementalGrid/Models/ElementRow.ss` to your own `themes/` folder. For example to:
+`themes/default/TheWebmen/ElementalGrid/Models/ElementRow.ss`. You can then edit the template to make it fit your needs.

@@ -5,8 +5,6 @@
 This module converts the elemental module (https://github.com/silverstripe/silverstripe-elemental) into a grid module.
 
 ![Overview](docs/images/screen01.png)
-### To do
-There's currently only partial translations in this module. The translations need to be extended through the whole module. Will be fixed as soon as possible.
 
 ## Requirements
 * silverstripe/cms ^4.0

@@ -70,8 +70,6 @@ class ColumnSize extends PureComponent {
 
   render() {
     let colSizes = [];
-
-
     let offsetSizes = [];
 
     offsetSizes.push({
