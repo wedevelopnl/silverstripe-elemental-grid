@@ -134,9 +134,7 @@ class BaseElementExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->removeByName('Title');
-        $fields->removeByName('TitleClass');
-        $fields->removeByName('TitleTag');
+        $fields->removeByName(['Title', 'TitleClass', 'TitleTag']);
 
         /***
          * Used insert before with an empty string as argument here, to force the
