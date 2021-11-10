@@ -1,6 +1,10 @@
 <% if not $Controller.IsFirstRow %>
     </div>
+    </div>
+    </section>
 <% end_if %>
 <% if not $Controller.IsLastRow %>
-<div class="$RowClass<% if $ExtraClass %> $ExtraClass<% end_if %>">
+    <section class="$SectionClasses" id="row-$ID">
+    <div class="$ContainerClasses">
+    <div class="$RowClasses">
 <% end_if %>

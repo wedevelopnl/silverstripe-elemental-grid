@@ -3,42 +3,82 @@
 namespace TheWebmen\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
+use DNADesign\Elemental\Models\BaseElement;
 
-
+/**
+ * Class ElementRowController
+ * @package TheWebmen\ElementalGrid\Controllers
+ */
 class ElementRowController extends ElementController
 {
+    /**
+     * @var bool
+     */
+    private $isLastRow = false;
 
-    private $_isLastRow = false;
-    private $_isFirstRow = false;
-    private $_previousRow = false;
+    /**
+     * @var bool
+     */
+    private $isFirstRow = false;
 
+    /**
+     * @var BaseElement
+     */
+    private $previousRow;
+
+    /**
+     * @return string
+     */
     public function forTemplate()
     {
         return $this->element->forTemplate(false);
     }
 
-    public function getIsLastRow(){
-        return $this->_isLastRow;
+    /**
+     * @return bool
+     */
+    public function getIsLastRow()
+    {
+        return $this->isLastRow;
     }
 
-    public function setIsLastRow($value){
-        $this->_isLastRow = $value;
+    /**
+     * @param bool $value
+     */
+    public function setIsLastRow($value)
+    {
+        $this->isLastRow = $value;
     }
 
-    public function getIsFirstRow(){
-        return $this->_isFirstRow;
+    /**
+     * @return bool
+     */
+    public function getIsFirstRow()
+    {
+        return $this->isFirstRow;
     }
 
-    public function setIsFirstRow($value){
-        $this->_isFirstRow = $value;
+    /**
+     * @param bool $value
+     */
+    public function setIsFirstRow($value)
+    {
+        $this->isFirstRow = $value;
     }
 
-    public function getPreviousRow(){
-        return $this->_previousRow;
+    /**
+     * @return BaseElement
+     */
+    public function getPreviousRow()
+    {
+        return $this->previousRow;
     }
 
-    public function setPreviousRow($value){
-        $this->_previousRow = $value;
+    /**
+     * @param BaseElement $value
+     */
+    public function setPreviousRow($value)
+    {
+        $this->previousRow = $value;
     }
-
 }
