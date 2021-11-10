@@ -62,7 +62,7 @@ class ElementRow extends BaseElement
     {
         $fields = parent::getCMSFields();
 
-        $fields->removeByName('Column');
+        $fields->removeByName(['Column', 'TitleTag', 'ShowTitle', 'TitleClass']);
 
         $fields->renameField('ExtraClass', _t('Row.CustomRowClasses', 'Custom row classes'));
 
