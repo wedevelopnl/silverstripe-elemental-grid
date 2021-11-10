@@ -2,15 +2,12 @@
 
 namespace TheWebmen\ElementalGrid\Extensions;
 
-use App\Services\SpotlerService;
-use App\Spotler\Exceptions\SpotlerException;
 use DNADesign\Elemental\Models\ElementalArea;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
-use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
-use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
+use TheWebmen\ElementalGrid\Controllers\ElementRowController;
 use TheWebmen\ElementalGrid\Models\ElementRow;
 
 /***
@@ -37,9 +34,12 @@ class ElementalAreaExtension extends DataExtension
             $this->controllers = $this->owner->ElementControllers();
         } catch (\Exception $exception) {
             $logger = Injector::inst()->get(LoggerInterface::class);
-            $logger->error($exception->getMessage(), [
-                'exception' => $exception,
-            ]);
+            $logger->error(
+                $exception->getMessage(),
+                [
+                    'exception' => $exception,
+                ]
+            );
             $this->controllers = new ArrayList();
         }
     }
@@ -60,6 +60,8 @@ class ElementalAreaExtension extends DataExtension
             $first->setIsFirstRow(true);
         } else {
             $createdFirstElement = ElementRow::create();
+
+            /** @var ElementRowController $createdFirst */
             $createdFirst = $createdFirstElement->getController();
             $createdFirst->setIsFirstRow(true);
             $this->controllers->unshift($createdFirst);
@@ -79,14 +81,15 @@ class ElementalAreaExtension extends DataExtension
 
         $previousRow = false;
         foreach ($this->controllers as $key => $controller) {
-            if ($controller) {
-                if ($controller->ClassName == ElementRow::class) {
-                    if ($previousRow) {
-                        $controller->setPreviousRow($previousRow->getElement());
-                    }
-                    $previousRow = $controller;
-                }
+            if (!$controller || $controller->ClassName !== ElementRow::class) {
+                continue;
             }
+
+            if ($previousRow) {
+                $controller->setPreviousRow($previousRow->getElement());
+            }
+
+            $previousRow = $controller;
         }
 
         return $this->controllers;
