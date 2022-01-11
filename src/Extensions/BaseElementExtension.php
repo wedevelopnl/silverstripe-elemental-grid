@@ -143,11 +143,11 @@ class BaseElementExtension extends DataExtension
         $fields->insertBefore(
             FieldGroup::create(
                 [
-                    TextField::create('Title', _t('Element.Title.Title', 'Title text'))
+                    TextField::create('Title', _t(__CLASS__ . '.TITLE', 'Title text'))
                         ->addExtraClass('flexbox-area-grow'),
-                    DropdownField::create('TitleTag', _t('Element.Title.Tag', 'Title tag'), $this->getTitleHTMLTags()),
-                    DropdownField::create('TitleClass', _t('Element.Title.DisplayAs', 'Display as'), $this->getTitleClasses()),
-                    CheckboxField::create('ShowTitle', _t('Element.Title.Displayed', 'Displayed'))
+                    DropdownField::create('TitleTag', _t(__CLASS__ . '.TITLE_TAG', 'Title tag'), $this->getTitleHTMLTags()),
+                    DropdownField::create('TitleClass', _t(__CLASS__ . '.DISPLAY_AS', 'Display as'), $this->getTitleClasses()),
+                    CheckboxField::create('ShowTitle', _t(__CLASS__ . '.DISPLAYED', 'Displayed'))
                         ->addExtraClass('align-self-end'),
                 ]
             )
@@ -161,95 +161,95 @@ class BaseElementExtension extends DataExtension
             $fields->removeByName('TitleClass');
         }
 
-        $fields->findOrMakeTab('Root.Column', _t('Column.Label', 'Column'));
+        $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
 
         $fields->addFieldsToTab(
             'Root.Column',
             [
-                HeaderField::create('HeadingXS', _t('Column.Viewport.XS', 'Extra small (e.g. mobile)')),
+                HeaderField::create('HeadingXS', _t(__CLASS__ . '.VIEWPORT_XS', 'Extra small (e.g. mobile)')),
                 DropdownField::create(
                     'SizeXS',
-                    _t('Column.Size.XS', 'Size XS'),
-                    self::getColumnSizeOptions(_t('Column.Default', 'Default'))
+                    _t(__CLASS__ . '.SIZE_XS', 'Size XS'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
                 ),
                 DropdownField::create(
                     'OffsetXS',
-                    _t('Column.Offset.XS', 'Offset XS'),
-                    self::getColumnSizeOptions(_t('Column.None', 'None'))
+                    _t(__CLASS__ . '.OFFSET_XS', 'Offset XS'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
                 ),
                 DropdownField::create(
                     'VisibilityXS',
-                    _t('Column.Visibility.XS', 'Visibility XS'),
+                    _t(__CLASS__ . '.VISIBILITY_XS', 'Visibility XS'),
                     self::getColumnVisibilityOptions()
                 ),
 
-                HeaderField::create('HeadingSM', _t('Column.Viewport.SM', 'Small (e.g. portrait tablet)')),
+                HeaderField::create('HeadingSM', _t(__CLASS__ . '.VIEWPORT_SM', 'Small (e.g. portrait tablet)')),
                 DropdownField::create(
                     'SizeSM',
-                    _t('Column.Size.SM', 'Size SM'),
-                    self::getColumnSizeOptions(_t('Column.Default', 'Default'))
+                    _t(__CLASS__ . '.SIZE_SM', 'Size SM'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
                 ),
                 DropdownField::create(
                     'OffsetSM',
-                    _t('Column.Offset.SM', 'Offset SM'),
-                    self::getColumnSizeOptions(_t('Column.None', 'None'))
+                    _t(__CLASS__ . '.OFFSET_SM', 'Offset SM'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
                 ),
                 DropdownField::create(
                     'VisibilitySM',
-                    _t('Column.Visibility.SM', 'Visibility SM'),
+                    _t(__CLASS__ . '.VISIBILITY_SM', 'Visibility SM'),
                     self::getColumnVisibilityOptions()
                 ),
 
-                HeaderField::create('HeadingMD', _t('Column.Viewport.MD', 'Medium (e.g. landscape tablet)')),
+                HeaderField::create('HeadingMD', _t(__CLASS__ . '.VIEWPORT_MD', 'Medium (e.g. landscape tablet)')),
                 DropdownField::create(
                     'SizeMD',
-                    _t('Column.Size.MD', 'Size MD'),
-                    self::getColumnSizeOptions(_t('Column.Default', 'Default'))
+                    _t(__CLASS__ . '.SIZE_MD', 'Size MD'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
                 )
                     ->addExtraClass('sizing')
                     ->setAttribute('data-column-size', 'md'),
                 DropdownField::create(
                     'OffsetMD',
-                    _t('Column.Offset.MD', 'Offset MD'),
-                    self::getColumnSizeOptions(_t('Column.None', 'None'))
+                    _t(__CLASS__ . '.OFFSET_MD', 'Offset MD'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
                 ),
                 DropdownField::create(
                     'VisibilityMD',
-                    _t('Column.Visibility.MD', 'Visibility MD'),
+                    _t(__CLASS__ . '.VISIBILITY_MD', 'Visibility MD'),
                     self::getColumnVisibilityOptions()
                 ),
 
-                HeaderField::create('HeadingLG', _t('Column.Viewport.LG', 'Large (e.g. normal desktop)')),
+                HeaderField::create('HeadingLG', _t(__CLASS__ . '.VIEWPORT_LG', 'Large (e.g. normal desktop)')),
                 DropdownField::create(
                     'SizeLG',
-                    _t('Column.Size.LG', 'Size LG'),
-                    self::getColumnSizeOptions(_t('Column.Default', 'Default'))
+                    _t(__CLASS__ . '.SIZE_LG', 'Size LG'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
                 ),
                 DropdownField::create(
                     'OffsetLG',
-                    _t('Column.Offset.LG', 'Offset LG'),
-                    self::getColumnSizeOptions(_t('Column.None', 'None'))
+                    _t(__CLASS__ . '.OFFSET_LG', 'Offset LG'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
                 ),
                 DropdownField::create(
                     'VisibilityLG',
-                    _t('Column.Visibility.LG', 'Visibility LG'),
+                    _t(__CLASS__ . '.VISIBILITY_LG', 'Visibility LG'),
                     self::getColumnVisibilityOptions()
                 ),
 
-                HeaderField::create('HeadingXL', _t('Column.Viewport.XL', 'Extra large (e.g. full HD monitor)')),
+                HeaderField::create('HeadingXL', _t(__CLASS__ . '.VIEWPORT_XL', 'Extra large (e.g. full HD monitor)')),
                 DropdownField::create(
                     'SizeXL',
-                    _t('Column.Size.XL', 'Size XL'),
-                    self::getColumnSizeOptions(_t('Column.Default', 'Default'))
+                    _t(__CLASS__ . '.SIZE_XL', 'Size XL'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.DEFAULT', 'Default'))
                 ),
                 DropdownField::create(
                     'OffsetXL',
-                    _t('Column.Offset.XL', 'Offset XL'),
-                    self::getColumnSizeOptions(_t('Column.None', 'None'))
+                    _t(__CLASS__ . '.OFFSET_XL', 'Offset XL'),
+                    self::getColumnSizeOptions(_t(__CLASS__ . '.NONE', 'None'))
                 ),
                 DropdownField::create(
                     'VisibilityXL',
-                    _t('Column.Visibility.XL', 'Visibility XL'),
+                    _t(__CLASS__ . '.VISIBILITY_XL', 'Visibility XL'),
                     self::getColumnVisibilityOptions()
                 ),
             ]
@@ -309,7 +309,7 @@ class BaseElementExtension extends DataExtension
         }
 
         for ($i = 1; $i < $this->getGridColumnsCount() + 1; $i++) {
-            $columns[$i] = sprintf('%s %u/%u', _t('Column.Label', 'Column'), $i, $this->getGridColumnsCount());
+            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, $this->getGridColumnsCount());
         }
 
         return $columns;
@@ -321,8 +321,8 @@ class BaseElementExtension extends DataExtension
     private function getColumnVisibilityOptions()
     {
         return [
-            'visible' => _t('Column.Visibility.Visible', 'Visible'),
-            'hidden' => _t('Column.Visibility.Hidden', 'Hidden'),
+            'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
+            'hidden' => _t(__CLASS__ . '.HIDDEN', 'Hidden'),
         ];
     }
 
@@ -351,6 +351,10 @@ class BaseElementExtension extends DataExtension
      */
     public function getTitleSizeClass()
     {
-        return $this->owner->getCSSFramework()->getTitleSizeClass();
+        $class = $this->owner->getCSSFramework()->getTitleSizeClass();
+
+        $this->owner->extend('updateTitleSizeClass', $class);
+
+        return $class;
     }
 }
