@@ -34,10 +34,10 @@ nl:
     HIDDEN: 'Onzichtbaar'
   TheWebmen\ElementalGrid\Models\ElementRow:
     LABEL: 'Rij'
-    CUSTOMROWCLASSES: 'Aangepaste rij classes'
-    ISFLUID: 'Deze rij gebruikt de volledige breedte'
+    CUSTOM_ROW_CLASSES: 'Aangepaste rij classes'
+    IS_FLUID: 'Deze rij gebruikt de volledige breedte'
     SECTION: 'Sectie'
-    CUSTOMSECTIONCLASSES: 'Aangepaste sectie classes'
+    CUSTOM_SECTION_CLASSES: 'Aangepaste sectie classes'
     PLURALNAME: 'Rijen'
     PLURALS:
       one: 'Een rij'
