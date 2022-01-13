@@ -81,6 +81,8 @@ class ElementRow extends BaseElement
                 ]
             );
         }
+        
+        $this->extend('updateElementalRowCMSFields', $fields);
 
         return $fields;
     }
