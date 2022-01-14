@@ -339,7 +339,7 @@ class BaseElementExtension extends DataExtension
      */
     public function getTitleTag()
     {
-        if(is_null($this->owner->getField('TitleTag'))) {
+        if(is_null($this->owner->getField('TitleTag')) && $this->owner->exists()) {
             return $this->owner->TitleSize ?? 'h2';
         }
 
