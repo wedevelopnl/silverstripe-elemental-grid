@@ -7,6 +7,7 @@ TheWebmen\ElementalGrid\ElementalConfig:
     default_viewport: 'MD'
     use_custom_title_classes: true
     css_framework: 'bulma'
+    default_title_tag: 'h2'
 ```
 
 ## Add the extension
