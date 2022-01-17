@@ -26,3 +26,4 @@ TheWebmen\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
   css_framework: 'bulma'
   enable_custom_title_classes: true
+  default_title_tag: 'h2'
