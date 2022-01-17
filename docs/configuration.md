@@ -7,6 +7,7 @@ TheWebmen\ElementalGrid\ElementalConfig:
     default_viewport: 'MD'
     use_custom_title_classes: true
     css_framework: 'bulma'
+    default_title_tag: 'h2'
 ```
 
 ## Add the extension
@@ -40,6 +41,8 @@ In your template, you can then use the following check to display the right cont
 ## Supported CSS frameworks
 Currently Bulma and Bootstrap (5) are the supported CSS frameworks that can be combined with this module.
 
+## Using TitleTag and TitleClass
+To show the TitleTag in the template, use `$TitleTag`. To show the TitleClass (which has to be enabled via the `use_custom_title_classes` property in the yml config), use the variable `$TitleSizeClass` in your .SS-template.
 
 ## Customizing the row, section and container CSS classes
 There are 3 extension point you can use to update which row, section and container CSS classes will be rendered in the templates.

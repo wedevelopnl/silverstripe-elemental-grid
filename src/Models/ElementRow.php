@@ -60,31 +60,29 @@ class ElementRow extends BaseElement
      */
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
+        $this->beforeUpdateCMSFields(function (FieldList $fields) {
+            $fields->removeByName(['Column', 'TitleTag', 'ShowTitle', 'TitleClass']);
 
-        $fields->removeByName(['Column', 'TitleTag', 'ShowTitle', 'TitleClass']);
+            $fields->renameField('ExtraClass', _t(__CLASS__ . '.CUSTOM_ROW_CLASSES', 'Custom row classes'));
 
-        $fields->renameField('ExtraClass', _t(__CLASS__ . '.CUSTOM_ROW_CLASSES', 'Custom row classes'));
-
-        $fields->addFieldsToTab(
-            'Root.Settings',
-            [
-                TextField::create('CustomSectionClass', _t(__CLASS__ . '.CUSTOM_SECTION_CLASSES','Custom section classes')),
-            ]
-        );
-
-        if (!$fields->fieldPosition('FullWidth')) {
             $fields->addFieldsToTab(
-                'Root.Main',
+                'Root.Settings',
                 [
-                    CheckboxField::create('IsFluid', _t(__CLASS__ . '.IS_FLUID', 'The row uses the full width of the page')),
+                    TextField::create('CustomSectionClass', _t(__CLASS__ . '.CUSTOM_SECTION_CLASSES','Custom section classes')),
                 ]
             );
-        }
-        
-        $this->extend('updateElementalRowCMSFields', $fields);
 
-        return $fields;
+            if (!$fields->fieldPosition('FullWidth')) {
+                $fields->addFieldsToTab(
+                    'Root.Main',
+                    [
+                        CheckboxField::create('IsFluid', _t(__CLASS__ . '.IS_FLUID', 'The row uses the full width of the page')),
+                    ]
+                );
+            }
+        });
+
+        return parent::getCMSFields();
     }
 
     /**
