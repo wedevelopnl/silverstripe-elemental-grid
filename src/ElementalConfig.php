@@ -19,6 +19,11 @@ final class ElementalConfig
     /***
      * @var string
      */
+    private static $default_title_tag;
+
+    /***
+     * @var string
+     */
     private static $css_framework;
 
     /**
@@ -35,6 +40,14 @@ final class ElementalConfig
     public static function getDefaultViewport()
     {
         return Config::inst()->get(__CLASS__, 'default_viewport');
+    }
+
+    /**
+     * @return string
+     */
+    public static function getDefaultTitleTag()
+    {
+        return Config::inst()->get(__CLASS__, 'default_title_tag');
     }
 
     /**
