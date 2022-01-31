@@ -212,7 +212,6 @@ var ColumnSize = function (_PureComponent) {
     key: 'render',
     value: function render() {
       var colSizes = [];
-
       var offsetSizes = [];
 
       offsetSizes.push({
@@ -568,6 +567,7 @@ var Element = function (_Component) {
 
       var elementClassNames = (0, _classnames2.default)('element-editor__element', {
         'element-editor__element--expandable': type.inlineEditable,
+        'element-editor__element--expanded': previewExpanded,
         'element-editor__element--dragging': isDragging,
         'element-editor__element--dragged-over': isOver
       }, this.getVersionedStateClassName(), this.getColumnSizeClassNames());

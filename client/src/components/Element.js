@@ -230,6 +230,7 @@ class Element extends Component {
       'element-editor__element',
       {
         'element-editor__element--expandable': type.inlineEditable,
+        'element-editor__element--expanded': previewExpanded,
         'element-editor__element--dragging': isDragging,
         'element-editor__element--dragged-over': isOver,
       },
