@@ -7,6 +7,12 @@
   min-height: 4rem;
   transition: all 100ms linear;
 
+  &--expanded {
+    margin: 0;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
   &--dragging {
     transform: scale(0.8);
     overflow: hidden;
