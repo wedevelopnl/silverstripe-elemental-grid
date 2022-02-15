@@ -6,6 +6,7 @@ After:
 SilverStripe\Core\Manifest\ModuleManifest:
   module_priority:
     - thewebmen/silverstripe-elemental-grid
+    - dnadesign/silverstripe-elemental
 
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
