@@ -12,7 +12,7 @@ This module converts the elemental module (https://github.com/silverstripe/silve
 
 ## Installation
 ```
-composer require thewebmen/silverstripe-elemental-grid
+composer require wedevelopnl/silverstripe-elemental-grid
 ```
 
 ## Further configuration
@@ -24,7 +24,7 @@ For more information about configuration, check out the documentation in the `do
 See [License](LICENSE)
 
 ## Maintainers
-* [Webmen](https://www.webmen.nl/) <development@webmen.nl>
+* [WeDevelop](https://www.wedevelop.nl/) <development@wedevelop.nl>
 
 ## Development and contribution
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.\

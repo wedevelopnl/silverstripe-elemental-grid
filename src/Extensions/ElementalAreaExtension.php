@@ -1,18 +1,18 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Extensions;
+namespace WeDevelop\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\ElementalArea;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
-use TheWebmen\ElementalGrid\Controllers\ElementRowController;
-use TheWebmen\ElementalGrid\Models\ElementRow;
+use WeDevelop\ElementalGrid\Controllers\ElementRowController;
+use WeDevelop\ElementalGrid\Models\ElementRow;
 
 /***
  * Class ElementalAreaExtension
- * @package TheWebmen\ElementalGrid\Extensions
+ * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property ElementalArea $owner
  */

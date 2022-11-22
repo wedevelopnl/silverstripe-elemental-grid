@@ -1,5 +1,5 @@
 en:
-  TheWebmen\ElementalGrid\Models\ElementRow:
+  WeDevelop\ElementalGrid\Models\ElementRow:
     PLURALNAME: 'Rows'
     PLURALS:
       one: 'A row'

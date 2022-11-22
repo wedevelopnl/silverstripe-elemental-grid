@@ -1,6 +1,6 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\CSSFramework;
+namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
 

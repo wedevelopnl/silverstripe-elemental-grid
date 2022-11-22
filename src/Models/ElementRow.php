@@ -1,16 +1,16 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Models;
+namespace WeDevelop\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
-use TheWebmen\ElementalGrid\Controllers\ElementRowController;
+use WeDevelop\ElementalGrid\Controllers\ElementRowController;
 
 /***
  * Class ElementRow
- * @package TheWebmen\ElementalGrid\Extensions
+ * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
  */

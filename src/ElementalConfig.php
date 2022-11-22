@@ -1,6 +1,6 @@
 <?php
 
-namespace TheWebmen\ElementalGrid;
+namespace WeDevelop\ElementalGrid;
 
 use SilverStripe\Core\Config\Config;
 

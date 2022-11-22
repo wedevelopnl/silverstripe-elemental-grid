@@ -1,5 +1,5 @@
 {
-    "name": "thewebmen/silverstripe-elemental-grid",
+    "name": "wedevelopnl/silverstripe-elemental-grid",
     "description": "Elemental grid module",
     "type": "silverstripe-vendormodule",
     "keywords": [
@@ -9,10 +9,9 @@
         "content blocks",
         "grid"
     ],
-    "license": "BSD-3-Clause",
     "authors": [{
-        "name": "Webmen",
-        "email": "development@webmen.nl"
+        "name": "WeDevelop",
+        "email": "development@wedevelop.nl"
     }],
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -33,7 +32,7 @@
     },
     "autoload": {
         "psr-4": {
-            "TheWebmen\\ElementalGrid\\": "src/"
+            "WeDevelop\\ElementalGrid\\": "src/"
         }
     },
     "config": {

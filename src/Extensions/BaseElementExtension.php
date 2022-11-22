@@ -1,6 +1,6 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Extensions;
+namespace WeDevelop\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
@@ -10,15 +10,15 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
-use TheWebmen\ElementalGrid\CSSFramework\BulmaCSSFramework;
-use TheWebmen\ElementalGrid\CSSFramework\BootstrapCSSFramework;
-use TheWebmen\ElementalGrid\CSSFramework\CSSFrameworkInterface;
-use TheWebmen\ElementalGrid\Models\ElementRow;
-use TheWebmen\ElementalGrid\ElementalConfig;
+use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;
+use WeDevelop\ElementalGrid\CSSFramework\BootstrapCSSFramework;
+use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
+use WeDevelop\ElementalGrid\Models\ElementRow;
+use WeDevelop\ElementalGrid\ElementalConfig;
 
 /***
  * Class BaseElementExtension
- * @package TheWebmen\ElementalGrid\Extensions
+ * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
  */
