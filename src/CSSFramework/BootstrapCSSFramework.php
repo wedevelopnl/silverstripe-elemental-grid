@@ -57,19 +57,19 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->VisibilityXS === 'hidden') {
-            array_push($classes, 'd-none d-sm-block');
+            $classes[] = 'd-none d-sm-block';
         }
         if ($this->baseElement->VisibilitySM === 'hidden') {
-            array_push($classes, 'd-sm-none d-md-block');
+            $classes[] = 'd-sm-none d-md-block';
         }
         if ($this->baseElement->VisibilityMD === 'hidden') {
-            array_push($classes, 'd-md-none d-lg-block');
+            $classes[] = 'd-md-none d-lg-block';
         }
         if ($this->baseElement->VisibilityLG === 'hidden') {
-            array_push($classes, 'd-lg-none d-xl-block');
+            $classes[] = 'd-lg-none d-xl-block';
         }
         if ($this->baseElement->VisibilityXL === 'hidden') {
-            array_push($classes, 'd-xl-none');
+            $classes[] = 'd-xl-none';
         }
 
         return $classes;
@@ -83,19 +83,19 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->SizeXS) {
-            array_push($classes, 'xs-' . $this->baseElement->SizeXS);
+            $classes[] = 'xs-' . $this->baseElement->SizeXS;
         }
         if ($this->baseElement->SizeSM) {
-            array_push($classes, 'sm-' . $this->baseElement->SizeSM);
+            $classes[] = 'sm-' . $this->baseElement->SizeSM;
         }
         if ($this->baseElement->SizeMD) {
-            array_push($classes, 'md-' . $this->baseElement->SizeMD);
+            $classes[] = 'md-' . $this->baseElement->SizeMD;
         }
         if ($this->baseElement->SizeLG) {
-            array_push($classes, 'lg-' . $this->baseElement->SizeLG);
+            $classes[] = 'lg-' . $this->baseElement->SizeLG;
         }
         if ($this->baseElement->SizeXL) {
-            array_push($classes, 'xl-' . $this->baseElement->SizeXL);
+            $classes[] = 'xl-' . $this->baseElement->SizeXL;
         }
 
         foreach ($classes as &$class) {
@@ -113,19 +113,19 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->OffsetXS) {
-            array_push($classes, 'offset-xs-' . $this->baseElement->OffsetXS);
+            $classes[] = 'offset-xs-' . $this->baseElement->OffsetXS;
         }
         if ($this->baseElement->OffsetSM) {
-            array_push($classes, 'offset-sm-' . $this->baseElement->OffsetSM);
+            $classes[] = 'offset-sm-' . $this->baseElement->OffsetSM;
         }
         if ($this->baseElement->OffsetMD) {
-            array_push($classes, 'offset-md-' . $this->baseElement->OffsetMD);
+            $classes[] = 'offset-md-' . $this->baseElement->OffsetMD;
         }
         if ($this->baseElement->OffsetLG) {
-            array_push($classes, 'offset-lg-' . $this->baseElement->OffsetLG);
+            $classes[] = 'offset-lg-' . $this->baseElement->OffsetLG;
         }
         if ($this->baseElement->OffsetXL) {
-            array_push($classes, 'offset-xl-' . $this->baseElement->OffsetXL);
+            $classes[] = 'offset-xl-' . $this->baseElement->OffsetXL;
         }
 
         return $classes;

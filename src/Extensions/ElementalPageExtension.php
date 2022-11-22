@@ -17,7 +17,7 @@ class ElementalPageExtension extends DataExtension
      * @var array
      */
     private static $db = [
-        'UseElementalGrid' => 'Boolean'
+        'UseElementalGrid' => 'Boolean',
     ];
 
     /***

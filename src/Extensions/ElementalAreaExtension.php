@@ -56,7 +56,7 @@ class ElementalAreaExtension extends DataExtension
 
         //Check for first row
         $first = $this->controllers->first();
-        if ($first->ClassName == ElementRow::class) {
+        if ($first->ClassName === ElementRow::class) {
             $first->setIsFirstRow(true);
         } else {
             $createdFirstElement = ElementRow::create();
@@ -70,7 +70,7 @@ class ElementalAreaExtension extends DataExtension
         // Check for last row
         $last = $this->controllers->last();
 
-        if ($last->ClassName == ElementRow::class) {
+        if ($last->ClassName === ElementRow::class) {
             $last->setIsLastRow(true);
         } else {
             $createdLastElement = ElementRow::create();
