@@ -5,7 +5,7 @@ ARG NODE_VERSION=10.24.1
 FROM node:$NODE_VERSION-alpine AS node
 FROM php:8.1-cli-alpine$ALPINE_VERSION AS php-cli
 
-RUN apk add php yarn make perl --no-cache
+RUN apk add php yarn make perl git --no-cache
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN rm -rf node_modules
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json ./
 ENV COMPOSER_ALLOW_SUPERUSER 1
-RUN composer install --prefer-dist --no-progress --no-suggest --no-interaction --no-plugins --ignore-platform-reqs
+RUN composer install --prefer-install=source --no-progress --no-suggest --no-interaction --no-plugins --ignore-platform-reqs
 
 COPY dev/docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
