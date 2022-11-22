@@ -8,5 +8,5 @@ window.document.addEventListener('DOMContentLoaded', () => {
     ElementList,
     Element,
     ColumnSize,
-  }, { force: true })
+  }, { force: true });
 });
