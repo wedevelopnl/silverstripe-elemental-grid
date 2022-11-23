@@ -19,6 +19,7 @@ composer require wedevelopnl/silverstripe-elemental-grid
 For more information about configuration, check out the documentation in the `docs` directory.
 
 * [Configuration](docs/configuration.md)
+* [Upgrade v2 => v3](docs/UPGRADE_V2_V3.md)
 
 # License
 See [License](LICENSE)
