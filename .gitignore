@@ -3,3 +3,6 @@
 /**/*.css.map
 /vendor/
 /resources/
+.idea
+composer.lock
+.php-cs-fixer.cache

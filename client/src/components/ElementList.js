@@ -30,7 +30,6 @@ class ElementList extends Component {
     const {
       ElementComponent,
       HoverBarComponent,
-      DragIndicatorComponent,
       blocks,
       allowedElementTypes,
       elementTypes,
@@ -60,7 +59,8 @@ class ElementList extends Component {
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
-        isDraggedOver={this.props.dragTargetElementId === element.id && this.props.draggedItem && this.props.draggedItem.id !== element.id}
+        isDraggedOver={this.props.dragTargetElementId === element.id &&
+            this.props.draggedItem && this.props.draggedItem.id !== element.id}
         isDraggedOverPosition={this.props.dragSpot}
       >
         {isDraggingOver || <HoverBarComponent

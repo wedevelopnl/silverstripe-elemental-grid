@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { elementType } from 'types/elementType';
 import { elementTypeType } from 'types/elementTypeType';
 import { compose } from 'redux';
-import { inject, withInjector } from 'lib/Injector';
+import { inject } from 'lib/Injector';
 import i18n from 'i18n';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
@@ -87,9 +87,9 @@ class Element extends Component {
       [`col-lg-${this.state.size}`]: true,
       [`offset-lg-${this.state.offset}`]: true,
       'is-row': element.blockSchema.grid.isRow === true,
-      [`is-dragged-top`]: this.props.isDraggedOver && this.props.isDraggedOverPosition === 'top',
-      ['is-dragged-bottom']: this.props.isDraggedOver && this.props.isDraggedOverPosition === 'bottom'
-    }
+      'is-dragged-top': this.props.isDraggedOver && this.props.isDraggedOverPosition === 'top',
+      'is-dragged-bottom': this.props.isDraggedOver && this.props.isDraggedOverPosition === 'bottom'
+    };
   }
 
   /**
@@ -405,9 +405,9 @@ export default compose(
   })),
   connect(mapStateToProps, mapDispatchToProps),
   inject(
-    ['ElementHeader', 'ElementContent', 'ColumnSize',],
-    (HeaderComponent, ContentComponent, ColumnSizeComponent,) => ({
-      HeaderComponent, ContentComponent, ColumnSizeComponent,
+    ['ElementHeader', 'ElementContent', 'ColumnSize'],
+    (HeaderComponent, ContentComponent, ColumnSizeComponent) => ({
+      HeaderComponent, ContentComponent, ColumnSizeComponent
     }),
     () => 'ElementEditor.ElementList.Element'
   )

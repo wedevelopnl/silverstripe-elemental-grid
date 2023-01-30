@@ -1,17 +1,16 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Models;
+namespace WeDevelop\ElementalGrid\Models;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
-use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
-use TheWebmen\ElementalGrid\Controllers\ElementRowController;
+use WeDevelop\ElementalGrid\Controllers\ElementRowController;
 
 /***
  * Class ElementRow
- * @package TheWebmen\ElementalGrid\Extensions
+ * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
  */
@@ -68,7 +67,7 @@ class ElementRow extends BaseElement
             $fields->addFieldsToTab(
                 'Root.Settings',
                 [
-                    TextField::create('CustomSectionClass', _t(__CLASS__ . '.CUSTOM_SECTION_CLASSES','Custom section classes')),
+                    TextField::create('CustomSectionClass', _t(__CLASS__ . '.CUSTOM_SECTION_CLASSES', 'Custom section classes')),
                 ]
             );
 
@@ -100,12 +99,12 @@ class ElementRow extends BaseElement
     {
         $classes = [];
 
-        array_push($classes, $this->getCSSFramework()->getRowClasses());
+        $classes[] = $this->getCSSFramework()->getRowClasses();
 
         $this->extend('updateRowClasses', $classes);
 
         if ($this->owner->ExtraClass) {
-            array_push($classes, $this->owner->ExtraClass);
+            $classes[] = $this->owner->ExtraClass;
         }
 
         return implode(' ', $classes);
@@ -122,7 +121,7 @@ class ElementRow extends BaseElement
         $this->extend('updateSectionClasses', $classes);
 
         if ($this->owner->CustomSectionClass) {
-            array_push($classes, $this->owner->CustomSectionClass);
+            $classes[] = $this->owner->CustomSectionClass;
         }
 
         return implode(' ', $classes);
@@ -135,7 +134,7 @@ class ElementRow extends BaseElement
     {
         $classes = [];
 
-        array_push($classes, $this->getCSSFramework()->getContainerClass($this->IsFluid));
+        $classes[] = $this->getCSSFramework()->getContainerClass($this->IsFluid);
 
         $this->extend('updateContainerClasses', $classes);
 

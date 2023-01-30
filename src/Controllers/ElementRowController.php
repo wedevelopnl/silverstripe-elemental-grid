@@ -1,13 +1,13 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Controllers;
+namespace WeDevelop\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
 use DNADesign\Elemental\Models\BaseElement;
 
 /**
  * Class ElementRowController
- * @package TheWebmen\ElementalGrid\Controllers
+ * @package WeDevelop\ElementalGrid\Controllers
  */
 class ElementRowController extends ElementController
 {

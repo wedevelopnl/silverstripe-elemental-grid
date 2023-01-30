@@ -1,6 +1,6 @@
-import {findDOMNode} from 'react-dom';
+import { findDOMNode } from 'react-dom';
 
-export const isOverTop = (monitor, component, draggedOverElement) => {
+export const isOverTop = (monitor, component) => {
   const clientOffset = monitor.getClientOffset();
   const componentRect = findDOMNode(component).getBoundingClientRect();
   const componentIsRow = component.props.element.blockSchema.grid.isRow === true;
@@ -10,7 +10,6 @@ export const isOverTop = (monitor, component, draggedOverElement) => {
   }
 
   return clientOffset.x < componentRect.x + (componentRect.width / 2);
-
 };
 
 export const getDragIndicatorIndex = (items, dragTarget, draggedItem, dragSpot) => {
@@ -45,7 +44,7 @@ export const elementDragSource = {
   },
 
   endDrag(props, monitor) {
-    const {onDragEnd} = props;
+    const { onDragEnd } = props;
     const dropResult = monitor.getDropResult();
 
     if (!onDragEnd || !dropResult || !dropResult.dropAfterID) {
@@ -53,7 +52,7 @@ export const elementDragSource = {
     }
 
     const itemID = monitor.getItem().id;
-    const {dropAfterID} = dropResult;
+    const { dropAfterID } = dropResult;
 
     // Only trigger the drop handler if the dragged element was moved, to avoid unnecessary work
     if (itemID !== dropAfterID) {

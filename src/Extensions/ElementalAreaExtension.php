@@ -1,18 +1,18 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Extensions;
+namespace WeDevelop\ElementalGrid\Extensions;
 
 use DNADesign\Elemental\Models\ElementalArea;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
-use TheWebmen\ElementalGrid\Controllers\ElementRowController;
-use TheWebmen\ElementalGrid\Models\ElementRow;
+use WeDevelop\ElementalGrid\Controllers\ElementRowController;
+use WeDevelop\ElementalGrid\Models\ElementRow;
 
 /***
  * Class ElementalAreaExtension
- * @package TheWebmen\ElementalGrid\Extensions
+ * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property ElementalArea $owner
  */
@@ -56,7 +56,7 @@ class ElementalAreaExtension extends DataExtension
 
         //Check for first row
         $first = $this->controllers->first();
-        if ($first->ClassName == ElementRow::class) {
+        if ($first->ClassName === ElementRow::class) {
             $first->setIsFirstRow(true);
         } else {
             $createdFirstElement = ElementRow::create();
@@ -70,7 +70,7 @@ class ElementalAreaExtension extends DataExtension
         // Check for last row
         $last = $this->controllers->last();
 
-        if ($last->ClassName == ElementRow::class) {
+        if ($last->ClassName === ElementRow::class) {
             $last->setIsLastRow(true);
         } else {
             $createdLastElement = ElementRow::create();

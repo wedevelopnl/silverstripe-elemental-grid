@@ -1,6 +1,6 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\Extensions;
+namespace WeDevelop\ElementalGrid\Extensions;
 
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
@@ -17,7 +17,7 @@ class ElementalPageExtension extends DataExtension
      * @var array
      */
     private static $db = [
-        'UseElementalGrid' => 'Boolean'
+        'UseElementalGrid' => 'Boolean',
     ];
 
     /***

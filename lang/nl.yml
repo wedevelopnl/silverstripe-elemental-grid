@@ -1,8 +1,8 @@
 nl:
-  TheWebmen\ElementalGrid\Extensions\ElementalPageExtension:
+  WeDevelop\ElementalGrid\Extensions\ElementalPageExtension:
     USE_ELEMENTAL_GRID: 'Gebruik elemental grid'
     USE_ELEMENTAL_GRID_DESCRIPTION: 'Sla de pagina eerst op nadat je deze instelling aanpast.'
-  TheWebmen\ElementalGrid\Extensions\BaseElementExtension:
+  WeDevelop\ElementalGrid\Extensions\BaseElementExtension:
     TITLE: 'Titel'
     TITLE_TAG: 'Titel tag'
     DISPLAY_AS: 'Weergeven als'
@@ -32,7 +32,7 @@ nl:
     VISIBILITY_XL: 'Zichtbaarheid extra groot'
     VISIBLE: 'Zichtbaar'
     HIDDEN: 'Onzichtbaar'
-  TheWebmen\ElementalGrid\Models\ElementRow:
+  WeDevelop\ElementalGrid\Models\ElementRow:
     LABEL: 'Rij'
     CUSTOM_ROW_CLASSES: 'Aangepaste rij classes'
     IS_FLUID: 'Deze rij gebruikt de volledige breedte'
