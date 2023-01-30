@@ -1,8 +1,8 @@
-import React, {PureComponent} from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import {compose, bindActionCreators} from 'redux';
-import {connect} from 'react-redux';
-import {autofill} from 'redux-form';
+import { compose, bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { autofill } from 'redux-form';
 
 class ColumnSize extends PureComponent {
   constructor(props) {
@@ -14,34 +14,34 @@ class ColumnSize extends PureComponent {
   }
 
   getColSizeSource() {
-    let colSizes = [];
+    const colSizes = [];
 
     for (let size = 1; size <= this.props.gridColumns; size++) {
       colSizes.push({
         label: `Column ${size}/${this.props.gridColumns}`,
         value: size
-      })
+      });
     }
 
-    return colSizes
+    return colSizes;
   }
 
   getOffsetSizeSource() {
-    let offsetSizes = [];
+    const offsetSizes = [];
 
     offsetSizes.push({
-      label: `None`,
+      label: 'None',
       value: 0
-    })
+    });
 
     for (let size = 1; size <= this.props.gridColumns; size++) {
       offsetSizes.push({
         label: `Column ${size}/${this.props.gridColumns}`,
         value: size
-      })
+      });
     }
 
-    return offsetSizes
+    return offsetSizes;
   }
 
   handleClick(event) {
@@ -49,7 +49,7 @@ class ColumnSize extends PureComponent {
   }
 
   handleChangeSize(event) {
-    const {elementId, defaultViewport} = this.props;
+    const { elementId, defaultViewport } = this.props;
     this.props.actions.reduxForm.autofill(
       `element.ElementForm_${elementId}`,
       `PageElements_${elementId}_Size${defaultViewport}`,
@@ -59,7 +59,7 @@ class ColumnSize extends PureComponent {
   }
 
   handleChangeOffset(event) {
-    const {elementId, defaultViewport} = this.props;
+    const { elementId, defaultViewport } = this.props;
     this.props.actions.reduxForm.autofill(
       `element.ElementForm_${elementId}`,
       `PageElements_${elementId}_Offset${defaultViewport}`,
@@ -69,49 +69,50 @@ class ColumnSize extends PureComponent {
   }
 
   render() {
-    let colSizes = [];
-    let offsetSizes = [];
+    const offsetSizes = [];
 
     offsetSizes.push({
-      label: `None`,
+      label: 'None',
       value: 0
-    })
+    });
 
     for (let size = 1; size <= this.props.gridColumns; size++) {
       offsetSizes.push({
         label: `Column ${size}/${this.props.gridColumns}`,
         value: size
-      })
+      });
     }
 
     return (
       <div>
-        <hr/>
+        <hr />
 
-        <label class="mb-0 font-italic">
+        <label className="mb-0 font-italic" htmlFor="colSize">
           Size { this.props.defaultViewport }
           <select
             defaultValue={this.props.size}
             onChange={this.handleChangeSize}
             onClick={this.handleClick}
+            id="colSize"
           >
             {
-              this.getColSizeSource().map((columnObject, index) => (
-                <option key={index} value={columnObject.value}>{columnObject.label}</option>
+              this.getColSizeSource().map((columnObject) => (
+                <option value={columnObject.value}>{columnObject.label}</option>
               ))
             }
           </select>
         </label>
-        <label class="mb-0 ml-2 font-italic">
+        <label className="mb-0 ml-2 font-italic" htmlFor="colOffset">
           Offset { this.props.defaultViewport }
           <select
             defaultValue={this.props.offset}
             onChange={this.handleChangeOffset}
             onClick={this.handleClick}
+            id="colOffset"
           >
             {
-              this.getOffsetSizeSource().map((columnObject, index) => (
-                <option key={index} value={columnObject.value}>{columnObject.label}</option>
+              this.getOffsetSizeSource().map((columnObject) => (
+                <option value={columnObject.value}>{columnObject.label}</option>
               ))
             }
           </select>
@@ -124,7 +125,7 @@ class ColumnSize extends PureComponent {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      reduxForm: bindActionCreators({autofill}, dispatch),
+      reduxForm: bindActionCreators({ autofill }, dispatch),
     },
   };
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace TheWebmen\ElementalGrid\CSSFramework;
+namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
 
@@ -57,19 +57,19 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->VisibilityXS === 'hidden') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilityXS . '-mobile');
+            $classes[] = 'is-' . $this->baseElement->VisibilityXS . '-mobile';
         }
         if ($this->baseElement->VisibilitySM === 'hidden') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilitySM . '-tablet-only');
+            $classes[] = 'is-' . $this->baseElement->VisibilitySM . '-tablet-only';
         }
         if ($this->baseElement->VisibilityMD === 'hidden') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilityMD . '-desktop-only');
+            $classes[] = 'is-' . $this->baseElement->VisibilityMD . '-desktop-only';
         }
         if ($this->baseElement->VisibilityLG === 'hidden') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilityLG . '-widescreen-only');
+            $classes[] = 'is-' . $this->baseElement->VisibilityLG . '-widescreen-only';
         }
         if ($this->baseElement->VisibilityXL === 'hidden') {
-            array_push($classes, 'is-' . $this->baseElement->VisibilityXL . '-fullhd');
+            $classes[] = 'is-' . $this->baseElement->VisibilityXL . '-fullhd';
         }
 
         return $classes;
@@ -83,19 +83,19 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->SizeXS) {
-            array_push($classes, 'is-' . $this->baseElement->SizeXS . '-mobile');
+            $classes[] = 'is-' . $this->baseElement->SizeXS . '-mobile';
         }
         if ($this->baseElement->SizeSM) {
-            array_push($classes, 'is-' . $this->baseElement->SizeSM . '-tablet');
+            $classes[] = 'is-' . $this->baseElement->SizeSM . '-tablet';
         }
         if ($this->baseElement->SizeMD) {
-            array_push($classes, 'is-' . $this->baseElement->SizeMD . '-desktop');
+            $classes[] = 'is-' . $this->baseElement->SizeMD . '-desktop';
         }
         if ($this->baseElement->SizeLG) {
-            array_push($classes, 'is-' . $this->baseElement->SizeLG . '-widescreen');
+            $classes[] = 'is-' . $this->baseElement->SizeLG . '-widescreen';
         }
         if ($this->baseElement->SizeXL) {
-            array_push($classes, 'is-' . $this->baseElement->SizeXL . '-fullhd');
+            $classes[] = 'is-' . $this->baseElement->SizeXL . '-fullhd';
         }
 
         return $classes;
@@ -109,19 +109,19 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->OffsetXS) {
-            array_push($classes, 'is-offset-' . $this->baseElement->OffsetXS . '-mobile');
+            $classes[] = 'is-offset-' . $this->baseElement->OffsetXS . '-mobile';
         }
         if ($this->baseElement->OffsetSM) {
-            array_push($classes, 'is-offset-' . $this->baseElement->OffsetSM . '-tablet');
+            $classes[] = 'is-offset-' . $this->baseElement->OffsetSM . '-tablet';
         }
         if ($this->baseElement->OffsetMD) {
-            array_push($classes, 'is-offset-' . $this->baseElement->OffsetMD . '-desktop');
+            $classes[] = 'is-offset-' . $this->baseElement->OffsetMD . '-desktop';
         }
         if ($this->baseElement->OffsetLG) {
-            array_push($classes, 'is-offset-' . $this->baseElement->OffsetLG . '-widescreen');
+            $classes[] = 'is-offset-' . $this->baseElement->OffsetLG . '-widescreen';
         }
         if ($this->baseElement->OffsetXL) {
-            array_push($classes, 'is-offset-' . $this->baseElement->OffsetXL . '-fullhd');
+            $classes[] = 'is-offset-' . $this->baseElement->OffsetXL . '-fullhd';
         }
 
         return $classes;

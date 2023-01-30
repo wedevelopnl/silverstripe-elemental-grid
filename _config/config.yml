@@ -5,25 +5,25 @@ After:
 ---
 SilverStripe\Core\Manifest\ModuleManifest:
   module_priority:
-    - thewebmen/silverstripe-elemental-grid
+    - wedevelopnl/silverstripe-elemental-grid
     - dnadesign/silverstripe-elemental
 
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
-    - 'thewebmen/silverstripe-elemental-grid:client/dist/js/bundle.js'
+    - 'wedevelopnl/silverstripe-elemental-grid:client/dist/js/bundle.js'
   extra_requirements_css:
-    - 'thewebmen/silverstripe-elemental-grid:client/dist/styles/bundle.css'
+    - 'wedevelopnl/silverstripe-elemental-grid:client/dist/styles/bundle.css'
 
 DNADesign\Elemental\Models\ElementalArea:
   extensions:
-    - TheWebmen\ElementalGrid\Extensions\ElementalAreaExtension
+    - WeDevelop\ElementalGrid\Extensions\ElementalAreaExtension
 
 DNADesign\Elemental\Models\BaseElement:
   inline_editable: false
   extensions:
-    - TheWebmen\ElementalGrid\Extensions\BaseElementExtension
+    - WeDevelop\ElementalGrid\Extensions\BaseElementExtension
 
-TheWebmen\ElementalGrid\ElementalConfig:
+WeDevelop\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
   css_framework: 'bulma'
   enable_custom_title_classes: true

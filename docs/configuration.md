@@ -3,7 +3,7 @@
 ## Default settings
 Use the following yaml configuration to override defaults;
 ```yaml
-TheWebmen\ElementalGrid\ElementalConfig:
+WeDevelop\ElementalGrid\ElementalConfig:
     default_viewport: 'MD'
     use_custom_title_classes: true
     css_framework: 'bulma'
@@ -25,7 +25,7 @@ If you want to have the possibility to switch between a normal Content field or 
 ```yaml
 Page\That\Uses\Grid:
     extensions:
-        - TheWebmen\ElementalGrid\Extensions\ElementalPageExtension
+        - WeDevelop\ElementalGrid\Extensions\ElementalPageExtension
 ```
 
 In your template, you can then use the following check to display the right content:
@@ -50,7 +50,7 @@ There are 3 extension point you can use to update which row, section and contain
 ### Step 1. Extend the ElementRow
 In your own project, extend the ElementRow that lives in this module
 ```yaml
-TheWebmen\ElementalGrid\Models\ElementRow:
+WeDevelop\ElementalGrid\Models\ElementRow:
   extensions:
     - Your\ElementRow\Extension
 ```
@@ -76,5 +76,5 @@ public function updateContainerClasses(&$classes)
 ```
 
 ## Override ElementRow template
-Copy the file `templates/TheWebmen/ElementalGrid/Models/ElementRow.ss` to your own `themes/` folder. For example to:
-`themes/default/TheWebmen/ElementalGrid/Models/ElementRow.ss`. You can then edit the template to make it fit your needs.
+Copy the file `templates/WeDevelop/ElementalGrid/Models/ElementRow.ss` to your own `themes/` folder. For example to:
+`themes/default/WeDevelop/ElementalGrid/Models/ElementRow.ss`. You can then edit the template to make it fit your needs.
