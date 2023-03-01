@@ -83,7 +83,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->SizeXS) {
-            $classes[] = 'xs-' . $this->baseElement->SizeXS;
+            $classes[] = $this->baseElement->SizeXS;
         }
         if ($this->baseElement->SizeSM) {
             $classes[] = 'sm-' . $this->baseElement->SizeSM;
@@ -113,7 +113,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = [];
 
         if ($this->baseElement->OffsetXS) {
-            $classes[] = 'offset-xs-' . $this->baseElement->OffsetXS;
+            $classes[] = 'offset-' . $this->baseElement->OffsetXS;
         }
         if ($this->baseElement->OffsetSM) {
             $classes[] = 'offset-sm-' . $this->baseElement->OffsetSM;
