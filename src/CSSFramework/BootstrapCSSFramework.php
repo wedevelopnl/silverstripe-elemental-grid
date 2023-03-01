@@ -4,6 +4,13 @@ namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
 
+/**
+ * CSS Framework class for Bootstrap (5). Cause bootstrap did not change grid
+ * classes, Bootstrap 4 should work too.
+ *
+ * https://getbootstrap.com/docs/5.3/layout/grid/#grid-options
+ * https://getbootstrap.com/docs/4.6/layout/grid/#grid-options
+ */
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
     /**
@@ -20,7 +27,9 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     private const FLUID_CONTAINER_CLASSNAME = 'container-fluid';
 
     /**
-     * @param BaseElement $baseElement
+     * Initialize CSS framework for elemental row element.
+     *
+     * @param BaseElement $baseElement Elemental row element
      */
     public function __construct($baseElement)
     {
@@ -28,6 +37,8 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     }
 
     /**
+     * Return bootstrap row class name for grid layouts.
+     *
      * @return string
      */
     public function getRowClasses()
@@ -36,6 +47,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     }
 
     /**
+     * Return bootstrap column classes for grid layout. It return classes for
+     * size, offset and visibility for different screen sizes based on the
+     * elemental settings.
+     *
      * @return string
      */
     public function getColumnClasses()
@@ -47,6 +62,32 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         $classes = array_merge($sizeClasses, $offsetClasses, $visibilityClasses);
 
         return implode(' ', $classes);
+    }
+
+    /**
+     * Get title class from base element.
+     *
+     * @return string
+     */
+    public function getTitleSizeClass()
+    {
+        return $this->baseElement->TitleClass;
+    }
+
+    /**
+     * Return container class name for fluid or normal design.
+     *
+     * @param bool $fluid Fluid or normal design (true/false)
+     *
+     * @return string
+     */
+    public function getContainerClass($fluid)
+    {
+        if ($fluid) {
+            return self::FLUID_CONTAINER_CLASSNAME;
+        }
+
+        return self::CONTAINER_CLASSNAME;
     }
 
     /**
@@ -129,26 +170,5 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         }
 
         return $classes;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitleSizeClass()
-    {
-        return $this->baseElement->TitleClass;
-    }
-
-    /***
-     * @param bool $fluid
-     * @return string
-     */
-    public function getContainerClass($fluid)
-    {
-        if ($fluid) {
-            return self::FLUID_CONTAINER_CLASSNAME;
-        }
-
-        return self::CONTAINER_CLASSNAME;
     }
 }
