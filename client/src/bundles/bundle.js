@@ -4,26 +4,22 @@ import Element from 'components/Element';
 import ColumnSize from 'components/ColumnSize';
 import AddBlockToBottomButton from 'components/AddBlockToBottomButton';
 import AddBlockToTopButton from 'components/AddBlockToTopButton';
-import Toolbar from 'components/ElementEditor/Toolbar'
+import Toolbar from 'components/ElementEditor/Toolbar';
 import addElementToArea from 'state/editor/addElementMutation';
 import AddElementPopover from 'components/AddElementPopover';
 import React from 'react';
 
-const OverruledToolbar = (OriginalToolbar) => (props) => {
-    return (
-        <div>
-            <Toolbar {...props} />
-        </div>
-    );
-}
+const OverruledToolbar = () => (props) => (
+  <div>
+    <Toolbar {...props} />
+  </div>
+);
 
-const OverruledAddElementPopover = (OriginalAddElementPopover) => (props) => {
-  return (
-    <div>
-      <AddElementPopover {...props} />
-    </div>
-  )
-}
+const OverruledAddElementPopover = () => (props) => (
+  <div>
+    <AddElementPopover {...props} />
+  </div>
+);
 
 window.document.addEventListener('DOMContentLoaded', () => {
   Injector.component.registerMany({
@@ -32,7 +28,7 @@ window.document.addEventListener('DOMContentLoaded', () => {
     ColumnSize,
     AddBlockToBottomButton,
     AddBlockToTopButton,
-  }, { force: true })
+  }, { force: true });
 
   Injector.transform('toolbar-override', (updater) => {
     updater.component('ElementToolbar', OverruledToolbar);
