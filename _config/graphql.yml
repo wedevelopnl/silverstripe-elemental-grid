@@ -8,4 +8,4 @@ SilverStripe\GraphQL\Schema\Schema:
   schemas:
     admin:
       src:
-        elemental: 'app/_graphql'
+        elemental: 'wedevelopnl/silverstripe-elemental-grid: _graphql'
