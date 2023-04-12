@@ -1,0 +1,11 @@
+---
+Name: elemental-graphql-override
+After: elemental-graphql
+Only:
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
+---
+SilverStripe\GraphQL\Schema\Schema:
+  schemas:
+    admin:
+      src:
+        elemental: 'wedevelopnl/silverstripe-elemental-grid: _graphql'
