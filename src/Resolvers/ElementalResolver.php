@@ -55,10 +55,14 @@ class ElementalResolver extends Resolver {
         $newElement->onBeforeWrite();
 
         if ($insertAtBottom) {
-            $reorderer = Injector::inst()->create(ReorderElements::class, $newElement);
-            $afterElementID = $elementalArea->Elements()->sort('Sort')->last()->ID;
-            $reorderer->reorder($afterElementID); // also writes the element
-        } else if ($afterElementID !== null) {
+            $lastElement = $elementalArea->Elements()->sort('Sort')->last();
+
+            if ($lastElement) {
+                $afterElementID = $lastElement->ID;
+            }
+        }
+
+        if ($afterElementID !== null) {
             /** @var ReorderElements $reorderer */
             $reorderer = Injector::inst()->create(ReorderElements::class, $newElement);
             $reorderer->reorder($afterElementID); // also writes the element
