@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
-import i18n from 'i18n';
 import { elementTypeType } from 'types/elementTypeType';
 import { inject } from 'lib/Injector';
 
@@ -51,7 +50,7 @@ class AddBlockToBottomButton extends Component {
           toggle={this.toggle}
           areaId={areaId}
           insertAfterElement={0}
-          insertAtBottom={true}
+          insertAtBottom
         />
       </div>
     );

@@ -7,7 +7,12 @@ import { DropTarget } from 'react-dnd';
 // eslint-disable-next-line react/prefer-stateless-function
 class Toolbar extends PureComponent {
   render() {
-    const { AddBlockToBottomButton, AddBlockToTopButton, elementTypes, areaId, connectDropTarget } = this.props;
+    const {
+      AddBlockToBottomButton,
+      AddBlockToTopButton,
+      elementTypes,
+      areaId,
+      connectDropTarget } = this.props;
     return connectDropTarget(
       <div className="element-editor__toolbar">
         <AddBlockToBottomButton
