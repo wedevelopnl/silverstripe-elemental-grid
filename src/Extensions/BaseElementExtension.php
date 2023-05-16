@@ -141,6 +141,7 @@ class BaseElementExtension extends DataExtension
          * TitleSettings group to always appear first in the fieldorder
          */
         $fields->insertBefore(
+            '',
             FieldGroup::create(
                 [
                     TextField::create('Title', _t(__CLASS__ . '.TITLE', 'Title text'))
@@ -154,7 +155,6 @@ class BaseElementExtension extends DataExtension
                 ->setName('TitleSettings')
                 ->setTitle('Title')
                 ->addExtraClass('d-lg-flex'),
-            ''
         );
 
         if (!ElementalConfig::getEnableCustomTitleClasses()) {
