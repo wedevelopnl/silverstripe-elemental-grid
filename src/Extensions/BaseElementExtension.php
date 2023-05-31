@@ -357,4 +357,9 @@ class BaseElementExtension extends DataExtension
 
         return $class;
     }
+
+    public function getAnchorTitle()
+    {
+        return $this->owner->singular_name() . '_' . $this->owner->getTitle() . '_' . $this->owner->ID;
+    }
 }
