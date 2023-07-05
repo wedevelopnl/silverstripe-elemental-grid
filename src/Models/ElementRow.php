@@ -118,6 +118,8 @@ class ElementRow extends BaseElement
     {
         $classes = [];
 
+        $classes[] = 'section';
+
         $this->extend('updateSectionClasses', $classes);
 
         if ($this->owner->CustomSectionClass) {
@@ -134,7 +136,7 @@ class ElementRow extends BaseElement
     {
         $classes = [];
 
-        $classes[] = $this->getCSSFramework()->getContainerClass($this->IsFluid);
+        $classes[] = $this->getCSSFramework()->getContainerClass((bool)$this->IsFluid);
 
         $this->extend('updateContainerClasses', $classes);
 

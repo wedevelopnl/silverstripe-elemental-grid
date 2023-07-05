@@ -17,16 +17,9 @@ use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
 use WeDevelop\ElementalGrid\Models\ElementRow;
 use WeDevelop\ElementalGrid\ElementalConfig;
 
-/***
- * Class BaseElementExtension
- * @package WeDevelop\ElementalGrid\Extensions
- *
- * @property BaseElement $owner
- * @property string $VisibilityXS
- */
 class BaseElementExtension extends DataExtension
 {
-    private const GRID_COLUMNS_COUNT = 12;
+    private static int $grid_column_count = 12;
 
     private static bool $inline_editable = false;
 
@@ -45,7 +38,7 @@ class BaseElementExtension extends DataExtension
     public function populateDefaults(): void
     {
         $defaultSizeField = 'Size' . ElementalConfig::getDefaultViewport();
-        $this->owner->$defaultSizeField = self::GRID_COLUMNS_COUNT;
+        $this->owner->$defaultSizeField = $this->getOwner()->config()->get('grid_column_count');
     }
 
     private static array $titleOptions = [
@@ -82,7 +75,7 @@ class BaseElementExtension extends DataExtension
         'ShowTitle' => true,
     ];
 
-    public function getTitleHTMLTags()
+    public function getTitleHTMLTags(): array
     {
         return self::$titleOptions;
     }
@@ -96,7 +89,7 @@ class BaseElementExtension extends DataExtension
         return $classes;
     }
 
-    public function updateCMSFields(FieldList $fields)
+    public function updateCMSFields(FieldList $fields): void
     {
         $fields->removeByName([
             'Title',
@@ -237,10 +230,10 @@ class BaseElementExtension extends DataExtension
 
         $blockSchema['grid'] = [
             'isRow' => $this->owner->ClassName === ElementRow::class,
-            'gridColumns' => $this->getGridColumnsCount(),
+            'gridColumns' => $this->getOwner()->config()->get('grid_column_count'),
             'column' => [
                 'defaultViewport' => ElementalConfig::getDefaultViewport(),
-                'size' => $this->owner->$defaultViewportSize ?? self::GRID_COLUMNS_COUNT,
+                'size' => $this->owner->$defaultViewportSize ?? $this->getOwner()->config()->get('grid_column_count'),
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
             ],
@@ -255,8 +248,8 @@ class BaseElementExtension extends DataExtension
             $columns[0] = $defaultValue;
         }
 
-        for ($i = 1; $i < $this->getGridColumnsCount() + 1; $i++) {
-            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, $this->getGridColumnsCount());
+        for ($i = 1; $i < $this->getOwner()->config()->get('grid_column_count') + 1; $i++) {
+            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, $this->getOwner()->config()->get('grid_column_count'));
         }
 
         return $columns;
@@ -268,11 +261,6 @@ class BaseElementExtension extends DataExtension
             'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
             'hidden' => _t(__CLASS__ . '.HIDDEN', 'Hidden'),
         ];
-    }
-
-    private function getGridColumnsCount(): int
-    {
-        return self::GRID_COLUMNS_COUNT;
     }
 
     public function getTitleTag(): string

@@ -10,29 +10,17 @@ use DNADesign\Elemental\Models\ElementalArea;
 
 class ElementalPageExtension extends DataExtension
 {
-    /***
-     * @var bool
-     */
-    private static $elemental_keep_content_field = true;
+    private static bool $elemental_keep_content_field = true;
 
-    /***
-     * @var array
-     */
-    private static $db = [
+    private static array $db = [
         'UseElementalGrid' => 'Boolean',
     ];
 
-    /***
-     * @var array
-     */
-    private static $defaults = [
+    private static array $defaults = [
         'UseElementalGrid' => true,
     ];
 
-    /***
-     * @param FieldList $fields
-     */
-    public function updateCMSFields(FieldList $fields)
+    public function updateCMSFields(FieldList $fields): void
     {
         parent::updateCMSFields($fields);
 
@@ -54,17 +42,18 @@ class ElementalPageExtension extends DataExtension
     public function updateAnchorsOnPage(array &$anchors): void
     {
         if ($this->getOwner()->ElementalArea()->exists()) {
-            /** @var ElementalArea $area */
             $area = $this->getOwner()->ElementalArea();
             $elementalAnchors = [];
 
-            $area->Elements()->each(function (BaseElement $element) use (&$elementalAnchors) {
-                if ($element->HTML) {
-                    $elementalAnchors = array_merge($elementalAnchors, $this->getAnchorsInContent($element->HTML));
-                }
+            if ($area instanceof ElementalArea) {
+                $area->Elements()->each(function (BaseElement $element) use (&$elementalAnchors) {
+                    if ($element->HTML) {
+                        $elementalAnchors = array_merge($elementalAnchors, $this->getAnchorsInContent($element->HTML));
+                    }
 
-                $elementalAnchors[] = $element->getAnchor();
-            });
+                    $elementalAnchors[] = $element->getAnchor();
+                });
+            }
 
             $anchors = array_merge($anchors, $elementalAnchors);
         }
@@ -79,6 +68,7 @@ class ElementalPageExtension extends DataExtension
         );
 
         $anchors = [];
+
         if ($parseSuccess >= 1) {
             $anchors = array_values(array_unique(array_filter(
                 array_merge($matches[3], $matches[5])
