@@ -55,11 +55,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
     public function getContainerClass(bool $fluid): string
     {
-        if ($fluid) {
-            return self::FLUID_CONTAINER_CLASSNAME;
-        }
-
-        return self::CONTAINER_CLASSNAME;
+        return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
     }
 
     private function getVisibilityClasses(): array

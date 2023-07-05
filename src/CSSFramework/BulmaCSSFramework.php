@@ -127,21 +127,12 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
             'h4' => 'title is-size-4',
             'h5' => 'title is-size-5',
             'h6' => 'title is-size-6',
-            'div' => 'div',
             default => $this->baseElement->TitleClass,
         };
     }
 
-    /***
-     * @param bool $fluid
-     * @return string
-     */
-    public function getContainerClass($fluid)
+    public function getContainerClass(bool $fluid): string
     {
-        if ($fluid) {
-            return self::FLUID_CONTAINER_CLASSNAME;
-        }
-
-        return self::CONTAINER_CLASSNAME;
+        return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
     }
 }

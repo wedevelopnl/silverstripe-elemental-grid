@@ -25,51 +25,30 @@ use WeDevelop\ElementalGrid\ElementalConfig;
  */
 class BaseElementExtension extends DataExtension
 {
-    /***
-     * @var int
-     */
     private const GRID_COLUMNS_COUNT = 12;
 
-    /**
-     * @var bool
-     */
-    private static $inline_editable = false;
+    private static bool $inline_editable = false;
 
-    /**
-     * @var CSSFrameworkInterface
-     */
-    private $cssFramework;
+    private CSSFrameworkInterface $cssFramework;
 
-    /***
-     * @param object $owner
-     */
     public function setOwner($owner)
     {
         parent::setOwner($owner);
 
-        switch (ElementalConfig::getCSSFrameworkName()) {
-            case 'bulma':
-                $this->cssFramework = new BulmaCSSFramework($this->owner);
-                break;
-            default:
-                $this->cssFramework = new BootstrapCSSFramework($this->owner);
-        }
+        match (ElementalConfig::getCSSFrameworkName()) {
+            'bulma' => $this->cssFramework = new BulmaCSSFramework($this->owner),
+            default => $this->cssFramework = new BootstrapCSSFramework($this->owner),
+        };
     }
 
-    /***
-     * @return void
-     */
-    public function populateDefaults()
+    public function populateDefaults(): void
     {
         $defaultSizeField = 'Size' . ElementalConfig::getDefaultViewport();
         $this->owner->$defaultSizeField = self::GRID_COLUMNS_COUNT;
     }
 
-    /**
-     * @var array
-     */
-    private static $titleOptions = [
-        'div' => 'Default',
+    private static array $titleOptions = [
+        '' => 'Default',
         'h1' => 'H1',
         'h2' => 'H2',
         'h3' => 'H3',
@@ -78,70 +57,53 @@ class BaseElementExtension extends DataExtension
         'h6' => 'H6',
     ];
 
-    /**
-     * @var array
-     */
-    private static $db = [
-        'SizeXS' => 'Int',
-        'SizeSM' => 'Int',
-        'SizeMD' => 'Int',
-        'SizeLG' => 'Int',
-        'SizeXL' => 'Int',
-        'OffsetXS' => 'Int',
-        'OffsetSM' => 'Int',
-        'OffsetMD' => 'Int',
-        'OffsetLG' => 'Int',
-        'OffsetXL' => 'Int',
+    private static array $db = [
+        'SizeXS' => 'Int(2)',
+        'SizeSM' => 'Int(2)',
+        'SizeMD' => 'Int(2)',
+        'SizeLG' => 'Int(2)',
+        'SizeXL' => 'Int(2)',
+        'OffsetXS' => 'In(2)t',
+        'OffsetSM' => 'Int(2)',
+        'OffsetMD' => 'Int(2)',
+        'OffsetLG' => 'Int(2)',
+        'OffsetXL' => 'Int(2)',
         'VisibilityXS' => 'Varchar(10)',
         'VisibilitySM' => 'Varchar(10)',
         'VisibilityMD' => 'Varchar(10)',
         'VisibilityLG' => 'Varchar(10)',
         'VisibilityXL' => 'Varchar(10)',
-        'TitleClass' => 'Varchar(100)',
-        'TitleTag' => 'Varchar(100)',
+        'TitleClass' => 'Varchar(255)',
+        'TitleTag' => 'Varchar(3)',
     ];
 
-    /***
-     * @var array
-     */
-    private static $defaults = [
+    private static array $defaults = [
         'ShowTitle' => true,
     ];
 
-    /***
-     * @return array
-     */
     public function getTitleHTMLTags()
     {
         return self::$titleOptions;
     }
 
-    /***
-     * @return array
-     */
-    public function getTitleClasses()
+    public function getTitleClasses(): array
     {
-        $classes = self::$titleOptions;
+        $classes = (array)self::$titleOptions;
 
         $this->owner->extend('updateTitleClasses', $classes);
 
         return $classes;
     }
 
-    /**
-     * Update the default CMS fields with our custom fields
-     *
-     * @param FieldList $fields
-     */
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->removeByName(['Title', 'TitleClass', 'TitleTag']);
+        $fields->removeByName([
+            'Title',
+            'TitleClass',
+            'TitleTag',
+        ]);
 
-        /***
-         * Used insert before with an empty string as argument here, to force the
-         * TitleSettings group to always appear first in the fieldorder
-         */
-        $fields->insertBefore(
+        $fields->insertBefore('Root.Main',
             FieldGroup::create(
                 [
                     TextField::create('Title', _t(__CLASS__ . '.TITLE', 'Title text'))
@@ -155,14 +117,11 @@ class BaseElementExtension extends DataExtension
                 ->setName('TitleSettings')
                 ->setTitle('Title')
                 ->addExtraClass('d-lg-flex'),
-            ''
         );
 
         if (!ElementalConfig::getEnableCustomTitleClasses()) {
             $fields->removeByName('TitleClass');
         }
-
-        $fields->findOrMakeTab('Root.Column', _t(__CLASS__ . '.COLUMN', 'Column'));
 
         $fields->addFieldsToTab(
             'Root.Column',
@@ -257,26 +216,16 @@ class BaseElementExtension extends DataExtension
         );
     }
 
-    /**
-     * @return string
-     */
-    public function getColumnClasses()
+    public function getColumnClasses(): string
     {
         return implode(' ', [$this->cssFramework->getColumnClasses(), $this->owner->ExtraClass]);
     }
 
-    /**
-     * @return CSSFrameworkInterface
-     */
-    public function getCSSFramework()
+    public function getCSSFramework(): CSSFrameworkInterface
     {
         return $this->cssFramework;
     }
 
-    /***
-     * Add the extra data to the blockSchema object, to be taken up by
-     * GraphQL and used in the react component in the CMS admin
-     */
     public function updateBlockSchema(&$blockSchema)
     {
         $defaultViewportSize = 'Size' . ElementalConfig::getDefaultViewport();
@@ -295,13 +244,7 @@ class BaseElementExtension extends DataExtension
         ];
     }
 
-    /***
-     * Returns an array of all possibile column widths
-     *
-     * @param string|null $defaultValue
-     * @return array
-     */
-    private function getColumnSizeOptions($defaultValue = null)
+    private function getColumnSizeOptions($defaultValue = null): array
     {
         $columns = [];
 
@@ -316,10 +259,7 @@ class BaseElementExtension extends DataExtension
         return $columns;
     }
 
-    /**
-     * @return array
-     */
-    private function getColumnVisibilityOptions()
+    private function getColumnVisibilityOptions(): array
     {
         return [
             'visible' => _t(__CLASS__ . '.VISIBLE', 'Visible'),
@@ -327,18 +267,12 @@ class BaseElementExtension extends DataExtension
         ];
     }
 
-    /**
-     * @return int
-     */
-    private function getGridColumnsCount()
+    private function getGridColumnsCount(): int
     {
         return self::GRID_COLUMNS_COUNT;
     }
 
-    /**
-     * @return string
-     */
-    public function getTitleTag()
+    public function getTitleTag(): string
     {
         if (is_null($this->owner->getField('TitleTag'))) {
             return $this->owner->TitleSize ?? ElementalConfig::getDefaultTitleTag();
@@ -347,10 +281,7 @@ class BaseElementExtension extends DataExtension
         return $this->owner->getField('TitleTag');
     }
 
-    /**
-     * @return string
-     */
-    public function getTitleSizeClass()
+    public function getTitleSizeClass(): string
     {
         $class = $this->owner->getCSSFramework()->getTitleSizeClass();
 
@@ -359,7 +290,7 @@ class BaseElementExtension extends DataExtension
         return $class;
     }
 
-    public function getAnchorTitle()
+    public function getAnchorTitle(): string
     {
         return $this->owner->singular_name() . '_' . $this->owner->getTitle() . '_' . $this->owner->ID;
     }
