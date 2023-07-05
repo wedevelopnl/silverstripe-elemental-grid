@@ -28,7 +28,7 @@
     "extra": {
         "expose": [
             "client/dist",
-            "images"
+            "client/images"
         ]
     },
     "autoload": {
