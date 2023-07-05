@@ -38,7 +38,7 @@ final class ElementRowController extends ElementController
         $this->isFirstRow = $value;
     }
 
-    public function getPreviousRow(): BaseElement
+    public function getPreviousRow(): ?BaseElement
     {
         return $this->previousRow;
     }

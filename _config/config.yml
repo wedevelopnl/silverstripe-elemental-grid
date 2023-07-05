@@ -23,6 +23,10 @@ DNADesign\Elemental\Models\BaseElement:
   extensions:
     - WeDevelop\ElementalGrid\Extensions\BaseElementExtension
 
+DNADesign\Elemental\Models\ElementContent:
+  extensions:
+    - WeDevelop\ElementalGrid\Extensions\ElementContentExtension
+
 WeDevelop\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
   css_framework: 'bulma'

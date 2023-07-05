@@ -8,6 +8,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;
@@ -63,7 +64,7 @@ class BaseElementExtension extends DataExtension
         'SizeMD' => 'Int(2)',
         'SizeLG' => 'Int(2)',
         'SizeXL' => 'Int(2)',
-        'OffsetXS' => 'In(2)t',
+        'OffsetXS' => 'Int(2)',
         'OffsetSM' => 'Int(2)',
         'OffsetMD' => 'Int(2)',
         'OffsetLG' => 'Int(2)',
@@ -103,7 +104,9 @@ class BaseElementExtension extends DataExtension
             'TitleTag',
         ]);
 
-        $fields->insertBefore('Root.Main',
+        $tab = $fields->findOrMakeTab('Root.Main');
+
+        $tab->unshift(
             FieldGroup::create(
                 [
                     TextField::create('Title', _t(__CLASS__ . '.TITLE', 'Title text'))
@@ -116,7 +119,7 @@ class BaseElementExtension extends DataExtension
             )
                 ->setName('TitleSettings')
                 ->setTitle('Title')
-                ->addExtraClass('d-lg-flex'),
+                ->addExtraClass('d-lg-flex')
         );
 
         if (!ElementalConfig::getEnableCustomTitleClasses()) {
