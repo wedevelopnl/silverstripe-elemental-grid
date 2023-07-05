@@ -16,11 +16,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
-        "silverstripe/admin": "^1.7@stable",
-        "silverstripe/cms": "^4@stable",
-        "silverstripe/vendor-plugin": "^1.0",
-        "dnadesign/silverstripe-elemental": "^4.7"
+        "php": "^8.2",
+        "silverstripe/cms": "^5@stable",
+        "silverstripe/vendor-plugin": "^2.0",
+        "dnadesign/silverstripe-elemental": "^5.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.4"

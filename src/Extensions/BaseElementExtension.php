@@ -21,6 +21,7 @@ use WeDevelop\ElementalGrid\ElementalConfig;
  * @package WeDevelop\ElementalGrid\Extensions
  *
  * @property BaseElement $owner
+ * @property string $VisibilityXS
  */
 class BaseElementExtension extends DataExtension
 {

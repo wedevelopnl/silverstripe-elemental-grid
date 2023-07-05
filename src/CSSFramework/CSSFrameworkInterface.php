@@ -4,19 +4,9 @@ namespace WeDevelop\ElementalGrid\CSSFramework;
 
 interface CSSFrameworkInterface
 {
-    /**
-     * @return string
-     */
-    public function getColumnClasses();
+    public function getColumnClasses(): string;
 
-    /**
-     * @return string
-     */
-    public function getTitleSizeClass();
+    public function getTitleSizeClass(): string;
 
-    /***
-     * @param bool $fluid
-     * @return mixed
-     */
-    public function getContainerClass($fluid);
+    public function getContainerClass(bool $fluid): string;
 }
