@@ -9,4 +9,6 @@ interface CSSFrameworkInterface
     public function getTitleSizeClass(): string;
 
     public function getContainerClass(bool $fluid): string;
+
+    public function getMediaRatioClass(?string $mediaRatio): ?string;
 }

@@ -134,4 +134,9 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
         return $classes;
     }
+
+    public function getMediaRatioClass(string $mediaRatio = null): ?string
+    {
+        return $mediaRatio;
+    }
 }

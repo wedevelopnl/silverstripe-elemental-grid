@@ -1,20 +1,48 @@
 <div class="$ElementClasses">
-    <% if $MediaImage %>
-        <div class="$MediaColumnClasses">
-            <% if $MediaCaption %><div class="captionImage"><% end_if %>
-            <figure class="image">
-                <% if $ColSize > 10 %>
-                    <img src="$MediaImage.ScaleMaxWidth(1440).URL" alt="$MediaImage.Title" width="1440" height="$MediaImage.ScaleMaxWidth(1440).Height" class="is-block" loading="lazy">
-                <% else_if $ColSize > 6 %>
-                    <img src="$MediaImage.ScaleMaxWidth(1200).URL" alt="$MediaImage.Title" width="1200" height="$MediaImage.ScaleMaxWidth(1200).Height" class="is-block" loading="lazy">
-                <% else %>
-                    <img src="$MediaImage.ScaleMaxWidth(720).URL" alt="$MediaImage.Title" width="720" height="$MediaImage.ScaleMaxWidth(720).Height" class="is-block" loading="lazy">
-                <% end_if %>
+    <div class="$MediaColumnClasses">
+        <% if $MediaType == 'image' && $MediaImage %>
+            <% if $MediaImage %>
+                <% if $MediaCaption %><div class="captionImage"><% end_if %>
+                <figure class="image<% if $MediaRatioClass %> $MediaRatioClass<% end_if %>">
+                    <% if $ColSize > 10 %>
+                        <img src="$MediaImage.ScaleMaxWidth(1440).URL" alt="$MediaImage.Title" width="1440" height="$MediaImage.ScaleMaxWidth(1440).Height" class="is-block" loading="lazy">
+                    <% else_if $ColSize > 6 %>
+                        <img src="$MediaImage.ScaleMaxWidth(1200).URL" alt="$MediaImage.Title" width="1200" height="$MediaImage.ScaleMaxWidth(1200).Height" class="is-block" loading="lazy">
+                    <% else %>
+                        <img src="$MediaImage.ScaleMaxWidth(720).URL" alt="$MediaImage.Title" width="720" height="$MediaImage.ScaleMaxWidth(720).Height" class="is-block" loading="lazy">
+                    <% end_if %>
+                </figure>
+                <% if $MediaCaption %><p class="caption leftAlone">$MediaCaption</p><% end_if %>
+                <% if $MediaCaption %></div><% end_if %>
+            <% end_if %>
+        <% else_if $MediaType == 'video' && $MediaVideoFullURL && $MediaVideoEmbeddedURL %>
+            <% if $MediaCaption %><div class="captionImage mb-0"><% end_if %>
+            <figure class="video image<% if $MediaRatioClass %> $MediaRatioClass<% end_if %>" data-video-embed-url="$MediaVideoEmbeddedURL" data-element-id="$ID" data-video-type="$MediaVideoProvider">
+                <div class="video-thumbnail<% if $MediaVideoHasOverlay %> has-overlay<% end_if %>" id="playVideo-$ID" style="background-image: url('<% if $MediaVideoCustomThumbnail %>$MediaVideoCustomThumbnail.FocusFill(1440,800).URL<% else %>$MediaVideoEmbeddedThumbnail<% end_if %>')">
+                    <span class="btn btn-primary btn-square button is-primary is-square">
+                        <span class="svg-icon">
+                            <% include Icons\Includes\PlayRegular %>
+                        </span>
+                    </span>
+                </div>
+                <div class="video-wrapper" id="player-$ID"></div>
             </figure>
-            <% if $MediaCaption %><p class="caption leftAlone">$MediaCaption</p><% end_if %>
+            <% if $MediaCaption %><p class="caption leftAlone mb-0">$MediaCaption</p><% end_if %>
             <% if $MediaCaption %></div><% end_if %>
-        </div>
-    <% end_if %>
+            <script type="application/ld+json">
+            {
+                "@context": "http://schema.org",
+                "@type": "VideoObject",
+                "playerType": "HTML5",
+                "embedUrl": "$MediaVideoEmbeddedURL",
+                "name": "$MediaVideoEmbeddedName",
+                "description": "$MediaVideoEmbeddedDescription",
+                "thumbnailUrl": "$MediaVideoEmbeddedThumbnail",
+                "uploadDate": "$MediaVideoEmbeddedCreated"
+            }
+        </script>
+        <% end_if %>
+    </div>
     <div class="$ContentColumnClasses">
         <div class="content{$MarginStyles}">
             <% if $ShowTitle %>

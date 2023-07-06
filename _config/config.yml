@@ -24,6 +24,7 @@ DNADesign\Elemental\Models\BaseElement:
     - WeDevelop\ElementalGrid\Extensions\BaseElementExtension
 
 DNADesign\Elemental\Models\ElementContent:
+  controller_class: WeDevelop\ElementalGrid\Controllers\ElementContentController
   extensions:
     - WeDevelop\ElementalGrid\Extensions\ElementContentExtension
 

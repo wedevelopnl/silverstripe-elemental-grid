@@ -24,6 +24,8 @@ const config = [
     name: 'js',
     entry: {
       bundle: `${PATHS.SRC}/bundles/bundle.js`,
+      // @TODO: This file doesn't compile due to compiling issue (seems to fail over a fat arrow function in youtube-player node module)
+      // video: `${PATHS.SRC}/video.js`,
     },
     output: {
       path: PATHS.DIST,

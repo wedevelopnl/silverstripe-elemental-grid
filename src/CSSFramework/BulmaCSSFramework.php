@@ -135,4 +135,9 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     {
         return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
     }
+
+    public function getMediaRatioClass(string $mediaRatio = null): ?string
+    {
+        return $mediaRatio ? 'is-' . str_replace('x', 'by', $mediaRatio) : null;
+    }
 }

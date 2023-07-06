@@ -17,7 +17,9 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\View\Requirements;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\MediaField\Form\MediaField;
 
@@ -133,6 +135,14 @@ final class ElementContentExtension extends DataExtension
 
         $fields->addFieldsToTab('Root.Media', [
             $mediaField,
+            Wrapper::create([
+                CheckboxField::create('MediaVideoHasOverlay', 'Show overlay on top of video thumbnail'),
+            ])->displayIf('MediaType')->isEqualTo('video')->end(),
+            TextField::create('MediaCaption', 'Caption text'),
+            DropdownField::create('MediaRatio', 'Media ratio', self::$mediaRatios)
+                ->setEmptyString('Auto (default)')
+                ->setDescription('By default, \'Auto\' will make videos appear as 16x9 ratio, while images will be shown as they are'),
+
             OptionsetField::create('ContentColumns', 'Content width', self::$contentColumns)
                 ->setTemplate('WeDevelop/ElementalGrid/Forms/OptionsetImageField')
                 ->addExtraClass('optionset-image-field'),
@@ -167,6 +177,17 @@ final class ElementContentExtension extends DataExtension
             $this->owner->MediaVideoFullURL = trim($this->owner->MediaVideoFullURL);
             MediaField::saveEmbed($this->owner);
         }
+    }
+
+    public function getMediaRatioClass()
+    {
+        $mediaRatio = $this->owner->MediaRatio;
+
+        if (!$this->owner->MediaRatio && $this->owner->MediaType === 'video') {
+            $mediaRatio = '16x9';
+        }
+
+        return $this->owner->getCSSFramework()->getMediaRatioClass($mediaRatio);
     }
 
     public function ElementClasses(): string
