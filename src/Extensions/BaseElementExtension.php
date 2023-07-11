@@ -2,13 +2,11 @@
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
-use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;

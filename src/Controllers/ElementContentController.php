@@ -3,7 +3,6 @@
 namespace WeDevelop\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Controllers\ElementController;
-use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementContent;
 use SilverStripe\View\Requirements;
 

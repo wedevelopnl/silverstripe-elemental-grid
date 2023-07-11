@@ -2,12 +2,8 @@
 
 namespace WeDevelop\ElementalGrid\CSSFramework;
 
-use App\Extensions\BaseElementExtension;
 use DNADesign\Elemental\Models\BaseElement;
 
-/**
- * @property BaseElementExtension $baseElement
- */
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
     private BaseElement $baseElement;
@@ -30,13 +26,11 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return self::ROW_CLASSNAME;
     }
 
-    /**
-     * Return bootstrap column classes for grid layout. It return classes for
-     * size, offset and visibility for different screen sizes based on the
-     * elemental settings.
-     *
-     * @return string
-     */
+    public function getColumnClass(): string
+    {
+        return self::COLUMN_CLASSNAME;
+    }
+
     public function getColumnClasses(): string
     {
         $sizeClasses = $this->getSizeClasses();
@@ -138,5 +132,10 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     public function getMediaRatioClass(string $mediaRatio = null): ?string
     {
         return $mediaRatio;
+    }
+
+    public function getViewportName(string $viewportName): string
+    {
+        return strtolower($viewportName);
     }
 }

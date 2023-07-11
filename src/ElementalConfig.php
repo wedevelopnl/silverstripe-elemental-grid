@@ -3,7 +3,6 @@
 namespace WeDevelop\ElementalGrid;
 
 use SilverStripe\Core\Config\Config;
-use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;
 
 final class ElementalConfig
 {
@@ -13,7 +12,7 @@ final class ElementalConfig
 
     private static string $default_title_tag = 'h2';
 
-    private static string $css_framework = BulmaCSSFramework::class;
+    private static string $css_framework = 'bulma';
 
     public static function getEnableCustomTitleClasses(): bool
     {

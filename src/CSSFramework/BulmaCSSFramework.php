@@ -26,6 +26,11 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return self::ROW_CLASSNAME;
     }
 
+    public function getColumnClass(): string
+    {
+        return self::COLUMN_CLASSNAME;
+    }
+
     public function getColumnClasses(): string
     {
         $sizeClasses = $this->getSizeClasses();
@@ -139,5 +144,18 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     public function getMediaRatioClass(string $mediaRatio = null): ?string
     {
         return $mediaRatio ? 'is-' . str_replace('x', 'by', $mediaRatio) : null;
+    }
+
+    public function getViewportName(string $viewportName): string
+    {
+        $viewports = [
+            'xl' => 'fullhd',
+            'lg' => 'widescreen',
+            'md' => 'desktop',
+            'sm' => 'tablet',
+            'xs' => 'mobile',
+        ];
+
+        return $viewports[strtolower($viewportName)];
     }
 }

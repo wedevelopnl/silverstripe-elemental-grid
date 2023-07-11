@@ -11,4 +11,6 @@ interface CSSFrameworkInterface
     public function getContainerClass(bool $fluid): string;
 
     public function getMediaRatioClass(?string $mediaRatio): ?string;
+
+    public function getColumnClass(): string;
 }

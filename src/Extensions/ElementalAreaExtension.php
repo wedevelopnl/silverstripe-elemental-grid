@@ -2,7 +2,6 @@
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
-use DNADesign\Elemental\Models\ElementalArea;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;

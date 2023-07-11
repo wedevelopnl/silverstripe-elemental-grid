@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
-use DNADesign\Elemental\Models\ElementContent;
-use gorriecoe\Link\Models\Link;
-use gorriecoe\LinkField\LinkField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
-use SilverStripe\View\Requirements;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
+use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
 
 final class ElementContentExtension extends DataExtension
@@ -76,14 +74,14 @@ final class ElementContentExtension extends DataExtension
 
     private static array $contentVerticalAligments = [
         '' => 'Top',
-        'is-align-items-center' => 'Center (default)',
-        'is-align-items-flex-end' => 'Bottom',
+        'align-items-center' => 'Center (default)',
+        'align-items-flex-end' => 'Bottom',
     ];
 
     private static array $imagePositions = [
-        'has-order-1' => 'Always first (default)',
-        'has-order-2' => 'Always last',
-        'has-order-2 has-order-1-touch' => 'Last on desktop, first on mobile/tablet devices',
+        'order-1' => 'Always first (default)',
+        'order-2' => 'Always last',
+        'order-1 order-md-2' => 'Last on desktop, first on mobile/tablet devices',
     ];
 
     private static array $columnGaps = [
@@ -95,7 +93,7 @@ final class ElementContentExtension extends DataExtension
     ];
 
     private static array $defaults = [
-        'ContentVerticalAlign' => 'is-align-items-center',
+        'ContentVerticalAlign' => 'align-items-center',
     ];
 
     public function updateCMSFields(FieldList $fields): void
@@ -126,45 +124,49 @@ final class ElementContentExtension extends DataExtension
         $fields->insertBefore('Settings', new Tab('Media'));
 
         $mediaField = MediaField::create($fields);
-        $mediaField->setTitle('Video settings');
+        $mediaField->setTitle(_t(__CLASS__ . '.VIDEO_SETTINGS', 'Video settings'));
         $mediaField->getVideoWrapper()->push(
-            UploadField::create('MediaVideoCustomThumbnail', 'Custom video thumbnail')
+            UploadField::create('MediaVideoCustomThumbnail', _t(__CLASS__ . '.CUSTOM_VIDEO_THUMBNAIL', 'Custom video thumbnail'))
                 ->setFolderName('MediaUploads')
-                ->setDescription('This overwrites the default thumbnail provided by youtube or vimeo'),
+                ->setDescription(_t(__CLASS__ . '.OVERWRITES_DEFAULT_THUMBNAIL', 'This overwrites the default thumbnail provided by youtube or vimeo')),
         );
 
         $fields->addFieldsToTab('Root.Media', [
+            HeaderField::create('', _t(__CLASS__ . '.MEDIA_FILE', 'Media file'))->setHeadingLevel(1),
             $mediaField,
             Wrapper::create([
-                CheckboxField::create('MediaVideoHasOverlay', 'Show overlay on top of video thumbnail'),
+                CheckboxField::create('MediaVideoHasOverlay', _t(__CLASS__ . '.SHOW_OVERLAY', 'Show dark overlay on top of video thumbnail')),
             ])->displayIf('MediaType')->isEqualTo('video')->end(),
-            TextField::create('MediaCaption', 'Caption text'),
-            DropdownField::create('MediaRatio', 'Media ratio', self::$mediaRatios)
-                ->setEmptyString('Auto (default)')
-                ->setDescription('By default, \'Auto\' will make videos appear as 16x9 ratio, while images will be shown as they are'),
+            TextField::create('MediaCaption', _t(__CLASS__ . '.CAPTION_TEXT', 'Caption text')),
+            DropdownField::create('MediaRatio', _t(__CLASS__ . '.MEDIA_RATIO', 'Media ratio'), self::$mediaRatios)
+                ->setEmptyString(_t(__CLASS__ . '.AUTO_DEFAULT', 'Auto (default)'))
+                ->setDescription(_t(__CLASS__ . '.DEFAULT_RATIO_DESCRIPTION', 'By default, \'Auto\' will make videos appear as 16x9 ratio, while images will be shown as they are')),
+        ]);
 
-            OptionsetField::create('ContentColumns', 'Content width', self::$contentColumns)
+        $fields->addFieldsToTab('Root.Media', [
+            HeaderField::create('', _t(__CLASS__ . '.MEDIA_POSITIONING', 'Media positioning'))->setHeadingLevel(1),
+            OptionsetField::create('ContentColumns', _t(__CLASS__ . '.CONTENT_COLUMN_WIDTH', 'Width of the content column'), self::$contentColumns)
                 ->setTemplate('WeDevelop/ElementalGrid/Forms/OptionsetImageField')
                 ->addExtraClass('optionset-image-field'),
-            DropdownField::create('MediaPosition', 'Media position', self::$imagePositions),
+            DropdownField::create('MediaPosition', _t(__CLASS__ . '.MEDIA_POSITION', 'Media position'), self::$imagePositions),
             Wrapper::create([
-                DropdownField::create('ContentVerticalAlign', 'Vertical align (if horizontal)', self::$contentVerticalAligments),
-                DropdownField::create('ExtraColumnGap', 'Extra column gap size', self::$columnGaps),
+                DropdownField::create('ContentVerticalAlign', _t(__CLASS__ . '.VERTICAL_ALIGNMENT', 'Vertical alignment'), self::$contentVerticalAligments),
+                DropdownField::create('ExtraColumnGap', _t(__CLASS__ . '.EXTRA_COLUMN_GAP_SIZE', 'Extra column gap size'), self::$columnGaps),
             ])->displayIf('ContentColumns')->isNotEmpty()->end(),
         ]);
 
 
         if ($this->owner->MediaType === 'video') {
             $fields->addFieldsToTab('Root.VideoEmbeddedData', [
-                ReadonlyField::create('MediaVideoEmbeddedURL', 'Shortened URL'),
-                ReadonlyField::create('MediaVideoProvider', 'Video provider'),
-                ReadonlyField::create('MediaVideoEmbeddedName', 'Embedded name'),
-                ReadonlyField::create('MediaVideoEmbeddedDescription', 'Embedded description'),
-                ReadonlyField::create('MediaVideoEmbeddedThumbnail', 'Embedded thumbnail URL'),
+                ReadonlyField::create('MediaVideoEmbeddedURL', _t(__CLASS__ . '.SHORTENED_URL', 'Shortened URL')),
+                ReadonlyField::create('MediaVideoProvider', _t(__CLASS__ . '.VIDEO_PROVIDER', 'Video provider')),
+                ReadonlyField::create('MediaVideoEmbeddedName', _t(__CLASS__ . '.EMBEDDED_NAME', 'Embedded name')),
+                ReadonlyField::create('MediaVideoEmbeddedDescription', _t(__CLASS__ . '.EMBEDDED_DESCRIPTION', 'Embedded description')),
+                ReadonlyField::create('MediaVideoEmbeddedThumbnail', _t(__CLASS__ . '.EMBEDDED_THUMBNAIL_URL', 'Embedded thumbnail URL')),
                 FieldGroup::create([
-                    LiteralField::create('MediaVideoEmbeddedThumbnailPreview', '<img src="' . $this->owner->MediaVideoEmbeddedThumbnail . '">', 'Embedded thumbnail'),
-                ])->setTitle('Video Thumbnail'),
-                ReadonlyField::create('MediaVideoEmbeddedCreated', 'Embedded publication date'),
+                    LiteralField::create('MediaVideoEmbeddedThumbnailPreview', '<img src="' . $this->owner->MediaVideoEmbeddedThumbnail . '">', _t(__CLASS__ . '.EMBEDDED_THUMBNAIL', 'Embedded thumbnail')),
+                ])->setTitle(_t(__CLASS__ . '.VIDEO_THUMBNAIL', 'Video Thumbnail')),
+                ReadonlyField::create('MediaVideoEmbeddedCreated', _t(__CLASS__ . '.EMBEDDED_PUBLICATION_DATE', 'Embedded publication date')),
             ]);
         }
     }
@@ -192,12 +194,14 @@ final class ElementContentExtension extends DataExtension
 
     public function ElementClasses(): string
     {
-        $elementClasses = [];
-
-        $elementClasses[] = 'columns is-multiline';
+        $elementClasses[] = $this->owner->getCSSFramework()->getRowClasses();
 
         if ($this->owner->ContentColumns && $this->owner->ContentVerticalAlign) {
-            $elementClasses[] = $this->owner->ContentVerticalAlign;
+            if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
+                $elementClasses[] = 'is-' . $this->owner->ContentVerticalAlign;
+            } else {
+                $elementClasses[] = $this->owner->ContentVerticalAlign;
+            }
         }
 
         $this->owner->extend('updateElementClasses', $classes);
@@ -207,19 +211,26 @@ final class ElementContentExtension extends DataExtension
 
     public function MediaColumnClasses(): ?string
     {
-        $imageClasses = [];
+        $imageClasses[] = $this->owner->getCSSFramework()->getColumnClass();
 
-        $imageClasses[] = 'column';
-
-        if ($this->owner->MediaPosition) {
-            $imageClasses[] = $this->owner->MediaPosition;
+        if ($this->owner->MediaPosition === 'order-1') {
+            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
+        } elseif ($this->owner->MediaPosition === 'order-2') {
+            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-2' : 'order-2';
+        } else {
+            $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
+            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-1 has-order-2-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
         }
 
         if ($this->owner->ContentColumns) {
-            $imageClasses[] = 'is-' . (12 - $this->owner->ContentColumns) . '-desktop';
+            if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
+                $imageClasses[] = 'is-' . (12 - $this->owner->ContentColumns) . '-' . $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
+            } else {
+                $imageClasses[] = 'col-' . $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport()) . '-' . (12 - $this->owner->ContentColumns);
+            }
         }
 
-        $this->owner->extend('updateMediaColumnClasses', $classes);
+        $this->owner->extend('updateMediaColumnClasses', $imageClasses);
 
         return implode(' ', $imageClasses);
     }
@@ -237,20 +248,27 @@ final class ElementContentExtension extends DataExtension
         return implode(' ', $classes);
     }
 
+//    private static array $imagePositions = [
+//        'order-1' => 'Always first (default)',
+//        'order-2' => 'Always last',
+//        'order-1 order-md-2' => 'Last on desktop, first on mobile/tablet devices',
+//    ];
+
     public function ContentColumnClasses(): string
     {
-        $contentClasses = [];
+        $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
 
-        $contentClasses[] = 'column';
-
-        if ($this->owner->MediaPosition !== 'has-order-1') {
-            $contentClasses[] = 'has-order-1';
+        if ($this->owner->MediaPosition === 'order-1') {
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-2' : 'order-2';
+        } elseif ($this->owner->MediaPosition === 'order-2') {
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
         } else {
-            $contentClasses[] = 'has-order-2';
+            $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
         }
 
         if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
-            $direction = str_contains($this->owner->MediaPosition, 'has-order-2') ? 'r' : 'l';
+            $direction = str_contains($this->owner->MediaPosition, 'order-2') ? 'r' : 'l';
             $contentClasses[] = sprintf('p%s-%u-desktop', $direction, (int)$this->owner->ExtraColumnGap);
         }
 
