@@ -248,12 +248,6 @@ final class ElementContentExtension extends DataExtension
         return implode(' ', $classes);
     }
 
-//    private static array $imagePositions = [
-//        'order-1' => 'Always first (default)',
-//        'order-2' => 'Always last',
-//        'order-1 order-md-2' => 'Last on desktop, first on mobile/tablet devices',
-//    ];
-
     public function ContentColumnClasses(): string
     {
         $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
