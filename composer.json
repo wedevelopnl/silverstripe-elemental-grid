@@ -21,7 +21,7 @@
         "silverstripe/vendor-plugin": "^1.0",
         "dnadesign/silverstripe-elemental": "^4.0",
         "unclecheese/display-logic": "^2.0",
-        "wedevelopnl/silverstripe-media-field"
+        "wedevelopnl/silverstripe-media-field": "^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.4"
