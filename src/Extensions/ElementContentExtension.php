@@ -246,7 +246,7 @@ final class ElementContentExtension extends DataExtension
 
     public function ContentClasses(): string
     {
-        $contentClasses = [];
+        $contentClasses[] = 'content';
         $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
         if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
