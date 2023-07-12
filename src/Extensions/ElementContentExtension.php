@@ -160,7 +160,7 @@ final class ElementContentExtension extends DataExtension
             DropdownField::create('MediaPosition', _t(__CLASS__ . '.MEDIA_POSITION', 'Media position'), self::$imagePositions),
             Wrapper::create([
                 DropdownField::create('ContentVerticalAlign', _t(__CLASS__ . '.VERTICAL_ALIGNMENT', 'Vertical alignment'), self::$contentVerticalAligments),
-                DropdownField::create('ExtraColumnGap', _t(__CLASS__ . '.EXTRA_COLUMN_GAP_SIZE', 'Extra column gap size'), self::$columnGaps),
+                DropdownField::create('ExtraColumnGap', _t(__CLASS__ . '.EXTRA_COLUMN_GAP_SIZE', 'Extra column gap size'), static::config()->get('columnGaps')),
             ])->displayIf('ContentColumns')->isNotEmpty()->end(),
         ]);
 
