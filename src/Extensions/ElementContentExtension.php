@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
+use DNADesign\Elemental\Models\ElementContent;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
 use SilverStripe\Forms\CheckboxField;
@@ -21,6 +22,10 @@ use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
 
+/**
+ * @method Image MediaImage()
+ * @property ElementContent|ElementContentExtension $owner
+ */
 final class ElementContentExtension extends DataExtension
 {
     private static array $db = [
@@ -280,5 +285,39 @@ final class ElementContentExtension extends DataExtension
     public function getColSize(): int
     {
         return $this->owner->ContentColumns ? ($this->getOwner()->config()->get('grid_column_count') - $this->owner->ContentColumns) : $this->getOwner()->config()->get('grid_column_count');
+    }
+
+    private function getCalculatedImageWidth(): int
+    {
+        $colSize = $this->getColSize();
+
+        return match (true) {
+            $colSize > 10 => 1440,
+            $colSize > 6 => 1200,
+            default => 720
+        };
+    }
+
+    public function getMediaHeight(): int
+    {
+        $values = explode('x', $this->owner->MediaRatio);
+        $widthRatio = $values[0];
+        $heightRatio = $values[1];
+
+        return ($this->getCalculatedImageWidth() / $widthRatio) * $heightRatio;
+    }
+
+    public function getMediaWidth(): int
+    {
+        return $this->getCalculatedImageWidth();
+    }
+
+    public function getMediaImageSourceURL()
+    {
+        if ($this->owner->MediaRatio) {
+            return $this->owner->MediaImage()->FocusFill($this->getMediaWidth(), $this->getMediaHeight())->URL;
+        }
+
+        return $this->owner->MediaImage()->ScaleWidth($this->getCalculatedImageWidth())->URL;
     }
 }
