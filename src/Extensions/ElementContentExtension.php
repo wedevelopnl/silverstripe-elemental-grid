@@ -260,25 +260,25 @@ final class ElementContentExtension extends DataExtension
     public function ContentColumnClasses(): string
     {
         $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
+        $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
         if ($this->owner->MediaPosition === 'order-1') {
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-2' : 'order-2';
         } elseif ($this->owner->MediaPosition === 'order-2') {
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
         } else {
-            $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
         }
 
         if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
             $direction = str_contains($this->owner->MediaPosition, 'order-2') ? 'r' : 'l';
-            $contentClasses[] = sprintf('p%s-%u-desktop', $direction, (int)$this->owner->ExtraColumnGap);
+            $contentClasses[] = sprintf('p%s-%u-%s', $direction, (int)$this->owner->ExtraColumnGap, $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport()));
         }
 
         if ($this->owner->ContentColumns && $this->owner->MediaImage()->exists()) {
-            $contentClasses[] = 'is-' . $this->owner->ContentColumns . '-desktop';
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('is-%u-%s', (int)$this->owner->ContentColumns, $viewportName) : sprintf('col-%s-%u', $viewportName, (int)$this->owner->ContentColumns);
         } else {
-            $contentClasses[] = 'is-12-desktop';
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('is-12-%s', $viewportName) : sprintf('col-%s-12', $viewportName);
         }
 
         $this->owner->extend('updateContentColumnClasses', $contentClasses);
