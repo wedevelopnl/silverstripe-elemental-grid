@@ -141,7 +141,7 @@ final class ElementContentExtension extends DataExtension
         );
 
         $fields->addFieldsToTab('Root.Media', [
-            HeaderField::create('', _t(__CLASS__ . '.MEDIA_FILE', 'Media file'))->setHeadingLevel(1),
+            HeaderField::create('MediaFileTitle', _t(__CLASS__ . '.MEDIA_FILE', 'Media file'))->setHeadingLevel(1),
             $mediaField,
             Wrapper::create([
                 CheckboxField::create('MediaVideoHasOverlay', _t(__CLASS__ . '.SHOW_OVERLAY', 'Show dark overlay on top of video thumbnail')),
@@ -153,7 +153,7 @@ final class ElementContentExtension extends DataExtension
         ]);
 
         $fields->addFieldsToTab('Root.Media', [
-            HeaderField::create('', _t(__CLASS__ . '.MEDIA_POSITIONING', 'Media positioning'))->setHeadingLevel(1),
+            HeaderField::create('MediaPositioningTitle', _t(__CLASS__ . '.MEDIA_POSITIONING', 'Media positioning'))->setHeadingLevel(1),
             OptionsetField::create('ContentColumns', _t(__CLASS__ . '.CONTENT_COLUMN_WIDTH', 'Width of the content column'), self::$contentColumns)
                 ->setTemplate('WeDevelop/ElementalGrid/Forms/OptionsetImageField')
                 ->addExtraClass('optionset-image-field'),
