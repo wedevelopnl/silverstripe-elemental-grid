@@ -244,17 +244,19 @@ final class ElementContentExtension extends DataExtension
         return implode(' ', $imageClasses);
     }
 
-    public function MarginStyles(): string
+    public function ContentClasses(): string
     {
-        $classes = [];
+        $contentClasses = [];
+        $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
-        if (!$this->owner->ContentColumns && $this->owner->MediaImage()->exists()) {
-            $classes[] = 'px-5';
+        if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
+            $direction = str_contains($this->owner->MediaPosition, 'order-2') ? 'r' : 'l';
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('p%s-%u-%s', $direction, (int)$this->owner->ExtraColumnGap, $viewportName) : sprintf('p%s-%s-%u', $direction, $viewportName, (int)$this->owner->ExtraColumnGap);
         }
 
-        $this->owner->extend('updateMarginStyles', $classes);
+        $this->owner->extend('updateContentClasses', $contentClasses);
 
-        return implode(' ', $classes);
+        return implode(' ', $contentClasses);
     }
 
     public function ContentColumnClasses(): string
@@ -268,11 +270,6 @@ final class ElementContentExtension extends DataExtension
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
         } else {
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
-        }
-
-        if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
-            $direction = str_contains($this->owner->MediaPosition, 'order-2') ? 'r' : 'l';
-            $contentClasses[] = sprintf('p%s-%u-%s', $direction, (int)$this->owner->ExtraColumnGap, $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport()));
         }
 
         if ($this->owner->ContentColumns && $this->owner->MediaImage()->exists()) {
