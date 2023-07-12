@@ -7,6 +7,7 @@ namespace WeDevelop\ElementalGrid\Extensions;
 use DNADesign\Elemental\Models\ElementContent;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
@@ -21,6 +22,7 @@ use SilverStripe\ORM\DataExtension;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
+use WeDevelop\Portfolio\Config;
 
 /**
  * @method Image MediaImage()
@@ -28,6 +30,8 @@ use WeDevelop\MediaField\Form\MediaField;
  */
 final class ElementContentExtension extends DataExtension
 {
+    use Configurable;
+
     private static array $db = [
         'ContentColumns' => 'Varchar(64)',
         'ContentVerticalAlign' => 'Varchar(64)',
@@ -143,7 +147,7 @@ final class ElementContentExtension extends DataExtension
                 CheckboxField::create('MediaVideoHasOverlay', _t(__CLASS__ . '.SHOW_OVERLAY', 'Show dark overlay on top of video thumbnail')),
             ])->displayIf('MediaType')->isEqualTo('video')->end(),
             TextField::create('MediaCaption', _t(__CLASS__ . '.CAPTION_TEXT', 'Caption text')),
-            DropdownField::create('MediaRatio', _t(__CLASS__ . '.MEDIA_RATIO', 'Media ratio'), self::$mediaRatios)
+            DropdownField::create('MediaRatio', _t(__CLASS__ . '.MEDIA_RATIO', 'Media ratio'), static::config()->get('mediaRatios'))
                 ->setEmptyString(_t(__CLASS__ . '.AUTO_DEFAULT', 'Auto (default)'))
                 ->setDescription(_t(__CLASS__ . '.DEFAULT_RATIO_DESCRIPTION', 'By default, \'Auto\' will make videos appear as 16x9 ratio, while images will be shown as they are')),
         ]);
