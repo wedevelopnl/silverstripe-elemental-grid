@@ -298,7 +298,7 @@ final class ElementContentExtension extends DataExtension
         };
     }
 
-    public function getMediaHeight(): int
+    public function getMediaImageHeight(): int
     {
         $values = explode('x', $this->owner->MediaRatio);
         $widthRatio = $values[0];
@@ -307,15 +307,15 @@ final class ElementContentExtension extends DataExtension
         return ($this->getCalculatedImageWidth() / $widthRatio) * $heightRatio;
     }
 
-    public function getMediaWidth(): int
+    public function getMediaImageWidth(): int
     {
         return $this->getCalculatedImageWidth();
     }
 
-    public function getMediaImageSourceURL()
+    public function getMediaImageSourceURL(): string
     {
         if ($this->owner->MediaRatio) {
-            return $this->owner->MediaImage()->FocusFill($this->getMediaWidth(), $this->getMediaHeight())->URL;
+            return $this->owner->MediaImage()->FocusFill($this->getMediaImageWidth(), $this->getMediaImageHeight())->URL;
         }
 
         return $this->owner->MediaImage()->ScaleWidth($this->getCalculatedImageWidth())->URL;
