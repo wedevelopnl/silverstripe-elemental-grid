@@ -42,9 +42,9 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return implode(' ', $classes);
     }
 
-    public function getTitleSizeClass(): ?string
+    public function getTitleSizeClass(): string
     {
-        return $this->baseElement->TitleClass;
+        return $this->baseElement->TitleClass ?? strtolower($this->baseElement->TitleTag);
     }
 
     public function getContainerClass(bool $fluid): string
@@ -129,7 +129,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    public function getMediaRatioClass(string $mediaRatio = null): ?string
+    public function getMediaRatioClass(?string $mediaRatio = null): ?string
     {
         return $mediaRatio;
     }

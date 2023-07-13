@@ -123,7 +123,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    public function getTitleSizeClass(): ?string
+    public function getTitleSizeClass(): string
     {
         return match ($this->baseElement->TitleClass) {
             'h1' => 'title is-size-1',
@@ -141,7 +141,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
     }
 
-    public function getMediaRatioClass(string $mediaRatio = null): ?string
+    public function getMediaRatioClass(?string $mediaRatio = null): ?string
     {
         return $mediaRatio ? 'is-' . str_replace('x', 'by', $mediaRatio) : null;
     }
@@ -149,6 +149,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     public function getViewportName(string $viewportName): string
     {
         $viewports = [
+            'xxl' => 'fullhd',
             'xl' => 'fullhd',
             'lg' => 'widescreen',
             'md' => 'desktop',

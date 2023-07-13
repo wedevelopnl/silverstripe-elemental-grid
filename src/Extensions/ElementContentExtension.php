@@ -22,8 +22,6 @@ use SilverStripe\ORM\DataExtension;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
-use WeDevelop\Portfolio\Config;
-use function _PHPStan_978789531\RingCentral\Psr7\str;
 
 /**
  * @method Image MediaImage()
@@ -191,7 +189,7 @@ final class ElementContentExtension extends DataExtension
         }
     }
 
-    public function getMediaRatioClass()
+    public function getMediaRatioClass(): ?string
     {
         $mediaRatio = $this->owner->MediaRatio;
 
@@ -221,6 +219,8 @@ final class ElementContentExtension extends DataExtension
 
     public function MediaColumnClasses(): ?string
     {
+        $imageClasses = [];
+
         if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
             $imageClasses[] = $this->owner->getCSSFramework()->getColumnClass();
         }
@@ -268,6 +268,8 @@ final class ElementContentExtension extends DataExtension
 
     public function ContentColumnClasses(): string
     {
+        $contentClasses = [];
+
         if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
             $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
         }
