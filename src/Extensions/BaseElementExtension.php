@@ -270,7 +270,7 @@ class BaseElementExtension extends DataExtension
         return $this->owner->getField('TitleTag');
     }
 
-    public function getTitleSizeClass(): string
+    public function getTitleSizeClass(): ?string
     {
         $class = $this->owner->getCSSFramework()->getTitleSizeClass();
 

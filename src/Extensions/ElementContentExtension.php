@@ -23,6 +23,7 @@ use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
 use WeDevelop\Portfolio\Config;
+use function _PHPStan_978789531\RingCentral\Psr7\str;
 
 /**
  * @method Image MediaImage()
@@ -84,7 +85,7 @@ final class ElementContentExtension extends DataExtension
     private static array $contentVerticalAligments = [
         '' => 'Top',
         'align-items-center' => 'Center (default)',
-        'align-items-flex-end' => 'Bottom',
+        'align-items-end' => 'Bottom',
     ];
 
     private static array $imagePositions = [
@@ -220,7 +221,9 @@ final class ElementContentExtension extends DataExtension
 
     public function MediaColumnClasses(): ?string
     {
-        $imageClasses[] = $this->owner->getCSSFramework()->getColumnClass();
+        if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
+            $imageClasses[] = $this->owner->getCSSFramework()->getColumnClass();
+        }
 
         if ($this->owner->MediaPosition === 'order-1') {
             $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
@@ -250,7 +253,11 @@ final class ElementContentExtension extends DataExtension
         $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
         if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
-            $direction = str_contains($this->owner->MediaPosition, 'order-2') ? 'r' : 'l';
+            if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
+                $direction = str_contains($this->owner->MediaPosition, 'order-2') || str_contains($this->owner->MediaPosition, 'order-md-2') ? 'r' : 'l';
+            } else {
+                $direction = str_contains($this->owner->MediaPosition, 'order-2') || str_contains($this->owner->MediaPosition, 'order-md-2') ? 'e' : 's';
+            }
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('p%s-%u-%s', $direction, (int)$this->owner->ExtraColumnGap, $viewportName) : sprintf('p%s-%s-%u', $direction, $viewportName, (int)$this->owner->ExtraColumnGap);
         }
 
@@ -261,7 +268,10 @@ final class ElementContentExtension extends DataExtension
 
     public function ContentColumnClasses(): string
     {
-        $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
+        if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
+            $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
+        }
+
         $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
         if ($this->owner->MediaPosition === 'order-1') {
@@ -269,7 +279,7 @@ final class ElementContentExtension extends DataExtension
         } elseif ($this->owner->MediaPosition === 'order-2') {
             $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
         } else {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
+            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-2 order-%s-1', $viewportName);
         }
 
         if ($this->owner->ContentColumns && $this->owner->MediaImage()->exists()) {
@@ -301,11 +311,15 @@ final class ElementContentExtension extends DataExtension
 
     public function getMediaImageHeight(): int
     {
-        $values = explode('x', $this->owner->MediaRatio);
-        $widthRatio = $values[0];
-        $heightRatio = $values[1];
+        if ($this->owner->MediaRatio) {
+            $values = explode('x', $this->owner->MediaRatio);
+            $widthRatio = $values[0];
+            $heightRatio = $values[1];
 
-        return ($this->getCalculatedImageWidth() / $widthRatio) * $heightRatio;
+            return ($this->getCalculatedImageWidth() / $widthRatio) * $heightRatio;
+        }
+
+        return $this->owner->MediaImage()->ScaleWidth($this->getCalculatedImageWidth())->Height;
     }
 
     public function getMediaImageWidth(): int

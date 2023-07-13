@@ -123,7 +123,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    public function getTitleSizeClass(): string
+    public function getTitleSizeClass(): ?string
     {
         return match ($this->baseElement->TitleClass) {
             'h1' => 'title is-size-1',

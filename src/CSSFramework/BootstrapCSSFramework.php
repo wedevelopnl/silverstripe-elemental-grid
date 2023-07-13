@@ -42,7 +42,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return implode(' ', $classes);
     }
 
-    public function getTitleSizeClass(): string
+    public function getTitleSizeClass(): ?string
     {
         return $this->baseElement->TitleClass;
     }
