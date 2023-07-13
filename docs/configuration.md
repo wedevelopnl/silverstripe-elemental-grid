@@ -61,20 +61,59 @@ Add these methods to your own ElementRow extension
 ```php
 public function updateSectionClasses(&$classes)
 {
-    array_push($classes, 'add-your-own-css-class')
+    $classes[] = 'add-your-own-css-class';
 }
 
 public function updateRowClasses(&$classes)
 {
-    array_push($classes, 'add-your-own-css-class')
+    $classes[] = 'add-your-own-css-class';
 }
 
 public function updateContainerClasses(&$classes)
 {
-    array_push($classes, 'add-your-own-css-class')
+    $classes[] = 'add-your-own-css-class';
 }
 ```
 
 ## Override ElementRow template
 Copy the file `templates/WeDevelop/ElementalGrid/Models/ElementRow.ss` to your own `themes/` folder. For example to:
 `themes/default/WeDevelop/ElementalGrid/Models/ElementRow.ss`. You can then edit the template to make it fit your needs.
+
+## Element content
+The new ElementContent will now support different mediatypes (images and videos, both YouTube and Vimeo). Built in are
+some handy tools that will make sure your videos will look styled out-of-the-box, as well as some JavaScript handlers that
+will replace your video-wrapper with the correct iframe. A button will be shown on top of the video to play the Video using
+your own styled player, in stead of the default third-party YouTube or Vimeo UI.
+
+### Step 1. Extend the ElementContent
+In your own project, extend the ElementContent that lives in this module
+```yaml
+DNADesign\Elemental\Models\ElementContent:
+    extensions:
+        - App\Extensions\ElementContentExtension
+```
+
+### Step 2. Add the methods
+Add these methods to your own ElementContentExtension to update the CSS styling classes that will be applied to your frontend.
+
+```php
+public function updateElementClasses(&$classes)
+{
+    $classes[] = 'add-your-own-css-class';
+}
+
+public function updateMediaColumnClasses(&$classes)
+{
+    $classes[] = 'add-your-own-css-class';
+}
+
+public function updateContentClasses(&$classes)
+{
+    $classes[] = 'add-your-own-css-class';
+}
+
+public function updateContentColumnClasses(&$classes)
+{
+    $classes[] = 'add-your-own-css-class';
+}
+```
