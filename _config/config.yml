@@ -30,6 +30,6 @@ DNADesign\Elemental\Models\ElementContent:
 
 WeDevelop\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
-  css_framework: 'bulma'
+  css_framework: 'bootstrap'
   enable_custom_title_classes: true
   default_title_tag: 'h2'
