@@ -38,7 +38,7 @@
         <% end_if %>
     </div>
     <div class="$ContentColumnClasses">
-        <div class="content{$MarginStyles}">
+        <div class="$ContentClasses">
             <% if $ShowTitle %>
                 <$TitleTag class="$TitleSizeClass">$Title.RAW</$TitleTag>
             <% end_if %>
