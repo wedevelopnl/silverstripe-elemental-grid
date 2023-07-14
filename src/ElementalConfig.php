@@ -12,7 +12,9 @@ final class ElementalConfig
 
     private static string $default_title_tag = 'h2';
 
-    private static string $css_framework = 'bulma';
+    private static string $css_framework = 'bootstrap';
+
+    private static int $grid_column_count = 12;
 
     public static function getEnableCustomTitleClasses(): bool
     {
@@ -27,6 +29,11 @@ final class ElementalConfig
     public static function getDefaultTitleTag(): string
     {
         return Config::inst()->get(__CLASS__, 'default_title_tag');
+    }
+
+    public static function getGridColumnCount(): int
+    {
+        return Config::inst()->get(__CLASS__, 'grid_column_count');
     }
 
     public static function getCSSFrameworkName(): string

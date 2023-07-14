@@ -3,6 +3,7 @@
 namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
+use WeDevelop\ElementalGrid\ElementalConfig;
 
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
@@ -50,6 +51,69 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     public function getContainerClass(bool $fluid): string
     {
         return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
+    }
+
+    public function getMediaRatioClass(?string $mediaRatio = null): ?string
+    {
+        return $mediaRatio;
+    }
+
+    public function getViewportName(): string
+    {
+        return strtolower(ElementalConfig::getDefaultViewport());
+    }
+
+    public function getContentPaddingClass(string $direction, int $size): string
+    {
+        $direction = match($direction) {
+            self::DIRECTION_TOP => 't',
+            self::DIRECTION_RIGHT => 'e',
+            self::DIRECTION_BOTTOM => 'b',
+            self::DIRECTION_LEFT => 's',
+        };
+
+        return sprintf('p%s-%s-%u', $direction, $this->getViewportName(), $size);
+    }
+
+    public function getInitialContentColumnClass(): ?string
+    {
+        return null;
+    }
+
+    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'order-1',
+            'order-2' => 'order-2',
+            default => sprintf('order-1 order-%s-2', $this->getViewportName()),
+        };
+    }
+
+    public function getContentColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'order-2',
+            'order-2' => 'order-1',
+            default => sprintf('order-2 order-%s-1', $this->getViewportName()),
+        };
+    }
+
+    public function getMediaColumnWidthClass(?string $contentColumnWidth): ?string
+    {
+        if ($contentColumnWidth) {
+            return 'col-' . $this->getViewportName() . '-' . (ElementalConfig::getGridColumnCount() - $contentColumnWidth);
+        }
+
+        return null;
+    }
+
+    public function getContentColumnWidthClass(?string $contentColumnWidth): string
+    {
+        if ($contentColumnWidth) {
+            return sprintf('col-%s-%s', $this->getViewportName(), $contentColumnWidth);
+        }
+
+        return sprintf('col-%s-12', $this->getViewportName());;
     }
 
     private function getVisibilityClasses(): array
@@ -129,13 +193,4 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    public function getMediaRatioClass(?string $mediaRatio = null): ?string
-    {
-        return $mediaRatio;
-    }
-
-    public function getViewportName(string $viewportName): string
-    {
-        return strtolower($viewportName);
-    }
 }

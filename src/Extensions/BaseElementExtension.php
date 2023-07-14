@@ -17,8 +17,6 @@ use WeDevelop\ElementalGrid\ElementalConfig;
 
 class BaseElementExtension extends DataExtension
 {
-    private static int $grid_column_count = 12;
-
     private static bool $inline_editable = false;
 
     private CSSFrameworkInterface $cssFramework;
@@ -36,7 +34,7 @@ class BaseElementExtension extends DataExtension
     public function populateDefaults(): void
     {
         $defaultSizeField = 'Size' . ElementalConfig::getDefaultViewport();
-        $this->owner->$defaultSizeField = $this->getOwner()->config()->get('grid_column_count');
+        $this->owner->$defaultSizeField = ElementalConfig::getGridColumnCount();
     }
 
     private static array $titleOptions = [
@@ -228,10 +226,10 @@ class BaseElementExtension extends DataExtension
 
         $blockSchema['grid'] = [
             'isRow' => $this->owner->ClassName === ElementRow::class,
-            'gridColumns' => $this->getOwner()->config()->get('grid_column_count'),
+            'gridColumns' => ElementalConfig::getGridColumnCount(),
             'column' => [
                 'defaultViewport' => ElementalConfig::getDefaultViewport(),
-                'size' => $this->owner->$defaultViewportSize ?? $this->getOwner()->config()->get('grid_column_count'),
+                'size' => $this->owner->$defaultViewportSize ?? ElementalConfig::getGridColumnCount(),
                 'offset' => $this->owner->$defaultViewportOffset,
                 'visibility' => $this->owner->$defaultViewportVisibility,
             ],
@@ -246,8 +244,8 @@ class BaseElementExtension extends DataExtension
             $columns[0] = $defaultValue;
         }
 
-        for ($i = 1; $i < $this->getOwner()->config()->get('grid_column_count') + 1; $i++) {
-            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, $this->getOwner()->config()->get('grid_column_count'));
+        for ($i = 1; $i < ElementalConfig::getGridColumnCount() + 1; $i++) {
+            $columns[$i] = sprintf('%s %u/%u', _t(__CLASS__ . '.COLUMN', 'Column'), $i, ElementalConfig::getGridColumnCount());
         }
 
         return $columns;

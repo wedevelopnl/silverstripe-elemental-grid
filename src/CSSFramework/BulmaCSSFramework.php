@@ -3,6 +3,7 @@
 namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
+use WeDevelop\ElementalGrid\ElementalConfig;
 
 final class BulmaCSSFramework implements CSSFrameworkInterface
 {
@@ -40,6 +41,91 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         $classes = array_merge([self::COLUMN_CLASSNAME], $sizeClasses, $offsetClasses, $visibilityClasses);
 
         return implode(' ', $classes);
+    }
+
+    public function getTitleSizeClass(): string
+    {
+        return match ($this->baseElement->TitleClass) {
+            'h1' => 'title is-size-1',
+            'h2' => 'title is-size-2',
+            'h3' => 'title is-size-3',
+            'h4' => 'title is-size-4',
+            'h5' => 'title is-size-5',
+            'h6' => 'title is-size-6',
+            default => 'title',
+        };
+    }
+
+    public function getContainerClass(bool $fluid): string
+    {
+        return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
+    }
+
+    public function getMediaRatioClass(?string $mediaRatio = null): ?string
+    {
+        return $mediaRatio ? 'is-' . str_replace('x', 'by', $mediaRatio) : null;
+    }
+
+    public function getViewportName(): string
+    {
+        $viewportName = ElementalConfig::getDefaultViewport();
+
+        $viewports = [
+            'xxl' => 'fullhd',
+            'xl' => 'fullhd',
+            'lg' => 'widescreen',
+            'md' => 'desktop',
+            'sm' => 'tablet',
+            'xs' => 'mobile',
+        ];
+
+        return $viewports[strtolower($viewportName)];
+    }
+
+    public function getContentPaddingClass(string $direction, int $size): string
+    {
+        return sprintf('p%s-%u-%s', $direction, $size, $this->getViewportName());
+    }
+
+    public function getInitialContentColumnClass(): ?string
+    {
+        return $this->getColumnClass();
+    }
+
+    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'has-order-1',
+            'order-2' => 'has-order-2',
+            default => sprintf('has-order-1 has-order-2-%s', $this->getViewportName()),
+        };
+    }
+
+    public function getContentColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'has-order-2',
+            'order-2' => 'has-order-1',
+            default => sprintf('has-order-2 has-order-1-%s', $this->getViewportName()),
+        };
+    }
+
+    public function getMediaColumnWidthClass(?int $contentColumnWidth): ?string
+    {
+        if ($contentColumnWidth) {
+            return 'is-' . (ElementalConfig::getGridColumnCount() - $contentColumnWidth) . '-' . $this->getViewportName();
+        }
+
+        return null;
+    }
+
+    public function getContentColumnWidthClass(?int $contentColumnWidth): string
+    {
+        if ($contentColumnWidth) {
+            return sprintf('is-%u-%s', $contentColumnWidth, $this->getViewportName());
+        }
+
+        return sprintf('is-12-%s', $this->getViewportName());
     }
 
     private function getVisibilityClasses(): array
@@ -121,42 +207,5 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         }
 
         return $classes;
-    }
-
-    public function getTitleSizeClass(): string
-    {
-        return match ($this->baseElement->TitleClass) {
-            'h1' => 'title is-size-1',
-            'h2' => 'title is-size-2',
-            'h3' => 'title is-size-3',
-            'h4' => 'title is-size-4',
-            'h5' => 'title is-size-5',
-            'h6' => 'title is-size-6',
-            default => 'title',
-        };
-    }
-
-    public function getContainerClass(bool $fluid): string
-    {
-        return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
-    }
-
-    public function getMediaRatioClass(?string $mediaRatio = null): ?string
-    {
-        return $mediaRatio ? 'is-' . str_replace('x', 'by', $mediaRatio) : null;
-    }
-
-    public function getViewportName(string $viewportName): string
-    {
-        $viewports = [
-            'xxl' => 'fullhd',
-            'xl' => 'fullhd',
-            'lg' => 'widescreen',
-            'md' => 'desktop',
-            'sm' => 'tablet',
-            'xs' => 'mobile',
-        ];
-
-        return $viewports[strtolower($viewportName)];
     }
 }

@@ -80,10 +80,10 @@ Copy the file `templates/WeDevelop/ElementalGrid/Models/ElementRow.ss` to your o
 `themes/default/WeDevelop/ElementalGrid/Models/ElementRow.ss`. You can then edit the template to make it fit your needs.
 
 ## Element content
-The new ElementContent will now support different mediatypes (images and videos, both YouTube and Vimeo). Built in are
+The new ElementContent will now support different mediatypes (images and videos, both YouTube and Vimeo). Built-in are
 some handy tools that will make sure your videos will look styled out-of-the-box, as well as some JavaScript handlers that
 will replace your video-wrapper with the correct iframe. A button will be shown on top of the video to play the Video using
-your own styled player, in stead of the default third-party YouTube or Vimeo UI.
+your own styled player, instead of the default third-party YouTube or Vimeo UI.
 
 ### Extending ElementContent
 

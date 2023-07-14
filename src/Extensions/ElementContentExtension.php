@@ -20,6 +20,7 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
+use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
 
@@ -164,7 +165,7 @@ final class ElementContentExtension extends DataExtension
         ]);
 
 
-        if ($this->owner->MediaType === 'video') {
+        if ($this->getOwner()->MediaType === 'video') {
             $fields->addFieldsToTab('Root.VideoEmbeddedData', [
                 ReadonlyField::create('MediaVideoEmbeddedURL', _t(__CLASS__ . '.SHORTENED_URL', 'Shortened URL')),
                 ReadonlyField::create('MediaVideoProvider', _t(__CLASS__ . '.VIDEO_PROVIDER', 'Video provider')),
@@ -172,7 +173,7 @@ final class ElementContentExtension extends DataExtension
                 ReadonlyField::create('MediaVideoEmbeddedDescription', _t(__CLASS__ . '.EMBEDDED_DESCRIPTION', 'Embedded description')),
                 ReadonlyField::create('MediaVideoEmbeddedThumbnail', _t(__CLASS__ . '.EMBEDDED_THUMBNAIL_URL', 'Embedded thumbnail URL')),
                 FieldGroup::create([
-                    LiteralField::create('MediaVideoEmbeddedThumbnailPreview', '<img src="' . $this->owner->MediaVideoEmbeddedThumbnail . '">', _t(__CLASS__ . '.EMBEDDED_THUMBNAIL', 'Embedded thumbnail')),
+                    LiteralField::create('MediaVideoEmbeddedThumbnailPreview', '<img src="' . $this->getOwner()->MediaVideoEmbeddedThumbnail . '">', _t(__CLASS__ . '.EMBEDDED_THUMBNAIL', 'Embedded thumbnail')),
                 ])->setTitle(_t(__CLASS__ . '.VIDEO_THUMBNAIL', 'Video Thumbnail')),
                 ReadonlyField::create('MediaVideoEmbeddedCreated', _t(__CLASS__ . '.EMBEDDED_PUBLICATION_DATE', 'Embedded publication date')),
             ]);
@@ -183,66 +184,51 @@ final class ElementContentExtension extends DataExtension
     {
         parent::onBeforeWrite();
 
-        if ($this->owner->MediaType === 'video' && $this->owner->MediaVideoFullURL) {
-            $this->owner->MediaVideoFullURL = trim($this->owner->MediaVideoFullURL);
-            MediaField::saveEmbed($this->owner);
+        if ($this->getOwner()->MediaType === 'video' && $this->getOwner()->MediaVideoFullURL) {
+            $this->getOwner()->MediaVideoFullURL = trim($this->getOwner()->MediaVideoFullURL);
+            MediaField::saveEmbed($this->getOwner());
         }
     }
 
     public function getMediaRatioClass(): ?string
     {
-        $mediaRatio = $this->owner->MediaRatio;
+        $mediaRatio = $this->getOwner()->MediaRatio;
 
-        if (!$this->owner->MediaRatio && $this->owner->MediaType === 'video') {
+        if (!$this->getOwner()->MediaRatio && $this->getOwner()->MediaType === 'video') {
             $mediaRatio = '16x9';
         }
 
-        return $this->owner->getCSSFramework()->getMediaRatioClass($mediaRatio);
+        return $this->getCSSFramework()->getMediaRatioClass($mediaRatio);
     }
 
     public function ElementClasses(): string
     {
-        $elementClasses[] = $this->owner->getCSSFramework()->getRowClasses();
+        $elementClasses = [];
 
-        if ($this->owner->ContentColumns && $this->owner->ContentVerticalAlign) {
+        $elementClasses[] = $this->getCSSFramework()->getRowClasses();
+
+        if ($this->getOwner()->ContentColumns && $this->getOwner()->ContentVerticalAlign) {
             if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
-                $elementClasses[] = 'is-' . $this->owner->ContentVerticalAlign;
+                $elementClasses[] = 'is-' . $this->getOwner()->ContentVerticalAlign;
             } else {
-                $elementClasses[] = $this->owner->ContentVerticalAlign;
+                $elementClasses[] = $this->getOwner()->ContentVerticalAlign;
             }
         }
 
-        $this->owner->extend('updateElementClasses', $classes);
+        $this->getOwner()->extend('updateElementClasses', $elementClasses);
 
         return implode(' ', $elementClasses);
     }
 
     public function MediaColumnClasses(): ?string
     {
-        $imageClasses = [];
+        $imageClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
 
-        if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
-            $imageClasses[] = $this->owner->getCSSFramework()->getColumnClass();
-        }
+        $imageClasses[] = $this->getCSSFramework()->getMediaColumnOrderClasses($this->getOwner()->MediaPosition);
 
-        if ($this->owner->MediaPosition === 'order-1') {
-            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
-        } elseif ($this->owner->MediaPosition === 'order-2') {
-            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-2' : 'order-2';
-        } else {
-            $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
-            $imageClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-1 has-order-2-%s', $viewportName) : sprintf('order-1 order-%s-2', $viewportName);
-        }
+        $imageClasses[] = $this->getCSSFramework()->getMediaColumnWidthClass($this->owner->ContentColumns);
 
-        if ($this->owner->ContentColumns) {
-            if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
-                $imageClasses[] = 'is-' . (12 - $this->owner->ContentColumns) . '-' . $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
-            } else {
-                $imageClasses[] = 'col-' . $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport()) . '-' . (12 - $this->owner->ContentColumns);
-            }
-        }
-
-        $this->owner->extend('updateMediaColumnClasses', $imageClasses);
+        $this->getOwner()->extend('updateMediaColumnClasses', $imageClasses);
 
         return implode(' ', $imageClasses);
     }
@@ -250,57 +236,35 @@ final class ElementContentExtension extends DataExtension
     public function ContentClasses(): string
     {
         $contentClasses[] = 'content';
-        $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
 
-        if ($this->owner->ContentColumns && $this->owner->ExtraColumnGap) {
-            if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
-                $direction = str_contains($this->owner->MediaPosition, 'order-2') || str_contains($this->owner->MediaPosition, 'order-md-2') ? 'r' : 'l';
-            } else {
-                $direction = str_contains($this->owner->MediaPosition, 'order-2') || str_contains($this->owner->MediaPosition, 'order-md-2') ? 'e' : 's';
-            }
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('p%s-%u-%s', $direction, (int)$this->owner->ExtraColumnGap, $viewportName) : sprintf('p%s-%s-%u', $direction, $viewportName, (int)$this->owner->ExtraColumnGap);
+        if ($this->getOwner()->ContentColumns && $this->getOwner()->ExtraColumnGap) {
+            $contentClasses[] = $this->getCSSFramework()->getContentPaddingClass($this->getContentPaddingDirection(), $this->getOwner()->ExtraColumnGap);
         }
 
-        $this->owner->extend('updateContentClasses', $contentClasses);
+        $this->getOwner()->extend('updateContentClasses', $contentClasses);
 
         return implode(' ', $contentClasses);
     }
 
     public function ContentColumnClasses(): string
     {
-        $contentClasses = [];
+        $contentClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
 
-        if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
-            $contentClasses[] = $this->owner->getCSSFramework()->getColumnClass();
-        }
+        $contentClasses[] = $this->getCSSFramework()->getContentColumnWidthClass($this->owner->ContentColumns);
 
-        $viewportName = $this->owner->getCSSFramework()->getViewportName(ElementalConfig::getDefaultViewport());
+        $contentClasses[] = $this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition);
 
-        if ($this->owner->MediaPosition === 'order-1') {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-2' : 'order-2';
-        } elseif ($this->owner->MediaPosition === 'order-2') {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? 'has-order-1' : 'order-1';
-        } else {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('has-order-2 has-order-1-%s', $viewportName) : sprintf('order-2 order-%s-1', $viewportName);
-        }
-
-        if ($this->owner->ContentColumns && $this->owner->MediaImage()->exists()) {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('is-%u-%s', (int)$this->owner->ContentColumns, $viewportName) : sprintf('col-%s-%u', $viewportName, (int)$this->owner->ContentColumns);
-        } else {
-            $contentClasses[] = ElementalConfig::getCSSFrameworkName() === 'bulma' ? sprintf('is-12-%s', $viewportName) : sprintf('col-%s-12', $viewportName);
-        }
-
-        $this->owner->extend('updateContentColumnClasses', $contentClasses);
+        $this->getOwner()->extend('updateContentColumnClasses', $contentClasses);
 
         return implode(' ', $contentClasses);
     }
 
     public function getColSize(): int
     {
-        return $this->owner->ContentColumns ? ($this->getOwner()->config()->get('grid_column_count') - $this->owner->ContentColumns) : $this->getOwner()->config()->get('grid_column_count');
+        return $this->getOwner()->ContentColumns ? (ElementalConfig::getGridColumnCount() - $this->getOwner()->ContentColumns) : ElementalConfig::getGridColumnCount();
     }
 
-    private function getCalculatedImageWidth(): int
+    private function getCalculatedMediaImageWidth(): int
     {
         $colSize = $this->getColSize();
 
@@ -313,28 +277,42 @@ final class ElementContentExtension extends DataExtension
 
     public function getMediaImageHeight(): int
     {
-        if ($this->owner->MediaRatio) {
-            $values = explode('x', $this->owner->MediaRatio);
+        if ($this->getOwner()->MediaRatio) {
+            $values = explode('x', $this->getOwner()->MediaRatio);
             $widthRatio = $values[0];
             $heightRatio = $values[1];
 
-            return ($this->getCalculatedImageWidth() / $widthRatio) * $heightRatio;
+            return ($this->getCalculatedMediaImageWidth() / $widthRatio) * $heightRatio;
         }
 
-        return $this->owner->MediaImage()->ScaleWidth($this->getCalculatedImageWidth())->Height;
+        return $this->getOwner()->MediaImage()->ScaleWidth($this->getCalculatedMediaImageWidth())->Height;
     }
 
     public function getMediaImageWidth(): int
     {
-        return $this->getCalculatedImageWidth();
+        return $this->getCalculatedMediaImageWidth();
     }
 
     public function getMediaImageSourceURL(): string
     {
-        if ($this->owner->MediaRatio) {
-            return $this->owner->MediaImage()->FocusFill($this->getMediaImageWidth(), $this->getMediaImageHeight())->URL;
+        if ($this->getOwner()->MediaRatio) {
+            return $this->getOwner()->MediaImage()->FocusFill($this->getMediaImageWidth(), $this->getMediaImageHeight())->URL;
         }
 
-        return $this->owner->MediaImage()->ScaleWidth($this->getCalculatedImageWidth())->URL;
+        return $this->getOwner()->MediaImage()->ScaleWidth($this->getCalculatedMediaImageWidth())->URL;
+    }
+
+    private function getCSSFramework(): CSSFrameworkInterface
+    {
+        return $this->getOwner()->getCSSFramework();
+    }
+
+    private function getContentPaddingDirection(): string
+    {
+        if (str_contains($this->getOwner()->MediaPosition, 'order-2') || str_contains($this->getOwner()->MediaPosition, 'order-md-2')) {
+            return CSSFrameworkInterface::DIRECTION_RIGHT;
+        }
+
+        return CSSFrameworkInterface::DIRECTION_LEFT;
     }
 }

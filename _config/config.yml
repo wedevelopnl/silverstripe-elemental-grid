@@ -33,3 +33,4 @@ WeDevelop\ElementalGrid\ElementalConfig:
   css_framework: 'bootstrap'
   enable_custom_title_classes: true
   default_title_tag: 'h2'
+  grid_column_count: 12
