@@ -110,7 +110,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         };
     }
 
-    public function getMediaColumnWidthClass(?int $contentColumnWidth): ?string
+    public function getMediaColumnWidthClass(?string $contentColumnWidth): ?string
     {
         if ($contentColumnWidth) {
             return 'is-' . (ElementalConfig::getGridColumnCount() - $contentColumnWidth) . '-' . $this->getViewportName();
@@ -119,7 +119,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return null;
     }
 
-    public function getContentColumnWidthClass(?int $contentColumnWidth): string
+    public function getContentColumnWidthClass(?string $contentColumnWidth): string
     {
         if ($contentColumnWidth) {
             return sprintf('is-%u-%s', $contentColumnWidth, $this->getViewportName());
