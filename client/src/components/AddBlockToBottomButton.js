@@ -11,14 +11,14 @@ class AddBlockToBottomButton extends Component {
     this.toggle = this.toggle.bind(this);
 
     this.state = {
-      popoverOpen: false
+      bottomPopoverOpen: false
     };
   }
 
   toggle() {
-    this.setState({
-      bottomPopoverOpen: !this.state.bottomPopoverOpen
-    });
+    this.setState(prevState => ({
+      bottomPopoverOpen: !prevState.bottomPopoverOpen
+    }));
   }
 
   /**
@@ -40,7 +40,7 @@ class AddBlockToBottomButton extends Component {
     return (
       <div>
         <Button {...buttonAttributes}>
-          {'Add to bottom'}
+          Add to bottom
         </Button>
         <AddElementPopoverComponent
           placement="bottom-start"
