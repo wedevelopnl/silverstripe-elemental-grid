@@ -17,7 +17,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.0",
-        "silverstripe/cms": "^4@stable",
+        "silverstripe/framework": "^4@stable",
         "silverstripe/vendor-plugin": "^1.0",
         "dnadesign/silverstripe-elemental": "^4.0",
         "unclecheese/display-logic": "^2.0",
