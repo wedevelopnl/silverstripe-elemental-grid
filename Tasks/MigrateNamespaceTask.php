@@ -14,7 +14,7 @@ class MigrateNamespaceTask extends BuildTask
 
     protected $description = 'Migrate elemental grid TheWebmen namespace to WeDevelop namespace';
 
-    private static $segment = 'migrate-elemental-grid-namespace';
+    private static string $segment = 'migrate-elemental-grid-namespace';
 
     public function run($request)
     {

@@ -2,7 +2,6 @@
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
-use DNADesign\Elemental\Models\ElementalArea;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
@@ -10,22 +9,10 @@ use SilverStripe\ORM\DataExtension;
 use WeDevelop\ElementalGrid\Controllers\ElementRowController;
 use WeDevelop\ElementalGrid\Models\ElementRow;
 
-/***
- * Class ElementalAreaExtension
- * @package WeDevelop\ElementalGrid\Extensions
- *
- * @property ElementalArea $owner
- */
 class ElementalAreaExtension extends DataExtension
 {
-    /**
-     * @var ArrayList
-     */
-    private $controllers;
+    private ArrayList $controllers;
 
-    /**
-     * @param object $owner
-     */
     public function setOwner($owner)
     {
         parent::setOwner($owner);
@@ -44,18 +31,15 @@ class ElementalAreaExtension extends DataExtension
         }
     }
 
-    /**
-     * @return false|ArrayList
-     * @throws \Exception
-     */
-    public function ElementControllersWithRows()
+    public function ElementControllersWithRows(): ?ArrayList
     {
         if (!$this->controllers->count()) {
-            return false;
+            return null;
         }
 
         //Check for first row
         $first = $this->controllers->first();
+
         if ($first->ClassName === ElementRow::class) {
             $first->setIsFirstRow(true);
         } else {

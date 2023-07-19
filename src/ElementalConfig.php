@@ -6,54 +6,37 @@ use SilverStripe\Core\Config\Config;
 
 final class ElementalConfig
 {
-    /***
-     * @var bool
-     */
-    private static $enable_custom_title_classes;
+    private static bool $enable_custom_title_classes = true;
 
-    /***
-     * @var string
-     */
-    private static $default_viewport;
+    private static string $default_viewport = 'MD';
 
-    /***
-     * @var string
-     */
-    private static $default_title_tag;
+    private static string $default_title_tag = 'h2';
 
-    /***
-     * @var string
-     */
-    private static $css_framework;
+    private static string $css_framework = 'bootstrap';
 
-    /**
-     * @return bool
-     */
-    public static function getEnableCustomTitleClasses()
+    private static int $grid_column_count = 12;
+
+    public static function getEnableCustomTitleClasses(): bool
     {
         return Config::inst()->get(__CLASS__, 'enable_custom_title_classes');
     }
 
-    /**
-     * @return string
-     */
-    public static function getDefaultViewport()
+    public static function getDefaultViewport(): string
     {
         return Config::inst()->get(__CLASS__, 'default_viewport');
     }
 
-    /**
-     * @return string
-     */
-    public static function getDefaultTitleTag()
+    public static function getDefaultTitleTag(): string
     {
         return Config::inst()->get(__CLASS__, 'default_title_tag');
     }
 
-    /**
-     * @return string
-     */
-    public static function getCSSFrameworkName()
+    public static function getGridColumnCount(): int
+    {
+        return Config::inst()->get(__CLASS__, 'grid_column_count');
+    }
+
+    public static function getCSSFrameworkName(): string
     {
         return Config::inst()->get(__CLASS__, 'css_framework');
     }

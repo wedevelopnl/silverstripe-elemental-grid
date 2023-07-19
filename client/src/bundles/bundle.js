@@ -50,3 +50,4 @@ window.document.addEventListener('DOMContentLoaded', () => {
     updater.component('AddElementPopover', OverruledAddElementPopover);
   });
 });
+

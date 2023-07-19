@@ -97,8 +97,6 @@ class ElementRow extends BaseElement
      */
     public function getRowClasses()
     {
-        $classes = [];
-
         $classes[] = $this->getCSSFramework()->getRowClasses();
 
         $this->extend('updateRowClasses', $classes);
@@ -116,7 +114,7 @@ class ElementRow extends BaseElement
      */
     public function getSectionClasses()
     {
-        $classes = [];
+        $classes[] = 'section';
 
         $this->extend('updateSectionClasses', $classes);
 
@@ -132,9 +130,7 @@ class ElementRow extends BaseElement
      */
     public function getContainerClasses()
     {
-        $classes = [];
-
-        $classes[] = $this->getCSSFramework()->getContainerClass($this->IsFluid);
+        $classes[] = $this->getCSSFramework()->getContainerClass((bool)$this->IsFluid);
 
         $this->extend('updateContainerClasses', $classes);
 

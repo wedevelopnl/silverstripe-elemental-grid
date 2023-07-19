@@ -16,18 +16,21 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1",
-        "silverstripe/admin": "^1.7@stable",
-        "silverstripe/cms": "^4@stable",
+        "php": "^8.0",
+        "silverstripe/framework": "^4@stable",
         "silverstripe/vendor-plugin": "^1.0",
-        "dnadesign/silverstripe-elemental": "^4.7"
+        "dnadesign/silverstripe-elemental": "^4.0",
+        "unclecheese/display-logic": "^2.0",
+        "wedevelopnl/silverstripe-media-field": "^3.0",
+        "jonom/focuspoint": "^4.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.4"
     },
     "extra": {
         "expose": [
-            "client/dist"
+            "client/dist",
+            "client/images"
         ]
     },
     "autoload": {
