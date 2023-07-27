@@ -3,20 +3,11 @@
 namespace WeDevelop\ElementalGrid\CSSFramework;
 
 use DNADesign\Elemental\Models\BaseElement;
+use WeDevelop\ElementalGrid\ElementalConfig;
 
-/**
- * CSS Framework class for Bootstrap (5). Cause bootstrap did not change grid
- * classes, Bootstrap 4 should work too.
- *
- * https://getbootstrap.com/docs/5.3/layout/grid/#grid-options
- * https://getbootstrap.com/docs/4.6/layout/grid/#grid-options
- */
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
-    /**
-     * @var BaseElement
-     */
-    private $baseElement;
+    private BaseElement $baseElement;
 
     private const COLUMN_CLASSNAME = 'col';
 
@@ -26,34 +17,22 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
     private const FLUID_CONTAINER_CLASSNAME = 'container-fluid';
 
-    /**
-     * Initialize CSS framework for elemental row element.
-     *
-     * @param BaseElement $baseElement Elemental row element
-     */
-    public function __construct($baseElement)
+    public function __construct(BaseElement $baseElement)
     {
         $this->baseElement = $baseElement;
     }
 
-    /**
-     * Return bootstrap row class name for grid layouts.
-     *
-     * @return string
-     */
-    public function getRowClasses()
+    public function getRowClasses(): string
     {
         return self::ROW_CLASSNAME;
     }
 
-    /**
-     * Return bootstrap column classes for grid layout. It return classes for
-     * size, offset and visibility for different screen sizes based on the
-     * elemental settings.
-     *
-     * @return string
-     */
-    public function getColumnClasses()
+    public function getColumnClass(): string
+    {
+        return self::COLUMN_CLASSNAME;
+    }
+
+    public function getColumnClasses(): string
     {
         $sizeClasses = $this->getSizeClasses();
         $offsetClasses = $this->getOffsetClasses();
@@ -64,51 +43,99 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return implode(' ', $classes);
     }
 
-    /**
-     * Get title class from base element.
-     *
-     * @return string
-     */
-    public function getTitleSizeClass()
+    public function getTitleSizeClass(): string
     {
-        return $this->baseElement->TitleClass;
+        return $this->baseElement->TitleClass ?? strtolower($this->baseElement->TitleTag);
     }
 
-    /**
-     * Return container class name for fluid or normal design.
-     *
-     * @param bool $fluid Fluid or normal design (true/false)
-     *
-     * @return string
-     */
-    public function getContainerClass($fluid)
+    public function getContainerClass(bool $fluid): string
     {
-        if ($fluid) {
-            return self::FLUID_CONTAINER_CLASSNAME;
+        return $fluid ? self::FLUID_CONTAINER_CLASSNAME : self::CONTAINER_CLASSNAME;
+    }
+
+    public function getMediaRatioClass(?string $mediaRatio = null): ?string
+    {
+        return $mediaRatio;
+    }
+
+    public function getViewportName(): string
+    {
+        return strtolower(ElementalConfig::getDefaultViewport());
+    }
+
+    public function getContentPaddingClass(string $direction, int $size): string
+    {
+        $direction = match($direction) {
+            self::DIRECTION_TOP => 't',
+            self::DIRECTION_RIGHT => 'e',
+            self::DIRECTION_BOTTOM => 'b',
+            self::DIRECTION_LEFT => 's',
+        };
+
+        return sprintf('p%s-%s-%u', $direction, $this->getViewportName(), $size);
+    }
+
+    public function getInitialContentColumnClass(): ?string
+    {
+        return null;
+    }
+
+    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'order-1',
+            'order-2' => 'order-2',
+            default => sprintf('order-1 order-%s-2', $this->getViewportName()),
+        };
+    }
+
+    public function getContentColumnOrderClasses(string $mediaPosition): string
+    {
+        return match($mediaPosition) {
+            'order-1' => 'order-2',
+            'order-2' => 'order-1',
+            default => sprintf('order-2 order-%s-1', $this->getViewportName()),
+        };
+    }
+
+    public function getMediaColumnWidthClass(?string $contentColumnWidth): ?string
+    {
+        if ($contentColumnWidth) {
+            return 'col-' . $this->getViewportName() . '-' . (ElementalConfig::getGridColumnCount() - $contentColumnWidth);
         }
 
-        return self::CONTAINER_CLASSNAME;
+        return null;
     }
 
-    /**
-     * @return array
-     */
-    private function getVisibilityClasses()
+    public function getContentColumnWidthClass(?string $contentColumnWidth): string
+    {
+        if ($contentColumnWidth) {
+            return sprintf('col-%s-%s', $this->getViewportName(), $contentColumnWidth);
+        }
+
+        return sprintf('col-%s-12', $this->getViewportName());;
+    }
+
+    private function getVisibilityClasses(): array
     {
         $classes = [];
 
         if ($this->baseElement->VisibilityXS === 'hidden') {
             $classes[] = 'd-none d-sm-block';
         }
+
         if ($this->baseElement->VisibilitySM === 'hidden') {
             $classes[] = 'd-sm-none d-md-block';
         }
+
         if ($this->baseElement->VisibilityMD === 'hidden') {
             $classes[] = 'd-md-none d-lg-block';
         }
+
         if ($this->baseElement->VisibilityLG === 'hidden') {
             $classes[] = 'd-lg-none d-xl-block';
         }
+
         if ($this->baseElement->VisibilityXL === 'hidden') {
             $classes[] = 'd-xl-none';
         }
@@ -116,10 +143,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    /**
-     * @return array
-     */
-    private function getSizeClasses()
+    private function getSizeClasses(): array
     {
         $classes = [];
 
@@ -146,10 +170,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return $classes;
     }
 
-    /**
-     * @return array
-     */
-    private function getOffsetClasses()
+    private function getOffsetClasses(): array
     {
         $classes = [];
 
@@ -171,4 +192,5 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
 
         return $classes;
     }
+
 }

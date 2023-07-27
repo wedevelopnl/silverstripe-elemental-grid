@@ -11,7 +11,8 @@ use InvalidArgumentException;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\QueryHandler\UserContextProvider;
 
-class ElementalResolver extends Resolver {
+class ElementalResolver extends Resolver
+{
     public static function resolveAddElementToArea(
         $obj,
         array $args,

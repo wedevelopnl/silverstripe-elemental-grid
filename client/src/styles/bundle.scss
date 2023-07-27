@@ -92,3 +92,12 @@
     }
   }
 }
+
+/* OPTIONSET IMAGE FIELD STYLING */
+.optionset-image-field:not(.form-group) {
+  display: flex;
+}
+
+.optionset-image-field:not(.form-group) > .radio {
+  margin-right: 10px;
+}

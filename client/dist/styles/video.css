@@ -1,0 +1,40 @@
+.video > div,
+.video > iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-wrapper {
+    z-index: 10;
+    overflow: hidden;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-thumbnail {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    background-size: cover;
+    background-position: 50%;
+}
+
+.video-thumbnail.has-overlay > * {
+    z-index: 30;
+}
+
+.video-thumbnail.has-overlay::before {
+    content: "";
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}

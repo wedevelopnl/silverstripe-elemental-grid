@@ -6,61 +6,46 @@ use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
+use SilverStripe\GraphQL\Schema\Field\Field;
 use WeDevelop\ElementalGrid\Controllers\ElementRowController;
+use WeDevelop\ElementalGrid\Extensions\BaseElementExtension;
 
 /***
- * Class ElementRow
- * @package WeDevelop\ElementalGrid\Extensions
- *
- * @property BaseElement $owner
+ * @method BaseElement|BaseElementExtension getOwner()
+ * @property bool $IsFluid
+ * @property bool $CustomSectionClass
  */
 class ElementRow extends BaseElement
 {
-    /**
-     * @var string
-     */
-    private static $icon = 'font-icon-menu';
+    private static string $icon = 'font-icon-menu';
+
+    private static string $table_name = 'ElementRow';
+
+    private static string $singular_name = 'row';
+
+    private static string $plural_name = 'rows';
+
+    private static string $description = 'Row element';
+
+    private static string $controller_class = ElementRowController::class;
 
     /**
-     * @var string
+     * @var array<string, string>
      */
-    private static $table_name = 'ElementRow';
-
-    /**
-     * @var string
-     */
-    private static $singular_name = 'row';
-
-    /**
-     * @var string
-     */
-    private static $plural_name = 'rows';
-
-    /**
-     * @var string
-     */
-    private static $description = 'Row element';
-
-    /**
-     * @var string
-     */
-    private static $controller_class = ElementRowController::class;
-
-    /**
-     * @var array
-     */
-    private static $db = [
+    private static array $db = [
         'IsFluid' => 'Boolean',
         'CustomSectionClass' => 'Varchar(255)',
     ];
 
-    /**
-     * @return FieldList
-     */
-    public function getCMSFields()
+    public function getCMSFields(): FieldList
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
-            $fields->removeByName(['Column', 'TitleTag', 'ShowTitle', 'TitleClass']);
+            $fields->removeByName([
+                'Column',
+                'TitleTag',
+                'ShowTitle',
+                'TitleClass'
+            ]);
 
             $fields->renameField('ExtraClass', _t(__CLASS__ . '.CUSTOM_ROW_CLASSES', 'Custom row classes'));
 
@@ -84,57 +69,40 @@ class ElementRow extends BaseElement
         return parent::getCMSFields();
     }
 
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getType(): string
     {
         return _t(__CLASS__ . '.LABEL', 'Row');
     }
 
-    /**
-     * @return string
-     */
-    public function getRowClasses()
+    public function getRowClasses(): string
     {
-        $classes = [];
-
         $classes[] = $this->getCSSFramework()->getRowClasses();
 
         $this->extend('updateRowClasses', $classes);
 
-        if ($this->owner->ExtraClass) {
-            $classes[] = $this->owner->ExtraClass;
+        if ($this->getOwner()->ExtraClass) {
+            $classes[] = $this->getOwner()->ExtraClass;
         }
 
         return implode(' ', $classes);
     }
 
-
-    /**
-     * @return string
-     */
-    public function getSectionClasses()
+    public function getSectionClasses(): string
     {
-        $classes = [];
+        $classes[] = 'section';
 
         $this->extend('updateSectionClasses', $classes);
 
-        if ($this->owner->CustomSectionClass) {
-            $classes[] = $this->owner->CustomSectionClass;
+        if ($this->CustomSectionClass) {
+            $classes[] = $this->CustomSectionClass;
         }
 
         return implode(' ', $classes);
     }
 
-    /**
-     * @return string
-     */
-    public function getContainerClasses()
+    public function getContainerClasses(): string
     {
-        $classes = [];
-
-        $classes[] = $this->getCSSFramework()->getContainerClass($this->IsFluid);
+        $classes[] = $this->getCSSFramework()->getContainerClass((bool)$this->IsFluid);
 
         $this->extend('updateContainerClasses', $classes);
 
