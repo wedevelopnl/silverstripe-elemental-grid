@@ -17,12 +17,12 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.0",
-        "silverstripe/framework": "^4@stable",
-        "silverstripe/vendor-plugin": "^1.0",
-        "dnadesign/silverstripe-elemental": "^4.0",
-        "unclecheese/display-logic": "^2.0",
-        "wedevelopnl/silverstripe-media-field": "^3.0",
-        "jonom/focuspoint": "^4.0"
+        "silverstripe/admin": "^2.0@stable",
+        "silverstripe/framework": "^5@stable",
+        "silverstripe/vendor-plugin": "^2.0",
+        "dnadesign/silverstripe-elemental": "^5.0",
+        "wedevelopnl/silverstripe-media-field": "^4.0",
+        "jonom/focuspoint": "^5.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.4"

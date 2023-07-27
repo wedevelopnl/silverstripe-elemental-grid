@@ -12,9 +12,7 @@ class Toolbar extends PureComponent {
       AddBlockToTopButton,
       elementTypes,
       areaId,
-      connectDropTarget
-    } = this.props;
-
+      connectDropTarget } = this.props;
     return connectDropTarget(
       <div className="element-editor__toolbar">
         <AddBlockToBottomButton

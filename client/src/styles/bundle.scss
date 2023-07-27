@@ -1,10 +1,7 @@
-// Core variables
-@import "variables";
-
 .element-editor__element {
   border: 0;
   min-height: 4rem;
-  outline: 1px solid $border-color-light;
+  outline: 1px solid #dbe0e9;
   transition: all 100ms linear;
 
   &--expanded {
@@ -21,7 +18,7 @@
 
   &.is-row {
     -webkit-flex: none;
-    background: $body-bg-dark;
+    background: #f4f6f8;
     display: block;
     flex: none;
     max-width: none;

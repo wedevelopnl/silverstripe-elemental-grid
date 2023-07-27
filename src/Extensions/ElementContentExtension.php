@@ -35,7 +35,7 @@ final class ElementContentExtension extends DataExtension
     private static array $db = [
         'ContentColumns' => 'Varchar(64)',
         'ContentVerticalAlign' => 'Varchar(64)',
-        'ExtraColumnGap' => 'Int(2)',
+        'ExtraColumnGap' => 'Int(3)',
 
         'MediaType' => 'Varchar(5)',
         'MediaCaption' => 'Varchar(255)',
@@ -82,8 +82,8 @@ final class ElementContentExtension extends DataExtension
     ];
 
     private static array $contentVerticalAligments = [
-        '' => 'Top',
-        'align-items-center' => 'Center (default)',
+        '' => 'Top (default)',
+        'align-items-center' => 'Center',
         'align-items-end' => 'Bottom',
     ];
 
@@ -95,10 +95,14 @@ final class ElementContentExtension extends DataExtension
 
     private static array $columnGaps = [
         '' => 'None (default)',
+        '2' => 'Smallest',
+        '3' => 'Smaller',
         '5' => 'Small',
         '7' => 'Normal',
         '9' => 'Medium',
         '11' => 'Large',
+        '16' => 'Larger',
+        '17' => 'Largest',
     ];
 
     private static array $defaults = [
@@ -145,7 +149,7 @@ final class ElementContentExtension extends DataExtension
             $mediaField,
             Wrapper::create([
                 CheckboxField::create('MediaVideoHasOverlay', _t(__CLASS__ . '.SHOW_OVERLAY', 'Show dark overlay on top of video thumbnail')),
-            ])->displayIf('MediaType')->isEqualTo('video')->end(),
+            ])->displayIf('MediaType')->isEqualTo(MediaField::TYPE_VIDEO)->end(),
             TextField::create('MediaCaption', _t(__CLASS__ . '.CAPTION_TEXT', 'Caption text')),
             DropdownField::create('MediaRatio', _t(__CLASS__ . '.MEDIA_RATIO', 'Media ratio'), static::config()->get('mediaRatios'))
                 ->setEmptyString(_t(__CLASS__ . '.AUTO_DEFAULT', 'Auto (default)'))
@@ -165,7 +169,7 @@ final class ElementContentExtension extends DataExtension
         ]);
 
 
-        if ($this->getOwner()->MediaType === 'video') {
+        if ($this->getOwner()->MediaType === MediaField::TYPE_VIDEO) {
             $fields->addFieldsToTab('Root.VideoEmbeddedData', [
                 ReadonlyField::create('MediaVideoEmbeddedURL', _t(__CLASS__ . '.SHORTENED_URL', 'Shortened URL')),
                 ReadonlyField::create('MediaVideoProvider', _t(__CLASS__ . '.VIDEO_PROVIDER', 'Video provider')),
@@ -184,7 +188,7 @@ final class ElementContentExtension extends DataExtension
     {
         parent::onBeforeWrite();
 
-        if ($this->getOwner()->MediaType === 'video' && $this->getOwner()->MediaVideoFullURL) {
+        if ($this->getOwner()->MediaType === MediaField::TYPE_VIDEO && $this->getOwner()->MediaVideoFullURL) {
             $this->getOwner()->MediaVideoFullURL = trim($this->getOwner()->MediaVideoFullURL);
             MediaField::saveEmbed($this->getOwner());
         }
@@ -194,7 +198,7 @@ final class ElementContentExtension extends DataExtension
     {
         $mediaRatio = $this->getOwner()->MediaRatio;
 
-        if (!$this->getOwner()->MediaRatio && $this->getOwner()->MediaType === 'video') {
+        if (!$this->getOwner()->MediaRatio && $this->getOwner()->MediaType === MediaField::TYPE_VIDEO) {
             $mediaRatio = '16x9';
         }
 

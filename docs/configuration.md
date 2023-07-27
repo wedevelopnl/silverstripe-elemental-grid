@@ -131,7 +131,7 @@ WeDevelop\Extensions\ElementContentExtension:
 ### Add extra column gaps to ElementContent
 Adding column gaps will add the extra items, not replace the existing items.
 ```
-WeDevelop\Extensions\ElementContentExtension:
+WeDevelop\ElementalGrid\Extensions\ElementContentExtension:
   columnGaps:
-    12: '12'
+    12: 'Larger'
 ```
