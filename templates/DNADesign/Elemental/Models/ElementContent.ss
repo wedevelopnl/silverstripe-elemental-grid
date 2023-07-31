@@ -1,5 +1,6 @@
 <div class="$ElementClasses">
-    <div class="$MediaColumnClasses">
+    <% if $MediaImage || $MediaVideoFullURL || $MediaVideoEmbeddedURL %>
+        <div class="$MediaColumnClasses">
         <% if $MediaType == 'image' && $MediaImage %>
             <% if $MediaImage %>
                 <% if $MediaCaption %><div class="captionImage"><% end_if %>
@@ -37,12 +38,15 @@
         </script>
         <% end_if %>
     </div>
-    <div class="$ContentColumnClasses">
-        <div class="$ContentClasses">
-            <% if $ShowTitle %>
-                <$TitleTag class="$TitleSizeClass">$Title.RAW</$TitleTag>
-            <% end_if %>
-            $HTML
+    <% end_if %>
+    <% if $Title || $HTML %>
+        <div class="$ContentColumnClasses">
+            <div class="$ContentClasses">
+                <% if $ShowTitle && $Title %>
+                    <$TitleTag class="$TitleSizeClass">$Title.RAW</$TitleTag>
+                <% end_if %>
+                $HTML
+            </div>
         </div>
-    </div>
+    <% end_if %>
 </div>
