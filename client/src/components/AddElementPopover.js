@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { inject } from 'lib/Injector';
-import { elementTypeType } from 'types/elementTypeType';
 import i18n from 'i18n';
+import { elementTypeType } from 'types/elementTypeType';
 
 /**
  * The AddElementPopover component used in the context of an ElementEditor shows the

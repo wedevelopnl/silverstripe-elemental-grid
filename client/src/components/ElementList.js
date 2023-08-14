@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { elementType } from 'types/elementType';
-import { elementTypeType } from 'types/elementTypeType';
+import { DropTarget } from 'react-dnd';
 import { compose } from 'redux';
 import { inject } from 'lib/Injector';
 import classNames from 'classnames';
 import i18n from 'i18n';
-import { DropTarget } from 'react-dnd';
+import { elementTypeType } from 'types/elementTypeType';
+import { elementType } from 'types/elementType';
 import { getDragIndicatorIndex } from 'lib/dragHelpers';
 import { getElementTypeConfig } from 'state/editor/elementConfig';
 
@@ -142,6 +142,7 @@ const elementListTarget = {
   drop(props, monitor) {
     const { blocks } = props;
     const elementTargetDropResult = monitor.getDropResult();
+
     if (!elementTargetDropResult) {
       return {};
     }
