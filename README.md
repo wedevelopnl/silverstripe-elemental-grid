@@ -7,8 +7,11 @@ This module converts the elemental module (https://github.com/silverstripe/silve
 ![Overview](docs/images/screen01.png)
 
 ## Requirements
-* silverstripe/cms ^4.0
-* dnadesign/silverstripe-elemental ^4
+* silverstripe/framework ^4.0
+* dnadesign/silverstripe-elemental ^4.0
+* unclecheese/display-logic ^2.0
+* wedevelopnl/silverstripe-media-field ^3.0
+* jonom/focuspoint ^4.0
 
 ## Installation
 ```

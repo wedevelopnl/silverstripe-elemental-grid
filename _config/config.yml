@@ -23,8 +23,14 @@ DNADesign\Elemental\Models\BaseElement:
   extensions:
     - WeDevelop\ElementalGrid\Extensions\BaseElementExtension
 
+DNADesign\Elemental\Models\ElementContent:
+  controller_class: WeDevelop\ElementalGrid\Controllers\ElementContentController
+  extensions:
+    - WeDevelop\ElementalGrid\Extensions\ElementContentExtension
+
 WeDevelop\ElementalGrid\ElementalConfig:
   default_viewport: 'MD'
-  css_framework: 'bulma'
+  css_framework: 'bootstrap'
   enable_custom_title_classes: true
   default_title_tag: 'h2'
+  grid_column_count: 12

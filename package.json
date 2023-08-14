@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/wedevelopnl/silverstripe-elemental-grid#readme",
   "dependencies": {
+    "@vimeo/player": "^2.20.1",
+    "youtube-player": "^5.6.0",
     "@apollo/client": "^3.7.1",
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^4.6.2",
