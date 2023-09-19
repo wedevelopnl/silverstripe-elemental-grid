@@ -7,6 +7,8 @@ use WeDevelop\ElementalGrid\ElementalConfig;
 
 final class BootstrapCSSFramework implements CSSFrameworkInterface
 {
+    public static string $framework_key = 'bootstrap';
+
     private BaseElement $baseElement;
 
     private const COLUMN_CLASSNAME = 'col';

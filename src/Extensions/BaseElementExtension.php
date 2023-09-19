@@ -2,6 +2,7 @@
 
 namespace WeDevelop\ElementalGrid\Extensions;
 
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldGroup;
@@ -25,10 +26,17 @@ class BaseElementExtension extends DataExtension
     {
         parent::setOwner($owner);
 
-        match (ElementalConfig::getCSSFrameworkName()) {
-            'bulma' => $this->cssFramework = new BulmaCSSFramework($this->owner),
-            default => $this->cssFramework = new BootstrapCSSFramework($this->owner),
-        };
+        $frameworks = ClassInfo::implementorsOf(CSSFrameworkInterface::class);
+        foreach ($frameworks as $framework) {
+            if ($framework::$framework_key === ElementalConfig::getCSSFrameworkName()) {
+                $this->cssFramework = new $framework($this->owner);
+            }
+        }
+        if(!$this->cssFramework) {
+            $this->cssFramework = new BootstrapCSSFramework($this->owner);
+        }
+
+        $this->owner->extend('updateCSSFramework', $this->cssFramework);
     }
 
     public function populateDefaults(): void
