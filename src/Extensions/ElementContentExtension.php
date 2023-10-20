@@ -297,13 +297,13 @@ final class ElementContentExtension extends DataExtension
         return $this->getCalculatedMediaImageWidth();
     }
 
-    public function getMediaImageSourceURL(): string
+    public function getMediaImageSourceURL(): ?string
     {
         if ($this->getOwner()->MediaRatio) {
-            return $this->getOwner()->MediaImage()->FocusFill($this->getMediaImageWidth(), $this->getMediaImageHeight())->URL;
+            return $this->getOwner()->MediaImage()->FocusFill($this->getMediaImageWidth(), $this->getMediaImageHeight())?->URL;
         }
 
-        return $this->getOwner()->MediaImage()->ScaleWidth($this->getCalculatedMediaImageWidth())->URL;
+        return $this->getOwner()->MediaImage()->ScaleWidth($this->getCalculatedMediaImageWidth())?->URL;
     }
 
     private function getCSSFramework(): CSSFrameworkInterface
