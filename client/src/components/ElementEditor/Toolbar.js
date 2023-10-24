@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { inject } from 'lib/Injector';
-import { elementTypeType } from 'types/elementTypeType';
 import { DropTarget } from 'react-dnd';
+import { elementTypeType } from 'types/elementTypeType';
 
 // eslint-disable-next-line react/prefer-stateless-function
 class Toolbar extends PureComponent {

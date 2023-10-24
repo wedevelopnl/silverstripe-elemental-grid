@@ -2,18 +2,18 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { elementType } from 'types/elementType';
-import { elementTypeType } from 'types/elementTypeType';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import { DragSource, DropTarget } from 'react-dnd';
 import { compose } from 'redux';
 import { inject } from 'lib/Injector';
 import i18n from 'i18n';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
+import * as TabsActions from 'state/tabs/TabsActions';
 import { loadElementFormStateName } from 'state/editor/loadElementFormStateName';
 import { loadElementSchemaValue } from 'state/editor/loadElementSchemaValue';
-import * as TabsActions from 'state/tabs/TabsActions';
-import { DragSource, DropTarget } from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
+import { elementTypeType } from 'types/elementTypeType';
+import { elementType } from 'types/elementType';
 import { elementDragSource, isOverTop } from 'lib/dragHelpers';
 
 /**
@@ -78,6 +78,47 @@ class Element extends Component {
     }
 
     return `${baseClassName}--published`;
+  }
+
+  /**
+   * Returns the link title for this element
+   *
+   * @param {Object} type
+   * @returns {string}
+   */
+  getLinkTitle(type) {
+    if (type.broken) {
+      return i18n._t('ElementalElement.ARCHIVE_BROKEN', 'Archive this block');
+    }
+    return i18n.inject(
+      i18n._t('ElementalElement.TITLE', 'Edit this {type} block'),
+      { type: type.title }
+    );
+  }
+
+  /**
+   * Returns the summary for this elemen
+   *
+   * @param {Object} element
+   * @param {Object} type
+   * @returns {string|JSX.Element}
+   */
+  getSummary(element, type) {
+    if (type.broken) {
+      // Return a message about the broken block.
+      return element.title ? i18n.inject(
+        i18n._t(
+          'ElementalElement.BROKEN_DESCRIPTION_TITLE',
+          'This block had the title "{title}". It is broken and will not display on the front-end. You can archive it to remove it from this elemental area.'
+        ),
+        { title: element.title }
+      ) : i18n._t(
+        'ElementalElement.BROKEN_DESCRIPTION',
+        'This block is broken and will not display on the front-end. You can archive it to remove it from this elemental area.'
+      );
+    }
+    // Return the configured summary for this block.
+    return element.blockSchema.content;
   }
 
   getColumnSizeClassNames() {
@@ -151,6 +192,10 @@ class Element extends Component {
     const { type, link } = this.props;
     const { loadingError } = this.state;
 
+    if (type.broken) {
+      return;
+    }
+
     if (event.target.type === 'button') {
       // Stop bubbling if the click target was a button within this container
       event.stopPropagation();
@@ -158,7 +203,7 @@ class Element extends Component {
     }
 
     if (type.inlineEditable && !loadingError) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         previewExpanded: !prevState.previewExpanded
       }));
       return;
@@ -221,81 +266,74 @@ class Element extends Component {
       return null;
     }
 
-    const linkTitle = i18n.inject(
-      i18n._t('ElementalElement.TITLE', 'Edit this {type} block'),
-      { type: type.title }
-    );
-
     const elementClassNames = classNames(
       'element-editor__element',
       {
-        'element-editor__element--expandable': type.inlineEditable,
-        'element-editor__element--expanded': previewExpanded,
+        'element-editor__element--broken': type.broken,
+        'element-editor__element--expandable': type.inlineEditable && !type.broken,
         'element-editor__element--dragging': isDragging,
         'element-editor__element--dragged-over': isOver,
       },
       this.getVersionedStateClassName(),
-      this.getColumnSizeClassNames(),
     );
 
-    const content = connectDropTarget(<div
-      className={elementClassNames}
-      onClick={this.handleExpand}
-      onKeyUp={this.handleKeyUp}
-      role="button"
-      tabIndex={0}
-      title={linkTitle}
-      key={element.id}
-    >
-      <HeaderComponent
-        element={element}
-        type={type}
-        areaId={areaId}
-        expandable={type.inlineEditable}
-        link={link}
-        previewExpanded={previewExpanded && !childRenderingError}
-        handleEditTabsClick={this.handleTabClick}
-        activeTab={activeTab}
-        disableTooltip={isDragging}
-        onDragEnd={onDragEnd}
-      />
-      {
-        !childRenderingError &&
-        <ContentComponent
-          id={element.id}
-          fileUrl={element.blockSchema.fileURL}
-          fileTitle={element.blockSchema.fileTitle}
-          content={element.blockSchema.content}
-          previewExpanded={previewExpanded && !isDragging}
+    const content = connectDropTarget(<div key={element.id} className={classNames('element-editor__element-holder', this.getColumnSizeClassNames())}>
+      <div
+        className={elementClassNames}
+        onClick={this.handleExpand}
+        onKeyUp={this.handleKeyUp}
+        role="button"
+        tabIndex={0}
+        title={this.getLinkTitle(type)}
+      >
+        <HeaderComponent
+          element={element}
+          type={type}
+          areaId={areaId}
+          expandable={type.inlineEditable}
+          link={link}
+          previewExpanded={previewExpanded && !childRenderingError}
+          handleEditTabsClick={this.handleTabClick}
           activeTab={activeTab}
-          onFormInit={() => this.updateFormTab(activeTab)}
-          handleLoadingError={this.handleLoadingError}
+          disableTooltip={isDragging}
+          onDragEnd={onDragEnd}
         />
-      }
 
-      {
-        childRenderingError &&
-        <div className="alert alert-danger mt-2">
-          {i18n._t('ElementalElement.CHILD_RENDERING_ERROR', 'Something went wrong with this block. Please try saving and refreshing the CMS.')}
-        </div>
-      }
+        {
+          !childRenderingError &&
+          <ContentComponent
+            id={element.id}
+            fileUrl={element.blockSchema.fileURL}
+            fileTitle={element.blockSchema.fileTitle}
+            content={this.getSummary(element, type)}
+            previewExpanded={previewExpanded && !isDragging}
+            activeTab={activeTab}
+            onFormInit={() => this.updateFormTab(activeTab)}
+            handleLoadingError={this.handleLoadingError}
+            broken={type.broken}
+          />
+        }
 
-      {!element.blockSchema.grid.isRow &&
-        <ColumnSizeComponent
-          elementId={element.id}
-          size={element.blockSchema.grid.column.size}
-          defaultViewport={element.blockSchema.grid.column.defaultViewport}
-          gridColumns={element.blockSchema.grid.gridColumns}
-          offset={element.blockSchema.grid.column.offset}
-          handleChangeSize={this.handleChangeSize}
-          handleChangeOffset={this.handleChangeOffset}
-        />
-      }
+        {
+          childRenderingError &&
+          <div className="alert alert-danger mt-2">
+            {i18n._t('ElementalElement.CHILD_RENDERING_ERROR', 'Something went wrong with this block. Please try saving and refreshing the CMS.')}
+          </div>
+        }
+
+        {!element.blockSchema.grid.isRow &&
+          <ColumnSizeComponent
+            elementId={element.id}
+            size={element.blockSchema.grid.column.size}
+            defaultViewport={element.blockSchema.grid.column.defaultViewport}
+            gridColumns={element.blockSchema.grid.gridColumns}
+            offset={element.blockSchema.grid.column.offset}
+            handleChangeSize={this.handleChangeSize}
+            handleChangeOffset={this.handleChangeOffset}
+          />
+        }
+      </div>
     </div>);
-
-    if (isDragging) {
-      return content;
-    }
 
     if (!previewExpanded) {
       return connectDragSource(content);
@@ -330,7 +368,6 @@ function mapStateToProps(state, ownProps) {
     state.tabs.fields &&
     state.tabs.fields[uniqueFieldId] &&
     state.tabs.fields[uniqueFieldId].activeTab;
-
   return {
     tabSetName,
     activeTab,

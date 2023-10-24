@@ -1,5 +1,7 @@
+import React from 'react';
 import Injector from 'lib/Injector';
 import ElementList from 'components/ElementList';
+import Header from 'components/Header';
 import Element from 'components/Element';
 import ColumnSize from 'components/ColumnSize';
 import AddBlockToBottomButton from 'components/AddBlockToBottomButton';
@@ -7,7 +9,6 @@ import AddBlockToTopButton from 'components/AddBlockToTopButton';
 import Toolbar from 'components/ElementEditor/Toolbar';
 import addElementToArea from 'state/editor/addElementMutation';
 import AddElementPopover from 'components/AddElementPopover';
-import React from 'react';
 
 const OverruledToolbar = () => (props) => (
   <div>
@@ -24,6 +25,7 @@ const OverruledAddElementPopover = () => (props) => (
 window.document.addEventListener('DOMContentLoaded', () => {
   Injector.component.registerMany({
     ElementList,
+    ElementHeader: Header,
     Element,
     ColumnSize,
     AddBlockToBottomButton,
@@ -50,4 +52,3 @@ window.document.addEventListener('DOMContentLoaded', () => {
     updater.component('AddElementPopover', OverruledAddElementPopover);
   });
 });
-

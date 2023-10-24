@@ -69,20 +69,6 @@ class ColumnSize extends PureComponent {
   }
 
   render() {
-    const offsetSizes = [];
-
-    offsetSizes.push({
-      label: 'None',
-      value: 0
-    });
-
-    for (let size = 1; size <= this.props.gridColumns; size++) {
-      offsetSizes.push({
-        label: `Column ${size}/${this.props.gridColumns}`,
-        value: size
-      });
-    }
-
     return (
       <div>
         <hr />

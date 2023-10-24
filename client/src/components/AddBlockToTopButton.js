@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
-import { elementTypeType } from 'types/elementTypeType';
 import { inject } from 'lib/Injector';
+import { elementTypeType } from 'types/elementTypeType';
 
 class AddBlockToTopButton extends Component {
   constructor(props) {
