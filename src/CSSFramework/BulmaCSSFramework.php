@@ -7,6 +7,8 @@ use WeDevelop\ElementalGrid\ElementalConfig;
 
 final class BulmaCSSFramework implements CSSFrameworkInterface
 {
+    public static string $framework_key = 'bulma';
+
     private BaseElement $baseElement;
 
     private const COLUMN_CLASSNAME = 'column';
