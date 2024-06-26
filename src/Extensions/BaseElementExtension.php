@@ -124,7 +124,7 @@ class BaseElementExtension extends DataExtension
         }
 
         $fields->addFieldsToTab(
-            'Root.Column',
+            'Root.Responsive',
             [
                 HeaderField::create('HeadingXS', _t(__CLASS__ . '.VIEWPORT_XS', 'Extra small (e.g. mobile)')),
                 DropdownField::create(
