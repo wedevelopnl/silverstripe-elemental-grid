@@ -226,11 +226,17 @@ final class ElementContentExtension extends DataExtension
 
     public function MediaColumnClasses(): ?string
     {
-        $imageClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
+        if ($this->getCSSFramework()->getInitialContentColumnClass()) {
+            $imageClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
+        }
 
-        $imageClasses[] = $this->getCSSFramework()->getMediaColumnOrderClasses($this->getOwner()->MediaPosition);
+        if ($this->getCSSFramework()->getMediaColumnWidthClass($this->owner->ContentColumns)) {
+            $imageClasses[] = $this->getCSSFramework()->getMediaColumnWidthClass($this->owner->ContentColumns);
+        }
 
-        $imageClasses[] = $this->getCSSFramework()->getMediaColumnWidthClass($this->owner->ContentColumns);
+        if ($this->getCSSFramework()->getMediaColumnOrderClasses($this->getOwner()->MediaPosition)) {
+            $imageClasses[] = $this->getCSSFramework()->getMediaColumnOrderClasses($this->getOwner()->MediaPosition);
+        }
 
         $this->getOwner()->extend('updateMediaColumnClasses', $imageClasses);
 
@@ -252,11 +258,17 @@ final class ElementContentExtension extends DataExtension
 
     public function ContentColumnClasses(): string
     {
-        $contentClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
+        if ($this->getCSSFramework()->getInitialContentColumnClass()) {
+            $contentClasses[] = $this->getCSSFramework()->getInitialContentColumnClass();
+        }
 
-        $contentClasses[] = $this->getCSSFramework()->getContentColumnWidthClass($this->owner->ContentColumns);
+        if ($this->getCSSFramework()->getContentColumnWidthClass($this->owner->ContentColumns)) {
+            $contentClasses[] = $this->getCSSFramework()->getContentColumnWidthClass($this->owner->ContentColumns);
+        }
 
-        $contentClasses[] = $this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition);
+        if ($this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition)) {
+            $contentClasses[] = $this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition);
+        }
 
         $this->getOwner()->extend('updateContentColumnClasses', $contentClasses);
 
