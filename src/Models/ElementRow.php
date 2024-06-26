@@ -41,7 +41,6 @@ class ElementRow extends BaseElement
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
             $fields->removeByName([
-                'Column',
                 'TitleTag',
                 'ShowTitle',
                 'TitleClass'
@@ -66,7 +65,22 @@ class ElementRow extends BaseElement
             }
         });
 
-        return parent::getCMSFields();
+        $fields = parent::getCMSFields();
+
+        $fields->removeByName([
+            'SizeXS',
+            'SizeSM',
+            'SizeMD',
+            'SizeLG',
+            'SizeXL',
+            'OffsetXS',
+            'OffsetSM',
+            'OffsetMD',
+            'OffsetLG',
+            'OffsetXL',
+        ]);
+
+        return $fields;
     }
 
     public function getType(): string
