@@ -26,7 +26,13 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
 
     public function getRowClasses(): string
     {
-        return self::ROW_CLASSNAME;
+        $classes[] = self::ROW_CLASSNAME;
+
+        if ($this->getVisibilityClasses()) {
+            $classes[] = implode(' ', $this->getVisibilityClasses());
+        }
+
+        return implode(' ', $classes);
     }
 
     public function getColumnClass(): string
