@@ -13,6 +13,7 @@ use SilverStripe\ORM\DataExtension;
 use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;
 use WeDevelop\ElementalGrid\CSSFramework\BootstrapCSSFramework;
 use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
+use WeDevelop\ElementalGrid\CSSFramework\TailwindCSSFramework;
 use WeDevelop\ElementalGrid\Models\ElementRow;
 use WeDevelop\ElementalGrid\ElementalConfig;
 
@@ -33,7 +34,7 @@ class BaseElementExtension extends DataExtension
             }
         }
         if(!$this->cssFramework) {
-            $this->cssFramework = new BootstrapCSSFramework($this->owner);
+            $this->cssFramework = new TailwindCSSFramework($this->owner);
         }
 
         $this->owner->extend('updateCSSFramework', $this->cssFramework);

@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const videoOverlay = videoWrapper.querySelector('.video-thumbnail');
     if (videoOverlay) {
       videoOverlay.addEventListener('click', () => {
-        videoOverlay.classList.add('is-hidden', 'd-none');
+        videoOverlay.classList.add('is-hidden', 'd-none', '!hidden');
       });
     }
 

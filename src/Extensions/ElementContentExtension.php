@@ -21,6 +21,7 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
 use UncleCheese\DisplayLogic\Forms\Wrapper;
 use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
+use WeDevelop\ElementalGrid\CSSFramework\TailwindCSSFramework;
 use WeDevelop\ElementalGrid\ElementalConfig;
 use WeDevelop\MediaField\Form\MediaField;
 
@@ -214,6 +215,8 @@ final class ElementContentExtension extends DataExtension
         if ($this->getOwner()->ContentColumns && $this->getOwner()->ContentVerticalAlign) {
             if (ElementalConfig::getCSSFrameworkName() === 'bulma') {
                 $elementClasses[] = 'is-' . $this->getOwner()->ContentVerticalAlign;
+            } else if(ElementalConfig::getCSSFrameworkName() === 'tailwind') {
+                $elementClasses[] = str_replace('align-', '', $this->getOwner()->ContentVerticalAlign);
             } else {
                 $elementClasses[] = $this->getOwner()->ContentVerticalAlign;
             }
@@ -246,6 +249,10 @@ final class ElementContentExtension extends DataExtension
     public function ContentClasses(): string
     {
         $contentClasses[] = 'content';
+
+        if (ElementalConfig::getCSSFrameworkName() === 'tailwind') {
+            $contentClasses[] = 'prose';
+        }
 
         if ($this->getOwner()->ContentColumns && $this->getOwner()->ExtraColumnGap) {
             $contentClasses[] = $this->getCSSFramework()->getContentPaddingClass($this->getContentPaddingDirection(), $this->getOwner()->ExtraColumnGap);
