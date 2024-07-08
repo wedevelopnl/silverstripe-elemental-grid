@@ -250,10 +250,6 @@ final class ElementContentExtension extends DataExtension
     {
         $contentClasses[] = 'content';
 
-        if (ElementalConfig::getCSSFrameworkName() === 'tailwind') {
-            $contentClasses[] = 'prose';
-        }
-
         if ($this->getOwner()->ContentColumns && $this->getOwner()->ExtraColumnGap) {
             $contentClasses[] = $this->getCSSFramework()->getContentPaddingClass($this->getContentPaddingDirection(), $this->getOwner()->ExtraColumnGap);
         }
