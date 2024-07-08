@@ -10,8 +10,6 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\DataExtension;
-use WeDevelop\ElementalGrid\CSSFramework\BulmaCSSFramework;
-use WeDevelop\ElementalGrid\CSSFramework\BootstrapCSSFramework;
 use WeDevelop\ElementalGrid\CSSFramework\CSSFrameworkInterface;
 use WeDevelop\ElementalGrid\CSSFramework\TailwindCSSFramework;
 use WeDevelop\ElementalGrid\Models\ElementRow;
