@@ -15,7 +15,7 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
 
     private const OFFSET_CLASSNAME = 'col-start';
 
-    private const ROW_CLASSNAME = 'grid grid-cols-12';
+    private const ROW_CLASSNAME = 'grid grid-cols-12 gap-8';
 
     private const CONTAINER_CLASSNAME = 'container';
 
@@ -69,9 +69,11 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
             return 'relative aspect-square';
         } else if ($mediaRatio === '4x3') {
             return 'relative aspect-4x3';
+        } else if ($mediaRatio === '16x9') {
+            return 'relative aspect-video';
         }
 
-        return 'relative aspect-video';
+        return null;
     }
 
     public function getViewportName(): string
