@@ -55,7 +55,7 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
 
     public function getTitleSizeClass(): string
     {
-        return $this->baseElement->TitleClass;
+        return $this->baseElement->TitleClass ?? '';
     }
 
     public function getContainerClass(bool $fluid): string
