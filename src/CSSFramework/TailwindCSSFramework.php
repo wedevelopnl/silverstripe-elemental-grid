@@ -15,7 +15,7 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
 
     private const OFFSET_CLASSNAME = 'col-start';
 
-    private const ROW_CLASSNAME = 'grid grid-cols-12 gap-8';
+    private const ROW_CLASSNAME = 'grid grid-cols-12';
 
     private const CONTAINER_CLASSNAME = 'container';
 
