@@ -32,9 +32,9 @@ interface CSSFrameworkInterface
 
     public function getInitialContentColumnClass(): ?string;
 
-    public function getMediaColumnOrderClasses(string $mediaPosition): string;
+    public function getMediaColumnOrderClasses(?string $mediaPosition): string;
 
-    public function getContentColumnOrderClasses(string $mediaPosition): string;
+    public function getContentColumnOrderClasses(?string $mediaPosition): string;
 
     public function getMediaColumnWidthClass(?string $contentColumnWidth): ?string;
 

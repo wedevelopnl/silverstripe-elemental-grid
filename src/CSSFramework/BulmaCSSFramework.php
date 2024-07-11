@@ -100,7 +100,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         return $this->getColumnClass();
     }
 
-    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    public function getMediaColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'has-order-1',
@@ -109,7 +109,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
         };
     }
 
-    public function getContentColumnOrderClasses(string $mediaPosition): string
+    public function getContentColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'has-order-2',
