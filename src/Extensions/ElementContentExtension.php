@@ -108,6 +108,7 @@ final class ElementContentExtension extends DataExtension
 
     private static array $defaults = [
         'ContentVerticalAlign' => 'align-items-center',
+        'MediaPosition' => 'order-1',
     ];
 
     public function updateCMSFields(FieldList $fields): void
