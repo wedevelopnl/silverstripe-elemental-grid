@@ -240,7 +240,7 @@ final class ElementContentExtension extends DataExtension
 
         $mediaPosition = $this->getOwner()->MediaPosition ?: self::$defaults['MediaPosition'];
         
-        if ($this->getCSSFramework()->getMediaColumnOrderClasses($mediaPosition) {
+        if ($this->getCSSFramework()->getMediaColumnOrderClasses($mediaPosition)) {
             $imageClasses[] = $this->getCSSFramework()->getMediaColumnOrderClasses($mediaPosition);
         }
 
