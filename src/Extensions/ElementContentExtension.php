@@ -272,8 +272,10 @@ final class ElementContentExtension extends DataExtension
             $contentClasses[] = $this->getCSSFramework()->getContentColumnWidthClass($this->owner->ContentColumns);
         }
 
-        if ($this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition)) {
-            $contentClasses[] = $this->getCSSFramework()->getContentColumnOrderClasses($this->getOwner()->MediaPosition);
+        $mediaPosition = $this->getOwner()->MediaPosition ?: self::$defaults['MediaPosition'];
+
+        if ($this->getCSSFramework()->getContentColumnOrderClasses($mediaPosition)) {
+            $contentClasses[] = $this->getCSSFramework()->getContentColumnOrderClasses($mediaPosition);
         }
 
         $this->getOwner()->extend('updateContentColumnClasses', $contentClasses);
