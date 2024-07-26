@@ -88,7 +88,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         return null;
     }
 
-    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    public function getMediaColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'order-1',
@@ -97,7 +97,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
         };
     }
 
-    public function getContentColumnOrderClasses(string $mediaPosition): string
+    public function getContentColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'order-2',
