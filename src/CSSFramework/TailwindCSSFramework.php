@@ -98,7 +98,7 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
         return null;
     }
 
-    public function getMediaColumnOrderClasses(string $mediaPosition): string
+    public function getMediaColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'order-1',
@@ -107,7 +107,7 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
         };
     }
 
-    public function getContentColumnOrderClasses(string $mediaPosition): string
+    public function getContentColumnOrderClasses(?string $mediaPosition): string
     {
         return match($mediaPosition) {
             'order-1' => 'order-2',
