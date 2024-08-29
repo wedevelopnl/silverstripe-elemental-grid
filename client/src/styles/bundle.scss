@@ -34,6 +34,14 @@
   }
 }
 
+.element-editor__toolbar {
+  display: flex;
+    position: fixed;
+    bottom: 1rem;
+    left: 60rem;
+    z-index: 1000;
+}
+
 .element-editor__hover-bar {
   display: none;
 }
