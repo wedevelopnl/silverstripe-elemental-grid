@@ -286,6 +286,12 @@ class BaseElementExtension extends DataExtension
 
     public function getAnchorTitle(): string
     {
-        return $this->owner->singular_name() . '_' . $this->owner->getTitle() . '_' . $this->owner->ID;
+        $ID = $this->owner->ID;
+
+        if (!$ID && $this->owner instanceof ElementRow) {
+            $ID = $this->owner->Parent()->ID;
+        }
+
+        return $this->owner->singular_name() . '_' . $this->owner->getTitle() . '_' . $ID;
     }
 }

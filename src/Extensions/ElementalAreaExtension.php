@@ -44,6 +44,7 @@ class ElementalAreaExtension extends DataExtension
             $first->setIsFirstRow(true);
         } else {
             $createdFirstElement = ElementRow::create();
+            $createdFirstElement->ParentID = $this->owner->ID;
 
             /** @var ElementRowController $createdFirst */
             $createdFirst = $createdFirstElement->getController();
