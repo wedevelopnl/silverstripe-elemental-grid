@@ -12,7 +12,9 @@ class Toolbar extends PureComponent {
       AddBlockToTopButton,
       elementTypes,
       areaId,
-      connectDropTarget } = this.props;
+      connectDropTarget,
+      onExportJSON
+    } = this.props;
     return connectDropTarget(
       <div className="element-editor__toolbar">
         <AddBlockToTopButton
@@ -23,6 +25,7 @@ class Toolbar extends PureComponent {
           elementTypes={elementTypes}
           areaId={areaId}
         />
+        <button onClick={onExportJSON}>Export JSON</button>
       </div>
     );
   }
@@ -37,6 +40,7 @@ Toolbar.propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
   onDragOver: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   onDragDrop: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
+  onExportJSON: PropTypes.func.isRequired,
 };
 
 const toolbarTarget = {
