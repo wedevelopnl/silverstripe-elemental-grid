@@ -78,4 +78,15 @@ class ElementalAreaExtension extends DataExtension
 
         return $this->controllers;
     }
+
+    public function generateGridJSON(): string
+    {
+        $gridData = [];
+
+        foreach ($this->controllers as $controller) {
+            $gridData[] = $controller->getElement()->toMap();
+        }
+
+        return json_encode($gridData, JSON_PRETTY_PRINT);
+    }
 }
