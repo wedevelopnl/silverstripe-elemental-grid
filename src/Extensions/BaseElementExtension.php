@@ -265,6 +265,14 @@ class BaseElementExtension extends DataExtension
     }
 
     /**
+     * @return string
+     */
+    public function getVisibilityClasses()
+    {
+        return implode(' ', [$this->cssFramework->getVisibilityClasses(), $this->owner->ExtraClass]);
+    }
+
+    /**
      * @return CSSFrameworkInterface
      */
     public function getCSSFramework()

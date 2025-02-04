@@ -12,6 +12,11 @@ interface CSSFrameworkInterface
     /**
      * @return string
      */
+    public function getVisibilityClasses();
+
+    /**
+     * @return string
+     */
     public function getTitleSizeClass();
 
     /***

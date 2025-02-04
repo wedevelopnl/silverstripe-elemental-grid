@@ -52,7 +52,7 @@ final class BootstrapCSSFramework implements CSSFrameworkInterface
     /**
      * @return array
      */
-    private function getVisibilityClasses()
+    public function getVisibilityClasses()
     {
         $classes = [];
 

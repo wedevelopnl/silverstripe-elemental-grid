@@ -52,7 +52,7 @@ final class BulmaCSSFramework implements CSSFrameworkInterface
     /**
      * @return array
      */
-    private function getVisibilityClasses()
+    public function getVisibilityClasses()
     {
         $classes = [];
 
