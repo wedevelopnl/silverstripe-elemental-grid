@@ -269,7 +269,7 @@ class BaseElementExtension extends DataExtension
      */
     public function getVisibilityClasses()
     {
-        return implode(' ', [$this->cssFramework->getVisibilityClasses(), $this->owner->ExtraClass]);
+        return implode(' ', $this->cssFramework->getVisibilityClasses());
     }
 
     /**

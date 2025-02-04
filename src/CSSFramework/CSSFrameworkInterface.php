@@ -10,7 +10,7 @@ interface CSSFrameworkInterface
     public function getColumnClasses();
 
     /**
-     * @return string
+     * @return array
      */
     public function getVisibilityClasses();
 
