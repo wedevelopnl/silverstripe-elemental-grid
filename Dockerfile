@@ -1,9 +1,5 @@
-ARG ALPINE_VERSION=3.16
-
-ARG NODE_VERSION=18
-
-FROM node:$NODE_VERSION-alpine AS node
-FROM php:8.1-cli-alpine$ALPINE_VERSION AS php-cli
+FROM node:18-alpine AS node
+FROM php:8.0-cli-alpine3.16 AS php-cli
 
 RUN apk add php yarn make perl git --no-cache
 
