@@ -97,6 +97,18 @@
   }
 }
 
+/* ELEMENT TOOLBAR STYLING */
+.element-editor__toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
 /* OPTIONSET IMAGE FIELD STYLING */
 .optionset-image-field:not(.form-group) {
   display: flex;

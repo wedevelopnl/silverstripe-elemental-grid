@@ -49,7 +49,7 @@ class AddBlockToBottomButton extends Component {
           elementTypes={elementTypes}
           toggle={this.toggle}
           areaId={areaId}
-          insertAfterElement={0}
+          insertAfterElement={null}
           insertAtBottom
         />
       </div>
