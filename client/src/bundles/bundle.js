@@ -70,8 +70,35 @@ const withGridFunctionality = (OriginalElement) => {
   return GridEnhancedElement;
 };
 
+// Function to clean up any incorrectly applied grid classes
+const cleanupIncorrectGridClasses = () => {
+  // Remove grid classes from the elemental-editor-list (wrong container)
+  const editorList = document.querySelector('.elemental-editor-list');
+  if (editorList) {
+    editorList.className = editorList.className.replace(/\bcol-lg-\d+\b/g, '');
+    editorList.className = editorList.className.replace(/\boffset-lg-\d+\b/g, '');
+  }
+  
+  // Remove grid classes from wrapper divs (should be on element cards instead)
+  const wrapperDivs = document.querySelectorAll('.elemental-editor-list > div');
+  wrapperDivs.forEach(div => {
+    if (div.classList.contains('col-lg-1') || div.classList.contains('col-lg-2') || 
+        div.classList.contains('col-lg-3') || div.classList.contains('col-lg-4') || 
+        div.classList.contains('col-lg-5') || div.classList.contains('col-lg-6') || 
+        div.classList.contains('col-lg-7') || div.classList.contains('col-lg-8') || 
+        div.classList.contains('col-lg-9') || div.classList.contains('col-lg-10') || 
+        div.classList.contains('col-lg-11') || div.classList.contains('col-lg-12')) {
+      div.className = div.className.replace(/\bcol-lg-\d+\b/g, '');
+      div.className = div.className.replace(/\boffset-lg-\d+\b/g, '');
+    }
+  });
+};
+
 // Function to move grid controls into their respective cards
 const moveGridControlsIntoCards = () => {
+  // First clean up any incorrectly applied grid classes
+  cleanupIncorrectGridClasses();
+  
   const gridControls = document.querySelectorAll('.column-size-controls');
   
   gridControls.forEach(control => {
@@ -101,21 +128,21 @@ const moveGridControlsIntoCards = () => {
     // Move the control into the card
     elementCard.appendChild(control);
     
-    // Apply grid classes to the parent container (the common parent of both elements)
-    applyGridClasses(parent, sizeSelect.value, offsetSelect.value);
+    // Apply grid classes directly to the element card itself to prevent drag handle positioning issues
+    applyGridClasses(elementCard, sizeSelect.value, offsetSelect.value);
     
     // Listen for changes to the dropdowns and update classes
     if (!sizeSelect.hasAttribute('data-grid-listener')) {
       sizeSelect.setAttribute('data-grid-listener', 'true');
       sizeSelect.addEventListener('change', (e) => {
-        applyGridClasses(parent, e.target.value, offsetSelect.value);
+        applyGridClasses(elementCard, e.target.value, offsetSelect.value);
       });
     }
     
     if (!offsetSelect.hasAttribute('data-grid-listener')) {
       offsetSelect.setAttribute('data-grid-listener', 'true');
       offsetSelect.addEventListener('change', (e) => {
-        applyGridClasses(parent, sizeSelect.value, e.target.value);
+        applyGridClasses(elementCard, sizeSelect.value, e.target.value);
       });
     }
   });
