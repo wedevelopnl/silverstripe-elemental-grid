@@ -1,9 +1,16 @@
 import Injector from 'lib/Injector';
 import React from 'react';
+import ReactDOM from 'react-dom';
+import { DragDropContext } from 'react-dnd';
 import ColumnSize from 'components/ColumnSize';
 import AddBlockToBottomButton from 'components/AddBlockToBottomButton';
 import AddBlockToTopButton from 'components/AddBlockToTopButton';
 import Toolbar from 'components/ElementEditor/Toolbar';
+import ReactGridDropZone from 'components/ReactGridDropZone';
+
+console.log('[GRID DEBUG] ========== GRID BUNDLE LOADING (REACT DND INTEGRATION) ==========');
+
+console.log('[GRID DEBUG] Core components loaded for alongside implementation with React DnD zones');
 
 const OverruledToolbar = () => (props) => (
   <div>
@@ -11,12 +18,15 @@ const OverruledToolbar = () => (props) => (
   </div>
 );
 
-// Register our grid components at module load time
+// Register core grid components (no complex overrides)
+console.log('[GRID DEBUG] Registering core grid components...');
 Injector.component.registerMany({
   AddBlockToBottomButton,
   AddBlockToTopButton,
   ColumnSize,
+  ReactGridDropZone,
 });
+console.log('[GRID DEBUG] Core grid components registered successfully');
 
 // Cache for row elements to quickly restore during drag operations
 const rowElementsCache = new Map();
@@ -86,6 +96,10 @@ const cleanupIncorrectGridClasses = () => {
 
 // Function to move grid controls into their respective cards
 const moveGridControlsIntoCards = () => {
+  // PAUSE grid manipulation during drag operations to prevent interference
+  if (window.pauseGridClassManipulation || window.isDraggingElement) {
+    return;
+  }
   // First clean up any incorrectly applied grid classes
   cleanupIncorrectGridClasses();
 
@@ -191,6 +205,10 @@ const moveGridControlsIntoCards = () => {
 
 // Function to quickly restore row element styling
 const restoreRowElementStyling = () => {
+  // PAUSE during drag operations to prevent interference
+  if (window.pauseGridClassManipulation || window.isDraggingElement) {
+    return;
+  }
   const allElementCards = document.querySelectorAll('.element-editor__element');
   allElementCards.forEach((elementCard) => {
     const hasGridControls = elementCard.querySelector('.column-size-controls');
@@ -251,11 +269,8 @@ const withGridFunctionality = (OriginalElement) => {
         originalOnDragEnd(itemID, dropAfterID);
       }
 
-      // Re-apply grid classes immediately after drag operation completes
-      // Use requestAnimationFrame to ensure DOM is updated but avoid visual shifts
-      requestAnimationFrame(() => {
-        moveGridControlsIntoCards();
-      });
+      // Don't immediately re-apply grid classes - let the global drag end handler do it
+      // This prevents double application and timing issues
     }, [originalOnDragEnd]);
 
     // NEW: Enhanced drag start handler to preserve row state
@@ -398,6 +413,73 @@ const addDragEventListeners = () => {
       // Mark that we're in a drag operation
       window.isDraggingElement = true;
 
+      // Capture the dragged element ID for our drop zones
+      const draggedElement = e.target.closest('.element-editor__element');
+      if (draggedElement) {
+        // Debug: log all attributes to see what's available
+        console.log('[GRID DEBUG] Dragged element attributes:', {
+          tagName: draggedElement.tagName,
+          className: draggedElement.className,
+          id: draggedElement.id,
+          attributes: Array.from(draggedElement.attributes).map(attr => `${attr.name}="${attr.value}"`),
+          innerHTML: draggedElement.innerHTML.substring(0, 500) + '...'
+        });
+        
+        // Look for all elements with ID attributes to understand the structure
+        const elementsWithIds = draggedElement.querySelectorAll('[id]');
+        console.log('[GRID DEBUG] All child elements with IDs:');
+        Array.from(elementsWithIds).forEach((el, index) => {
+          console.log(`  [${index}] ${el.tagName} id="${el.id}" class="${el.className}"`);
+        });
+        
+        // Look for any data attributes that might contain the block ID
+        const allElements = [draggedElement, ...draggedElement.querySelectorAll('*')];
+        const dataAttributes = [];
+        allElements.forEach(el => {
+          Array.from(el.attributes).forEach(attr => {
+            if (attr.name.startsWith('data-')) {
+              dataAttributes.push({ element: el.tagName, attribute: attr.name, value: attr.value });
+            }
+          });
+        });
+        console.log('[GRID DEBUG] All data attributes in dragged element:');
+        dataAttributes.forEach((attr, index) => {
+          console.log(`  [${index}] ${attr.element} ${attr.attribute}="${attr.value}"`);
+        });
+        
+        const elementId = draggedElement.getAttribute('data-element-id') || 
+                         draggedElement.getAttribute('data-id') ||
+                         draggedElement.getAttribute('data-block-id') ||
+                         draggedElement.getAttribute('data-element') ||
+                         draggedElement.id;
+        const numericElementId = extractNumericId(elementId);
+        window.currentDraggedElement = numericElementId;
+        console.log('[GRID DEBUG] Captured dragged element ID on drag start:', elementId, '-> converted to numeric:', numericElementId);
+        
+        // If still no ID, try to find it in child elements
+        if (!elementId) {
+          const childWithId = draggedElement.querySelector('[data-element-id], [data-id], [data-block-id], [id]');
+          if (childWithId) {
+            const childId = childWithId.getAttribute('data-element-id') || 
+                           childWithId.getAttribute('data-id') ||
+                           childWithId.getAttribute('data-block-id') ||
+                           childWithId.id;
+            const numericChildId = extractNumericId(childId);
+            window.currentDraggedElement = numericChildId;
+            console.log('[GRID DEBUG] Found element ID in child element:', childId, '-> converted to numeric:', numericChildId);
+          }
+        }
+      }
+
+      // Add fallback class for browsers without :has() support
+      const elementalList = document.querySelector('.elemental-editor-list');
+      if (elementalList) {
+        elementalList.classList.add('dragging-active');
+      }
+
+      // STOP grid class manipulation during drag to prevent interference
+      window.pauseGridClassManipulation = true;
+
       // Cache current row elements state
       rowElementsCache.clear();
       document.querySelectorAll('.element-editor__element.is-row').forEach((row) => {
@@ -414,11 +496,21 @@ const addDragEventListeners = () => {
     if (e.target.closest('.element-editor__element')) {
       // Clear the drag flag
       window.isDraggingElement = false;
+      window.pauseGridClassManipulation = false;
 
-      // Re-apply grid classes immediately using requestAnimationFrame
-      requestAnimationFrame(() => {
+      // Clear the captured element ID
+      window.currentDraggedElement = null;
+
+      // Remove fallback class for browsers without :has() support
+      const elementalList = document.querySelector('.elemental-editor-list');
+      if (elementalList) {
+        elementalList.classList.remove('dragging-active');
+      }
+
+      // Re-apply grid classes after a short delay to ensure DOM is stable
+      setTimeout(() => {
         moveGridControlsIntoCards();
-      });
+      }, 100);
 
       // Clear cache
       setTimeout(() => {
@@ -469,28 +561,556 @@ const addDragEventListeners = () => {
   });
 };
 
+// Enhanced hover bar system that works alongside existing SilverStripe components
+const enhanceHoverBars = () => {
+  console.log('[GRID DEBUG] Enhancing existing hover bars for better grid UX...');
+
+  const hoverBars = document.querySelectorAll('.element-editor__hover-bar');
+  console.log('[GRID DEBUG] Found', hoverBars.length, 'hover bars to enhance');
+
+  hoverBars.forEach((hoverBar, index) => {
+    console.log('[GRID DEBUG] Enhancing hover bar', index);
+
+    // Make hover bars more responsive for grid layouts
+    if (!hoverBar.classList.contains('grid-enhanced')) {
+      hoverBar.classList.add('grid-enhanced');
+
+      // Add larger hit area for better targeting
+      const hoverArea = hoverBar.querySelector('.element-editor__hover-bar-area');
+      if (hoverArea) {
+        hoverArea.style.minHeight = '40px'; // Increased from 24px
+        hoverArea.style.padding = '8px 0';
+        console.log('[GRID DEBUG] Enhanced hover area size for better targeting');
+      }
+    }
+  });
+};
+
+// Inject grid-aware drop zones around existing elements
+const injectGridDropZones = () => {
+  console.log('[GRID DEBUG] Injecting grid-aware drop zones...');
+
+  const elementList = document.querySelector('.elemental-editor-list');
+  if (!elementList) {
+    console.log('[GRID DEBUG] No elemental editor list found');
+    return;
+  }
+
+  const elements = elementList.querySelectorAll('.element-editor__element');
+  console.log('[GRID DEBUG] Found', elements.length, 'elements to add grid zones to');
+
+  elements.forEach((element, index) => {
+    // Only add zones if not already present
+    if (!element.parentElement.querySelector('.grid-drop-zone')) {
+      addGridDropZonesAroundElement(element, index, elements.length);
+    }
+  });
+};
+
+// Add grid drop zones around a specific element
+const addGridDropZonesAroundElement = (element, index, totalElements) => {
+  const elementWrapper = element.parentElement;
+  if (!elementWrapper) return;
+
+  console.log('[GRID DEBUG] Adding grid zones around element', index);
+
+  // Create left drop zone
+  const leftZone = createGridDropZone('left', element, index);
+  elementWrapper.insertBefore(leftZone, element);
+
+  // Create right drop zone using insertAfter polyfill
+  const rightZone = createGridDropZone('right', element, index);
+  insertAfter(rightZone, element);
+
+  // Add row zones for first/last elements
+  if (index === 0) {
+    const topRowZone = createRowDropZone('above', element, index);
+    elementWrapper.insertBefore(topRowZone, elementWrapper.firstChild);
+  }
+
+  if (index === totalElements - 1) {
+    const bottomRowZone = createRowDropZone('below', element, index);
+    elementWrapper.appendChild(bottomRowZone);
+  }
+};
+
+// insertAfter polyfill
+const insertAfter = (newNode, referenceNode) => {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+};
+
+// Trigger existing SilverStripe hover bar functionality
+const triggerHoverBarClick = (hoverBar) => {
+  if (!hoverBar) return;
+
+  console.log('[GRID DEBUG] Attempting to trigger hover bar click');
+
+  // Find the button inside the hover bar
+  const hoverButton = hoverBar.querySelector('.element-editor__hover-bar-area');
+  if (hoverButton) {
+    console.log('[GRID DEBUG] Found hover bar button, triggering click');
+    hoverButton.click();
+  } else {
+    console.log('[GRID DEBUG] No hover bar button found');
+  }
+};
+
+// Helper function to get element ID from any element using our detection method
+const getElementIdFromElement = (element) => {
+  if (!element) return null;
+  
+  // Try direct attributes first
+  const directId = element.getAttribute('data-element-id') || 
+                  element.getAttribute('data-id') ||
+                  element.getAttribute('data-block-id') ||
+                  element.getAttribute('data-element') ||
+                  element.id;
+  
+  if (directId) return extractNumericId(directId);
+  
+  // Try to find ID in child elements
+  const childWithId = element.querySelector('[data-element-id], [data-id], [data-block-id], [id]');
+  if (childWithId) {
+    const childId = childWithId.getAttribute('data-element-id') || 
+                   childWithId.getAttribute('data-id') ||
+                   childWithId.getAttribute('data-block-id') ||
+                   childWithId.id;
+    return extractNumericId(childId);
+  }
+  
+  return null;
+};
+
+// Helper function to extract numeric ID from DOM element IDs
+const extractNumericId = (domElementId) => {
+  if (!domElementId) return null;
+  
+  // If it's already numeric, return as string
+  if (/^\d+$/.test(domElementId)) {
+    return domElementId;
+  }
+  
+  // Extract numeric part from DOM element IDs like "element-icon-71", "columnSize-71", etc.
+  const match = domElementId.match(/(\d+)$/);
+  if (match) {
+    console.log('[GRID DEBUG] Extracted numeric ID:', match[1], 'from DOM ID:', domElementId);
+    return match[1];
+  }
+  
+  console.warn('[GRID DEBUG] Could not extract numeric ID from:', domElementId);
+  return null;
+};
+
+// Calculate insertion position for grid drop zones
+const calculateGridInsertionPosition = (position, targetElement) => {
+  const targetElementId = getElementIdFromElement(targetElement);
+  const elementWrapper = targetElement.parentElement;
+
+  console.log('[GRID DEBUG] Calculating insertion for position:', position, 'target:', targetElementId);
+
+  if (!elementWrapper) {
+    console.warn('[GRID DEBUG] No element wrapper found');
+    // Find any element to use as reference instead of null
+    const anyElement = document.querySelector('.element-editor__element');
+    const anyElementId = getElementIdFromElement(anyElement);
+    return { insertAfterElementId: anyElementId || 'fallback', dropSpot: 'bottom' };
+  }
+
+  // Find all elements in the list to understand positioning
+  const elementsList = elementWrapper.parentElement;
+  const allElements = Array.from(elementsList.children).filter(child =>
+    child.querySelector('.element-editor__element')
+  );
+
+  const currentIndex = allElements.findIndex(element =>
+    element.querySelector('.element-editor__element') === targetElement
+  );
+
+  console.log('[GRID DEBUG] Current element index:', currentIndex, 'of', allElements.length);
+
+  switch (position) {
+    case 'left':
+      // Insert before this element (same row, left position)
+      if (currentIndex > 0) {
+        const prevElement = allElements[currentIndex - 1].querySelector('.element-editor__element');
+        const prevElementId = getElementIdFromElement(prevElement);
+        return { insertAfterElementId: prevElementId, dropSpot: 'bottom' };
+      }
+      // For inserting at the beginning, we need a valid element ID instead of null
+      const firstElement = allElements[0].querySelector('.element-editor__element');
+      const firstElementId = getElementIdFromElement(firstElement);
+      return { insertAfterElementId: firstElementId, dropSpot: 'top' };
+
+    case 'right':
+      // Insert after this element (same row, right position)
+      return { insertAfterElementId: targetElementId, dropSpot: 'bottom' };
+
+    case 'above':
+      // Insert before this element (new row above)
+      if (currentIndex > 0) {
+        const prevElement = allElements[currentIndex - 1].querySelector('.element-editor__element');
+        const prevElementId = getElementIdFromElement(prevElement);
+        return { insertAfterElementId: prevElementId, dropSpot: 'bottom' };
+      }
+      // For inserting at the beginning, we need a valid element ID instead of null
+      const firstElementForAbove = allElements[0].querySelector('.element-editor__element');
+      const firstElementIdForAbove = getElementIdFromElement(firstElementForAbove);
+      return { insertAfterElementId: firstElementIdForAbove, dropSpot: 'top' };
+
+    case 'below':
+      // Insert after this element (new row below)
+      return { insertAfterElementId: targetElementId, dropSpot: 'bottom' };
+
+    default:
+      console.warn('[GRID DEBUG] Unknown position:', position);
+      return { insertAfterElementId: targetElementId || 'fallback', dropSpot: 'bottom' };
+  }
+};
+
+// Old manual drag/drop event handling removed - React DnD components handle this now
+
+// Trigger SilverStripe's drag end handler with the correct parameters
+const triggerSilverStripeDragEnd = (draggedElementId, insertAfterElementId) => {
+  console.log('[GRID DEBUG] Triggering SilverStripe drag end:', { draggedElementId, insertAfterElementId });
+
+  // Try multiple methods to trigger the drag end
+  const elementList = document.querySelector('.elemental-editor-list');
+  if (!elementList) {
+    console.warn('[GRID DEBUG] Could not find elemental-editor-list');
+    return;
+  }
+
+  // Method 1: Try React fiber (React 17/18)
+  const fiberKey = Object.keys(elementList).find(key => key.startsWith('__reactInternalInstance') || key.startsWith('__reactFiber'));
+  if (fiberKey && elementList[fiberKey]) {
+    let reactComponent = elementList[fiberKey];
+    let attempts = 0;
+    while (reactComponent && attempts < 10) {
+      if (reactComponent.memoizedProps && reactComponent.memoizedProps.onDragEnd) {
+        console.log('[GRID DEBUG] Found React component with onDragEnd handler via fiber');
+        reactComponent.memoizedProps.onDragEnd(draggedElementId, insertAfterElementId);
+        return;
+      }
+      reactComponent = reactComponent.return || reactComponent.child;
+      attempts++;
+    }
+  }
+
+  // Method 2: Try to find React instance via properties
+  if (elementList._reactInternalInstance) {
+    let reactComponent = elementList._reactInternalInstance;
+    let attempts = 0;
+    while (reactComponent && attempts < 10) {
+      if (reactComponent.props && reactComponent.props.onDragEnd) {
+        console.log('[GRID DEBUG] Found React component with onDragEnd handler via instance');
+        reactComponent.props.onDragEnd(draggedElementId, insertAfterElementId);
+        return;
+      }
+      reactComponent = reactComponent._currentElement && reactComponent._currentElement._owner;
+      attempts++;
+    }
+  }
+
+  // Method 3: Fallback - try to simulate a hover bar click for the same effect
+  console.log('[GRID DEBUG] React component access failed, falling back to hover bar simulation');
+  const targetElement = document.querySelector(`[data-element-id="${insertAfterElementId}"]`) ||
+                       document.querySelector('.element-editor__element');
+  
+  if (targetElement) {
+    const elementWrapper = targetElement.parentElement;
+    const hoverBar = elementWrapper && elementWrapper.nextElementSibling;
+    if (hoverBar && hoverBar.classList.contains('element-editor__hover-bar')) {
+      console.log('[GRID DEBUG] Triggering hover bar as fallback');
+      triggerHoverBarClick(hoverBar);
+    }
+  }
+};
+
+// Helper function to get area ID from the context
+const getAreaIdFromContext = (targetElement) => {
+  // Try to find the area ID from the elemental editor list
+  const elementalList = targetElement.closest('.elemental-editor-list');
+  if (elementalList) {
+    // Look for data attributes or React fiber props that contain area ID
+    const areaIdAttribute = elementalList.getAttribute('data-area-id');
+    if (areaIdAttribute) {
+      return parseInt(areaIdAttribute, 10);
+    }
+  }
+
+  // Fallback: try to extract from URL or other context
+  const urlParams = new URLSearchParams(window.location.search);
+  const areaIdFromUrl = urlParams.get('ElementalAreaID');
+  if (areaIdFromUrl) {
+    return parseInt(areaIdFromUrl, 10);
+  }
+
+  // Default fallback
+  console.warn('[GRID DEBUG] Could not determine area ID, using default');
+  return 1;
+};
+
+// Helper function to get allowed element types
+const getAllowedElementTypes = () => {
+  // Try to get element types from the window context if available
+  if (window.ss && window.ss.elementTypes) {
+    return window.ss.elementTypes;
+  }
+
+  // Fallback: return empty array, ReactGridDropZone will handle this
+  return [];
+};
+
+// Create a simpler DOM-based grid drop zone that integrates with React DnD
+const createGridDropZone = (position, targetElement, index) => {
+  const zone = document.createElement('div');
+  zone.className = `grid-drop-zone grid-drop-zone--${position}`;
+  zone.setAttribute('data-target-element', targetElement.getAttribute('data-element-id') || index);
+  zone.setAttribute('data-position', position);
+  
+  console.log('[GRID DEBUG] Creating simplified grid drop zone for', position, 'position');
+  
+  zone.innerHTML = `
+    <div class="grid-drop-zone__inner">
+      <button class="grid-drop-zone__button" title="Add block ${position}">
+        <span class="grid-drop-zone__icon font-icon-plus-circled"></span>
+        <span class="grid-drop-zone__label">Add ${position}</span>
+      </button>
+    </div>
+  `;
+  
+  // Add click handler for popover functionality
+  const button = zone.querySelector('.grid-drop-zone__button');
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log('[GRID DEBUG] Grid drop zone clicked:', position);
+    triggerHoverBarForPosition(targetElement, position);
+  });
+  
+  // Add native drag and drop event handlers for React DnD integration
+  setupNativeDragDropEvents(zone, targetElement, position);
+  
+  console.log('[GRID DEBUG] Created simplified grid drop zone for', position, 'position');
+  return zone;
+};
+
+// Create a simpler DOM-based row drop zone that integrates with React DnD
+const createRowDropZone = (position, targetElement, index) => {
+  const zone = document.createElement('div');
+  zone.className = `row-drop-zone row-drop-zone--${position}`;
+  zone.setAttribute('data-target-element', targetElement.getAttribute('data-element-id') || index);
+  zone.setAttribute('data-position', position);
+
+  console.log('[GRID DEBUG] Creating simplified row drop zone for', position, 'position');
+
+  zone.innerHTML = `
+    <div class="row-drop-zone__inner">
+      <div class="row-drop-zone__line"></div>
+      <button class="row-drop-zone__button" title="Add row ${position}">
+        <span class="row-drop-zone__icon font-icon-plus-circled"></span>
+        <span class="row-drop-zone__label">Add row ${position}</span>
+      </button>
+    </div>
+  `;
+  
+  // Add click handler for popover functionality
+  const button = zone.querySelector('.row-drop-zone__button');
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log('[GRID DEBUG] Row drop zone clicked:', position);
+    triggerHoverBarForPosition(targetElement, position);
+  });
+  
+  // Add native drag and drop event handlers for React DnD integration
+  setupNativeDragDropEvents(zone, targetElement, position);
+
+  console.log('[GRID DEBUG] Created simplified row drop zone for', position, 'position');
+  return zone;
+};
+
+// Helper function to trigger the appropriate hover bar based on position
+const triggerHoverBarForPosition = (targetElement, position) => {
+  const elementWrapper = targetElement.parentElement;
+  if (!elementWrapper) return;
+  
+  let hoverBar = null;
+  
+  if (position === 'left' || position === 'above') {
+    // For left/above positions, use the hover bar before this element
+    hoverBar = elementWrapper.previousElementSibling;
+  } else if (position === 'right' || position === 'below') {
+    // For right/below positions, use the hover bar after this element
+    hoverBar = elementWrapper.nextElementSibling;
+  }
+  
+  if (hoverBar && hoverBar.classList.contains('element-editor__hover-bar')) {
+    console.log('[GRID DEBUG] Triggering hover bar for', position, 'position');
+    triggerHoverBarClick(hoverBar);
+  } else {
+    console.log('[GRID DEBUG] No hover bar found for', position, 'position');
+  }
+};
+
+// Setup native drag and drop events to integrate with React DnD
+const setupNativeDragDropEvents = (zone, targetElement, position) => {
+  // Make the zone a proper drop target
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    zone.classList.add('grid-drop-zone--drag-over');
+  });
+  
+  zone.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    zone.classList.add('grid-drop-zone--drag-over');
+  });
+  
+  zone.addEventListener('dragleave', (e) => {
+    if (!zone.contains(e.relatedTarget)) {
+      zone.classList.remove('grid-drop-zone--drag-over');
+    }
+  });
+  
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('grid-drop-zone--drag-over');
+    
+    // Debug: Log all available drag data types
+    console.log('[GRID DEBUG] Drop event - available data types:', e.dataTransfer.types);
+    
+    // The issue is that SilverStripe stores data as application/json but it returns '[object Object]'
+    // We need to get the actual drag data from the drag event or monitor
+    let draggedElementId = null;
+    
+    // Try to get drag data from different sources
+    const rawJsonData = e.dataTransfer.getData('application/json');
+    console.log('[GRID DEBUG] Raw JSON data:', rawJsonData);
+    
+    // Since we can't get the actual data from dataTransfer, we need to intercept it from the drag start
+    // Let's try to get it from the dragged element's attributes or global state
+    const draggedElement = document.querySelector('.element-editor__element--dragging');
+    if (draggedElement) {
+      console.log('[GRID DEBUG] Currently dragging element attributes:', {
+        tagName: draggedElement.tagName,
+        className: draggedElement.className,
+        id: draggedElement.id,
+        attributes: Array.from(draggedElement.attributes).map(attr => `${attr.name}="${attr.value}"`)
+      });
+      
+      const rawDraggedElementId = draggedElement.getAttribute('data-element-id') || 
+                        draggedElement.getAttribute('data-id') ||
+                        draggedElement.getAttribute('data-block-id') ||
+                        draggedElement.getAttribute('data-element') ||
+                        draggedElement.id;
+      draggedElementId = extractNumericId(rawDraggedElementId);
+      console.log('[GRID DEBUG] Found dragged element via CSS class:', rawDraggedElementId, '-> converted to numeric:', draggedElementId);
+      
+      // Try to find ID in child elements if main element doesn't have it
+      if (!draggedElementId) {
+        const childWithId = draggedElement.querySelector('[data-element-id], [data-id], [data-block-id], [id]');
+        if (childWithId) {
+          const rawChildElementId = childWithId.getAttribute('data-element-id') || 
+                            childWithId.getAttribute('data-id') ||
+                            childWithId.getAttribute('data-block-id') ||
+                            childWithId.id;
+          draggedElementId = extractNumericId(rawChildElementId);
+          console.log('[GRID DEBUG] Found element ID in dragging child element:', rawChildElementId, '-> converted to numeric:', draggedElementId);
+        }
+      }
+    }
+    
+    // If still no ID, try to find it from the drag image or any recently active element
+    if (!draggedElementId) {
+      // Look for any element that might have been recently dragged
+      const allElements = document.querySelectorAll('.element-editor__element[data-element-id]');
+      for (const element of allElements) {
+        if (element.style.opacity === '0.5' || element.classList.contains('dragging')) {
+          const rawElementId = element.getAttribute('data-element-id');
+          draggedElementId = extractNumericId(rawElementId);
+          console.log('[GRID DEBUG] Found dragged element via opacity/class:', rawElementId, '-> converted to numeric:', draggedElementId);
+          break;
+        }
+      }
+    }
+    
+    // Alternative approach: Check if there's a global drag state we can access
+    if (!draggedElementId && window.currentDraggedElement) {
+      draggedElementId = window.currentDraggedElement;
+      // Ensure the ID is numeric (fallback in case it wasn't converted earlier)
+      if (draggedElementId && !/^\d+$/.test(draggedElementId)) {
+        draggedElementId = extractNumericId(draggedElementId);
+        console.log('[GRID DEBUG] Found dragged element from global state and converted to numeric:', draggedElementId);
+      } else {
+        console.log('[GRID DEBUG] Found dragged element from global state (already numeric):', draggedElementId);
+      }
+    }
+    
+    if (!draggedElementId) {
+      console.warn('[GRID DEBUG] Could not determine dragged element ID. Available data:', {
+        hasDataTransfer: !!e.dataTransfer,
+        types: e.dataTransfer.types,
+        effectAllowed: e.dataTransfer.effectAllowed,
+        dropEffect: e.dataTransfer.dropEffect,
+        rawJsonData: rawJsonData
+      });
+      // Don't return - let's try the fallback approach
+    } else {
+      console.log('[GRID DEBUG] Successfully found dragged element ID:', draggedElementId);
+    }
+    
+    // Calculate insertion position
+    const insertionData = calculateGridInsertionPosition(position, targetElement);
+    console.log('[GRID DEBUG] Native drop on', position, 'zone:', insertionData);
+    
+    // If we have a valid element ID, trigger the drag end handler
+    if (draggedElementId) {
+      console.log('[GRID DEBUG] Triggering drag end with element ID:', draggedElementId);
+      triggerSilverStripeDragEnd(draggedElementId, insertionData.insertAfterElementId);
+    } else {
+      // Fallback: Try to trigger hover bar functionality as a last resort
+      console.log('[GRID DEBUG] No element ID - falling back to hover bar trigger');
+      triggerHoverBarForPosition(targetElement, position);
+    }
+  });
+};
+
 window.document.addEventListener('DOMContentLoaded', () => {
-  // Use Injector.transform() to enhance the Element component instead of replacing it
+  console.log('[GRID DEBUG] DOMContentLoaded - Starting alongside grid enhancements...');
+
+  // Keep the Element enhancement (this works well)
+  console.log('[GRID DEBUG] Applying Element enhancement...');
   Injector.transform('grid-element-enhancement', (updater) => {
     updater.component('Element', withGridFunctionality);
+    console.log('[GRID DEBUG] Element enhanced with grid functionality');
   });
 
-  // Register the toolbar that uses the buttons
+  // Keep the toolbar enhancement (this works well)
+  console.log('[GRID DEBUG] Applying ElementToolbar enhancement...');
   Injector.transform('elemental-grid-toolbar', (updater) => {
     updater.component('ElementToolbar', OverruledToolbar);
+    console.log('[GRID DEBUG] ElementToolbar enhanced');
   });
 
-  // Set up drag event listeners
+  // Set up drag event listeners (keep existing functionality)
   addDragEventListeners();
 
   // Set up DOM manipulation to move controls inside cards
   setTimeout(() => {
     moveGridControlsIntoCards();
 
-    // Enhanced observer to detect React re-renders and styling loss during drag operations
+    // Enhance existing hover bars for better grid UX
+    enhanceHoverBars();
+
+    // Inject our grid drop zones alongside existing system
+    injectGridDropZones();
+
+    console.log('[GRID DEBUG] Grid enhancements applied alongside existing system');
+
+    // Enhanced observer to detect React re-renders and maintain grid enhancements
     const observer = new MutationObserver((mutations) => {
       let shouldReapply = false;
       let shouldRestoreRowStyling = false;
+      let shouldReenhanceSystem = false;
 
       mutations.forEach(mutation => {
         // Check for added/removed nodes (new elements or React re-renders)
@@ -500,6 +1120,16 @@ window.document.addEventListener('DOMContentLoaded', () => {
             shouldRestoreRowStyling = true;
           }
           shouldReapply = true;
+
+          // Check if new elements were added that need grid enhancements
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (node.classList && node.classList.contains('element-editor__element')) {
+                shouldReenhanceSystem = true;
+                console.log('[GRID DEBUG] New element detected, will re-enhance system');
+              }
+            }
+          });
         }
 
         // Check for class changes that might indicate drag operations or React re-renders
@@ -578,6 +1208,15 @@ window.document.addEventListener('DOMContentLoaded', () => {
             moveGridControlsIntoCards();
           });
         }
+      }
+
+      // Re-enhance the system when new elements are added
+      if (shouldReenhanceSystem) {
+        setTimeout(() => {
+          console.log('[GRID DEBUG] Re-enhancing system due to new content...');
+          enhanceHoverBars();
+          injectGridDropZones();
+        }, 100);
       }
     });
 

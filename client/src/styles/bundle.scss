@@ -55,8 +55,65 @@
 
 }
 
+/* ENHANCED HOVER BAR STYLING - Work alongside our grid drop zones */
 .element-editor__hover-bar {
-  display: none;
+  /* Keep hover bars as designed by SilverStripe but improve usability */
+  height: 0;
+  position: relative;
+  
+  /* Enhanced hover bars for better grid experience */
+  &.grid-enhanced {
+    .element-editor__hover-bar-area {
+      /* Larger hit area for better targeting */
+      min-height: 40px !important; /* Increased from 24px */
+      padding: 8px 0 !important;
+      transition: all 200ms ease-in-out;
+      
+      /* Enhanced visual feedback */
+      &:hover {
+        background-color: rgba(0, 113, 196, 0.05);
+      }
+      
+      /* Add invisible padding to catch more drag events */
+      &::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        bottom: -12px;
+        left: 0;
+        right: 0;
+        z-index: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+}
+
+/* REMOVED: CSS that breaks grid layout during drag operations
+   The grid layout must remain intact for proper left/right drop zone detection */
+
+/* ENHANCED DRAG POSITION INDICATOR STYLING - Using correct SilverStripe class names */
+.elemental-editor-drag-indicator {
+  /* Make the drag indicator more visible without ugly arrows */
+  height: 4px !important;
+  background: rgba(0, 113, 196, 0.8) !important;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 113, 196, 0.4);
+  margin: 8px 0 !important;
+  
+  /* Subtle animation to draw attention */
+  animation: drag-indicator-pulse 2s ease-in-out infinite;
+}
+
+@keyframes drag-indicator-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
 }
 
 .is-dragged-top,
@@ -126,6 +183,229 @@
   .btn {
     flex: 1;
     min-width: auto;
+  }
+}
+
+/* GRID DROP ZONE STYLING - Simplified Approach */
+.grid-drop-zone {
+  position: absolute;
+  width: 40px;
+  min-height: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(0, 113, 196, 0.3);
+  transition: all 200ms ease-in-out;
+  border-radius: 4px;
+  z-index: 5;
+  opacity: 0.4; /* Make them visible by default */
+  pointer-events: auto;
+  background-color: rgba(0, 113, 196, 0.05);
+
+  &--left {
+    left: -45px;
+  }
+
+  &--right {
+    right: -45px;
+  }
+
+  /* Always show drop zones for better discoverability */
+  .elemental-editor-list & {
+    opacity: 0.6;
+    pointer-events: auto;
+  }
+
+  /* Enhanced visibility on hover or during drag operations */
+  .elemental-editor-list:hover &,
+  .elemental-editor-list.dragging-active & {
+    opacity: 0.9;
+    border-color: rgba(0, 113, 196, 0.6);
+    background-color: rgba(0, 113, 196, 0.1);
+  }
+
+  &--hover,
+  &:hover,
+  &--drag-over {
+    opacity: 1 !important;
+    border-color: rgba(0, 113, 196, 0.6);
+    background-color: rgba(0, 113, 196, 0.1);
+    width: 40px;
+    
+    .grid-drop-zone__label {
+      opacity: 1;
+    }
+  }
+
+  &--active {
+    border-color: rgba(0, 113, 196, 0.8);
+    background-color: rgba(0, 113, 196, 0.15);
+  }
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 8px 4px;
+  }
+
+  &__button {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: rgba(0, 113, 196, 0.8);
+    transition: all 200ms ease-in-out;
+    border-radius: 4px;
+    width: 100%;
+
+    &:hover {
+      color: rgba(0, 113, 196, 1);
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  &__icon {
+    font-size: 1.1rem;
+  }
+
+  &__label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+    white-space: nowrap;
+  }
+}
+
+/* ROW DROP ZONE STYLING - Simplified Approach */
+.row-drop-zone {
+  position: relative;
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+  transition: all 200ms ease-in-out;
+
+  &--hover,
+  &:hover,
+  &--drag-over {
+    .row-drop-zone__line {
+      background-color: rgba(0, 113, 196, 0.8);
+      height: 4px;
+      box-shadow: 0 0 8px rgba(0, 113, 196, 0.4);
+    }
+
+    .row-drop-zone__button {
+      color: rgba(0, 113, 196, 1);
+      background-color: rgba(255, 255, 255, 0.9);
+      transform: scale(1.05);
+    }
+  }
+
+  &--active {
+    .row-drop-zone__line {
+      background-color: rgba(0, 113, 196, 1);
+      height: 4px;
+      box-shadow: 0 0 12px rgba(0, 113, 196, 0.6);
+    }
+  }
+
+  &__inner {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: rgba(0, 113, 196, 0.3);
+    transition: all 200ms ease-in-out;
+    border-radius: 1px;
+  }
+
+  &__button {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 113, 196, 0.3);
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(0, 113, 196, 0.7);
+    transition: all 200ms ease-in-out;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      color: rgba(0, 113, 196, 1);
+      border-color: rgba(0, 113, 196, 0.6);
+      transform: scale(1.05);
+    }
+  }
+
+  &__icon {
+    font-size: 1rem;
+  }
+
+  &__label {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+}
+
+/* ENHANCED GRID LAYOUT FOR ALONGSIDE DROP ZONES */
+.elemental-editor-list {
+  /* Add padding to accommodate side drop zones */
+  padding: 0 60px;
+  
+  /* Element holders need relative positioning for absolute drop zones */
+  .element-editor__element-holder {
+    position: relative;
+    margin: 8px 0;
+    
+    /* Ensure minimum height for drop zone visibility */
+    min-height: 4rem;
+  }
+  
+  /* Enhanced state during drag operations */
+  &.dragging-active {
+    .grid-drop-zone {
+      opacity: 0.9;
+      pointer-events: auto;
+      border-color: rgba(0, 113, 196, 0.8);
+    }
+    
+    .row-drop-zone {
+      opacity: 1;
+    }
+  }
+  
+  /* Show zones on hover for better discoverability */
+  &:hover {
+    .grid-drop-zone {
+      opacity: 0.8;
+      pointer-events: auto;
+    }
   }
 }
 

@@ -2,6 +2,30 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## **🚨 CRITICAL DEVELOPMENT RULE - ALWAYS CHECK VENDOR CODE FIRST**
+
+**Before making ANY changes to this module, you MUST examine the relevant vendor code to understand the full context.**
+
+### Why This Rule Exists
+This module extends complex third-party systems (SilverStripe Elemental) that have their own implementation patterns, class names, and architectural decisions. Making assumptions about how these systems work leads to:
+- Broken functionality due to incorrect assumptions
+- Wasted time implementing solutions that conflict with the underlying system
+- CSS/JavaScript that targets non-existent classes or components
+- Integration issues that are difficult to debug
+
+### Required Vendor Code Review Process
+1. **Identify the relevant vendor directories**: `vendor/dnadesign/silverstripe-elemental/`, `vendor/silverstripe/`
+2. **Examine the actual implementation**: Look at the real CSS classes, component names, and integration patterns
+3. **Understand the intended workflow**: How does the vendor system expect to be extended?
+4. **Document your findings**: Note any discrepancies between assumptions and reality
+5. **Design solutions that work WITH the vendor system, not against it**
+
+### Example: Drag/Drop System Investigation
+- **Wrong approach**: Assume CSS classes like `.is-dragged-top` exist and build solutions around them
+- **Correct approach**: Examine `vendor/dnadesign/silverstripe-elemental/client/src/components/ElementEditor/` to find the actual classes (`.element-editor__element--dragging`, `.elemental-editor-drag-indicator`) and understand how the system really works
+
+**This rule is non-negotiable and must be followed for every feature modification or bug fix.**
+
 ## Project Overview
 
 This is the `wedevelopnl/silverstripe-elemental-grid` module, which extends SilverStripe's Elemental module to provide a Bootstrap-style grid system for content blocks. The module allows content editors to arrange elemental blocks in rows and columns with responsive column sizing.
@@ -650,5 +674,336 @@ observer.observe(document.body, {
 4. **Smooth Transitions**: Add CSS transitions as fallback for any remaining shifts
 5. **Performance**: Eliminate unnecessary delays and debouncing
 6. **Debugging**: Add comprehensive console logging for troubleshooting
+
+## Drag/Drop Integration with SilverStripe Elemental
+
+### Critical Learning: Grid Layout Must Remain Intact During Drag Operations
+
+**Date: 2025-01-18**  
+**Issue**: Previous implementation incorrectly tried to force elements to full width during drag operations, breaking the native "Drop here to place left/right" functionality.
+
+#### Key Insights from Vendor Code Investigation
+
+1. **Actual CSS Classes Used**:
+   - `.element-editor__element--dragging` - Applied to element being dragged
+   - `.element-editor__element--dragged-over` - Applied to elements being hovered over during drag
+   - `.elemental-editor-drag-indicator` - The actual drag position indicator class (NOT `.drag-position-indicator`)
+
+2. **No Left/Right Drag State Classes**: 
+   - The classes `.is-dragged-top` and `.is-dragged-bottom` do NOT exist in the SilverStripe Elemental codebase
+   - These are part of our grid module's overlay system for showing "Drop here to place left/right" messages
+
+3. **Grid Layout Dependency**:
+   - The "Drop here to place left/right" overlays depend on elements maintaining their side-by-side grid positioning
+   - Breaking the grid layout during drag makes left/right positioning meaningless
+   - SilverStripe's drag system expects elements to stay in their visual positions for accurate drop zone calculation
+
+#### Correct Implementation Pattern
+
+```css
+/* ✅ CORRECT - Enhance hover bars without breaking grid layout */
+.element-editor__hover-bar {
+  height: 0;
+  position: relative;
+  
+  .element-editor__hover-bar-area {
+    min-height: 24px; /* Improved from default 18px */
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      bottom: -8px;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      pointer-events: auto;
+    }
+  }
+}
+
+/* ❌ WRONG - This breaks grid layout and left/right drop zones */
+.elemental-editor-list:has(.element-editor__element--dragging) {
+  .element-editor__element {
+    width: 100% !important; /* Breaks grid positioning */
+  }
+}
+```
+
+#### Integration Rules
+
+1. **Never modify element widths during drag** - This breaks left/right drop zone detection
+2. **Keep grid layout intact** - Elements must remain in their Bootstrap grid positions
+3. **Only enhance hover bar detection** - Make between-element drops easier without visual interference
+4. **Use correct vendor CSS classes** - Target actual classes, not assumed ones
+5. **Test with grid overlays** - Verify "Drop here to place left/right" functionality works
+
+#### Files Modified
+- `client/src/styles/bundle.scss` - Enhanced hover bar detection, removed grid-breaking CSS
+- Used correct `.elemental-editor-drag-indicator` class instead of wrong `.drag-position-indicator`
+
+This approach maintains all existing SilverStripe Elemental functionality while improving usability for between-element drops.
+
+## Enhanced Grid Positioning System (2025-01-18)
+
+### Problem Solved
+
+The original drag/drop system had "finicky" behavior where:
+- Dropping elements "after" other elements in the same row required hovering over the next row
+- Moving elements to the bottom was difficult when the last element was a row
+- Users had to be very precise with cursor positioning for successful drops
+
+### Solution: Grid-Aware Drop Zones
+
+Implemented a comprehensive grid positioning system that works **alongside** existing SilverStripe functionality:
+
+#### **DOM-Based Enhancement Approach**
+- **No React component overrides** - avoids SilverStripe 5.3+ compatibility issues
+- **Enhances existing hover bars** with larger hit areas (40px vs 24px)
+- **Injects grid-aware drop zones** around each element for intuitive positioning
+- **Preserves all existing drag/drop functionality** while adding grid enhancements
+
+#### **Grid Drop Zone Types**
+
+1. **Left/Right Zones** - Position elements side-by-side within the same row
+2. **Above/Below Zones** - Create new rows above or below existing elements
+3. **Enhanced Hover Bars** - Improved between-element drop detection
+
+```javascript
+// Grid drop zones are injected around each element
+const positions = ['left', 'right', 'above', 'below'];
+positions.forEach(position => {
+  const dropZone = createGridDropZone(element, position);
+  element.parentElement.insertBefore(dropZone, element);
+});
+```
+
+#### **Critical GraphQL ID Conversion**
+
+The biggest technical challenge was GraphQL compatibility:
+
+**Problem**: SilverStripe's GraphQL expects numeric element IDs (`"71"`), but DOM elements use prefixed IDs (`"element-icon-71"`)
+
+**Solution**: Comprehensive ID conversion throughout the drag/drop pipeline:
+
+```javascript
+// Convert DOM element IDs to numeric format
+const extractNumericId = (domElementId) => {
+  if (!domElementId) return null;
+  
+  // If already numeric, return as-is
+  if (/^\d+$/.test(domElementId)) {
+    return domElementId;
+  }
+  
+  // Extract numeric part from DOM IDs like "element-icon-71"
+  const match = domElementId.match(/(\d+)$/);
+  return match ? match[1] : null;
+};
+
+// Applied at every ID detection point:
+// 1. Drag start handler
+// 2. Drop handler primary detection
+// 3. Drop handler child detection
+// 4. Drop handler fallback detection
+```
+
+#### **React DnD Integration**
+
+The system integrates with SilverStripe's existing React DnD infrastructure:
+
+```javascript
+// Find and trigger SilverStripe's drag end handler
+const triggerSilverStripeDragEnd = (draggedElementId, insertAfterElementId) => {
+  const elementList = document.querySelector('.elemental-editor-list');
+  const fiberKey = Object.keys(elementList).find(key => 
+    key.startsWith('__reactInternalInstance') || key.startsWith('__reactFiber')
+  );
+  
+  if (fiberKey && elementList[fiberKey]) {
+    let reactComponent = elementList[fiberKey];
+    // Navigate React fiber tree to find onDragEnd handler
+    while (reactComponent && reactComponent.memoizedProps?.onDragEnd) {
+      reactComponent.memoizedProps.onDragEnd(draggedElementId, insertAfterElementId);
+      return;
+    }
+  }
+};
+```
+
+#### **Grid Position Calculation**
+
+The system calculates proper insertion points based on visual grid positioning:
+
+```javascript
+const calculateGridInsertionPosition = (position, targetElementId) => {
+  const allElements = Array.from(document.querySelectorAll('.element-editor__element'));
+  const targetIndex = allElements.findIndex(el => 
+    getElementIdFromElement(el) === targetElementId
+  );
+  
+  switch (position) {
+    case 'left':
+      // Insert before target element (same row)
+      const prevElement = allElements[targetIndex - 1];
+      return { insertAfterElementId: getElementIdFromElement(prevElement), dropSpot: 'bottom' };
+      
+    case 'right': 
+      // Insert after target element (same row)
+      return { insertAfterElementId: targetElementId, dropSpot: 'bottom' };
+      
+    case 'above':
+      // Insert before target element (new row above)
+      return { insertAfterElementId: targetElementId, dropSpot: 'top' };
+      
+    case 'below':
+      // Insert after target element (new row below)
+      return { insertAfterElementId: targetElementId, dropSpot: 'bottom' };
+  }
+};
+```
+
+#### **Enhanced Hover Bar System**
+
+Improved existing SilverStripe hover bars without breaking functionality:
+
+```scss
+// Enhanced hover bars for better grid UX
+.element-editor__hover-bar.grid-enhanced {
+  .element-editor__hover-bar-area {
+    min-height: 40px !important; // Increased from 24px
+    padding: 8px 0 !important;
+    transition: all 200ms ease-in-out;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      bottom: -8px;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      pointer-events: auto;
+    }
+  }
+}
+
+// Grid drop zones with visual feedback
+.grid-drop-zone {
+  position: absolute;
+  background: rgba(0, 123, 255, 0.1);
+  border: 2px dashed rgba(0, 123, 255, 0.3);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+  pointer-events: auto;
+  z-index: 10;
+  
+  &::after {
+    content: attr(data-position);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: rgba(0, 123, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  &.dragover {
+    opacity: 1;
+    background: rgba(0, 123, 255, 0.2);
+    border-color: rgba(0, 123, 255, 0.6);
+  }
+}
+```
+
+#### **Implementation Files**
+
+**Core System**:
+- `client/src/bundles/bundle.js` - Main drag/drop enhancement logic with comprehensive element ID conversion
+- `client/src/styles/bundle.scss` - Enhanced hover bars and grid drop zone styling
+
+**New Components**:
+- `client/src/components/GridDropZone.js` - Grid positioning drop zones
+- `client/src/components/ReactGridDropZone.js` - React DnD integration components
+- `client/src/components/RowDropZone.js` - Row-specific drop zones
+- `client/src/lib/gridPositionHelpers.js` - Grid positioning calculation utilities
+
+**Enhanced Components**:
+- `client/src/components/Element.js` - Grid functionality integration
+- `client/src/components/ElementList.js` - Enhanced drag/drop handling
+
+#### **Key Success Metrics**
+
+✅ **Resolved GraphQL 500 errors** - Element IDs now properly converted to numeric format  
+✅ **Intuitive drag/drop UX** - Users can easily position elements left/right/above/below  
+✅ **Maintained SilverStripe compatibility** - All existing functionality preserved  
+✅ **Enhanced visual feedback** - Clear drop zones with position indicators  
+✅ **Improved hover bar targeting** - 40px hit areas vs original 24px  
+✅ **Grid layout preservation** - Elements stay in Bootstrap grid positions during drag  
+✅ **React DnD integration** - Seamless integration with existing drag system  
+
+#### **Console Logging for Debugging**
+
+The system includes comprehensive logging for troubleshooting:
+
+```javascript
+// Example debug output
+[GRID DEBUG] Found element ID in child element: element-icon-71 -> converted to numeric: 71
+[GRID DEBUG] Calculating insertion for position: right target: 68
+[GRID DEBUG] Triggering SilverStripe drag end: {draggedElementId: '71', insertAfterElementId: '68'}
+[GRID DEBUG] Found React component with onDragEnd handler via fiber
+```
+
+#### **Performance Optimizations**
+
+- **`useLayoutEffect`** for immediate class application before browser paint
+- **`requestAnimationFrame`** for optimal timing of post-drag updates
+- **Element ID caching** to avoid repeated DOM queries
+- **Throttled restoration** for drag operations
+- **MutationObserver** for efficient DOM change detection
+
+#### **Browser Compatibility**
+
+- **Modern browsers** with React DnD support
+- **Fallback hover bars** for better targeting on all browsers
+- **CSS transitions** for smooth visual feedback
+- **Touch device compatibility** through React DnD
+
+### Testing the Enhanced System
+
+1. **Left/Right Positioning**: Drag elements onto side zones to position within the same row
+2. **Above/Below Positioning**: Drag elements onto top/bottom zones to create new rows
+3. **Bottom Insertion**: Drag elements to the bottom zone of the last element
+4. **Visual Feedback**: Confirm drop zones highlight on dragover
+5. **Element Ordering**: Verify elements appear in correct positions after drop
+6. **GraphQL Integration**: Check browser console for successful API calls
+
+### Troubleshooting Enhanced Drag/Drop
+
+**GraphQL 500 Errors**:
+- Check element ID conversion in browser console
+- Verify numeric IDs are sent to GraphQL: `{blockId: "71", afterBlockId: "68"}`
+- Ensure `extractNumericId()` function is working correctly
+
+**Drop Zones Not Appearing**:
+- Verify `injectGridDropZones()` is called after DOM content loads
+- Check browser console for "Found X elements to add grid zones to"
+- Ensure CSS is properly built with `npm run build`
+
+**Elements Not Moving**:
+- Verify React DnD integration is finding SilverStripe's drag handler
+- Check console for "Found React component with onDragEnd handler"
+- Ensure element IDs are being captured correctly on drag start
+
+**Visual Feedback Issues**:
+- Verify drop zone CSS classes are applied correctly
+- Check `dragover` and `dragleave` event handlers are working
+- Ensure transitions are smooth with proper timing
+
+This enhanced grid positioning system provides intuitive drag/drop UX while maintaining full compatibility with SilverStripe's existing elemental system.
 
 This documentation should be updated whenever significant changes are made to the SilverStripe compatibility layer or core functionality.

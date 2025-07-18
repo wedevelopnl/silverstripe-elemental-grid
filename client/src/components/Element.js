@@ -28,13 +28,7 @@ class Element extends Component {
   constructor(props) {
     super(props);
 
-    console.log('🔧 Grid Element: Constructor called with props:', props);
-    console.log('🔧 Grid Element: Element data:', props.element);
-    console.log('🔧 Grid Element: Grid schema:', props.element && props.element.blockSchema && props.element.blockSchema.grid);
-    console.log('🔧 Grid Element: Full blockSchema:', props.element && props.element.blockSchema);
-
-    // Alert to make sure this is being called
-    console.log('🚨 GRID ELEMENT CONSTRUCTOR EXECUTED! 🚨');
+    // Debug logging removed for production build
 
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleExpand = this.handleExpand.bind(this);
@@ -257,7 +251,7 @@ class Element extends Component {
   }
 
   render() {
-    console.log('🚨 GRID ELEMENT RENDER CALLED! 🚨');
+    // Debug logging removed for production build
 
     const {
       element,
@@ -340,19 +334,10 @@ class Element extends Component {
           const gridSchema = element && element.blockSchema && element.blockSchema.grid;
           const columnData = (gridSchema && gridSchema.column) || {};
 
-          console.log('🔧 Grid Element: Checking if should render ColumnSize component');
-          console.log('🔧 Grid Element: gridSchema:', gridSchema);
-          console.log('🔧 Grid Element: ColumnSizeComponent:', ColumnSizeComponent);
-          console.log('🔧 Grid Element: Grid data:', {
-            elementId: element.id,
-            size: columnData.size,
-            defaultViewport: columnData.defaultViewport,
-            gridColumns: gridSchema && gridSchema.gridColumns,
-            offset: columnData.offset
-          });
+          // Debug logging removed for production build
 
           if (gridSchema && !gridSchema.isRow && ColumnSizeComponent) {
-            console.log('✅ Grid Element: Rendering ColumnSize component');
+            // Rendering ColumnSize component
             return (
               <ColumnSizeComponent
                 elementId={element.id}
@@ -365,11 +350,7 @@ class Element extends Component {
               />
             );
           } else {
-            console.log('❌ Grid Element: NOT rendering ColumnSize component', {
-              hasGridSchema: !!gridSchema,
-              isRow: gridSchema && gridSchema.isRow,
-              hasColumnSizeComponent: !!ColumnSizeComponent
-            });
+            // Not rendering ColumnSize component - element is a row or lacks grid schema
             return null;
           }
         })()}
