@@ -70,6 +70,71 @@ const withGridFunctionality = (OriginalElement) => {
   return GridEnhancedElement;
 };
 
+// Function to move grid controls into their respective cards
+const moveGridControlsIntoCards = () => {
+  const gridControls = document.querySelectorAll('.column-size-controls');
+  
+  gridControls.forEach(control => {
+    // Find the element ID from the control inputs
+    const sizeSelect = control.querySelector('[id^="columnSize-"]');
+    const offsetSelect = control.querySelector('[id^="columnOffset-"]');
+    if (!sizeSelect || !offsetSelect) {
+      return;
+    }
+    
+    // The control is rendered as a sibling to the element card
+    // Look for the element card that's a sibling to this control
+    const parent = control.parentElement;
+    if (!parent) return;
+    
+    const elementCard = Array.from(parent.children).find(child => 
+      child.classList.contains('element-editor__element')
+    );
+    
+    if (!elementCard) return;
+    
+    // Check if already moved
+    if (elementCard.contains(control)) {
+      return;
+    }
+    
+    // Move the control into the card
+    elementCard.appendChild(control);
+    
+    // Apply grid classes to the parent container (the common parent of both elements)
+    applyGridClasses(parent, sizeSelect.value, offsetSelect.value);
+    
+    // Listen for changes to the dropdowns and update classes
+    if (!sizeSelect.hasAttribute('data-grid-listener')) {
+      sizeSelect.setAttribute('data-grid-listener', 'true');
+      sizeSelect.addEventListener('change', (e) => {
+        applyGridClasses(parent, e.target.value, offsetSelect.value);
+      });
+    }
+    
+    if (!offsetSelect.hasAttribute('data-grid-listener')) {
+      offsetSelect.setAttribute('data-grid-listener', 'true');
+      offsetSelect.addEventListener('change', (e) => {
+        applyGridClasses(parent, sizeSelect.value, e.target.value);
+      });
+    }
+  });
+};
+
+// Function to apply Bootstrap grid classes to an element holder
+const applyGridClasses = (elementHolder, size, offset) => {
+  // Remove existing grid classes
+  elementHolder.className = elementHolder.className.replace(/\bcol-lg-\d+\b/g, '');
+  elementHolder.className = elementHolder.className.replace(/\boffset-lg-\d+\b/g, '');
+  
+  // Add new grid classes
+  elementHolder.classList.add(`col-lg-${size}`);
+  
+  if (offset && offset > 0) {
+    elementHolder.classList.add(`offset-lg-${offset}`);
+  }
+};
+
 window.document.addEventListener('DOMContentLoaded', () => {
   // Use Injector.transform() to enhance the Element component instead of replacing it
   Injector.transform('grid-element-enhancement', (updater) => {
@@ -80,4 +145,19 @@ window.document.addEventListener('DOMContentLoaded', () => {
   Injector.transform('elemental-grid-toolbar', (updater) => {
     updater.component('ElementToolbar', OverruledToolbar);
   });
+
+  // Set up DOM manipulation to move controls inside cards
+  setTimeout(() => {
+    moveGridControlsIntoCards();
+    
+    // Watch for new controls being added
+    const observer = new MutationObserver(() => {
+      moveGridControlsIntoCards();
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }, 1000);
 });
