@@ -55,35 +55,61 @@
 
 }
 
-/* ENHANCED HOVER BAR STYLING - Work alongside our grid drop zones */
+/* HOVER BAR STYLING - Completely hide visual feedback while preserving functionality */
 .element-editor__hover-bar {
-  /* Keep hover bars as designed by SilverStripe but improve usability */
+  /* Keep basic structure for SilverStripe functionality */
   height: 0;
   position: relative;
+  /* No visual enhancements - we use our own drop zones for feedback */
   
-  /* Enhanced hover bars for better grid experience */
-  &.grid-enhanced {
-    .element-editor__hover-bar-area {
-      /* Larger hit area for better targeting */
-      min-height: 40px !important; /* Increased from 24px */
-      padding: 8px 0 !important;
-      transition: all 200ms ease-in-out;
+  /* Completely hide any hover bar visual feedback */
+  .element-editor__hover-bar-area {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
+  
+  /* NEW: Hide the blue line and plus icon completely */
+  .element-editor__hover-bar-line {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    
+    &::before {
+      display: none !important;
+      opacity: 0 !important;
+      transform: scale(0) !important;
+      visibility: hidden !important;
+    }
+  }
+  
+  /* NEW: Hide on all hover/focus states */
+  .element-editor__hover-bar-area:hover,
+  .element-editor__hover-bar-area:focus,
+  .element-editor__hover-bar-area--focus {
+    .element-editor__hover-bar-line {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
       
-      /* Enhanced visual feedback */
-      &:hover {
-        background-color: rgba(0, 113, 196, 0.05);
-      }
-      
-      /* Add invisible padding to catch more drag events */
       &::before {
-        content: '';
-        position: absolute;
-        top: -12px;
-        bottom: -12px;
-        left: 0;
-        right: 0;
-        z-index: 1;
-        pointer-events: auto;
+        display: none !important;
+        opacity: 0 !important;
+        transform: scale(0) !important;
+        visibility: hidden !important;
       }
     }
   }
@@ -199,8 +225,8 @@
   transition: all 200ms ease-in-out;
   border-radius: 4px;
   z-index: 10;
-  opacity: 0.6; /* Make them visible by default */
-  pointer-events: auto;
+  opacity: 0; /* Hidden by default, shown only during drag operations */
+  pointer-events: none; /* Don't capture events by default to avoid interfering with drag handles */
   background-color: rgba(0, 113, 196, 0.08);
 
   &--left {
@@ -211,22 +237,21 @@
     right: 0;
   }
 
-  /* Always show drop zones for better discoverability */
+  /* Hidden by default, shown only during drag operations */
   .elemental-editor-list & {
-    opacity: 0.6;
-    pointer-events: auto;
+    opacity: 0;
+    pointer-events: none; /* Don't interfere with normal interactions */
   }
 
-  /* Enhanced visibility on hover or during drag operations */
-  .elemental-editor-list:hover &,
+  /* Show zones only during drag operations */
   .elemental-editor-list.dragging-active & {
     opacity: 0.8;
     border-color: rgba(0, 113, 196, 0.6);
     background-color: rgba(0, 113, 196, 0.12);
+    pointer-events: auto; /* Enable interaction only during drag */
   }
 
   &--hover,
-  &:hover,
   &--drag-over {
     opacity: 1 !important;
     border-color: rgba(0, 113, 196, 0.8);
@@ -266,11 +291,6 @@
     transition: all 200ms ease-in-out;
     border-radius: 4px;
     width: 100%;
-
-    &:hover {
-      color: rgba(0, 113, 196, 1);
-      background-color: rgba(255, 255, 255, 0.9);
-    }
   }
 
   &__icon {
@@ -300,7 +320,6 @@
   transition: all 200ms ease-in-out;
 
   &--hover,
-  &:hover,
   &--drag-over {
     .row-drop-zone__line {
       background-color: rgba(0, 113, 196, 0.8);
@@ -355,12 +374,6 @@
     transition: all 200ms ease-in-out;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-    &:hover {
-      color: rgba(0, 113, 196, 1);
-      border-color: rgba(0, 113, 196, 0.6);
-      transform: scale(1.05);
-    }
   }
 
   &__icon {
@@ -400,13 +413,7 @@
     }
   }
   
-  /* Show zones on hover for better discoverability */
-  &:hover {
-    .grid-drop-zone {
-      opacity: 0.8;
-      pointer-events: auto;
-    }
-  }
+  /* Removed hover visibility - zones only show during drag operations */
 }
 
 /* OPTIONSET IMAGE FIELD STYLING */
