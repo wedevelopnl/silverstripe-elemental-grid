@@ -1,11 +1,11 @@
+import getFormState from 'lib/getFormState';
+import { inject } from 'lib/Injector';
+import i18n from 'i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import getFormState from 'lib/getFormState';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { inject } from 'lib/Injector';
-import i18n from 'i18n';
 import classNames from 'classnames';
 import { isDirty } from 'redux-form';
 import { DragSource } from 'react-dnd';

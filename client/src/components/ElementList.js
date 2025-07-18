@@ -1,10 +1,10 @@
+import { inject } from 'lib/Injector';
+import i18n from 'i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { DropTarget } from 'react-dnd';
 import { compose } from 'redux';
-import { inject } from 'lib/Injector';
 import classNames from 'classnames';
-import i18n from 'i18n';
 import { elementTypeType } from 'types/elementTypeType';
 import { elementType } from 'types/elementType';
 import { getDragIndicatorIndex } from 'lib/dragHelpers';

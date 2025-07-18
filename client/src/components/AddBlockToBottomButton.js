@@ -1,7 +1,7 @@
+import { inject } from 'lib/Injector';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'reactstrap';
-import { inject } from 'lib/Injector';
 import { elementTypeType } from 'types/elementTypeType';
 
 class AddBlockToBottomButton extends Component {

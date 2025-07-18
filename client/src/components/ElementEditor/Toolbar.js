@@ -1,6 +1,6 @@
+import { inject } from 'lib/Injector';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { inject } from 'lib/Injector';
 import { DropTarget } from 'react-dnd';
 import { elementTypeType } from 'types/elementTypeType';
 

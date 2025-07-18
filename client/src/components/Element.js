@@ -1,15 +1,15 @@
 /* global window */
 
+import { inject } from 'lib/Injector';
+import i18n from 'i18n';
+import * as TabsActions from 'state/tabs/TabsActions';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragSource, DropTarget } from 'react-dnd';
 import { compose } from 'redux';
-import { inject } from 'lib/Injector';
-import i18n from 'i18n';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import * as TabsActions from 'state/tabs/TabsActions';
 import { loadElementFormStateName } from 'state/editor/loadElementFormStateName';
 import { loadElementSchemaValue } from 'state/editor/loadElementSchemaValue';
 import { elementTypeType } from 'types/elementTypeType';

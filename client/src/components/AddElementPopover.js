@@ -1,10 +1,10 @@
 /* global window */
 
+import { inject } from 'lib/Injector';
+import i18n from 'i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { inject } from 'lib/Injector';
-import i18n from 'i18n';
 import { elementTypeType } from 'types/elementTypeType';
 
 /**
