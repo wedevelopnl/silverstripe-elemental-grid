@@ -32,8 +32,40 @@ const withGridFunctionality = (OriginalElement) => {
     const hasGridSchema = element && element.blockSchema && element.blockSchema.grid;
     const isNotRow = hasGridSchema && !element.blockSchema.grid.isRow;
 
-    // Render the original element
-    const originalElement = React.createElement(OriginalElement, props);
+    // Hook into drag lifecycle to re-apply grid classes
+    const originalOnDragEnd = props.onDragEnd;
+    const enhancedOnDragEnd = React.useCallback((result) => {
+      // Call the original onDragEnd first
+      if (originalOnDragEnd) {
+        originalOnDragEnd(result);
+      }
+      
+      // Re-apply grid classes after drag operation completes
+      setTimeout(() => {
+        moveGridControlsIntoCards();
+      }, 200);
+    }, [originalOnDragEnd]);
+
+    // Create enhanced props with our drag end handler
+    const enhancedProps = {
+      ...props,
+      onDragEnd: enhancedOnDragEnd
+    };
+
+    // Render the original element with enhanced props
+    const originalElement = React.createElement(OriginalElement, enhancedProps);
+
+    // Post-render effect to ensure grid classes are applied after React renders
+    React.useEffect(() => {
+      if (isNotRow && ColumnSizeComponent) {
+        // Use a small delay to ensure DOM is fully rendered
+        const timer = setTimeout(() => {
+          moveGridControlsIntoCards();
+        }, 50);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [element.id, isNotRow, ColumnSizeComponent]);
 
     // If this element doesn't need grid functionality, return as-is
     if (!isNotRow || !ColumnSizeComponent) {
@@ -162,6 +194,45 @@ const applyGridClasses = (elementHolder, size, offset) => {
   }
 };
 
+// Global function to force re-application of grid classes (can be called from anywhere)
+window.reapplyGridClasses = () => {
+  moveGridControlsIntoCards();
+};
+
+// Add event listeners for drag operations
+const addDragEventListeners = () => {
+  // Listen for drag start events
+  document.addEventListener('dragstart', (e) => {
+    if (e.target.closest('.element-editor__element')) {
+      // Mark that we're in a drag operation
+      window.isDraggingElement = true;
+    }
+  });
+
+  // Listen for drag end events
+  document.addEventListener('dragend', (e) => {
+    if (e.target.closest('.element-editor__element')) {
+      // Clear the drag flag
+      window.isDraggingElement = false;
+      
+      // Re-apply grid classes after a short delay
+      setTimeout(() => {
+        moveGridControlsIntoCards();
+      }, 300);
+    }
+  });
+
+  // Listen for drop events
+  document.addEventListener('drop', (e) => {
+    if (e.target.closest('.elemental-editor-list')) {
+      // Re-apply grid classes after drop
+      setTimeout(() => {
+        moveGridControlsIntoCards();
+      }, 500);
+    }
+  });
+};
+
 window.document.addEventListener('DOMContentLoaded', () => {
   // Use Injector.transform() to enhance the Element component instead of replacing it
   Injector.transform('grid-element-enhancement', (updater) => {
@@ -173,18 +244,59 @@ window.document.addEventListener('DOMContentLoaded', () => {
     updater.component('ElementToolbar', OverruledToolbar);
   });
 
+  // Set up drag event listeners
+  addDragEventListeners();
+
   // Set up DOM manipulation to move controls inside cards
   setTimeout(() => {
     moveGridControlsIntoCards();
     
-    // Watch for new controls being added
-    const observer = new MutationObserver(() => {
-      moveGridControlsIntoCards();
+    // Watch for new controls being added AND class changes (drag operations)
+    const observer = new MutationObserver((mutations) => {
+      let shouldReapply = false;
+      
+      mutations.forEach(mutation => {
+        // Check for added/removed nodes (new elements)
+        if (mutation.type === 'childList' && (mutation.addedNodes.length || mutation.removedNodes.length)) {
+          shouldReapply = true;
+        }
+        
+        // Check for class changes that might indicate drag operations
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const target = mutation.target;
+          // If an element card lost its grid classes, we need to reapply
+          if (target.classList.contains('element-editor__element') && 
+              !target.classList.contains('col-lg-1') && 
+              !target.classList.contains('col-lg-2') && 
+              !target.classList.contains('col-lg-3') && 
+              !target.classList.contains('col-lg-4') && 
+              !target.classList.contains('col-lg-5') && 
+              !target.classList.contains('col-lg-6') && 
+              !target.classList.contains('col-lg-7') && 
+              !target.classList.contains('col-lg-8') && 
+              !target.classList.contains('col-lg-9') && 
+              !target.classList.contains('col-lg-10') && 
+              !target.classList.contains('col-lg-11') && 
+              !target.classList.contains('col-lg-12')) {
+            shouldReapply = true;
+          }
+        }
+      });
+      
+      if (shouldReapply) {
+        // Debounce to prevent excessive re-applications
+        clearTimeout(observer.debounceTimer);
+        observer.debounceTimer = setTimeout(() => {
+          moveGridControlsIntoCards();
+        }, 100);
+      }
     });
     
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
     });
   }, 1000);
 });
