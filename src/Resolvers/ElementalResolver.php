@@ -6,6 +6,7 @@ use DNADesign\Elemental\GraphQL\Resolvers\Resolver;
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use DNADesign\Elemental\Services\ReorderElements;
+use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
 use SilverStripe\Core\Injector\Injector;
@@ -72,5 +73,50 @@ class ElementalResolver extends Resolver
         }
 
         return $newElement;
+    }
+
+    public static function resolveUpdateElementGrid(
+        $obj,
+        array $args,
+        array $context,
+        ResolveInfo $info
+    ): BaseElement {
+        $elementID = $args['id'];
+
+        $element = BaseElement::get()->byID($elementID);
+
+        if (!$element) {
+            throw new InvalidArgumentException("Invalid Element ID: $elementID");
+        }
+
+        $member = UserContextProvider::get($context);
+        if (!$element->canEdit($member)) {
+            throw new InvalidArgumentException(
+                'The current user has insufficient permission to edit this Element'
+            );
+        }
+
+        // Update grid properties
+        if (isset($args['sizeLG'])) {
+            $element->SizeLG = (int) $args['sizeLG'];
+        }
+        
+        if (isset($args['offsetLG'])) {
+            $element->OffsetLG = (int) $args['offsetLG'];
+        }
+
+        try {
+            $result = $element->write();
+            if (!$result) {
+                throw new InvalidArgumentException('Failed to save element changes');
+            }
+        } catch (Exception $e) {
+            throw new InvalidArgumentException('Error saving element: ' . $e->getMessage());
+        }
+
+        // Force reload from database to ensure we return fresh data
+        $element = BaseElement::get()->byID($elementID);
+
+        return $element;
     }
 }

@@ -108,9 +108,11 @@ The fix involved simplifying the component registration to avoid problematic pat
 3. **Proper Registration Order**: Ensure dependencies are registered before consumers
 4. **Avoid Problematic Components**: Skip registration of components with deep inject/compose patterns
 
-### Final Working Implementation
+### Final Working Implementation - Grid Enhancement Pattern
 
 **File**: `client/src/bundles/bundle.js`
+
+After extensive research and testing with SilverStripe 5.3+, the correct approach is to **enhance** existing components rather than replace them. This avoids all circular dependency and inject pattern issues.
 
 ```javascript
 import React from 'react';
@@ -126,12 +128,59 @@ const OverruledToolbar = () => (props) => (
   </div>
 );
 
+// Create a higher-order component that enhances the existing Element with grid functionality
+const withGridFunctionality = (OriginalElement) => {
+  const GridEnhancedElement = (props) => {
+    // Get the ColumnSize component from Injector
+    const ColumnSizeComponent = Injector.component.get('ColumnSize');
+
+    // Check if this element needs grid functionality
+    const { element } = props;
+    const hasGridSchema = element && element.blockSchema && element.blockSchema.grid;
+    const isNotRow = hasGridSchema && !element.blockSchema.grid.isRow;
+
+    // Render the original element
+    const originalElement = React.createElement(OriginalElement, props);
+
+    // If this element doesn't need grid functionality, return as-is
+    if (!isNotRow || !ColumnSizeComponent) {
+      return originalElement;
+    }
+
+    // Add grid functionality
+    const gridData = element.blockSchema.grid.column || {};
+    const gridComponent = React.createElement(ColumnSizeComponent, {
+      elementId: element.id,
+      size: gridData.size || 12,
+      defaultViewport: gridData.defaultViewport || 'LG',
+      gridColumns: element.blockSchema.grid.gridColumns || 12,
+      offset: gridData.offset || 0,
+      // Provide stub handlers - ColumnSize manages its own Redux Form integration
+      handleChangeSize: () => {},
+      handleChangeOffset: () => {}
+    });
+
+    // Return enhanced element with grid controls
+    return React.createElement(React.Fragment, null, originalElement, gridComponent);
+  };
+
+  GridEnhancedElement.displayName = `GridEnhanced(${OriginalElement.displayName || OriginalElement.name || 'Element'})`;
+  return GridEnhancedElement;
+};
+
+// Register grid components at module load time
+Injector.component.registerMany({
+  AddBlockToBottomButton,
+  AddBlockToTopButton,
+  ColumnSize,
+});
+
 window.document.addEventListener('DOMContentLoaded', () => {
-  // Register buttons directly so toolbar inject() can find them
-  Injector.component.register('AddBlockToBottomButton', AddBlockToBottomButton);
-  Injector.component.register('AddBlockToTopButton', AddBlockToTopButton);
-  Injector.component.register('ColumnSize', ColumnSize);
-  
+  // Use Injector.transform() to enhance the Element component instead of replacing it
+  Injector.transform('grid-element-enhancement', (updater) => {
+    updater.component('Element', withGridFunctionality);
+  });
+
   // Register the toolbar that uses the buttons
   Injector.transform('elemental-grid-toolbar', (updater) => {
     updater.component('ElementToolbar', OverruledToolbar);
@@ -144,24 +193,70 @@ window.document.addEventListener('DOMContentLoaded', () => {
 ### What Works in SilverStripe 5.3+
 
 ✅ **Simple component registration**: `Injector.component.register('ComponentName', Component)`  
-✅ **Transform-based overrides**: `Injector.transform('name', updater => { updater.component(...) })`  
+✅ **Transform-based enhancements**: `Injector.transform('name', updater => { updater.component(...) })`  
+✅ **Higher-Order Component (HOC) patterns**: Enhance existing components instead of replacing them  
 ✅ **Direct component dependencies**: Register dependencies before consumers  
 ✅ **Clean inject patterns**: Simple inject with minimal dependencies  
+✅ **Enhancement over replacement**: Use `withComponentName` HOC patterns to extend functionality  
 
 ### What Causes Issues in SilverStripe 5.3+
 
 ❌ **Force registration**: `registerMany({}, { force: true })`  
+❌ **Component replacement**: Directly overriding core components like `Element`  
 ❌ **Complex inject patterns**: `inject(['A', 'B', 'C'], (a, b, c) => ({ a, b, c }))`  
 ❌ **Deep component composition**: Multiple levels of inject/compose  
-❌ **Overriding core components**: Replacing base elemental components  
+❌ **Circular dependencies**: Components that depend on themselves through injection  
+❌ **"Cannot set properties of undefined" errors**: Usually caused by complex inject patterns
+
+### Critical SilverStripe 5.3+ React Integration Insights
+
+Based on extensive research and debugging, the following patterns are essential for SilverStripe 5.3+ compatibility:
+
+#### ✅ **Enhancement Pattern (Recommended)**
+```javascript
+const withGridFunctionality = (OriginalComponent) => {
+  return (props) => {
+    // Enhancement logic here
+    const enhanced = React.createElement(OriginalComponent, props);
+    return enhanced;
+  };
+};
+
+Injector.transform('enhancement', (updater) => {
+  updater.component('Element', withGridFunctionality);
+});
+```
+
+#### ❌ **Replacement Pattern (Problematic)**
+```javascript
+// This causes "Cannot set properties of undefined" errors
+const GridElement = inject(['A', 'B', 'C'], ...)(Element);
+Injector.component.register('Element', GridElement, { force: true });
+```
+
+#### ⚠️ **Inject Pattern Guidelines**
+- **Minimal dependencies**: Only inject what's absolutely necessary
+- **Avoid core component injection**: Don't inject `Element`, `ElementHeader`, etc.
+- **Use `Injector.component.get()`**: Dynamically get components at render time instead of injection
+- **Error boundaries**: Wrap enhanced components in try/catch or error boundaries
+
+#### 🔧 **Debugging Tips**
+- **"Cannot set properties of undefined"**: Usually indicates circular dependency or complex inject pattern
+- **Infinite loops**: Check for `{ force: true }` or component self-registration
+- **Components not appearing**: Verify registration order and component availability
+- **Form hanging on save**: Check Redux Form integration in custom components  
 
 ### Component Registration Best Practices
 
-1. **Register dependencies first**: Buttons before toolbar that uses them
-2. **Use simple names**: Avoid complex namespacing in registration
-3. **Minimal inject patterns**: Keep inject dependencies to essential components only
-4. **Test incrementally**: Add one component at a time to isolate issues
-5. **Avoid core overrides**: Work with existing components rather than replacing them
+1. **Enhancement over replacement**: Use HOC patterns to extend functionality rather than replace components
+2. **Register dependencies first**: Buttons before toolbar that uses them
+3. **Use simple names**: Avoid complex namespacing in registration
+4. **Minimal inject patterns**: Keep inject dependencies to essential components only
+5. **Dynamic component access**: Use `Injector.component.get()` at render time instead of injection
+6. **Test incrementally**: Add one component at a time to isolate issues
+7. **Avoid core overrides**: Work with existing components rather than replacing them
+8. **Error handling**: Always check component availability before using
+9. **Proper timing**: Register components at module load, enhance at DOMContentLoaded
 
 ## Grid Button Functionality
 
@@ -341,16 +436,36 @@ Elements can be inserted at top or bottom of lists via:
 - Remove `{ force: true }` from component registrations
 - Simplify inject patterns
 - Check for circular dependencies
+- Use enhancement patterns instead of component replacement
+
+### "Cannot set properties of undefined" Errors
+- Avoid complex inject patterns with multiple dependencies
+- Use `Injector.component.get()` for dynamic component access
+- Check for circular dependencies in component injection
+- Implement HOC enhancement pattern instead of direct replacement
 
 ### Buttons Not Appearing
 - Verify registration order (buttons before toolbar)
 - Check component names match inject patterns
 - Ensure CSS is properly built (`npm run build`)
+- Verify components are registered before being requested
+
+### Size LG and Offset LG Dropdowns Missing
+- Ensure `ColumnSize` component is properly registered
+- Check that grid enhancement HOC is applied to `Element` component
+- Verify grid schema data is available in element props
+- Confirm element is not a row type (rows don't show grid controls)
 
 ### Wrong Insertion Behavior
 - Check `insertAfterElement` values in button components
 - Verify backend resolver handles `insertAtBottom` correctly
 - Test with different element configurations
+
+### Form Save Hanging Issues
+- Check Redux Form integration in grid components
+- Verify autofill handlers are properly implemented
+- Ensure component state updates don't cause infinite loops
+- Test form submission with minimal grid functionality
 
 ### CSS Display Issues
 - Run `npm run build` after CSS changes

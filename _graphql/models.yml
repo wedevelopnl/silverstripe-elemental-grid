@@ -15,6 +15,8 @@ DNADesign\Elemental\Models\BaseElement:
     canPublish: Boolean
     canUnpublish: Boolean
     canDelete: Boolean
+    sizeLG: Int
+    offsetLG: Int
   operations:
     copyToStage: true
     readOne: true
@@ -39,3 +41,4 @@ SilverStripe\Security\Member:
     surname: true
   operations:
     readOne: true
+

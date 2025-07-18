@@ -28,6 +28,14 @@ class Element extends Component {
   constructor(props) {
     super(props);
 
+    console.log('🔧 Grid Element: Constructor called with props:', props);
+    console.log('🔧 Grid Element: Element data:', props.element);
+    console.log('🔧 Grid Element: Grid schema:', props.element && props.element.blockSchema && props.element.blockSchema.grid);
+    console.log('🔧 Grid Element: Full blockSchema:', props.element && props.element.blockSchema);
+
+    // Alert to make sure this is being called
+    console.log('🚨 GRID ELEMENT CONSTRUCTOR EXECUTED! 🚨');
+
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.handleExpand = this.handleExpand.bind(this);
     this.handleLoadingError = this.handleLoadingError.bind(this);
@@ -36,13 +44,17 @@ class Element extends Component {
     this.handleChangeSize = this.handleChangeSize.bind(this);
     this.handleChangeOffset = this.handleChangeOffset.bind(this);
 
+    // Safely access grid schema with fallbacks
+    const gridSchema = props.element && props.element.blockSchema && props.element.blockSchema.grid;
+    const columnData = (gridSchema && gridSchema.column) || {};
+
     this.state = {
       previewExpanded: false,
       initialTab: '',
       loadingError: false,
       childRenderingError: false,
-      size: props.element.blockSchema.grid.column.size,
-      offset: props.element.blockSchema.grid.column.offset,
+      size: columnData.size || 12,
+      offset: columnData.offset || 0,
     };
   }
 
@@ -123,11 +135,12 @@ class Element extends Component {
 
   getColumnSizeClassNames() {
     const { element } = this.props;
+    const gridSchema = element && element.blockSchema && element.blockSchema.grid;
 
     return {
       [`col-lg-${this.state.size}`]: true,
-      [`offset-lg-${this.state.offset}`]: true,
-      'is-row': element.blockSchema.grid.isRow === true,
+      [`offset-lg-${this.state.offset}`]: this.state.offset > 0,
+      'is-row': gridSchema && gridSchema.isRow === true,
       'is-dragged-top': this.props.isDraggedOver && this.props.isDraggedOverPosition === 'top',
       'is-dragged-bottom': this.props.isDraggedOver && this.props.isDraggedOverPosition === 'bottom'
     };
@@ -244,6 +257,8 @@ class Element extends Component {
   }
 
   render() {
+    console.log('🚨 GRID ELEMENT RENDER CALLED! 🚨');
+
     const {
       element,
       type,
@@ -321,17 +336,43 @@ class Element extends Component {
           </div>
         }
 
-        {!element.blockSchema.grid.isRow &&
-          <ColumnSizeComponent
-            elementId={element.id}
-            size={element.blockSchema.grid.column.size}
-            defaultViewport={element.blockSchema.grid.column.defaultViewport}
-            gridColumns={element.blockSchema.grid.gridColumns}
-            offset={element.blockSchema.grid.column.offset}
-            handleChangeSize={this.handleChangeSize}
-            handleChangeOffset={this.handleChangeOffset}
-          />
-        }
+        {(() => {
+          const gridSchema = element && element.blockSchema && element.blockSchema.grid;
+          const columnData = (gridSchema && gridSchema.column) || {};
+
+          console.log('🔧 Grid Element: Checking if should render ColumnSize component');
+          console.log('🔧 Grid Element: gridSchema:', gridSchema);
+          console.log('🔧 Grid Element: ColumnSizeComponent:', ColumnSizeComponent);
+          console.log('🔧 Grid Element: Grid data:', {
+            elementId: element.id,
+            size: columnData.size,
+            defaultViewport: columnData.defaultViewport,
+            gridColumns: gridSchema && gridSchema.gridColumns,
+            offset: columnData.offset
+          });
+
+          if (gridSchema && !gridSchema.isRow && ColumnSizeComponent) {
+            console.log('✅ Grid Element: Rendering ColumnSize component');
+            return (
+              <ColumnSizeComponent
+                elementId={element.id}
+                size={columnData.size || 12}
+                defaultViewport={columnData.defaultViewport || 'LG'}
+                gridColumns={gridSchema.gridColumns || 12}
+                offset={columnData.offset || 0}
+                handleChangeSize={this.handleChangeSize}
+                handleChangeOffset={this.handleChangeOffset}
+              />
+            );
+          } else {
+            console.log('❌ Grid Element: NOT rendering ColumnSize component', {
+              hasGridSchema: !!gridSchema,
+              isRow: gridSchema && gridSchema.isRow,
+              hasColumnSizeComponent: !!ColumnSizeComponent
+            });
+            return null;
+          }
+        })()}
       </div>
     </div>);
 
@@ -445,6 +486,6 @@ export default compose(
     (HeaderComponent, ContentComponent, ColumnSizeComponent) => ({
       HeaderComponent, ContentComponent, ColumnSizeComponent
     }),
-    () => 'ElementEditor.ElementList.Element'
+    () => 'Element' // Back to Element since we're directly registering as Element
   )
 )(Element);

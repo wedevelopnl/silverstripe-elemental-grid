@@ -1,137 +1,190 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { compose, bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { autofill } from 'redux-form';
+import { graphql } from '@apollo/client/react/hoc';
+import { gql } from '@apollo/client';
+import { Input } from 'reactstrap';
 
-class ColumnSize extends PureComponent {
+class ColumnSize extends Component {
   constructor(props) {
     super(props);
-
-    this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      currentSize: props.size || 12,
+      currentOffset: props.offset || 0,
+    };
     this.handleChangeSize = this.handleChangeSize.bind(this);
     this.handleChangeOffset = this.handleChangeOffset.bind(this);
   }
 
-  getColSizeSource() {
-    const colSizes = [];
+  componentDidUpdate(prevProps) {
+    // Update state if props change (e.g., after a successful mutation)
+    if (prevProps.size !== this.props.size) {
+      this.setState({ currentSize: this.props.size || 12 });
+    }
+    if (prevProps.offset !== this.props.offset) {
+      this.setState({ currentOffset: this.props.offset || 0 });
+    }
+  }
 
+  getColSizeOptions() {
+    const colSizes = [];
     for (let size = 1; size <= this.props.gridColumns; size++) {
       colSizes.push({
-        label: `Column ${size}/${this.props.gridColumns}`,
-        value: size
+        value: size,
+        title: `Column ${size}/${this.props.gridColumns}`
       });
     }
-
     return colSizes;
   }
 
-  getOffsetSizeSource() {
-    const offsetSizes = [];
-
-    offsetSizes.push({
-      label: 'None',
-      value: 0
+  getOffsetOptions() {
+    const offsets = [];
+    offsets.push({
+      value: 0,
+      title: 'None'
     });
-
     for (let size = 1; size <= this.props.gridColumns; size++) {
-      offsetSizes.push({
-        label: `Column ${size}/${this.props.gridColumns}`,
-        value: size
+      offsets.push({
+        value: size,
+        title: `Column ${size}/${this.props.gridColumns}`
       });
     }
-
-    return offsetSizes;
-  }
-
-  handleClick(event) {
-    event.stopPropagation();
+    return offsets;
   }
 
   handleChangeSize(event) {
-    const { elementId, defaultViewport } = this.props;
-    this.props.actions.reduxForm.autofill(
-      `element.ElementForm_${elementId}`,
-      `PageElements_${elementId}_Size${defaultViewport}`,
-      event.target.value
-    );
-    this.props.handleChangeSize(event);
+    const newSize = parseInt(event.target.value, 10);
+    this.setState({ currentSize: newSize });
+
+    // Update via GraphQL mutation
+    this.updateElementGrid({ sizeLG: newSize });
+
+    if (typeof this.props.onChangeSize === 'function') {
+      this.props.onChangeSize(event, {
+        id: this.props.id,
+        value: newSize,
+        elementId: this.props.elementId,
+        field: 'size'
+      });
+    }
   }
 
   handleChangeOffset(event) {
-    const { elementId, defaultViewport } = this.props;
-    this.props.actions.reduxForm.autofill(
-      `element.ElementForm_${elementId}`,
-      `PageElements_${elementId}_Offset${defaultViewport}`,
-      event.target.value
-    );
-    this.props.handleChangeOffset(event);
+    const newOffset = parseInt(event.target.value, 10);
+    this.setState({ currentOffset: newOffset });
+
+    // Update via GraphQL mutation
+    this.updateElementGrid({ offsetLG: newOffset });
+
+    if (typeof this.props.onChangeOffset === 'function') {
+      this.props.onChangeOffset(event, {
+        id: this.props.id,
+        value: newOffset,
+        elementId: this.props.elementId,
+        field: 'offset'
+      });
+    }
+  }
+
+  updateElementGrid(gridData) {
+    if (this.props.updateElementGrid) {
+      this.props.updateElementGrid({
+        variables: {
+          id: this.props.elementId,
+          ...gridData,
+        },
+      }).catch(() => {
+        // Handle error silently or with user notification
+        // Optionally revert the state on error
+      });
+    }
   }
 
   render() {
-    return (
-      <div>
-        <hr />
+    const sizeId = `columnSize-${this.props.elementId}`;
+    const offsetId = `columnOffset-${this.props.elementId}`;
 
-        <label className="mb-0 font-italic" htmlFor="colSize">
-          Size { this.props.defaultViewport }
-          <select
-            defaultValue={this.props.size}
+    return (
+      <div className="column-size-controls">
+        <hr />
+        <div className="form-group">
+          <label htmlFor={sizeId} className="form__field-label">
+            Size {this.props.defaultViewport}
+          </label>
+          <Input
+            type="select"
+            id={sizeId}
+            value={this.state.currentSize}
             onChange={this.handleChangeSize}
-            onClick={this.handleClick}
-            id="colSize"
+            className="form-control"
           >
-            {
-              this.getColSizeSource().map((columnObject) => (
-                <option value={columnObject.value}>{columnObject.label}</option>
-              ))
-            }
-          </select>
-        </label>
-        <label className="mb-0 ml-2 font-italic" htmlFor="colOffset">
-          Offset { this.props.defaultViewport }
-          <select
-            defaultValue={this.props.offset}
+            {this.getColSizeOptions().map((option) => (
+              <option key={`size-${option.value}`} value={option.value}>
+                {option.title}
+              </option>
+            ))}
+          </Input>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor={offsetId} className="form__field-label">
+            Offset {this.props.defaultViewport}
+          </label>
+          <Input
+            type="select"
+            id={offsetId}
+            value={this.state.currentOffset}
             onChange={this.handleChangeOffset}
-            onClick={this.handleClick}
-            id="colOffset"
+            className="form-control"
           >
-            {
-              this.getOffsetSizeSource().map((columnObject) => (
-                <option value={columnObject.value}>{columnObject.label}</option>
-              ))
-            }
-          </select>
-        </label>
+            {this.getOffsetOptions().map((option) => (
+              <option key={`offset-${option.value}`} value={option.value}>
+                {option.title}
+              </option>
+            ))}
+          </Input>
+        </div>
       </div>
     );
   }
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    actions: {
-      reduxForm: bindActionCreators({ autofill }, dispatch),
-    },
-  };
-}
-
-ColumnSize.defaultProps = {};
-
 ColumnSize.propTypes = {
-  actions: PropTypes.shape({
-    reduxFrom: PropTypes.object,
-  }),
-  elementId: PropTypes.number,
+  elementId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   size: PropTypes.number,
-  defaultViewport: PropTypes.string,
   offset: PropTypes.number,
+  defaultViewport: PropTypes.string,
   gridColumns: PropTypes.number,
-  handleChangeSize: PropTypes.func,
-  handleChangeOffset: PropTypes.func,
+  onChangeSize: PropTypes.func,
+  onChangeOffset: PropTypes.func,
+  id: PropTypes.string,
+  updateElementGrid: PropTypes.func,
 };
 
-export default compose(
-  connect(() => {
-  }, mapDispatchToProps)
-)(ColumnSize);
+ColumnSize.defaultProps = {
+  size: 12,
+  offset: 0,
+  defaultViewport: 'LG',
+  gridColumns: 12,
+  onChangeSize: null,
+  onChangeOffset: null,
+  id: '',
+  updateElementGrid: null,
+};
+
+// GraphQL mutation
+const mutation = gql`
+  mutation UpdateElementGrid($id: ID!, $sizeLG: Int, $offsetLG: Int) {
+    updateElementGrid(id: $id, sizeLG: $sizeLG, offsetLG: $offsetLG) {
+      id
+      sizeLG
+      offsetLG
+    }
+  }
+`;
+
+// Export with GraphQL mutation
+export default graphql(mutation, {
+  props: ({ mutate }) => ({
+    updateElementGrid: mutate,
+  }),
+})(ColumnSize);
