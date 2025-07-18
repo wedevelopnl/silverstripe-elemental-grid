@@ -29,99 +29,10 @@ const isRowElement = (element) => {
   return element && element.classList && element.classList.contains('is-row');
 };
 
-// Helper function to create grid drop zones
-const createGridDropZone = (position, element, index) => {
-  const zone = document.createElement('div');
-  zone.className = `grid-drop-zone grid-drop-zone--${position}`;
-  zone.setAttribute('data-position', position);
-  zone.setAttribute('data-element-index', index);
-  zone.setAttribute('data-element-id', element.getAttribute('data-element-id') || element.id);
-  
-  const inner = document.createElement('div');
-  inner.className = 'grid-drop-zone__inner';
-  
-  const button = document.createElement('button');
-  button.className = 'grid-drop-zone__button';
-  button.type = 'button';
-  
-  const icon = document.createElement('span');
-  icon.className = 'grid-drop-zone__icon';
-  icon.textContent = position === 'left' ? '←' : '→';
-  
-  const label = document.createElement('span');
-  label.className = 'grid-drop-zone__label';
-  label.textContent = position === 'left' ? 'LEFT' : 'RIGHT';
-  
-  button.appendChild(icon);
-  button.appendChild(label);
-  inner.appendChild(button);
-  zone.appendChild(inner);
-  
-  return zone;
-};
-
-// Helper function to create row drop zones
-const createRowDropZone = (position, element, index) => {
-  const zone = document.createElement('div');
-  zone.className = `row-drop-zone row-drop-zone--${position}`;
-  zone.setAttribute('data-position', position);
-  zone.setAttribute('data-element-index', index);
-  zone.setAttribute('data-element-id', element.getAttribute('data-element-id') || element.id);
-  
-  const inner = document.createElement('div');
-  inner.className = 'row-drop-zone__inner';
-  
-  const line = document.createElement('div');
-  line.className = 'row-drop-zone__line';
-  
-  const button = document.createElement('button');
-  button.className = 'row-drop-zone__button';
-  button.type = 'button';
-  
-  const icon = document.createElement('span');
-  icon.className = 'row-drop-zone__icon';
-  icon.textContent = '+';
-  
-  const label = document.createElement('span');
-  label.className = 'row-drop-zone__label';
-  label.textContent = position === 'above' ? 'Add Above' : 'Add Below';
-  
-  button.appendChild(icon);
-  button.appendChild(label);
-  inner.appendChild(line);
-  inner.appendChild(button);
-  zone.appendChild(inner);
-  
-  return zone;
-};
+// Removed createGridDropZone and createRowDropZone functions - now working with SilverStripe's existing system
 
 // Function to add grid drop zones around elements
-const addGridDropZonesAroundElement = (element, index) => {
-  const elementWrapper = element.closest('.element-editor__element-holder') || element.parentElement;
-  
-  if (!elementWrapper) return;
-  
-  // Make the element container position relative to contain the absolute positioned zones
-  if (elementWrapper.style.position !== 'relative') {
-    elementWrapper.style.position = 'relative';
-  }
-  
-  if (isRowElement(element)) {
-    // For row elements: add top and bottom drop zones
-    const aboveZone = createRowDropZone('above', element, index);
-    const belowZone = createRowDropZone('below', element, index);
-    
-    elementWrapper.parentElement.insertBefore(aboveZone, elementWrapper);
-    elementWrapper.parentElement.insertBefore(belowZone, elementWrapper.nextSibling);
-  } else {
-    // For regular elements: add left and right drop zones as overlays inside the element container
-    const leftZone = createGridDropZone('left', element, index);
-    elementWrapper.appendChild(leftZone);
-
-    const rightZone = createGridDropZone('right', element, index);
-    elementWrapper.appendChild(rightZone);
-  }
-};
+// Removed addGridDropZonesAroundElement - now working with SilverStripe's existing system
 
 // Remove console.log statements to fix linting
 // console.log('[GRID DEBUG] ========== GRID BUNDLE LOADING (REACT DND INTEGRATION) ==========');
@@ -676,26 +587,7 @@ const addDragEventListeners = () => {
 
 // Hover bar enhancements removed - we now use our own drop zones for visual feedback
 
-// Inject grid-aware drop zones around existing elements
-const injectGridDropZones = () => {
-  console.log('[GRID DEBUG] Injecting grid-aware drop zones...');
-
-  const elementList = document.querySelector('.elemental-editor-list');
-  if (!elementList) {
-    console.log('[GRID DEBUG] No elemental editor list found');
-    return;
-  }
-
-  const elements = elementList.querySelectorAll('.element-editor__element');
-  console.log('[GRID DEBUG] Found', elements.length, 'elements to add grid zones to');
-
-  elements.forEach((element, index) => {
-    // Only add zones if not already present
-    if (!element.parentElement.querySelector('.grid-drop-zone')) {
-      addGridDropZonesAroundElement(element, index);
-    }
-  });
-};
+// Removed custom drop zone injection - now working with SilverStripe's existing system
 
 
 // insertAfter polyfill
@@ -1079,9 +971,6 @@ window.document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     moveGridControlsIntoCards();
 
-    // Inject our grid drop zones alongside existing system
-    injectGridDropZones();
-
     console.log('[GRID DEBUG] Grid enhancements applied alongside existing system');
 
     // Enhanced observer to detect React re-renders and maintain grid enhancements
@@ -1192,7 +1081,7 @@ window.document.addEventListener('DOMContentLoaded', () => {
       if (shouldReenhanceSystem) {
         setTimeout(() => {
           console.log('[GRID DEBUG] Re-enhancing system due to new content...');
-          injectGridDropZones();
+          moveGridControlsIntoCards();
         }, 100);
       }
     });

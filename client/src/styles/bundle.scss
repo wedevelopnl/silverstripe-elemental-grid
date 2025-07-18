@@ -31,6 +31,8 @@
   min-height: 4rem;
   outline: 1px solid #dbe0e9;
   transition: all 200ms ease-in-out;
+  position: relative;
+  z-index: 15; /* Ensure elements are above drop zones (z-index: 10) for proper drag functionality */
 
   &--expanded {
     flex: 0 0 100%;
@@ -42,6 +44,11 @@
     opacity: 0;
     overflow: hidden;
     transform: scale(0.8);
+    
+    // Hide drop zones for the element being dragged
+    .grid-drop-zone {
+      display: none !important;
+    }
   }
 
   &.is-row {
