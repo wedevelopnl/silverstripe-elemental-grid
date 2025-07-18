@@ -2,6 +2,30 @@
   padding: 0;
 }
 
+/* Grid class transitions for smooth layout changes on wrapper divs */
+.elemental-editor-list > div {
+  transition: all 200ms ease-in-out;
+  
+  &.col-lg-1,
+  &.col-lg-2,
+  &.col-lg-3,
+  &.col-lg-4,
+  &.col-lg-5,
+  &.col-lg-6,
+  &.col-lg-7,
+  &.col-lg-8,
+  &.col-lg-9,
+  &.col-lg-10,
+  &.col-lg-11,
+  &.col-lg-12 {
+    transition: all 200ms ease-in-out;
+  }
+
+  &[class*="offset-lg-"] {
+    transition: all 200ms ease-in-out;
+  }
+}
+
 .element-editor__element {
   border: 0;
   min-height: 4rem;
@@ -21,38 +45,14 @@
   }
 
   &.is-row {
-    -webkit-flex: none;
     background: #f4f6f8;
-    display: block;
-    flex: none;
-    max-width: none;
     padding: 1.5rem 1.5385rem;
-    width: 100%;
 
     .element-editor-summary {
       display: none;
     }
   }
 
-  /* Grid class transitions for smooth layout changes */
-  &.col-lg-1,
-  &.col-lg-2,
-  &.col-lg-3,
-  &.col-lg-4,
-  &.col-lg-5,
-  &.col-lg-6,
-  &.col-lg-7,
-  &.col-lg-8,
-  &.col-lg-9,
-  &.col-lg-10,
-  &.col-lg-11,
-  &.col-lg-12 {
-    transition: all 200ms ease-in-out;
-  }
-
-  &[class*="offset-lg-"] {
-    transition: all 200ms ease-in-out;
-  }
 }
 
 .element-editor__hover-bar {

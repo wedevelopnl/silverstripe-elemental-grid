@@ -109,20 +109,22 @@ const cleanupIncorrectGridClasses = () => {
   if (editorList) {
     editorList.className = editorList.className.replace(/\bcol-lg-\d+\b/g, '');
     editorList.className = editorList.className.replace(/\boffset-lg-\d+\b/g, '');
+    editorList.classList.remove('px-0'); // Remove px-0 from wrong container
   }
   
-  // Remove grid classes from wrapper divs (should be on element cards instead)
-  const wrapperDivs = document.querySelectorAll('.elemental-editor-list > div');
-  wrapperDivs.forEach(div => {
-    if (div.classList.contains('col-lg-1') || div.classList.contains('col-lg-2') || 
-        div.classList.contains('col-lg-3') || div.classList.contains('col-lg-4') || 
-        div.classList.contains('col-lg-5') || div.classList.contains('col-lg-6') || 
-        div.classList.contains('col-lg-7') || div.classList.contains('col-lg-8') || 
-        div.classList.contains('col-lg-9') || div.classList.contains('col-lg-10') || 
-        div.classList.contains('col-lg-11') || div.classList.contains('col-lg-12')) {
-      div.className = div.className.replace(/\bcol-lg-\d+\b/g, '');
-      div.className = div.className.replace(/\boffset-lg-\d+\b/g, '');
+  // Remove grid classes from element cards (wrong level - should be on wrapper divs)
+  const elementCards = document.querySelectorAll('.element-editor__element');
+  elementCards.forEach(elementCard => {
+    // Only remove grid classes if they exist, preserving other classes like 'is-row'
+    if (elementCard.className.match(/\bcol-lg-\d+\b/)) {
+      elementCard.className = elementCard.className.replace(/\bcol-lg-\d+\b/g, '');
+      console.log('🔧 Grid: Removed grid classes from element card');
     }
+    if (elementCard.className.match(/\boffset-lg-\d+\b/)) {
+      elementCard.className = elementCard.className.replace(/\boffset-lg-\d+\b/g, '');
+      console.log('🔧 Grid: Removed offset classes from element card');
+    }
+    elementCard.classList.remove('px-0'); // Remove px-0 from element cards
   });
 };
 
@@ -132,6 +134,13 @@ const moveGridControlsIntoCards = () => {
   
   // First clean up any incorrectly applied grid classes
   cleanupIncorrectGridClasses();
+  
+  // Add row class to the elemental-editor-list container to enable Bootstrap flexbox grid
+  const elementalEditorList = document.querySelector('.elemental-editor-list');
+  if (elementalEditorList && !elementalEditorList.classList.contains('row')) {
+    elementalEditorList.classList.add('row');
+    console.log('🔧 Grid: Added row class to elemental-editor-list container');
+  }
   
   const gridControls = document.querySelectorAll('.column-size-controls');
   console.log('🔧 Grid: Found', gridControls.length, 'grid controls');
@@ -152,9 +161,12 @@ const moveGridControlsIntoCards = () => {
     // Check if control is already inside an element card
     const existingElementCard = control.closest('.element-editor__element');
     if (existingElementCard) {
-      console.log('🔧 Grid: Control', index, 'already inside element card, just applying classes');
-      // Apply grid classes directly to the element card
-      applyGridClasses(existingElementCard, sizeSelect.value, offsetSelect.value);
+      console.log('🔧 Grid: Control', index, 'already inside element card, applying classes to wrapper');
+      // Find the wrapper div (parent of element card) to apply grid classes
+      const wrapperDiv = existingElementCard.parentElement;
+      if (wrapperDiv && wrapperDiv.parentElement && wrapperDiv.parentElement.classList.contains('elemental-editor-list')) {
+        applyGridClassesToWrapper(wrapperDiv, sizeSelect.value, offsetSelect.value);
+      }
       return;
     }
     
@@ -181,15 +193,20 @@ const moveGridControlsIntoCards = () => {
     // Move the control into the card
     elementCard.appendChild(control);
     
-    // Apply grid classes directly to the element card itself to prevent drag handle positioning issues
-    applyGridClasses(elementCard, sizeSelect.value, offsetSelect.value);
+    // Apply grid classes to the wrapper div (parent of element card) instead of element card itself
+    const wrapperDiv = elementCard.parentElement;
+    if (wrapperDiv && wrapperDiv.parentElement && wrapperDiv.parentElement.classList.contains('elemental-editor-list')) {
+      applyGridClassesToWrapper(wrapperDiv, sizeSelect.value, offsetSelect.value);
+    }
     
     // Listen for changes to the dropdowns and update classes
     if (!sizeSelect.hasAttribute('data-grid-listener')) {
       sizeSelect.setAttribute('data-grid-listener', 'true');
       sizeSelect.addEventListener('change', (e) => {
         console.log('🔧 Grid: Size changed to', e.target.value);
-        applyGridClasses(elementCard, e.target.value, offsetSelect.value);
+        if (wrapperDiv && wrapperDiv.parentElement && wrapperDiv.parentElement.classList.contains('elemental-editor-list')) {
+          applyGridClassesToWrapper(wrapperDiv, e.target.value, offsetSelect.value);
+        }
       });
     }
     
@@ -197,15 +214,43 @@ const moveGridControlsIntoCards = () => {
       offsetSelect.setAttribute('data-grid-listener', 'true');
       offsetSelect.addEventListener('change', (e) => {
         console.log('🔧 Grid: Offset changed to', e.target.value);
-        applyGridClasses(elementCard, sizeSelect.value, e.target.value);
+        if (wrapperDiv && wrapperDiv.parentElement && wrapperDiv.parentElement.classList.contains('elemental-editor-list')) {
+          applyGridClassesToWrapper(wrapperDiv, sizeSelect.value, e.target.value);
+        }
       });
+    }
+  });
+  
+  // Identify and handle row elements (elements without grid controls)
+  const allElementCards = document.querySelectorAll('.element-editor__element');
+  allElementCards.forEach((elementCard, index) => {
+    const hasGridControls = elementCard.querySelector('.column-size-controls');
+    const titleElement = elementCard.querySelector('.element-editor-header__title');
+    const isRowElement = !hasGridControls || 
+                         (titleElement && titleElement.textContent.includes('Row block'));
+    
+    if (isRowElement) {
+      console.log('🔧 Grid: Found row element', index, 'title:', titleElement ? titleElement.textContent : 'No title');
+      
+      // Add is-row class for identification to the element card
+      if (!elementCard.classList.contains('is-row')) {
+        elementCard.classList.add('is-row');
+        console.log('🔧 Grid: Added is-row class to element', index);
+      }
+      
+      // Force row elements to be full-width breaks by applying classes to wrapper
+      const wrapperDiv = elementCard.parentElement;
+      if (wrapperDiv && wrapperDiv.parentElement && wrapperDiv.parentElement.classList.contains('elemental-editor-list')) {
+        applyGridClassesToWrapper(wrapperDiv, 12, 0);
+        console.log('🔧 Grid: Applied full-width classes to row element wrapper', index);
+      }
     }
   });
 };
 
-// Function to apply Bootstrap grid classes to an element holder
+// Function to apply Bootstrap grid classes to an element holder (legacy compatibility)
 const applyGridClasses = (elementHolder, size, offset) => {
-  console.log('🔧 Grid: applyGridClasses called with:', { size, offset, element: elementHolder });
+  console.log('🔧 Grid: applyGridClasses called (legacy) with:', { size, offset, element: elementHolder });
   console.log('🔧 Grid: Current classes before:', elementHolder.className);
   
   // Remove existing grid classes
@@ -224,6 +269,35 @@ const applyGridClasses = (elementHolder, size, offset) => {
   }
   
   console.log('🔧 Grid: Final classes:', elementHolder.className);
+};
+
+// Function to apply Bootstrap grid classes to wrapper divs (correct Bootstrap implementation)
+const applyGridClassesToWrapper = (wrapperDiv, size, offset) => {
+  console.log('🔧 Grid: applyGridClassesToWrapper called with:', { size, offset, wrapper: wrapperDiv });
+  console.log('🔧 Grid: Current wrapper classes before:', wrapperDiv.className);
+  
+  // Remove existing grid classes from wrapper
+  wrapperDiv.className = wrapperDiv.className.replace(/\bcol-lg-\d+\b/g, '');
+  wrapperDiv.className = wrapperDiv.className.replace(/\boffset-lg-\d+\b/g, '');
+  
+  console.log('🔧 Grid: Wrapper classes after removal:', wrapperDiv.className);
+  
+  // Add new grid classes to wrapper (direct child of .row)
+  wrapperDiv.classList.add(`col-lg-${size}`);
+  console.log('🔧 Grid: Added col-lg-' + size + ' to wrapper');
+  
+  if (offset && offset > 0) {
+    wrapperDiv.classList.add(`offset-lg-${offset}`);
+    console.log('🔧 Grid: Added offset-lg-' + offset + ' to wrapper');
+  }
+  
+  // Add Bootstrap no horizontal padding class to prevent padding conflicts
+  if (!wrapperDiv.classList.contains('px-0')) {
+    wrapperDiv.classList.add('px-0');
+    console.log('🔧 Grid: Added px-0 class to wrapper for proper element editor spacing');
+  }
+  
+  console.log('🔧 Grid: Final wrapper classes:', wrapperDiv.className);
 };
 
 // Global function to force re-application of grid classes (can be called from anywhere)
@@ -296,8 +370,8 @@ window.document.addEventListener('DOMContentLoaded', () => {
         // Check for class changes that might indicate drag operations
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
           const target = mutation.target;
-          // If an element card lost its grid classes, we need to reapply
-          if (target.classList.contains('element-editor__element') && 
+          // If a wrapper div (direct child of .elemental-editor-list) lost its grid classes, we need to reapply
+          if (target.parentElement && target.parentElement.classList.contains('elemental-editor-list') && 
               !target.classList.contains('col-lg-1') && 
               !target.classList.contains('col-lg-2') && 
               !target.classList.contains('col-lg-3') && 
