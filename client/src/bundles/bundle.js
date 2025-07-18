@@ -34,16 +34,20 @@ const withGridFunctionality = (OriginalElement) => {
 
     // Hook into drag lifecycle to re-apply grid classes
     const originalOnDragEnd = props.onDragEnd;
-    const enhancedOnDragEnd = React.useCallback((result) => {
-      // Call the original onDragEnd first
+    const enhancedOnDragEnd = React.useCallback((itemID, dropAfterID) => {
+      console.log('🔧 Grid: Enhanced onDragEnd called with:', { itemID, dropAfterID });
+      
+      // Call the original onDragEnd first with the correct parameters
       if (originalOnDragEnd) {
-        originalOnDragEnd(result);
+        originalOnDragEnd(itemID, dropAfterID);
       }
       
-      // Re-apply grid classes after drag operation completes
-      setTimeout(() => {
+      // Re-apply grid classes immediately after drag operation completes
+      // Use requestAnimationFrame to ensure DOM is updated but avoid visual shifts
+      requestAnimationFrame(() => {
+        console.log('🔧 Grid: Re-applying grid classes after drag...');
         moveGridControlsIntoCards();
-      }, 200);
+      });
     }, [originalOnDragEnd]);
 
     // Create enhanced props with our drag end handler
@@ -55,15 +59,11 @@ const withGridFunctionality = (OriginalElement) => {
     // Render the original element with enhanced props
     const originalElement = React.createElement(OriginalElement, enhancedProps);
 
-    // Post-render effect to ensure grid classes are applied after React renders
-    React.useEffect(() => {
+    // Post-render layout effect to ensure grid classes are applied before browser paint
+    React.useLayoutEffect(() => {
       if (isNotRow && ColumnSizeComponent) {
-        // Use a small delay to ensure DOM is fully rendered
-        const timer = setTimeout(() => {
-          moveGridControlsIntoCards();
-        }, 50);
-        
-        return () => clearTimeout(timer);
+        // Apply immediately before browser paint to prevent visual shifts
+        moveGridControlsIntoCards();
       }
     }, [element.id, isNotRow, ColumnSizeComponent]);
 
@@ -128,34 +128,55 @@ const cleanupIncorrectGridClasses = () => {
 
 // Function to move grid controls into their respective cards
 const moveGridControlsIntoCards = () => {
+  console.log('🔧 Grid: moveGridControlsIntoCards() called');
+  
   // First clean up any incorrectly applied grid classes
   cleanupIncorrectGridClasses();
   
   const gridControls = document.querySelectorAll('.column-size-controls');
+  console.log('🔧 Grid: Found', gridControls.length, 'grid controls');
   
-  gridControls.forEach(control => {
+  gridControls.forEach((control, index) => {
+    console.log('🔧 Grid: Processing control', index);
+    
     // Find the element ID from the control inputs
     const sizeSelect = control.querySelector('[id^="columnSize-"]');
     const offsetSelect = control.querySelector('[id^="columnOffset-"]');
     if (!sizeSelect || !offsetSelect) {
+      console.log('🔧 Grid: No size or offset select found for control', index);
+      return;
+    }
+    
+    console.log('🔧 Grid: Control', index, 'has size:', sizeSelect.value, 'offset:', offsetSelect.value);
+    
+    // Check if control is already inside an element card
+    const existingElementCard = control.closest('.element-editor__element');
+    if (existingElementCard) {
+      console.log('🔧 Grid: Control', index, 'already inside element card, just applying classes');
+      // Apply grid classes directly to the element card
+      applyGridClasses(existingElementCard, sizeSelect.value, offsetSelect.value);
       return;
     }
     
     // The control is rendered as a sibling to the element card
     // Look for the element card that's a sibling to this control
     const parent = control.parentElement;
-    if (!parent) return;
+    if (!parent) {
+      console.log('🔧 Grid: No parent found for control', index);
+      return;
+    }
     
     const elementCard = Array.from(parent.children).find(child => 
       child.classList.contains('element-editor__element')
     );
     
-    if (!elementCard) return;
-    
-    // Check if already moved
-    if (elementCard.contains(control)) {
+    if (!elementCard) {
+      console.log('🔧 Grid: No element card found for control', index);
       return;
     }
+    
+    console.log('🔧 Grid: Found element card for control', index, 'classes:', elementCard.className);
+    console.log('🔧 Grid: Moving control', index, 'into element card');
     
     // Move the control into the card
     elementCard.appendChild(control);
@@ -167,6 +188,7 @@ const moveGridControlsIntoCards = () => {
     if (!sizeSelect.hasAttribute('data-grid-listener')) {
       sizeSelect.setAttribute('data-grid-listener', 'true');
       sizeSelect.addEventListener('change', (e) => {
+        console.log('🔧 Grid: Size changed to', e.target.value);
         applyGridClasses(elementCard, e.target.value, offsetSelect.value);
       });
     }
@@ -174,6 +196,7 @@ const moveGridControlsIntoCards = () => {
     if (!offsetSelect.hasAttribute('data-grid-listener')) {
       offsetSelect.setAttribute('data-grid-listener', 'true');
       offsetSelect.addEventListener('change', (e) => {
+        console.log('🔧 Grid: Offset changed to', e.target.value);
         applyGridClasses(elementCard, sizeSelect.value, e.target.value);
       });
     }
@@ -182,16 +205,25 @@ const moveGridControlsIntoCards = () => {
 
 // Function to apply Bootstrap grid classes to an element holder
 const applyGridClasses = (elementHolder, size, offset) => {
+  console.log('🔧 Grid: applyGridClasses called with:', { size, offset, element: elementHolder });
+  console.log('🔧 Grid: Current classes before:', elementHolder.className);
+  
   // Remove existing grid classes
   elementHolder.className = elementHolder.className.replace(/\bcol-lg-\d+\b/g, '');
   elementHolder.className = elementHolder.className.replace(/\boffset-lg-\d+\b/g, '');
   
+  console.log('🔧 Grid: Classes after removal:', elementHolder.className);
+  
   // Add new grid classes
   elementHolder.classList.add(`col-lg-${size}`);
+  console.log('🔧 Grid: Added col-lg-' + size);
   
   if (offset && offset > 0) {
     elementHolder.classList.add(`offset-lg-${offset}`);
+    console.log('🔧 Grid: Added offset-lg-' + offset);
   }
+  
+  console.log('🔧 Grid: Final classes:', elementHolder.className);
 };
 
 // Global function to force re-application of grid classes (can be called from anywhere)
@@ -215,20 +247,20 @@ const addDragEventListeners = () => {
       // Clear the drag flag
       window.isDraggingElement = false;
       
-      // Re-apply grid classes after a short delay
-      setTimeout(() => {
+      // Re-apply grid classes immediately using requestAnimationFrame
+      requestAnimationFrame(() => {
         moveGridControlsIntoCards();
-      }, 300);
+      });
     }
   });
 
   // Listen for drop events
   document.addEventListener('drop', (e) => {
     if (e.target.closest('.elemental-editor-list')) {
-      // Re-apply grid classes after drop
-      setTimeout(() => {
+      // Re-apply grid classes immediately using requestAnimationFrame
+      requestAnimationFrame(() => {
         moveGridControlsIntoCards();
-      }, 500);
+      });
     }
   });
 };
@@ -284,11 +316,10 @@ window.document.addEventListener('DOMContentLoaded', () => {
       });
       
       if (shouldReapply) {
-        // Debounce to prevent excessive re-applications
-        clearTimeout(observer.debounceTimer);
-        observer.debounceTimer = setTimeout(() => {
+        // Apply immediately using queueMicrotask for non-blocking updates
+        queueMicrotask(() => {
           moveGridControlsIntoCards();
-        }, 100);
+        });
       }
     });
     

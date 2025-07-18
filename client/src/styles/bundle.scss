@@ -6,7 +6,7 @@
   border: 0;
   min-height: 4rem;
   outline: 1px solid #dbe0e9;
-  transition: all 100ms linear;
+  transition: all 200ms ease-in-out;
 
   &--expanded {
     flex: 0 0 100%;
@@ -32,6 +32,26 @@
     .element-editor-summary {
       display: none;
     }
+  }
+
+  /* Grid class transitions for smooth layout changes */
+  &.col-lg-1,
+  &.col-lg-2,
+  &.col-lg-3,
+  &.col-lg-4,
+  &.col-lg-5,
+  &.col-lg-6,
+  &.col-lg-7,
+  &.col-lg-8,
+  &.col-lg-9,
+  &.col-lg-10,
+  &.col-lg-11,
+  &.col-lg-12 {
+    transition: all 200ms ease-in-out;
+  }
+
+  &[class*="offset-lg-"] {
+    transition: all 200ms ease-in-out;
   }
 }
 

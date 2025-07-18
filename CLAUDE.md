@@ -472,4 +472,183 @@ Elements can be inserted at top or bottom of lists via:
 - Check browser cache (hard refresh)
 - Verify CSS selectors target correct elements
 
+### Visual Shifts and Layout Jumps
+- **Problem**: Grid classes applied after DOM painting cause "visual terror" - elements jump from full-width to grid positions
+- **Root Cause**: DOM manipulation happens after React render cycle and browser paint
+- **Solution**: Use `useLayoutEffect` instead of `useEffect` for class application before browser paint
+- **Optimization**: Remove `setTimeout` delays, use `requestAnimationFrame` for optimal timing
+- **CSS Fallback**: Add smooth transitions (`transition: all 200ms ease-in-out`) to handle any remaining layout changes
+
+## Advanced Grid Class Management
+
+### Critical DOM Manipulation Insights
+
+The grid system applies Bootstrap classes (`col-lg-X`, `offset-lg-X`) via DOM manipulation after React renders the components. This creates several challenges:
+
+#### **The Visual Shift Problem**
+When grid classes are applied after DOM painting, users experience jarring visual shifts:
+1. React renders elements without grid classes (full width)
+2. Browser paints the DOM
+3. DOM manipulation applies grid classes
+4. Browser repaints with new layout (causing visible jump)
+
+#### **Solution: Pre-Paint Class Application**
+```javascript
+// ❌ WRONG - Causes visual shifts
+React.useEffect(() => {
+  setTimeout(() => {
+    moveGridControlsIntoCards();
+  }, 50);
+}, [element.id]);
+
+// ✅ CORRECT - Applies before browser paint
+React.useLayoutEffect(() => {
+  moveGridControlsIntoCards();
+}, [element.id]);
+```
+
+#### **Enhanced Element Finding Logic**
+The grid controls are moved from siblings to children of element cards. The finding logic must handle both states:
+
+```javascript
+// Check if control is already inside an element card
+const existingElementCard = control.closest('.element-editor__element');
+if (existingElementCard) {
+  // Apply classes to existing parent
+  applyGridClasses(existingElementCard, sizeSelect.value, offsetSelect.value);
+  return;
+}
+
+// Otherwise find sibling element card
+const parent = control.parentElement;
+const elementCard = Array.from(parent.children).find(child => 
+  child.classList.contains('element-editor__element')
+);
+```
+
+#### **Drag/Drop Class Persistence**
+Drag operations cause React to re-render the element list with clean DOM, losing manually applied classes:
+
+**Problem**: `onDragEnd` callback parameter mismatch
+```javascript
+// ❌ WRONG - Breaks SilverStripe core drag/drop
+const enhancedOnDragEnd = (result) => {
+  originalOnDragEnd(result);
+};
+
+// ✅ CORRECT - Matches core expectations
+const enhancedOnDragEnd = (itemID, dropAfterID) => {
+  originalOnDragEnd(itemID, dropAfterID);
+};
+```
+
+**Solution**: Immediate class reapplication using optimal timing
+```javascript
+// Re-apply classes immediately after drag
+requestAnimationFrame(() => {
+  moveGridControlsIntoCards();
+});
+```
+
+### Performance Optimization Patterns
+
+#### **Timing Optimization**
+- **`useLayoutEffect`**: Synchronous execution before browser paint
+- **`requestAnimationFrame`**: Optimal timing for post-drag updates
+- **`queueMicrotask`**: Immediate, non-blocking DOM updates
+- **Remove `setTimeout`**: Eliminates arbitrary delays and visual shifts
+
+#### **MutationObserver Configuration**
+```javascript
+// Enhanced observer for immediate updates
+const observer = new MutationObserver((mutations) => {
+  let shouldReapply = false;
+  
+  mutations.forEach(mutation => {
+    if (mutation.type === 'childList' && (mutation.addedNodes.length || mutation.removedNodes.length)) {
+      shouldReapply = true;
+    }
+    
+    // Detect when element cards lose grid classes
+    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+      const target = mutation.target;
+      if (target.classList.contains('element-editor__element') && 
+          !target.classList.contains('col-lg-1') && 
+          !target.classList.contains('col-lg-2') && 
+          /* ... other col-lg classes ... */
+          !target.classList.contains('col-lg-12')) {
+        shouldReapply = true;
+      }
+    }
+  });
+  
+  if (shouldReapply) {
+    queueMicrotask(() => {
+      moveGridControlsIntoCards();
+    });
+  }
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['class']
+});
+```
+
+#### **CSS Transitions for Smooth Fallback**
+```scss
+.element-editor__element {
+  // Enhanced transition for smooth layout changes
+  transition: all 200ms ease-in-out;
+  
+  // Specific transitions for grid classes
+  &.col-lg-1,
+  &.col-lg-2,
+  &.col-lg-3,
+  &.col-lg-4,
+  &.col-lg-5,
+  &.col-lg-6,
+  &.col-lg-7,
+  &.col-lg-8,
+  &.col-lg-9,
+  &.col-lg-10,
+  &.col-lg-11,
+  &.col-lg-12 {
+    transition: all 200ms ease-in-out;
+  }
+  
+  &[class*="offset-lg-"] {
+    transition: all 200ms ease-in-out;
+  }
+}
+```
+
+### Critical Debugging Techniques
+
+#### **Visual Shift Debugging**
+- **Symptoms**: Elements jump or "flash" between different sizes
+- **Tools**: Browser DevTools Performance tab to see paint events
+- **Fix**: Replace `useEffect` with `useLayoutEffect`
+
+#### **Drag/Drop Debugging**
+- **Symptoms**: GraphQL errors like "Variable $afterBlockId was not provided"
+- **Cause**: Incorrect `onDragEnd` callback parameters
+- **Fix**: Match core SilverStripe callback signature: `(itemID, dropAfterID)`
+
+#### **Class Persistence Debugging**
+- **Symptoms**: Classes applied initially but lost after drag
+- **Cause**: DOM manipulation logic can't find elements after they're moved
+- **Fix**: Use `.closest()` to find parent element cards
+
+### Best Practices Summary
+
+1. **Pre-Paint Application**: Use `useLayoutEffect` for immediate class application
+2. **Optimal Timing**: Use `requestAnimationFrame` for post-drag updates
+3. **Robust Element Finding**: Handle both sibling and child element relationships
+4. **Smooth Transitions**: Add CSS transitions as fallback for any remaining shifts
+5. **Performance**: Eliminate unnecessary delays and debouncing
+6. **Debugging**: Add comprehensive console logging for troubleshooting
+
 This documentation should be updated whenever significant changes are made to the SilverStripe compatibility layer or core functionality.
