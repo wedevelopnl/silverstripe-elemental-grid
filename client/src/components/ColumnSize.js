@@ -106,42 +106,44 @@ class ColumnSize extends Component {
     return (
       <div className="column-size-controls">
         <hr />
-        <div className="form-group">
-          <label htmlFor={sizeId} className="form__field-label">
-            Size {this.props.defaultViewport}
-          </label>
-          <Input
-            type="select"
-            id={sizeId}
-            value={this.state.currentSize}
-            onChange={this.handleChangeSize}
-            className="form-control"
-          >
-            {this.getColSizeOptions().map((option) => (
-              <option key={`size-${option.value}`} value={option.value}>
-                {option.title}
-              </option>
-            ))}
-          </Input>
-        </div>
+        <div className="form-row">
+          <div className="col-sm-6">
+            <label htmlFor={sizeId} className="col-form-label">
+              Size {this.props.defaultViewport}
+            </label>
+            <Input
+              type="select"
+              id={sizeId}
+              value={this.state.currentSize}
+              onChange={this.handleChangeSize}
+              className="form-control"
+            >
+              {this.getColSizeOptions().map((option) => (
+                <option key={`size-${option.value}`} value={option.value}>
+                  {option.title}
+                </option>
+              ))}
+            </Input>
+          </div>
 
-        <div className="form-group">
-          <label htmlFor={offsetId} className="form__field-label">
-            Offset {this.props.defaultViewport}
-          </label>
-          <Input
-            type="select"
-            id={offsetId}
-            value={this.state.currentOffset}
-            onChange={this.handleChangeOffset}
-            className="form-control"
-          >
-            {this.getOffsetOptions().map((option) => (
-              <option key={`offset-${option.value}`} value={option.value}>
-                {option.title}
-              </option>
-            ))}
-          </Input>
+          <div className="col-sm-6">
+            <label htmlFor={offsetId} className="col-form-label">
+              Offset {this.props.defaultViewport}
+            </label>
+            <Input
+              type="select"
+              id={offsetId}
+              value={this.state.currentOffset}
+              onChange={this.handleChangeOffset}
+              className="form-control"
+            >
+              {this.getOffsetOptions().map((option) => (
+                <option key={`offset-${option.value}`} value={option.value}>
+                  {option.title}
+                </option>
+              ))}
+            </Input>
+          </div>
         </div>
       </div>
     );
