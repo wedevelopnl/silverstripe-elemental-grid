@@ -612,25 +612,28 @@ const addGridDropZonesAroundElement = (element, index, totalElements) => {
   const elementWrapper = element.parentElement;
   if (!elementWrapper) return;
 
-  console.log('[GRID DEBUG] Adding grid zones around element', index);
+  const isRow = isRowElement(element);
+  console.log('[GRID DEBUG] Adding grid zones around element', index, isRow ? '(row element)' : '(regular element)');
 
-  // Create left drop zone
-  const leftZone = createGridDropZone('left', element, index);
-  elementWrapper.insertBefore(leftZone, element);
-
-  // Create right drop zone using insertAfter polyfill
-  const rightZone = createGridDropZone('right', element, index);
-  insertAfter(rightZone, element);
-
-  // Add row zones for first/last elements
-  if (index === 0) {
+  if (isRow) {
+    // For row elements: only add top and bottom drop zones
     const topRowZone = createRowDropZone('above', element, index);
-    elementWrapper.insertBefore(topRowZone, elementWrapper.firstChild);
-  }
-
-  if (index === totalElements - 1) {
+    elementWrapper.insertBefore(topRowZone, element);
+    
     const bottomRowZone = createRowDropZone('below', element, index);
-    elementWrapper.appendChild(bottomRowZone);
+    insertAfter(bottomRowZone, element);
+  } else {
+    // For regular elements: add left and right drop zones as overlays inside the element container
+    // Make the element container position relative to contain the absolute positioned zones
+    if (elementWrapper.style.position !== 'relative') {
+      elementWrapper.style.position = 'relative';
+    }
+    
+    const leftZone = createGridDropZone('left', element, index);
+    elementWrapper.appendChild(leftZone);
+
+    const rightZone = createGridDropZone('right', element, index);
+    elementWrapper.appendChild(rightZone);
   }
 };
 
@@ -699,6 +702,30 @@ const extractNumericId = (domElementId) => {
   
   console.warn('[GRID DEBUG] Could not extract numeric ID from:', domElementId);
   return null;
+};
+
+// Helper function to detect element type (row vs regular element)
+const isRowElement = (element) => {
+  if (!element) return false;
+  
+  // Check if the element has the .is-row class
+  if (element.classList.contains('is-row')) {
+    return true;
+  }
+  
+  // Check if it's an ElementRow type by examining the element structure
+  const elementIcon = element.querySelector('.font-icon-list');
+  if (elementIcon) {
+    return true;
+  }
+  
+  // Check for row-specific text content
+  const titleElement = element.querySelector('.element-editor-header__title');
+  if (titleElement && titleElement.textContent.toLowerCase().includes('row')) {
+    return true;
+  }
+  
+  return false;
 };
 
 // Calculate insertion position for grid drop zones
