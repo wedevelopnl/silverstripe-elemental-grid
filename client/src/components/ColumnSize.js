@@ -93,12 +93,41 @@ class ColumnSize extends Component {
     // Get CSRF token from SilverStripe's window.ss.config
     const csrfTokenValue = window.ss && window.ss.config && window.ss.config.SecurityID
       ? window.ss.config.SecurityID
-      : '';
+      : null;
+
+    if (!csrfTokenValue) {
+      console.error('[Grid] CSRF token is missing. Aborting GraphQL request for element grid update.');
+      return;
+    }
 
     // Make direct GraphQL call to update element grid properties
     const query = `
-      mutation UpdateElementGrid($id: ID!, $sizeXS: Int, $sizeSM: Int, $sizeMD: Int, $sizeLG: Int, $sizeXL: Int, $offsetXS: Int, $offsetSM: Int, $offsetMD: Int, $offsetLG: Int, $offsetXL: Int) {
-        updateElementGrid(id: $id, sizeXS: $sizeXS, sizeSM: $sizeSM, sizeMD: $sizeMD, sizeLG: $sizeLG, sizeXL: $sizeXL, offsetXS: $offsetXS, offsetSM: $offsetSM, offsetMD: $offsetMD, offsetLG: $offsetLG, offsetXL: $offsetXL) {
+      mutation UpdateElementGrid(
+        $id: ID!,
+        $sizeXS: Int,
+        $sizeSM: Int,
+        $sizeMD: Int,
+        $sizeLG: Int,
+        $sizeXL: Int,
+        $offsetXS: Int,
+        $offsetSM: Int,
+        $offsetMD: Int,
+        $offsetLG: Int,
+        $offsetXL: Int
+      ) {
+        updateElementGrid(
+          id: $id,
+          sizeXS: $sizeXS,
+          sizeSM: $sizeSM,
+          sizeMD: $sizeMD,
+          sizeLG: $sizeLG,
+          sizeXL: $sizeXL,
+          offsetXS: $offsetXS,
+          offsetSM: $offsetSM,
+          offsetMD: $offsetMD,
+          offsetLG: $offsetLG,
+          offsetXL: $offsetXL
+        ) {
           id
           sizeXS
           sizeSM
@@ -122,12 +151,8 @@ class ColumnSize extends Component {
     const headers = {
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': csrfTokenValue,
     };
-
-    // Add CSRF token if available
-    if (csrfTokenValue) {
-      headers['X-CSRF-TOKEN'] = csrfTokenValue;
-    }
 
     // Use fetch to call the GraphQL endpoint directly
     fetch('/admin/graphql', {
@@ -139,7 +164,12 @@ class ColumnSize extends Component {
         variables,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((result) => {
         if (result.errors) {
           console.error('[Grid] GraphQL mutation errors:', result.errors);
@@ -147,13 +177,20 @@ class ColumnSize extends Component {
           result.errors.forEach((error) => {
             console.error('[Grid] Error details:', error.message, error);
           });
+          // Notify user of failure
+          if (window.statusMessage) {
+            window.statusMessage('Failed to update grid properties. Please try again.', 'error');
+          }
         } else {
           console.log('[Grid] Successfully updated element grid properties:', result.data);
         }
       })
       .catch((error) => {
         console.error('[Grid] Failed to update element grid properties:', error);
-        // Optionally revert the state on error
+        // Notify user of network or other errors
+        if (window.statusMessage) {
+          window.statusMessage('Failed to update grid properties. Please check your connection and try again.', 'error');
+        }
       });
   }
 
