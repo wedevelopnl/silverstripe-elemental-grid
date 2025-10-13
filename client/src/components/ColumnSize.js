@@ -1,7 +1,5 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { graphql } from '@apollo/client/react/hoc';
-import { gql } from '@apollo/client';
+import { Component } from 'react';
 import { Input } from 'reactstrap';
 
 class ColumnSize extends Component {
@@ -55,8 +53,10 @@ class ColumnSize extends Component {
     const newSize = parseInt(event.target.value, 10);
     this.setState({ currentSize: newSize });
 
-    // Update via GraphQL mutation
-    this.updateElementGrid({ sizeLG: newSize });
+    // Update via GraphQL mutation using the correct viewport
+    const viewport = this.props.defaultViewport || 'MD';
+    const sizeField = `size${viewport}`;
+    this.updateElementGrid({ [sizeField]: newSize });
 
     if (typeof this.props.onChangeSize === 'function') {
       this.props.onChangeSize(event, {
@@ -72,8 +72,10 @@ class ColumnSize extends Component {
     const newOffset = parseInt(event.target.value, 10);
     this.setState({ currentOffset: newOffset });
 
-    // Update via GraphQL mutation
-    this.updateElementGrid({ offsetLG: newOffset });
+    // Update via GraphQL mutation using the correct viewport
+    const viewport = this.props.defaultViewport || 'MD';
+    const offsetField = `offset${viewport}`;
+    this.updateElementGrid({ [offsetField]: newOffset });
 
     if (typeof this.props.onChangeOffset === 'function') {
       this.props.onChangeOffset(event, {
@@ -86,17 +88,73 @@ class ColumnSize extends Component {
   }
 
   updateElementGrid(gridData) {
-    if (this.props.updateElementGrid) {
-      this.props.updateElementGrid({
-        variables: {
-          id: this.props.elementId,
-          ...gridData,
-        },
-      }).catch(() => {
-        // Handle error silently or with user notification
+    const { elementId } = this.props;
+
+    // Get CSRF token from SilverStripe's window.ss.config
+    const csrfTokenValue = window.ss && window.ss.config && window.ss.config.SecurityID
+      ? window.ss.config.SecurityID
+      : '';
+
+    // Make direct GraphQL call to update element grid properties
+    const query = `
+      mutation UpdateElementGrid($id: ID!, $sizeXS: Int, $sizeSM: Int, $sizeMD: Int, $sizeLG: Int, $sizeXL: Int, $offsetXS: Int, $offsetSM: Int, $offsetMD: Int, $offsetLG: Int, $offsetXL: Int) {
+        updateElementGrid(id: $id, sizeXS: $sizeXS, sizeSM: $sizeSM, sizeMD: $sizeMD, sizeLG: $sizeLG, sizeXL: $sizeXL, offsetXS: $offsetXS, offsetSM: $offsetSM, offsetMD: $offsetMD, offsetLG: $offsetLG, offsetXL: $offsetXL) {
+          id
+          sizeXS
+          sizeSM
+          sizeMD
+          sizeLG
+          sizeXL
+          offsetXS
+          offsetSM
+          offsetMD
+          offsetLG
+          offsetXL
+        }
+      }
+    `;
+
+    const variables = {
+      id: elementId,
+      ...gridData,
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+    };
+
+    // Add CSRF token if available
+    if (csrfTokenValue) {
+      headers['X-CSRF-TOKEN'] = csrfTokenValue;
+    }
+
+    // Use fetch to call the GraphQL endpoint directly
+    fetch('/admin/graphql', {
+      method: 'POST',
+      headers,
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.errors) {
+          console.error('[Grid] GraphQL mutation errors:', result.errors);
+          // Log detailed error information
+          result.errors.forEach((error) => {
+            console.error('[Grid] Error details:', error.message, error);
+          });
+        } else {
+          console.log('[Grid] Successfully updated element grid properties:', result.data);
+        }
+      })
+      .catch((error) => {
+        console.error('[Grid] Failed to update element grid properties:', error);
         // Optionally revert the state on error
       });
-    }
   }
 
   render() {
@@ -165,7 +223,7 @@ ColumnSize.propTypes = {
 ColumnSize.defaultProps = {
   size: 12,
   offset: 0,
-  defaultViewport: 'LG',
+  defaultViewport: 'MD',
   gridColumns: 12,
   onChangeSize: null,
   onChangeOffset: null,
@@ -173,20 +231,4 @@ ColumnSize.defaultProps = {
   updateElementGrid: null,
 };
 
-// GraphQL mutation
-const mutation = gql`
-  mutation UpdateElementGrid($id: ID!, $sizeLG: Int, $offsetLG: Int) {
-    updateElementGrid(id: $id, sizeLG: $sizeLG, offsetLG: $offsetLG) {
-      id
-      sizeLG
-      offsetLG
-    }
-  }
-`;
-
-// Export with GraphQL mutation
-export default graphql(mutation, {
-  props: ({ mutate }) => ({
-    updateElementGrid: mutate,
-  }),
-})(ColumnSize);
+export default ColumnSize;

@@ -7,6 +7,6 @@
 'sortBlock(id: ID!, afterBlockID: ID!)':
   model: DNADesign\Elemental\Models\BaseElement
   description: Changes the sort position of an element
-'updateElementGrid(id: ID!, sizeLG: Int, offsetLG: Int)':
+'updateElementGrid(id: ID!, sizeXS: Int, sizeSM: Int, sizeMD: Int, sizeLG: Int, sizeXL: Int, offsetXS: Int, offsetSM: Int, offsetMD: Int, offsetLG: Int, offsetXL: Int)':
   model: DNADesign\Elemental\Models\BaseElement
   description: Updates grid properties for an element

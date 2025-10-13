@@ -15,8 +15,16 @@ DNADesign\Elemental\Models\BaseElement:
     canPublish: Boolean
     canUnpublish: Boolean
     canDelete: Boolean
+    sizeXS: Int
+    sizeSM: Int
+    sizeMD: Int
     sizeLG: Int
+    sizeXL: Int
+    offsetXS: Int
+    offsetSM: Int
+    offsetMD: Int
     offsetLG: Int
+    offsetXL: Int
   operations:
     copyToStage: true
     readOne: true

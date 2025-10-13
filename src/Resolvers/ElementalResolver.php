@@ -96,13 +96,22 @@ class ElementalResolver extends Resolver
             );
         }
 
-        // Update grid properties
-        if (isset($args['sizeLG'])) {
-            $element->SizeLG = (int) $args['sizeLG'];
-        }
+        // Update grid properties for all viewports
+        $viewports = ['XS', 'SM', 'MD', 'LG', 'XL'];
         
-        if (isset($args['offsetLG'])) {
-            $element->OffsetLG = (int) $args['offsetLG'];
+        foreach ($viewports as $viewport) {
+            $sizeKey = 'size' . $viewport;
+            $offsetKey = 'offset' . $viewport;
+            $sizeField = 'Size' . $viewport;
+            $offsetField = 'Offset' . $viewport;
+            
+            if (isset($args[$sizeKey])) {
+                $element->$sizeField = (int) $args[$sizeKey];
+            }
+            
+            if (isset($args[$offsetKey])) {
+                $element->$offsetField = (int) $args[$offsetKey];
+            }
         }
 
         try {
