@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', () => {
       // GET VIDEO ID
       const videoID = videoEmbedUrl.substring(
         videoEmbedUrl.indexOf('video/') + 6,
-        videoEmbedUrl.lastIndexOf('?h='),
+        videoEmbedUrl.lastIndexOf('?app_id='),
       );
 
       // REPLACE DIV FOR VIDEO
