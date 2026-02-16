@@ -1,0 +1,4 @@
+{
+  "intelephense.environment.phpVersion": "8.3",
+  "snyk.advanced.autoSelectOrganization": true
+}

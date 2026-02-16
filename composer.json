@@ -1,0 +1,27 @@
+{
+  "name": "wedevelopnl/silverstripe-elemental-grid",
+  "description": "Elemental grid module",
+  "type": "silverstripe-vendormodule",
+  "license": "BSD-3-Clause",
+  "homepage": "https://wedevelop.nl",
+  "keywords": [
+    "silverstripe",
+    "element",
+    "elemental",
+    "content blocks",
+    "grid"
+  ],
+  "authors": [
+    {
+      "name": "WeDevelop",
+      "email": "development@wedevelop.nl"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.3"
+  },
+  "extra": {},
+  "autoload": {}
+}
