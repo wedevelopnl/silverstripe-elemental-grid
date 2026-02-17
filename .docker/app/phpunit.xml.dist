@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/silverstripe/framework/tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache/integration"
+         colors="true"
+         beStrictAboutTestsThatDoNotTestAnything="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>vendor/wedevelopnl/silverstripe-elemental-grid/tests/Unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>vendor/wedevelopnl/silverstripe-elemental-grid/tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">vendor/wedevelopnl/silverstripe-elemental-grid/src</directory>
+        </include>
+    </source>
+</phpunit>

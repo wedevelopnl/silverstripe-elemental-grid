@@ -7,7 +7,8 @@ RUN install-php-extensions \
     pdo_mysql \
     zip \
     bcmath \
-    exif
+    exif \
+    pcov
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -21,6 +22,8 @@ COPY app/composer.json /app/composer.json
 RUN mkdir -p /app/src \
     && printf '<?php\n\nuse SilverStripe\\CMS\\Model\\SiteTree;\n\nclass Page extends SiteTree\n{\n}\n' > /app/src/Page.php \
     && printf '<?php\n\nuse SilverStripe\\CMS\\Controllers\\ContentController;\n\nclass PageController extends ContentController\n{\n}\n' > /app/src/PageController.php
+
+COPY app/phpunit.xml.dist /app/phpunit.xml.dist
 
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
