@@ -1,0 +1,16 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": ["/module/src"]
+    },
+    "timeout": 30,
+    "logs": {
+        "text": "infection/infection.log",
+        "json": "infection/infection.json"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "minMsi": 0,
+    "minCoveredMsi": 0
+}

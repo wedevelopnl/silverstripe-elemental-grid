@@ -18,7 +18,8 @@
     "lint:js:fix": "eslint client/src --fix",
     "lint:css": "stylelint 'client/src/**/*.scss'",
     "lint:css:fix": "stylelint 'client/src/**/*.scss' --fix",
-    "qa": "npm run lint && npm run typecheck && npm run test"
+    "qa": "npm run lint && npm run typecheck && npm run test",
+    "mutate": "stryker run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.0",
@@ -36,6 +37,9 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/coverage-v8": "^4.0.18",
+    "@stryker-mutator/core": "^9.5.0",
+    "@stryker-mutator/typescript-checker": "^9.5.0",
+    "@stryker-mutator/vitest-runner": "^9.5.0",
     "eslint": "^9.0.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^7.0.0",

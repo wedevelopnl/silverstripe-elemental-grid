@@ -19,10 +19,10 @@ src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
 client/src/           # Frontend source (React/TS/SCSS) — not yet scaffolded
-client/dist/          # Vite build output (exposed via vendor-plugin)
-client/images/        # Static images (exposed)
-client/lang/          # Frontend translations (exposed)
-lang/                 # PHP translations (exposed)
+client/dist/          # Vite build output (exposed, created by build)
+client/images/        # Static images (exposed, not yet created)
+client/lang/          # Frontend translations (exposed, not yet created)
+lang/                 # PHP translations (exposed, not yet created)
 .docker/              # Docker dev env: Caddy + PHP + MySQL 8
 ```
 
@@ -37,9 +37,13 @@ lang/                 # PHP translations (exposed)
 
 - `vite.config.ts` — Build config + Vitest test config, `@` alias → `client/src`
 - `tsconfig.json` — TypeScript config
+- `stryker.config.mjs` — Stryker JS mutation testing config
 - `Makefile` — Docker-based PHP test/coverage commands
 - `.docker/compose.yml` — Docker service definitions
 - `.docker/env.sh` — Generates `.docker/.env` with deterministic ports
+- `.docker/app/infection.json5` — Infection mutation testing config
+- `.docker/app/phpunit.mutation.xml.dist` — PHPUnit config for mutation testing
+- `.docker/app/phpstan.neon.dist` — PHPStan config (level max + Silverstan + 100% type coverage)
 
 ### PHP Testing
 
@@ -47,10 +51,16 @@ lang/                 # PHP translations (exposed)
 - PHPUnit configs: `.docker/app/phpunit.unit.xml.dist` (unit), `.docker/app/phpunit.xml.dist` (integration)
 - Test namespace: `WeDevelop\ElementalGrid\Tests\` → `tests/` (Unit/ + Integration/)
 
+### Static Analysis
+
+- PHPStan level max with Silverstan (SilverStripe-aware rules)
+- 100% type coverage enforced: return, param, property, constant, declare
+- Runs inside Docker via `make analyse`
+
 ## Code Style
 
 - 4 spaces: PHP, `composer.json`
-- 2 spaces: YML, JS, TS, TSX, JSON, CSS, SCSS
+- 2 spaces: YML, JS, TS, TSX, JSON, CSS, SCSS (enforced via `.editorconfig`)
 - LF line endings, UTF-8, trailing newline
 
 ## Commands
@@ -61,11 +71,14 @@ lang/                 # PHP translations (exposed)
 | `npm run dev` | Vite watch mode for development |
 | `npm run test` | Run Vitest tests |
 | `npm run lint` | ESLint + Stylelint |
+| `npm run lint:js` | ESLint only (no fix) |
 | `npm run lint:js:fix` | ESLint with auto-fix |
+| `npm run lint:css` | Stylelint only (no fix) |
 | `npm run lint:css:fix` | Stylelint with auto-fix |
 | `npm run typecheck` | TypeScript type checking |
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run coverage` | Vitest with coverage report |
+| `npm run mutate` | JS mutation testing (Stryker) |
 | `npm run qa` | Full QA: lint + typecheck + test |
 
 ### PHP (via Makefile — requires Docker)
@@ -75,6 +88,7 @@ lang/                 # PHP translations (exposed)
 | `make up` | Start Docker services (build if needed) |
 | `make down` | Stop Docker services |
 | `make destroy` | Stop services and remove volumes |
+| `make build` | Build Docker images without starting |
 | `make test` | Run all tests (PHP unit + integration + JS) |
 | `make test-unit` | Run PHP unit tests (no database/framework) |
 | `make test-integration` | Run PHP integration tests (full SilverStripe env) |
@@ -83,6 +97,9 @@ lang/                 # PHP translations (exposed)
 | `make coverage-unit` | PHP unit test coverage only |
 | `make coverage-integration` | PHP integration test coverage only |
 | `make coverage-js` | JavaScript test coverage (Vitest) |
+| `make mutate` | PHP mutation testing (Infection) |
+| `make mutate-js` | JS mutation testing (Stryker) |
+| `make analyse` | Run PHPStan static analysis |
 
 ## Docker Dev Environment
 
@@ -102,3 +119,4 @@ Ports are deterministic per worktree directory name (hashed). Default admin: `ad
 - Active development happens on branch `6` (orphaned from `main`)
 - composer.json is intentionally minimal; dependencies will be added incrementally
 - `make test-js` and `make coverage-js` run locally (no Docker), unlike PHP targets
+- **No ESLint/Stylelint configs yet**: `eslint.config.*` and `stylelint.config.*` don't exist — lint commands will fail until these are scaffolded

@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f .docker/compose.yml
 
-.PHONY: up down destroy build test test-unit test-integration test-js coverage coverage-unit coverage-integration coverage-js
+.PHONY: up down destroy build test test-unit test-integration test-js coverage coverage-unit coverage-integration coverage-js mutate mutate-js analyse
 
 ## Start services (build if needed)
 up:
@@ -58,3 +58,15 @@ coverage-integration: ensure-up
 ## Run JavaScript tests with coverage
 coverage-js:
 	npm run coverage
+
+## Run PHP mutation testing (Infection)
+mutate: ensure-up
+	$(COMPOSE) exec app vendor/bin/infection --threads=4
+
+## Run JavaScript mutation testing (Stryker)
+mutate-js:
+	npm run mutate
+
+## Run PHPStan static analysis
+analyse: ensure-up
+	$(COMPOSE) exec app vendor/bin/phpstan analyse -c phpstan.neon.dist

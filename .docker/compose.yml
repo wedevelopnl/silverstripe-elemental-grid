@@ -6,7 +6,10 @@ services:
     ports:
       - "${WEB_PORT}:80"
     volumes:
-      - ../:/module:ro
+      - ../composer.json:/module/composer.json:ro
+      - ../src:/module/src
+      - ../tests:/module/tests:ro
+      - ../_config:/module/_config:ro
       - vendor:/app/vendor
     depends_on:
       db:
