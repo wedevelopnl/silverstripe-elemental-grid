@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(bd:*)", "WebFetch(domain:docs.silverstripe.org)"],
+    "allow": [
+      "Bash(bd:*)",
+      "Bash(docker compose:*)",
+      "WebFetch(domain:docs.silverstripe.org)"
+    ],
     "deny": []
   },
   "enabledPlugins": {

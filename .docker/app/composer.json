@@ -1,0 +1,26 @@
+{
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "silverstripe/recipe-cms": "^6.0",
+        "wedevelopnl/silverstripe-elemental-grid": "*"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/module"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/recipe-plugin": true,
+            "silverstripe/vendor-plugin": true
+        }
+    }
+}

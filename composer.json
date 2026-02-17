@@ -20,8 +20,32 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": "^8.3"
+    "php": "^8.3",
+    "dnadesign/silverstripe-elemental": "^6.0",
+    "silverstripe/admin": "^3.0",
+    "silverstripe/framework": "^6.0",
+    "silverstripe/vendor-plugin": "^3.0"
   },
-  "extra": {},
-  "autoload": {}
+  "conflict": {
+    "dnadesign/silverstripe-elemental-list": "*"
+  },
+  "extra": {
+    "expose": [
+      "client/dist",
+      "client/images",
+      "client/lang",
+      "lang"
+    ]
+  },
+  "autoload": {
+    "psr-4": {
+      "WeDevelop\\ElementalGrid\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "silverstripe/vendor-plugin": true
+    }
+  }
 }
