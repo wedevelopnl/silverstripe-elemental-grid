@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit;
+namespace WeDevelop\ElementalGrid\Tests\Unit\Contract;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\ContainerType;
+use WeDevelop\ElementalGrid\Contract\ContainerType;
 
 #[CoversClass(ContainerType::class)]
 final class ContainerTypeTest extends TestCase

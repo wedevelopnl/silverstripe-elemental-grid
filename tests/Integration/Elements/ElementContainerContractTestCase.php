@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit;
+namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
 
 use DNADesign\Elemental\Models\ElementalArea;
-use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\ContainerType;
-use WeDevelop\ElementalGrid\ElementContainerInterface;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Versioned\Versioned;
+use WeDevelop\ElementalGrid\Contract\ContainerType;
+use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 
 /**
  * Abstract contract test for ElementContainerInterface implementations.
@@ -15,8 +16,21 @@ use WeDevelop\ElementalGrid\ElementContainerInterface;
  * Extend this in each concrete container's test class and implement
  * {@see createContainer()} to return a configured instance.
  */
-abstract class ElementContainerContractTestCase extends TestCase
+abstract class ElementContainerContractTestCase extends SapphireTest
 {
+    protected $usesDatabase = true;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // FlushableTestState::setUp() calls Versioned::reset() which clears
+        // the reading mode to ''. This runs before VersionedTestState::setUp()
+        // which only saves (doesn't set) the current mode. Explicitly set
+        // draft stage so ElementalAreasExtension and scaffolding hooks work.
+        Versioned::set_stage(Versioned::DRAFT);
+    }
+
     abstract protected function createContainer(): ElementContainerInterface;
 
     public function testImplementsElementContainerInterface(): void

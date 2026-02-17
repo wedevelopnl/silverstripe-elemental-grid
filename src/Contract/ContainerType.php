@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid;
+namespace WeDevelop\ElementalGrid\Contract;
 
 enum ContainerType: string
 {

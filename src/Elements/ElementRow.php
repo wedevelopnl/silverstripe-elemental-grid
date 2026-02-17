@@ -1,0 +1,102 @@
+<?php
+
+declare(strict_types=1);
+
+namespace WeDevelop\ElementalGrid\Elements;
+
+use DNADesign\Elemental\Models\BaseElement;
+use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\Core\Validation\ValidationResult;
+use SilverStripe\Versioned\Versioned;
+use WeDevelop\ElementalGrid\Contract\ContainerType;
+use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+
+/**
+ * Mid-level container in the Section > Row > Column hierarchy.
+ * Lives inside a Section's ChildArea only. On draft-stage write,
+ * auto-scaffolds a child Column when the ChildArea is empty.
+ */
+class ElementRow extends BaseElement implements ElementContainerInterface
+{
+    private static string $table_name = 'ElementRow';
+
+    private static string $singular_name = 'Row';
+
+    /** @var array<string, class-string> */
+    private static array $has_one = [
+        'ChildArea' => ElementalArea::class,
+    ];
+
+    /** @var list<string> */
+    private static array $owns = [
+        'ChildArea',
+    ];
+
+    /** @var list<string> */
+    private static array $cascade_deletes = [
+        'ChildArea',
+    ];
+
+    /** @var list<string> */
+    private static array $cascade_duplicates = [
+        'ChildArea',
+    ];
+
+    private static string $default_column_title = '';
+
+    public function getChildArea(): ElementalArea
+    {
+        return $this->ChildArea();
+    }
+
+    #[\Override]
+    public function hasChildren(): bool
+    {
+        return $this->getChildArea()->Elements()->exists();
+    }
+
+    #[\Override]
+    public function getContainerType(): ContainerType
+    {
+        return ContainerType::Row;
+    }
+
+    #[\Override]
+    public function validate(): ValidationResult
+    {
+        $result = parent::validate();
+
+        $parent = $this->Parent();
+        if (!$parent->exists()) {
+            return $result;
+        }
+
+        $owner = $parent->getOwnerPage();
+        if (!($owner instanceof ElementSection)) {
+            $result->addError('A Row can only be placed inside a Section.');
+        }
+
+        return $result;
+    }
+
+    #[\Override]
+    protected function onAfterWrite(): void
+    {
+        parent::onAfterWrite();
+
+        // Only scaffold on draft stage to avoid duplicates during publish
+        if (Versioned::get_stage() !== Versioned::DRAFT) {
+            return;
+        }
+
+        $childArea = $this->getChildArea();
+        if (!$childArea->exists() || $childArea->Elements()->count() > 0) {
+            return;
+        }
+
+        $column = ElementColumn::create();
+        $column->Title = static::config()->get('default_column_title');
+        $column->ParentID = $childArea->ID;
+        $column->write();
+    }
+}

@@ -1,0 +1,25 @@
+---
+Name: elemental-grid-elements
+---
+
+# Apply ElementalAreasExtension so each container's ChildArea
+# is auto-created and managed (CMS fields, relation discovery)
+WeDevelop\ElementalGrid\Elements\ElementSection:
+  extensions:
+    - DNADesign\Elemental\Extensions\ElementalAreasExtension
+  allowed_elements:
+    - WeDevelop\ElementalGrid\Elements\ElementRow
+
+WeDevelop\ElementalGrid\Elements\ElementRow:
+  extensions:
+    - DNADesign\Elemental\Extensions\ElementalAreasExtension
+  allowed_elements:
+    - WeDevelop\ElementalGrid\Elements\ElementColumn
+
+WeDevelop\ElementalGrid\Elements\ElementColumn:
+  extensions:
+    - DNADesign\Elemental\Extensions\ElementalAreasExtension
+  disallowed_elements:
+    - WeDevelop\ElementalGrid\Elements\ElementSection
+    - WeDevelop\ElementalGrid\Elements\ElementRow
+    - WeDevelop\ElementalGrid\Elements\ElementColumn
