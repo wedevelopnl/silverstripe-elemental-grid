@@ -1,0 +1,15 @@
+---
+Name: elemental-grid-dev
+Only:
+  environment: dev
+---
+
+SilverStripe\Dev\DevelopmentAdmin:
+  controllers:
+    elemental-grid-fixtures:
+      class: 'WeDevelop\ElementalGrid\Dev\FixtureController'
+      description: 'Load and reset E2E fixtures for elemental grid'
+
+WeDevelop\ElementalGrid\Dev\FixtureLoader:
+  fixtures:
+    element-tree: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'

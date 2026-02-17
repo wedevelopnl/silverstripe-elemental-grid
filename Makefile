@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f .docker/compose.yml
 
-.PHONY: up down destroy build test test-unit test-integration test-js coverage coverage-unit coverage-integration coverage-js mutate mutate-js analyse
+.PHONY: up down destroy build test test-unit test-integration test-js coverage coverage-unit coverage-integration coverage-js mutate mutate-js analyse qa qa-js
 
 ## Start services (build if needed)
 up:
@@ -70,3 +70,11 @@ mutate-js:
 ## Run PHPStan static analysis
 analyse: ensure-up
 	$(COMPOSE) exec app vendor/bin/phpstan analyse -c phpstan.neon.dist
+
+## Run full QA suite (PHPStan + PHP tests + JS QA)
+qa: analyse test-unit test-integration qa-js
+
+## Run JavaScript QA (lint + typecheck + test)
+qa-js:
+  # Not setup yet
+	# npm run qa

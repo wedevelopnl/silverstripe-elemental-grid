@@ -3,6 +3,7 @@
     "allow": [
       "Bash(bd:*)",
       "Bash(docker compose:*)",
+      "Bash(make *)",
       "WebFetch(domain:docs.silverstripe.org)"
     ],
     "deny": []
@@ -28,6 +29,18 @@
           }
         ],
         "matcher": ""
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": ".claude/hooks/qa-gate.sh",
+            "timeout": 300,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
       }
     ],
     "SessionStart": [

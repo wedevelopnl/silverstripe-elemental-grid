@@ -1,0 +1,67 @@
+# E2E fixture for Playwright: Section > Row > Column > leaf hierarchy.
+#
+# Uses Page (not TestPage) because TestOnly classes are not available
+# at runtime — only during PHPUnit execution.
+#
+# Bottom-up ordering: children are written before parent containers so that
+# onAfterWrite scaffolding checks see a non-empty ChildArea and skip
+# auto-creation of Row/Column elements.
+#
+# All pages use the 'e2e-' URLSegment prefix for cleanup identification.
+
+DNADesign\Elemental\Models\ElementalArea:
+  page_area: {}
+  section1_area: {}
+  row1_area: {}
+  col1_area: {}
+  col2_area: {}
+
+Page:
+  e2e_page:
+    Title: 'E2E Grid Test Page'
+    URLSegment: 'e2e-grid-test'
+    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
+
+# --- Leaves first (into column areas) ---
+DNADesign\Elemental\Models\BaseElement:
+  leaf1:
+    Title: 'Text Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  leaf2:
+    Title: 'Image Block'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  leaf3:
+    Title: 'Video Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+
+# --- Columns (into row area; ChildAreas already have leaves) ---
+WeDevelop\ElementalGrid\Elements\ElementColumn:
+  col1:
+    Title: 'Left Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  col2:
+    Title: 'Right Column'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+
+# --- Row (into section area; ChildArea already has columns) ---
+WeDevelop\ElementalGrid\Elements\ElementRow:
+  row1:
+    Title: 'First Row'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+
+# --- Section (into page area; section1_area already has row) ---
+WeDevelop\ElementalGrid\Elements\ElementSection:
+  section1:
+    Title: 'Main Section'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section1_area

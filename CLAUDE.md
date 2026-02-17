@@ -100,16 +100,15 @@ lang/                 # PHP translations (exposed, not yet created)
 | `make mutate` | PHP mutation testing (Infection) |
 | `make mutate-js` | JS mutation testing (Stryker) |
 | `make analyse` | Run PHPStan static analysis |
+| `make qa` | Full QA suite (PHPStan + PHP tests + JS QA) |
+| `make qa-js` | JavaScript QA (lint + typecheck + test) |
 
 ## Docker Dev Environment
 
-```bash
-.docker/env.sh              # Generate .docker/.env with auto-assigned ports
-docker compose -f .docker/compose.yml up -d   # Start services
-docker compose -f .docker/compose.yml down     # Stop services
-```
-
-Ports are deterministic per worktree directory name (hashed). Default admin: `admin`/`admin`.
+- Run `.docker/env.sh` to generate `.docker/.env` with auto-assigned ports
+- Ports are deterministic per worktree directory name (hashed)
+- Default admin credentials: `admin`/`admin`
+- Use `make up`/`make down` to manage services (see Commands above)
 
 ## Gotchas
 
