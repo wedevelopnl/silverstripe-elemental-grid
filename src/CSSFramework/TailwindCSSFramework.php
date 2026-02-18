@@ -85,9 +85,9 @@ final class TailwindCSSFramework implements CSSFrameworkInterface
     {
         $direction = match($direction) {
             self::DIRECTION_TOP => 't',
-            self::DIRECTION_RIGHT => 'e',
+            self::DIRECTION_RIGHT => 'r',
             self::DIRECTION_BOTTOM => 'b',
-            self::DIRECTION_LEFT => 's',
+            self::DIRECTION_LEFT => 'l',
         };
 
         return sprintf('%s:p%s-%u', $this->getViewportName(), $direction, $size);
