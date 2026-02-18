@@ -35,3 +35,13 @@ After:
 DNADesign\Elemental\Models\BaseElement:
   extensions:
     HierarchyValidation: WeDevelop\ElementalGrid\Validation\HierarchyValidationExtension
+
+---
+Name: elemental-grid-services
+After:
+  - '#elemental-grid-validation'
+---
+
+SilverStripe\Core\Injector\Injector:
+  WeDevelop\ElementalGrid\Validation\HierarchyValidatorInterface:
+    class: WeDevelop\ElementalGrid\Validation\HierarchyValidationService

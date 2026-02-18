@@ -18,7 +18,8 @@ class HierarchyValidationExtension extends Extension
 {
     public function updateValidate(ValidationResult $result): void
     {
-        $service = Injector::inst()->get(HierarchyValidationService::class);
+        /** @var HierarchyValidatorInterface $service */
+        $service = Injector::inst()->get(HierarchyValidatorInterface::class);
         $serviceResult = $service->validate($this->owner);
 
         /** @var array<array{message: string, messageType: string, messageCast: string, fieldName: string|null}> $messages */
