@@ -139,7 +139,7 @@ final class ElementContentExtension extends DataExtension
         $fields->insertBefore('Settings', new Tab('Media'));
 
         $mediaField = MediaField::create($fields);
-        $mediaField->setTitle(_t(__CLASS__ . '.VIDEO_SETTINGS', 'Video settings'));
+        $mediaField->setTitle(_t(__CLASS__ . '.VIDEO_SETTINGS', 'Media settings'));
         $mediaField->getVideoWrapper()->push(
             UploadField::create('MediaVideoCustomThumbnail', _t(__CLASS__ . '.CUSTOM_VIDEO_THUMBNAIL', 'Custom video thumbnail'))
                 ->setFolderName('MediaUploads')
