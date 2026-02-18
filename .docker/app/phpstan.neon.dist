@@ -1,7 +1,9 @@
 parameters:
     level: max
     paths:
-        - vendor/wedevelopnl/silverstripe-elemental-grid/src
+        - /module/src
+    stubFiles:
+        - /module/phpstan/stubs/AdminController.stub
     type_coverage:
         return_type: 100
         param_type: 100

@@ -10,6 +10,7 @@ services:
       - ../src:/module/src
       - ../tests:/module/tests:ro
       - ../_config:/module/_config:ro
+      - ../phpstan:/module/phpstan:ro
       - vendor:/app/vendor
     depends_on:
       db:

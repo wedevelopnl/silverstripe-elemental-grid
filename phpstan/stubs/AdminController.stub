@@ -1,0 +1,9 @@
+<?php
+
+namespace SilverStripe\Admin;
+
+class AdminController
+{
+    /** @return never */
+    protected function jsonError(int $errorCode, string $errorMessage = ''): never {}
+}

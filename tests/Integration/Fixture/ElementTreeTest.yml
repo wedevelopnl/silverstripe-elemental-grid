@@ -1,0 +1,81 @@
+# Bottom-up ordering: children are written before parent containers so that
+# onAfterWrite scaffolding checks see a non-empty ChildArea and skip
+# auto-creation of Row/Column elements.
+
+DNADesign\Elemental\Models\ElementalArea:
+  page_area: {}
+  section1_area: {}
+  row1_area: {}
+  row2_area: {}
+  col1_area: {}
+  col2_area: {}
+  col3_area: {}
+
+WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage:
+  testpage:
+    Title: 'Tree Test Page'
+    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
+
+# --- Leaves first (into column areas) ---
+DNADesign\Elemental\Models\BaseElement:
+  leaf1:
+    Title: 'Text Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  leaf2:
+    Title: 'Image Block'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  leaf3:
+    Title: 'Video Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+
+# --- Columns (into row areas; ChildAreas already have leaves) ---
+WeDevelop\ElementalGrid\Elements\ElementColumn:
+  col1:
+    Title: 'Left Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  col2:
+    Title: 'Right Column'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+  col3:
+    Title: 'Full Width Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row2_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col3_area
+
+# --- Rows (into section area; ChildAreas already have columns) ---
+# row3 has no ChildArea — prevents auto-scaffolding of a Column
+WeDevelop\ElementalGrid\Elements\ElementRow:
+  row1:
+    Title: 'First Row'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+  row2:
+    Title: 'Second Row'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row2_area
+  row3:
+    Title: 'Empty Row'
+    Sort: 3
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+
+# --- Sections (into page area; section1_area already has rows) ---
+# section2 has no ChildArea — prevents auto-scaffolding of a Row
+WeDevelop\ElementalGrid\Elements\ElementSection:
+  section1:
+    Title: 'First Section'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+  section2:
+    Title: 'Second Section'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
