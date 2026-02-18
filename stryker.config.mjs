@@ -7,6 +7,7 @@ export default {
     '!client/src/**/*.d.ts',
     '!client/src/**/tests/**',
   ],
+  ignorePatterns: ['public'],
   checkers: ['typescript'],
   tsconfigFile: 'tsconfig.json',
   reporters: ['progress', 'clear-text', 'json'],

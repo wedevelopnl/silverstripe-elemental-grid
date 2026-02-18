@@ -11,6 +11,8 @@ services:
       - ../tests:/module/tests:ro
       - ../_config:/module/_config:ro
       - ../phpstan:/module/phpstan:ro
+      - ../client/dist:/module/client/dist:ro
+      - ../templates:/module/templates:ro
       - vendor:/app/vendor
     depends_on:
       db:
