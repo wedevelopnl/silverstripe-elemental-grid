@@ -6,7 +6,6 @@ namespace WeDevelop\ElementalGrid\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
@@ -59,24 +58,6 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Row;
-    }
-
-    #[\Override]
-    public function validate(): ValidationResult
-    {
-        $result = parent::validate();
-
-        $parent = $this->Parent();
-        if (!$parent->exists()) {
-            return $result;
-        }
-
-        $owner = $parent->getOwnerPage();
-        if (!($owner instanceof ElementSection)) {
-            $result->addError('A Row can only be placed inside a Section.');
-        }
-
-        return $result;
     }
 
     #[\Override]

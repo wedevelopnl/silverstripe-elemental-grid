@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
 
-use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
+use SilverStripe\Core\Validation\ValidationException;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
@@ -30,22 +30,53 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         $this->assertSame(ContainerType::Column, $column->getContainerType());
     }
 
-    public function testValidationFailsWhenNotInsideRow(): void
+    public function testWriteBlockedOnPage(): void
     {
-        // Place Column directly in a page-level area (owned by no container)
-        $area = ElementalArea::create();
-        $area->write();
+        $page = \Page::create();
+        $page->Title = 'Test Page';
+        $page->write();
 
         $column = ElementColumn::create();
-        $column->ParentID = $area->ID;
+        $column->ParentID = $page->ElementalArea()->ID;
 
-        $result = $column->validate();
-
-        $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('Row', $result->getMessages()[0]['message']);
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Column cannot be placed inside Page.');
+        $column->write();
     }
 
-    public function testValidationPassesInsideRow(): void
+    public function testWriteBlockedInsideSection(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $column = ElementColumn::create();
+        $column->ParentID = $section->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Column cannot be placed inside Section.');
+        $column->write();
+    }
+
+    public function testWriteBlockedInsideColumn(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
+
+        $column = $row->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementColumn::class, $column);
+
+        $innerColumn = ElementColumn::create();
+        $innerColumn->ParentID = $column->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Column cannot be placed inside Column.');
+        $innerColumn->write();
+    }
+
+    public function testWriteSucceedsInsideRow(): void
     {
         $section = ElementSection::create();
         $section->write();
@@ -57,18 +88,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         $column->ParentID = $row->getChildArea()->ID;
         $column->write();
 
-        $result = $column->validate();
-
-        $this->assertTrue($result->isValid());
-    }
-
-    public function testValidationPassesWithoutParent(): void
-    {
-        $column = ElementColumn::create();
-
-        $result = $column->validate();
-
-        $this->assertTrue($result->isValid());
+        $this->assertGreaterThan(0, $column->ID);
     }
 
     public function testDoesNotScaffoldChildren(): void

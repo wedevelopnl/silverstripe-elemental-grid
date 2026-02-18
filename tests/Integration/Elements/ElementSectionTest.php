@@ -6,6 +6,7 @@ namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
@@ -44,28 +45,65 @@ final class ElementSectionTest extends ElementContainerContractTestCase
         $this->assertSame(ContainerType::Section, $section->getContainerType());
     }
 
-    public function testValidationFailsInsideContainer(): void
+    public function testWriteSucceedsOnPage(): void
     {
-        // Place Section inside another Section's ChildArea
+        $page = \Page::create();
+        $page->Title = 'Test Page';
+        $page->write();
+
+        $section = ElementSection::create();
+        $section->ParentID = $page->ElementalArea()->ID;
+        $section->write();
+
+        $this->assertGreaterThan(0, $section->ID);
+    }
+
+    public function testWriteBlockedInsideSection(): void
+    {
         $outerSection = ElementSection::create();
         $outerSection->write();
 
         $innerSection = ElementSection::create();
         $innerSection->ParentID = $outerSection->getChildArea()->ID;
 
-        $result = $innerSection->validate();
-
-        $this->assertFalse($result->isValid());
-        $this->assertStringContainsString('container', $result->getMessages()[0]['message']);
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Section cannot be placed inside Section.');
+        $innerSection->write();
     }
 
-    public function testValidationPassesWithoutParent(): void
+    public function testWriteBlockedInsideRow(): void
     {
         $section = ElementSection::create();
+        $section->write();
 
-        $result = $section->validate();
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
 
-        $this->assertTrue($result->isValid());
+        $innerSection = ElementSection::create();
+        $innerSection->ParentID = $row->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Section cannot be placed inside Row.');
+        $innerSection->write();
+    }
+
+    public function testWriteBlockedInsideColumn(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
+
+        $column = $row->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementColumn::class, $column);
+
+        $innerSection = ElementSection::create();
+        $innerSection->ParentID = $column->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Section cannot be placed inside Column.');
+        $innerSection->write();
     }
 
     public function testScaffoldsRowOnWrite(): void

@@ -6,7 +6,6 @@ namespace WeDevelop\ElementalGrid\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
@@ -61,24 +60,6 @@ class ElementSection extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Section;
-    }
-
-    #[\Override]
-    public function validate(): ValidationResult
-    {
-        $result = parent::validate();
-
-        $parent = $this->Parent();
-        if (!$parent->exists()) {
-            return $result;
-        }
-
-        $owner = $parent->getOwnerPage();
-        if ($owner !== null && $owner instanceof ElementContainerInterface) {
-            $result->addError('A Section cannot be placed inside another container.');
-        }
-
-        return $result;
     }
 
     #[\Override]

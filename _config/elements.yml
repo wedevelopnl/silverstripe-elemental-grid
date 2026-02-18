@@ -13,13 +13,25 @@ WeDevelop\ElementalGrid\Elements\ElementSection:
 WeDevelop\ElementalGrid\Elements\ElementRow:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
+  can_be_root: false
   allowed_elements:
     - WeDevelop\ElementalGrid\Elements\ElementColumn
 
 WeDevelop\ElementalGrid\Elements\ElementColumn:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
+  can_be_root: false
   disallowed_elements:
     - WeDevelop\ElementalGrid\Elements\ElementSection
     - WeDevelop\ElementalGrid\Elements\ElementRow
     - WeDevelop\ElementalGrid\Elements\ElementColumn
+
+---
+Name: elemental-grid-validation
+After:
+  - '#elemental-grid-elements'
+---
+
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    HierarchyValidation: WeDevelop\ElementalGrid\Validation\HierarchyValidationExtension

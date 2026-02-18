@@ -20,6 +20,10 @@ abstract class ElementContainerContractTestCase extends SapphireTest
 {
     protected $usesDatabase = true;
 
+    protected static $required_extensions = [
+        \Page::class => [\DNADesign\Elemental\Extensions\ElementalPageExtension::class],
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();

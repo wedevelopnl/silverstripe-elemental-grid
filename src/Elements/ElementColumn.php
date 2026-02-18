@@ -6,7 +6,6 @@ namespace WeDevelop\ElementalGrid\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use SilverStripe\Core\Validation\ValidationResult;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 
@@ -75,24 +74,6 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Column;
-    }
-
-    #[\Override]
-    public function validate(): ValidationResult
-    {
-        $result = parent::validate();
-
-        $parent = $this->Parent();
-        if (!$parent->exists()) {
-            return $result;
-        }
-
-        $owner = $parent->getOwnerPage();
-        if (!($owner instanceof ElementRow)) {
-            $result->addError('A Column can only be placed inside a Row.');
-        }
-
-        return $result;
     }
 
     /**
