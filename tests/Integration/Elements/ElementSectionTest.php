@@ -47,12 +47,12 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
     public function testWriteSucceedsOnPage(): void
     {
-        $page = \Page::create();
+        $page = TestPage::create();
         $page->Title = 'Test Page';
         $page->write();
 
         $section = ElementSection::create();
-        $section->ParentID = $page->ElementalArea()->ID;
+        $section->ParentID = $page->ElementalAreaID;
         $section->write();
 
         $this->assertGreaterThan(0, $section->ID);

@@ -10,7 +10,7 @@
             "type": "path",
             "url": "/module",
             "options": {
-                "symlink": false
+                "symlink": true
             }
         }
     ],

@@ -21,7 +21,7 @@ use WeDevelop\ElementalGrid\Elements\ElementSection;
  */
 class CascadeDeleteTest extends SapphireTest
 {
-    protected static string $fixture_file = __DIR__ . '/../Fixture/CascadeDeleteTest.yml';
+    protected static $fixture_file = __DIR__ . '/../Fixture/CascadeDeleteTest.yml';
 
     protected function setUp(): void
     {
