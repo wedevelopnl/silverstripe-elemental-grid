@@ -17,6 +17,14 @@ use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 
+/**
+ * @phpstan-type CreateElementBody array{
+ *   elementClass: class-string<BaseElement>,
+ *   elementalAreaID: positive-int,
+ *   insertAfterElementID: positive-int|null,
+ * }
+ * @phpstan-type ElementIdBody array{id: positive-int}
+ */
 class ElementalGridController extends AdminController
 {
     private static string $url_segment = 'elemental-grid';
@@ -83,25 +91,10 @@ class ElementalGridController extends AdminController
             $this->jsonError(400);
         }
 
-        $body = $this->parseJsonBody($request);
-        $elementClass = $body['elementClass'] ?? null;
-        $elementalAreaID = $body['elementalAreaID'] ?? null;
-        $afterElementID = $body['insertAfterElementID'] ?? null;
-
-        if (!is_string($elementClass) || !is_subclass_of($elementClass, BaseElement::class)) {
-            $this->jsonError(400);
-        }
-
-        if (!is_int($elementalAreaID)) {
-            $this->jsonError(400);
-        }
-
-        if ($afterElementID !== null && !is_int($afterElementID)) {
-            $this->jsonError(400);
-        }
+        $body = $this->parseCreateBody($request);
 
         /** @var ElementalArea|null $area */
-        $area = ElementalArea::get()->byID($elementalAreaID);
+        $area = ElementalArea::get()->byID($body['elementalAreaID']);
         if ($area === null) {
             $this->jsonError(400);
         }
@@ -111,7 +104,7 @@ class ElementalGridController extends AdminController
         }
 
         /** @var BaseElement $newElement */
-        $newElement = Injector::inst()->create($elementClass);
+        $newElement = Injector::inst()->create($body['elementClass']);
         if (!$newElement->canCreate()) {
             $this->jsonError(403);
         }
@@ -119,8 +112,8 @@ class ElementalGridController extends AdminController
         $newElement->ParentID = $area->ID;
         $newElement->ensureSortSet();
 
-        if ($afterElementID !== null) {
-            $this->reorderElements($newElement, $afterElementID);
+        if ($body['insertAfterElementID'] !== null) {
+            $this->reorderElements($newElement, $body['insertAfterElementID']);
         } else {
             $newElement->write();
         }
@@ -249,11 +242,11 @@ class ElementalGridController extends AdminController
     }
 
     /**
-     * Parse the JSON request body into an associative array.
+     * Parse and validate the JSON body for element creation.
      *
-     * @return array<string, mixed>
+     * @return CreateElementBody
      */
-    private function parseJsonBody(HTTPRequest $request): array
+    private function parseCreateBody(HTTPRequest $request): array
     {
         $data = json_decode($request->getBody() ?? '', true);
 
@@ -261,17 +254,43 @@ class ElementalGridController extends AdminController
             $this->jsonError(400);
         }
 
-        /** @var array<string, mixed> $data JSON objects always have string keys */
-        return $data;
+        $elementClass = $data['elementClass'] ?? null;
+        $elementalAreaID = $data['elementalAreaID'] ?? null;
+        $afterElementID = $data['insertAfterElementID'] ?? null;
+
+        if (!is_string($elementClass) || !is_subclass_of($elementClass, BaseElement::class)) {
+            $this->jsonError(400);
+        }
+
+        if (!is_int($elementalAreaID) || $elementalAreaID < 1) {
+            $this->jsonError(400);
+        }
+
+        if ($afterElementID !== null && (!is_int($afterElementID) || $afterElementID < 1)) {
+            $this->jsonError(400);
+        }
+
+        return [
+            'elementClass' => $elementClass,
+            'elementalAreaID' => $elementalAreaID,
+            'insertAfterElementID' => $afterElementID,
+        ];
     }
 
     /**
      * Extract and validate a required integer `id` from the JSON request body.
+     *
+     * @return positive-int
      */
     private function requireElementId(HTTPRequest $request): int
     {
-        $body = $this->parseJsonBody($request);
-        $id = $body['id'] ?? null;
+        $data = json_decode($request->getBody() ?? '', true);
+
+        if (!is_array($data)) {
+            $this->jsonError(400);
+        }
+
+        $id = $data['id'] ?? null;
 
         if (!is_int($id) || $id < 1) {
             $this->jsonError(400);
