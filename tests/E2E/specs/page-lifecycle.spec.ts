@@ -25,9 +25,9 @@ test.describe('Page lifecycle', () => {
     await expect(
       page.locator('.grid-editor__loading'),
     ).toBeHidden({ timeout: 15_000 });
-    await expect(page.locator('.grid-editor__tree')).toBeVisible();
+    await expect(page.locator('.section-block').first()).toBeVisible();
     await expect(
-      page.locator('[data-element-id]', { hasText: 'Main Section' }),
+      page.locator('.section-block', { hasText: 'Main Section' }),
     ).toBeVisible();
 
     // Publish the page
