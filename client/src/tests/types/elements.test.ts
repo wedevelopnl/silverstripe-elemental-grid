@@ -51,6 +51,13 @@ function makeColumnNode(
     containerType: 'column',
     allowedTypes: { 'App\\Model\\ElementContent': 'Content' },
     children,
+    gridSettings: {
+      xs: { width: 12, offset: 0, visible: true },
+      sm: { width: 12, offset: 0, visible: true },
+      md: { width: 12, offset: 0, visible: true },
+      lg: { width: 12, offset: 0, visible: true },
+      xl: { width: 12, offset: 0, visible: true },
+    },
     ...overrides,
   };
 }
@@ -142,6 +149,33 @@ describe('columnNodeSchema', () => {
     const column = makeColumnNode([makeRowNode()]);
     const result = columnNodeSchema.parse(column);
     expect(result.children).toHaveLength(1);
+  });
+
+  it('parses column node with gridSettings', () => {
+    const input = {
+      id: 3,
+      title: 'Left Column',
+      containerType: 'column',
+      allowedTypes: null,
+      children: [],
+      gridSettings: {
+        xs: { width: 12, offset: 0, visible: true },
+        md: { width: 6, offset: 0, visible: true },
+      },
+      blockSchema: { typeName: 'Column', actions: { edit: '/edit/3' }, content: '' },
+      obsoleteClassName: null,
+      version: 1,
+      isPublished: false,
+      isLiveVersion: false,
+      canDelete: true,
+      canPublish: true,
+      canUnpublish: false,
+      canCreate: true,
+      statusFlags: {},
+    };
+
+    const result = columnNodeSchema.parse(input);
+    expect(result.gridSettings).toEqual(input.gridSettings);
   });
 });
 

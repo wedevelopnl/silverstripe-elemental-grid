@@ -10,6 +10,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Model\ElementNode;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 
@@ -143,6 +144,7 @@ class ElementTreeBuilder
         $containerType = null;
         $allowedTypes = null;
         $children = null;
+        $gridSettings = null;
 
         if ($element instanceof ElementContainerInterface) {
             $containerType = $element->getContainerType();
@@ -152,6 +154,10 @@ class ElementTreeBuilder
             $children = $childAreaId !== 0
                 ? $this->assembleSubTree($elementsByParent, $childAreaId)
                 : [];
+        }
+
+        if ($element instanceof ElementColumn) {
+            $gridSettings = $element->getGridSettingsData();
         }
 
         $id = (int) $element->ID;
@@ -164,6 +170,7 @@ class ElementTreeBuilder
         $canPublish = $element->canPublish();
         $canUnpublish = (bool) $element->canUnpublish();
         $canCreate = $element->canCreate();
+
 
         /** @var array{typeName: string, actions: array{edit: string}, content: string} $blockSchema */
         $blockSchema = $element->getBlockSchema();
@@ -192,6 +199,7 @@ class ElementTreeBuilder
             containerType: $containerType,
             allowedTypes: $allowedTypes,
             children: $children,
+            gridSettings: $gridSettings,
             extensions: $extensions,
         );
     }

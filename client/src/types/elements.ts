@@ -38,12 +38,23 @@ const baseFieldsSchema = z.object({
 
 export const simpleElementNodeSchema = baseFieldsSchema.passthrough();
 
+// --- Grid settings schema (column-specific) ---
+
+const viewportSettingsSchema = z.object({
+  width: z.number().int(),
+  offset: z.number().int(),
+  visible: z.boolean(),
+});
+
+export const gridSettingsSchema = z.record(z.string(), viewportSettingsSchema);
+
 // --- Container node schemas (bottom-up: column → row → section) ---
 
 export const columnNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('column'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(simpleElementNodeSchema).nullable(),
+  gridSettings: gridSettingsSchema,
 });
 
 export const rowNodeSchema = baseFieldsSchema.extend({
@@ -87,6 +98,8 @@ export type ElementNode = z.infer<typeof elementNodeSchema>;
 export type ContainerNode = SectionNode | RowNode | ColumnNode;
 export type ElementTreeResponse = z.infer<typeof elementTreeResponseSchema>;
 export type BlockSchema = z.infer<typeof blockSchemaSchema>;
+export type GridSettings = z.infer<typeof gridSettingsSchema>;
+export type ViewportSettings = z.infer<typeof viewportSettingsSchema>;
 
 // --- Type guards ---
 

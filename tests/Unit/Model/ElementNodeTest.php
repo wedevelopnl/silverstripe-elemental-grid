@@ -256,4 +256,59 @@ final class ElementNodeTest extends TestCase
         $this->assertSame('Deep Leaf', $deepLeaf['title']);
         $this->assertArrayNotHasKey('containerType', $deepLeaf);
     }
+
+    public function testColumnNodeIncludesGridSettings(): void
+    {
+        $gridSettings = [
+            'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
+            'md' => ['width' => 6, 'offset' => 0, 'visible' => true],
+        ];
+
+        $node = new ElementNode(
+            id: 1,
+            title: 'Test Column',
+            blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 1,
+            isPublished: false,
+            isLiveVersion: false,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Column,
+            allowedTypes: null,
+            children: [],
+            gridSettings: $gridSettings,
+        );
+
+        $serialized = $node->jsonSerialize();
+        self::assertArrayHasKey('gridSettings', $serialized);
+        self::assertSame($gridSettings, $serialized['gridSettings']);
+    }
+
+    public function testNonColumnNodeOmitsGridSettings(): void
+    {
+        $node = new ElementNode(
+            id: 2,
+            title: 'Test Row',
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 1,
+            isPublished: false,
+            isLiveVersion: false,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Row,
+            allowedTypes: null,
+            children: [],
+        );
+
+        $serialized = $node->jsonSerialize();
+        self::assertArrayNotHasKey('gridSettings', $serialized);
+    }
 }
