@@ -1,0 +1,13 @@
+.empty-state {
+  border: 1px dashed #dee2e6;
+  color: #6c757d;
+  padding: 16px;
+  text-align: center;
+
+  &--centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+  }
+}

@@ -1,3 +1,7 @@
+@use '../components/ElementCard/ElementCard';
+@use '../components/EmptyState/EmptyState';
+@use '../components/ViewportSwitcher/ViewportSwitcher';
+
 // Grid editor styles
 .grid-editor {
   position: relative;
