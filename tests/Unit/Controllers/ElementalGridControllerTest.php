@@ -107,60 +107,97 @@ final class ElementalGridControllerTest extends TestCase
 
     // --- baseWidthClasses ----------------------------------------------------
 
+    public function testBaseWidthClassesIsStdClass(): void
+    {
+        self::assertInstanceOf(\stdClass::class, $this->config['baseWidthClasses']);
+    }
+
     public function testBaseWidthClassesContainsTwelveEntries(): void
     {
-        self::assertCount(12, $this->config['baseWidthClasses']);
+        $props = get_object_vars($this->config['baseWidthClasses']);
+
+        self::assertCount(12, $props);
     }
 
     public function testBaseWidthClassesKeysRangeFrom1To12(): void
     {
-        $keys = array_keys($this->config['baseWidthClasses']);
+        $keys = array_keys(get_object_vars($this->config['baseWidthClasses']));
 
         self::assertSame(range(1, 12), $keys);
     }
 
     public function testBaseWidthClassesProducesUnprefixedClasses(): void
     {
+        $classes = $this->config['baseWidthClasses'];
+
         // Bootstrap xs viewport produces 'col-N' (no viewport infix)
-        self::assertSame('col-1', $this->config['baseWidthClasses'][1]);
-        self::assertSame('col-6', $this->config['baseWidthClasses'][6]);
-        self::assertSame('col-12', $this->config['baseWidthClasses'][12]);
+        self::assertSame('col-1', $classes->{'1'});
+        self::assertSame('col-6', $classes->{'6'});
+        self::assertSame('col-12', $classes->{'12'});
     }
 
     public function testBaseWidthClassesAllMatchBootstrapPattern(): void
     {
         foreach ($this->config['baseWidthClasses'] as $width => $class) {
-            self::assertSame(sprintf('col-%d', $width), $class);
+            self::assertSame(sprintf('col-%s', $width), $class);
         }
     }
 
     // --- baseOffsetClasses ---------------------------------------------------
 
+    public function testBaseOffsetClassesIsStdClass(): void
+    {
+        self::assertInstanceOf(\stdClass::class, $this->config['baseOffsetClasses']);
+    }
+
     public function testBaseOffsetClassesContainsTwelveEntries(): void
     {
-        self::assertCount(12, $this->config['baseOffsetClasses']);
+        $props = get_object_vars($this->config['baseOffsetClasses']);
+
+        self::assertCount(12, $props);
     }
 
     public function testBaseOffsetClassesKeysRangeFrom0To11(): void
     {
-        $keys = array_keys($this->config['baseOffsetClasses']);
+        $keys = array_keys(get_object_vars($this->config['baseOffsetClasses']));
 
         self::assertSame(range(0, 11), $keys);
     }
 
     public function testBaseOffsetClassesProducesUnprefixedClasses(): void
     {
+        $classes = $this->config['baseOffsetClasses'];
+
         // Bootstrap xs viewport produces 'offset-N' (no viewport infix)
-        self::assertSame('offset-0', $this->config['baseOffsetClasses'][0]);
-        self::assertSame('offset-3', $this->config['baseOffsetClasses'][3]);
-        self::assertSame('offset-11', $this->config['baseOffsetClasses'][11]);
+        self::assertSame('offset-0', $classes->{'0'});
+        self::assertSame('offset-3', $classes->{'3'});
+        self::assertSame('offset-11', $classes->{'11'});
     }
 
     public function testBaseOffsetClassesAllMatchBootstrapPattern(): void
     {
         foreach ($this->config['baseOffsetClasses'] as $offset => $class) {
-            self::assertSame(sprintf('offset-%d', $offset), $class);
+            self::assertSame(sprintf('offset-%s', $offset), $class);
         }
+    }
+
+    // --- JSON serialization boundary -----------------------------------------
+
+    public function testBaseClassesSurviveJsonRoundTrip(): void
+    {
+        /** @var array<string, mixed> $decoded */
+        $decoded = json_decode(json_encode($this->config), true);
+
+        // After JSON round-trip, keys must remain strings (associative object),
+        // not become sequential integers (JSON array).
+        self::assertSame(
+            array_keys(get_object_vars($this->config['baseWidthClasses'])),
+            array_keys($decoded['baseWidthClasses']),
+        );
+        self::assertSame(
+            array_keys(get_object_vars($this->config['baseOffsetClasses'])),
+            array_keys($decoded['baseOffsetClasses']),
+        );
     }
 
     // --- Base viewport resolution (fallback) ---------------------------------
@@ -225,7 +262,7 @@ final class ElementalGridControllerTest extends TestCase
         $config = ElementalGridController::buildAdapterConfig($adapter);
 
         // Falls back to first viewport ('sm'), so classes use 'sm' infix
-        self::assertSame('col-sm-1', $config['baseWidthClasses'][1]);
-        self::assertSame('offset-sm-0', $config['baseOffsetClasses'][0]);
+        self::assertSame('col-sm-1', $config['baseWidthClasses']->{'1'});
+        self::assertSame('offset-sm-0', $config['baseOffsetClasses']->{'0'});
     }
 }

@@ -111,7 +111,7 @@ test.describe('Viewport switcher', () => {
     await expect(badges.nth(1)).toHaveText('4/12');
 
     // Switch to "Large" (lg): both columns become 6/12
-    await page.locator('.viewport-switcher__button', { hasText: 'Large' }).click();
+    await page.getByRole('button', { name: 'Large', exact: true }).click();
     await expect(badges.nth(0)).toHaveText('6/12');
     await expect(badges.nth(1)).toHaveText('6/12');
   });

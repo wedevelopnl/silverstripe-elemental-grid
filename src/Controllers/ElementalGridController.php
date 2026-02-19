@@ -33,8 +33,16 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  *   defaultViewport: string,
  *   columnCount: positive-int,
  *   rowClasses: string,
- *   baseWidthClasses: array<int, string>,
- *   baseOffsetClasses: array<int, string>,
+ *   baseWidthClasses: \stdClass&object{
+ *     '1': string, '2': string, '3': string, '4': string,
+ *     '5': string, '6': string, '7': string, '8': string,
+ *     '9': string, '10': string, '11': string, '12': string,
+ *   },
+ *   baseOffsetClasses: \stdClass&object{
+ *     '0': string, '1': string, '2': string, '3': string,
+ *     '4': string, '5': string, '6': string, '7': string,
+ *     '8': string, '9': string, '10': string, '11': string,
+ *   },
  * }
  *
  * @property ElementRepositoryInterface $elementRepository
@@ -281,6 +289,12 @@ class ElementalGridController extends AdminController
         $viewports = $adapter->getViewports();
         $baseViewportKey = self::resolveBaseViewportKey($viewports);
 
+        /** @var AdapterConfig['baseWidthClasses'] $baseWidthClasses */
+        $baseWidthClasses = (object) self::buildBaseWidthClasses($adapter, $baseViewportKey);
+
+        /** @var AdapterConfig['baseOffsetClasses'] $baseOffsetClasses */
+        $baseOffsetClasses = (object) self::buildBaseOffsetClasses($adapter, $baseViewportKey);
+
         return [
             'viewports' => array_map(
                 static fn (Viewport $vp): array => [
@@ -293,8 +307,8 @@ class ElementalGridController extends AdminController
             'defaultViewport' => $adapter->getDefaultViewport()->key,
             'columnCount' => $adapter->getColumnCount(),
             'rowClasses' => $adapter->getRowClasses(),
-            'baseWidthClasses' => self::buildBaseWidthClasses($adapter, $baseViewportKey),
-            'baseOffsetClasses' => self::buildBaseOffsetClasses($adapter, $baseViewportKey),
+            'baseWidthClasses' => $baseWidthClasses,
+            'baseOffsetClasses' => $baseOffsetClasses,
         ];
     }
 

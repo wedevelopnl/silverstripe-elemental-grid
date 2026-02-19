@@ -79,7 +79,7 @@ final class ElementNodeTest extends TestCase
         $this->assertTrue($data['canPublish']);
         $this->assertFalse($data['canUnpublish']);
         $this->assertTrue($data['canCreate']);
-        $this->assertSame([], $data['statusFlags']);
+        $this->assertEquals(new \stdClass(), $data['statusFlags']);
     }
 
     public function testContainerNodeSerializesWithContainerFields(): void

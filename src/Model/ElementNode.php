@@ -24,7 +24,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     canPublish: bool,
  *     canUnpublish: bool,
  *     canCreate: bool,
- *     statusFlags: array<string, mixed>,
+ *     statusFlags: \stdClass&object{addedtodraft?: string, modified?: string, removedfromdraft?: string},
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
@@ -66,6 +66,9 @@ final readonly class ElementNode implements \JsonSerializable
     #[\Override]
     public function jsonSerialize(): array
     {
+        /** @var SerializedNode['statusFlags'] $statusFlags */
+        $statusFlags = (object) $this->statusFlags;
+
         $data = [
             'id' => $this->id,
             'title' => $this->title,
@@ -78,7 +81,7 @@ final readonly class ElementNode implements \JsonSerializable
             'canPublish' => $this->canPublish,
             'canUnpublish' => $this->canUnpublish,
             'canCreate' => $this->canCreate,
-            'statusFlags' => $this->statusFlags,
+            'statusFlags' => $statusFlags,
         ];
 
         if ($this->containerType !== null) {
