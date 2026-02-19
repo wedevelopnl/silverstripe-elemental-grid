@@ -1,0 +1,49 @@
+$element-card-border-draft: #0071c4;
+$element-card-border-published: #3fa142;
+$element-card-border-modified: #d4a017;
+
+.element-card {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 8px 12px;
+  border-left: 3px solid transparent;
+
+  &--draft {
+    border-left-color: $element-card-border-draft;
+  }
+
+  &--published {
+    border-left-color: $element-card-border-published;
+  }
+
+  &--modified {
+    border-left-color: $element-card-border-modified;
+  }
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  &__title {
+    font-weight: 600;
+  }
+
+  &__type {
+    font-size: 0.8em;
+    color: #6c757d;
+  }
+
+  &__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #6c757d;
+  }
+
+  &__content--empty {
+    font-style: italic;
+  }
+}
