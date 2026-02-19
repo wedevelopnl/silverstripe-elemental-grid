@@ -12,6 +12,7 @@ use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\FixtureFactory;
 use SilverStripe\Dev\YamlFixture;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -20,6 +21,9 @@ use SilverStripe\Versioned\Versioned;
  * Playwright calls {@see FixtureController} which delegates to this class.
  * Fixtures are registered via config and resolved through ModuleResourceLoader
  * so vendor:path syntax works.
+ *
+ * Fixtures can be a simple path string or an array with `path` and optional
+ * `post_actions` for manipulating versioned state after YAML loading.
  */
 class FixtureLoader
 {
@@ -29,10 +33,12 @@ class FixtureLoader
     private const string URL_SEGMENT_PREFIX = 'e2e-';
 
     /**
-     * Map of fixture names to YAML file paths.
-     * Paths use module resource syntax: 'vendor/package:path/to/file.yml'
+     * Map of fixture names to YAML file paths or config arrays.
      *
-     * @var array<string, string>
+     * String value: 'vendor/package:path/to/file.yml'
+     * Array value: { path: 'vendor/package:path.yml', post_actions: [...] }
+     *
+     * @var array<string, string|array{path: string, post_actions?: list<array{action: string, class: string, identifier: string, fields?: array<string, mixed>}>}>
      */
     private static array $fixtures = [];
 
@@ -40,8 +46,8 @@ class FixtureLoader
      * Load a named fixture into the database.
      *
      * Resets existing E2E data first to guarantee idempotency,
-     * then writes the YAML fixture and returns a result with
-     * the page ID and full fixture map.
+     * then writes the YAML fixture, applies any post-actions,
+     * and returns a result with the page ID and full fixture map.
      */
     public function load(string $name): FixtureResult
     {
@@ -55,6 +61,11 @@ class FixtureLoader
             Versioned::set_stage(Versioned::DRAFT);
             $fixture->writeInto($factory);
         });
+
+        $postActions = $this->resolvePostActions($name);
+        if ($postActions !== []) {
+            $this->applyPostActions($postActions, $factory);
+        }
 
         $pageClass = Page::class;
         /** @var array<string, int>|false $pageIds */
@@ -119,7 +130,7 @@ class FixtureLoader
      */
     public function getAvailableFixtures(): array
     {
-        /** @var array<string, string> $fixtures */
+        /** @var array<string, string|array<string, mixed>> $fixtures */
         $fixtures = static::config()->get('fixtures');
 
         return array_keys($fixtures);
@@ -128,11 +139,14 @@ class FixtureLoader
     /**
      * Resolve a fixture name to an absolute file path.
      *
+     * Accepts both string config ('path.yml') and array config
+     * ({ path: 'path.yml', post_actions: [...] }).
+     *
      * @throws \InvalidArgumentException If the fixture name is not registered or the file doesn't exist
      */
     private function resolveFixturePath(string $name): string
     {
-        /** @var array<string, string> $fixtures */
+        /** @var array<string, string|array<string, mixed>> $fixtures */
         $fixtures = static::config()->get('fixtures');
 
         if (!isset($fixtures[$name])) {
@@ -145,7 +159,14 @@ class FixtureLoader
             );
         }
 
-        $resourcePath = $fixtures[$name];
+        $config = $fixtures[$name];
+        $resourcePath = is_array($config) ? ($config['path'] ?? null) : $config;
+
+        if (!is_string($resourcePath) || $resourcePath === '') {
+            throw new \InvalidArgumentException(
+                sprintf('Fixture "%s" has no path configured', $name),
+            );
+        }
 
         // Resolve module resource syntax (vendor/package:path)
         $resolved = ModuleResourceLoader::singleton()->resolvePath($resourcePath);
@@ -165,5 +186,69 @@ class FixtureLoader
         }
 
         return $absolutePath;
+    }
+
+    /**
+     * Extract post-actions from a fixture's array config.
+     *
+     * @return list<FixturePostAction>
+     */
+    private function resolvePostActions(string $name): array
+    {
+        /** @var array<string, string|array<string, mixed>> $fixtures */
+        $fixtures = static::config()->get('fixtures');
+
+        $config = $fixtures[$name] ?? null;
+        if (!is_array($config) || !isset($config['post_actions'])) {
+            return [];
+        }
+
+        /** @var list<array{action?: string, class?: class-string, identifier?: string, fields?: array<string, string|int|float|bool>}> $rawActions */
+        $rawActions = $config['post_actions'];
+
+        return array_map(
+            static fn (array $actionConfig): FixturePostAction => FixturePostAction::fromConfig($actionConfig),
+            $rawActions,
+        );
+    }
+
+    /**
+     * Resolve fixture identifiers to records and delegate execution
+     * to each {@see FixturePostAction}.
+     *
+     * @param list<FixturePostAction> $actions
+     */
+    private function applyPostActions(array $actions, FixtureFactory $factory): void
+    {
+        Versioned::withVersionedMode(static function () use ($actions, $factory): void {
+            Versioned::set_stage(Versioned::DRAFT);
+
+            foreach ($actions as $action) {
+                $id = $factory->getId($action->class, $action->identifier);
+                if ($id === false || $id === 0) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Post-action references unknown fixture: %s.%s',
+                            $action->class,
+                            $action->identifier,
+                        ),
+                    );
+                }
+
+                $record = DataObject::get($action->class)->byID($id);
+                if ($record === null) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Record not found for post-action: %s #%d (%s)',
+                            $action->class,
+                            $id,
+                            $action->identifier,
+                        ),
+                    );
+                }
+
+                $action->apply($record);
+            }
+        });
     }
 }

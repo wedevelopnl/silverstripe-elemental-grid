@@ -18,6 +18,10 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
+tests/E2E/            # Playwright E2E tests
+tests/E2E/Fixture/    # YAML fixtures for E2E test data
+tests/E2E/specs/      # E2E test specs
+tests/E2E/helpers/    # Shared E2E test utilities
 client/src/           # Frontend source (React/TS/SCSS) — not yet scaffolded
 client/dist/          # Vite build output (exposed, created by build)
 client/images/        # Static images (exposed, not yet created)
@@ -29,7 +33,7 @@ lang/                 # PHP translations (exposed, not yet created)
 - PSR-4 namespace: `WeDevelop\ElementalGrid\` → `src/`
 - Frontend: React 18, TypeScript 5.9, Vite 7, SCSS
 - Key frontend libs: dnd-kit (drag & drop), TanStack Query (data fetching), Zod (validation)
-- Testing: Vitest + React Testing Library (jsdom), PHPUnit 11
+- Testing: Vitest + React Testing Library (jsdom), PHPUnit 11, Playwright (E2E)
 - Node: >=24 (pinned to 24.13 in `.nvmrc`)
 - Docker dev env: Caddy + PHP + MySQL 8 (see `.docker/`)
 
@@ -37,6 +41,7 @@ lang/                 # PHP translations (exposed, not yet created)
 
 - `vite.config.ts` — Build config + Vitest test config, `@` alias → `client/src`
 - `tsconfig.json` — TypeScript config
+- `playwright.config.ts` — Playwright E2E test config (base URL from `.docker/.env` or `E2E_BASE_URL`)
 - `stryker.config.mjs` — Stryker JS mutation testing config
 - `Makefile` — Docker-based PHP test/coverage commands
 - `.docker/compose.yml` — Docker service definitions
@@ -79,6 +84,9 @@ lang/                 # PHP translations (exposed, not yet created)
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run coverage` | Vitest with coverage report |
 | `npm run mutate` | JS mutation testing (Stryker) |
+| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run test:e2e:ui` | Playwright with interactive UI |
+| `npm run test:e2e:debug` | Playwright in debug mode |
 | `npm run qa` | Full QA: lint + typecheck + test |
 
 ### PHP (via Makefile — requires Docker)
@@ -100,6 +108,8 @@ lang/                 # PHP translations (exposed, not yet created)
 | `make mutate` | PHP mutation testing (Infection) |
 | `make mutate-js` | JS mutation testing (Stryker) |
 | `make analyse` | Run PHPStan static analysis |
+| `make test-e2e` | Run Playwright E2E tests (requires Docker) |
+| `make test-e2e-ui` | Playwright E2E with interactive UI |
 | `make qa` | Full QA suite (PHPStan + PHP tests + JS QA) |
 | `make qa-js` | JavaScript QA (lint + typecheck + test) |
 
@@ -119,3 +129,6 @@ lang/                 # PHP translations (exposed, not yet created)
 - composer.json is intentionally minimal; dependencies will be added incrementally
 - `make test-js` and `make coverage-js` run locally (no Docker), unlike PHP targets
 - **No ESLint/Stylelint configs yet**: `eslint.config.*` and `stylelint.config.*` don't exist — lint commands will fail until these are scaffolded
+- **E2E tests are opt-in**: `make test-e2e` is NOT part of `make test` or `make qa` — E2E tests require running Docker services and are slow
+- **E2E fixtures**: loaded via HTTP (`/dev/elemental-grid-fixtures/{load,reset}`), gated to dev environment only
+- **E2E TypeScript**: `tests/E2E/` has its own `tsconfig.json` (no vitest globals, includes Playwright types)

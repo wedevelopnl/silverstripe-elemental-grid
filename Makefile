@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f .docker/compose.yml
 
-.PHONY: up down destroy build test test-unit test-integration test-js coverage coverage-unit coverage-integration coverage-js mutate mutate-js analyse qa qa-js
+.PHONY: up down destroy build test test-unit test-integration test-js test-e2e test-e2e-ui coverage coverage-unit coverage-integration coverage-js mutate mutate-js analyse qa qa-js
 
 ## Start services (build if needed)
 up:
@@ -73,6 +73,14 @@ analyse: ensure-up
 
 ## Run full QA suite (PHPStan + PHP tests + JS QA)
 qa: analyse test-unit test-integration qa-js
+
+## Run E2E tests (Playwright, requires running Docker services)
+test-e2e: ensure-up
+	npx playwright test
+
+## Run E2E tests with interactive UI
+test-e2e-ui: ensure-up
+	npx playwright test --ui
 
 ## Run JavaScript QA (lint + typecheck + test)
 qa-js:

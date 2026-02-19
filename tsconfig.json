@@ -16,5 +16,5 @@
       "@/*": ["./client/src/*"]
     }
   },
-  "include": ["client/src/**/*", "vite.config.ts"]
+  "include": ["client/src/**/*", "vite.config.ts", "playwright.config.ts"]
 }

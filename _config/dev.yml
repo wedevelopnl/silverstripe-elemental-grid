@@ -4,6 +4,11 @@ Only:
   environment: dev
 ---
 
+# Playwright's setup project and chromium project use different user agents
+# (real browser vs devices['Desktop Chrome']), which triggers session invalidation.
+SilverStripe\Control\Session:
+  strict_user_agent_check: false
+
 SilverStripe\Dev\DevelopmentAdmin:
   controllers:
     elemental-grid-fixtures:
@@ -13,3 +18,18 @@ SilverStripe\Dev\DevelopmentAdmin:
 WeDevelop\ElementalGrid\Dev\FixtureLoader:
   fixtures:
     element-tree: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'
+    empty-page: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/EmptyPage.yml'
+    complex-page:
+      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ComplexPage.yml'
+      post_actions:
+        - action: publish_recursive
+          class: Page
+          identifier: e2e_page
+        - action: unpublish
+          class: 'DNADesign\Elemental\Models\BaseElement'
+          identifier: draft_leaf
+        - action: modify
+          class: 'DNADesign\Elemental\Models\BaseElement'
+          identifier: modified_leaf
+          fields:
+            Title: 'Modified Text Block (draft)'

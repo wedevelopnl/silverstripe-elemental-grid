@@ -1,0 +1,67 @@
+# E2E fixture: page with Section > Row > Columns > leaves for testing
+# manipulation workflows with versioned states.
+#
+# Post-actions (configured in dev.yml) produce three leaf states:
+#   draft_leaf    — unpublished after page publishRecursive (draft-only)
+#   published_leaf — stays published (on both Draft and Live)
+#   modified_leaf  — published, then draft title changed (differs between stages)
+#
+# Bottom-up ordering: children written before parents to prevent
+# auto-scaffolding of Row/Column elements.
+
+DNADesign\Elemental\Models\ElementalArea:
+  page_area: {}
+  section_area: {}
+  row_area: {}
+  col1_area: {}
+  col2_area: {}
+
+Page:
+  e2e_page:
+    Title: 'E2E Complex Page'
+    URLSegment: 'e2e-complex-page'
+    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
+
+# --- Leaves first (into column areas) ---
+DNADesign\Elemental\Models\BaseElement:
+  draft_leaf:
+    Title: 'Draft Only Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  published_leaf:
+    Title: 'Published Block'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  modified_leaf:
+    Title: 'Modified Text Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+
+# --- Columns (into row area) ---
+WeDevelop\ElementalGrid\Elements\ElementColumn:
+  col1:
+    Title: 'Left Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+  col2:
+    Title: 'Right Column'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+
+# --- Row (into section area) ---
+WeDevelop\ElementalGrid\Elements\ElementRow:
+  row1:
+    Title: 'First Row'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_area
+
+# --- Section (into page area) ---
+WeDevelop\ElementalGrid\Elements\ElementSection:
+  section1:
+    Title: 'Main Section'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_area
