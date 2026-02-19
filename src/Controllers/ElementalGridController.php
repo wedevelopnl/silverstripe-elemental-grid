@@ -14,6 +14,9 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
+use WeDevelop\ElementalGrid\Contract\Viewport;
 use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
@@ -25,6 +28,14 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  *   insertAfterElementID: positive-int|null,
  * }
  * @phpstan-type ElementIdBody array{id: positive-int}
+ * @phpstan-type AdapterConfig array{
+ *   viewports: list<array{key: string, label: string, minWidth: int|null}>,
+ *   defaultViewport: string,
+ *   columnCount: positive-int,
+ *   rowClasses: string,
+ *   baseWidthClasses: array<int, string>,
+ *   baseOffsetClasses: array<int, string>,
+ * }
  *
  * @property ElementRepositoryInterface $elementRepository
  * @property ElementalAreaRepositoryInterface $areaRepository
@@ -251,8 +262,40 @@ class ElementalGridController extends AdminController
         /** @var array<string, mixed> $clientConfig */
         $clientConfig = parent::getClientConfig();
         $clientConfig['controllerLink'] = $this->Link();
+        $clientConfig['gridAdapter'] = self::buildAdapterConfig(new BootstrapAdapter());
 
         return $clientConfig;
+    }
+
+    /**
+     * Build the grid adapter config for frontend consumption.
+     *
+     * Exposed as a static method so unit tests can verify the adapter config
+     * shape without requiring the full SilverStripe framework bootstrap that
+     * {@see getClientConfig()} depends on via its parent class.
+     *
+     * @return AdapterConfig
+     */
+    public static function buildAdapterConfig(GridAdapterInterface $adapter): array
+    {
+        $viewports = $adapter->getViewports();
+        $baseViewportKey = self::resolveBaseViewportKey($viewports);
+
+        return [
+            'viewports' => array_map(
+                static fn (Viewport $vp): array => [
+                    'key' => $vp->key,
+                    'label' => $vp->label,
+                    'minWidth' => $vp->minWidth,
+                ],
+                $viewports,
+            ),
+            'defaultViewport' => $adapter->getDefaultViewport()->key,
+            'columnCount' => $adapter->getColumnCount(),
+            'rowClasses' => $adapter->getRowClasses(),
+            'baseWidthClasses' => self::buildBaseWidthClasses($adapter, $baseViewportKey),
+            'baseOffsetClasses' => self::buildBaseOffsetClasses($adapter, $baseViewportKey),
+        ];
     }
 
     /**
@@ -350,5 +393,63 @@ class ElementalGridController extends AdminController
         }
 
         return $title . ' copy';
+    }
+
+    /**
+     * Find the base viewport key — the one with null minWidth (mobile-first default).
+     *
+     * Falls back to the first viewport if none has null minWidth.
+     *
+     * @param list<Viewport> $viewports
+     */
+    private static function resolveBaseViewportKey(array $viewports): string
+    {
+        foreach ($viewports as $viewport) {
+            if ($viewport->minWidth === null) {
+                return $viewport->key;
+            }
+        }
+
+        return $viewports[0]->key;
+    }
+
+    /**
+     * Build a map of column widths (1..columnCount) to their base CSS classes.
+     *
+     * Uses the base viewport (the one with null minWidth) to produce unprefixed
+     * classes. For Bootstrap, this yields 'col-1' through 'col-12'.
+     *
+     * @return array<int, string>
+     */
+    private static function buildBaseWidthClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
+    {
+        $classes = [];
+        $columnCount = $adapter->getColumnCount();
+
+        for ($width = 1; $width <= $columnCount; $width++) {
+            $classes[$width] = $adapter->getWidthClass($baseViewportKey, $width);
+        }
+
+        return $classes;
+    }
+
+    /**
+     * Build a map of column offsets (0..columnCount-1) to their base CSS classes.
+     *
+     * Uses the base viewport (the one with null minWidth) to produce unprefixed
+     * classes. For Bootstrap, this yields 'offset-0' through 'offset-11'.
+     *
+     * @return array<int, string>
+     */
+    private static function buildBaseOffsetClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
+    {
+        $classes = [];
+        $columnCount = $adapter->getColumnCount();
+
+        for ($offset = 0; $offset < $columnCount; $offset++) {
+            $classes[$offset] = $adapter->getOffsetClass($baseViewportKey, $offset);
+        }
+
+        return $classes;
     }
 }
