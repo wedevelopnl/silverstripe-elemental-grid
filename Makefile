@@ -69,7 +69,7 @@ mutate-js:
 
 ## Run PHPStan static analysis
 analyse: ensure-up
-	$(COMPOSE) exec app vendor/bin/phpstan analyse -c phpstan.neon.dist
+	$(COMPOSE) exec app vendor/bin/phpstan analyse -c phpstan.neon.dist --memory-limit=512M
 
 ## Run full QA suite (PHPStan + PHP tests + JS QA)
 qa: analyse test-unit test-integration qa-js

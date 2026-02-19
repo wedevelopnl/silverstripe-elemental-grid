@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import GridQueryProvider from '@/hooks/QueryProvider';
 import { loadComponent } from './Injector';
 
 /**
@@ -20,7 +21,13 @@ window.jQuery.entwine('ss', ($) => {
 
       const root = createRoot(this[0]);
       this.setReactRoot(root);
-      root.render(createElement(GridEditor, { areaId, pageId }));
+      root.render(
+        createElement(
+          GridQueryProvider,
+          null,
+          createElement(GridEditor, { areaId, pageId }),
+        ),
+      );
     },
 
     onunmatch() {

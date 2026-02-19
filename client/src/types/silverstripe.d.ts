@@ -50,11 +50,26 @@ interface JQueryStatic {
   entwine(namespace: string, callback: ($: JQueryStatic) => void): void;
 }
 
+// --- CMS config (window.ss.config) ---
+
+export interface SilverStripeSectionConfig {
+  name: string;
+  url: string;
+  controllerLink: string;
+  [key: string]: unknown;
+}
+
+export interface SilverStripeConfig {
+  SecurityID: string;
+  sections: SilverStripeSectionConfig[];
+}
+
 // --- Window augmentation ---
 
 declare global {
   interface Window {
     Injector: InjectorGlobal;
     jQuery: JQueryStatic;
+    ss: { config: SilverStripeConfig };
   }
 }
