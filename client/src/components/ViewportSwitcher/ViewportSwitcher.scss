@@ -1,0 +1,51 @@
+$viewport-switcher-active-bg: #0071c4;
+$viewport-switcher-border-color: #ccc;
+$viewport-switcher-hover-bg: #f0f0f0;
+$viewport-switcher-radius: 4px;
+
+.viewport-switcher {
+  display: flex;
+}
+
+.viewport-switcher__button {
+  padding: 6px 16px;
+  border: 1px solid $viewport-switcher-border-color;
+  background: #fff;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  // Collapse shared borders between adjacent buttons
+  & + & {
+    margin-left: -1px;
+  }
+
+  &:first-child {
+    border-radius: $viewport-switcher-radius 0 0 $viewport-switcher-radius;
+  }
+
+  &:last-child {
+    border-radius: 0 $viewport-switcher-radius $viewport-switcher-radius 0;
+  }
+
+  // Single button gets full rounding
+  &:first-child:last-child {
+    border-radius: $viewport-switcher-radius;
+  }
+
+  &:hover:not(.viewport-switcher__button--active) {
+    background-color: $viewport-switcher-hover-bg;
+  }
+
+  &--active {
+    background-color: $viewport-switcher-active-bg;
+    border-color: $viewport-switcher-active-bg;
+    color: #fff;
+
+    // Ensure active border renders above adjacent inactive borders
+    position: relative;
+    z-index: 1;
+  }
+}
