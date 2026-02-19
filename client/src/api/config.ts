@@ -1,4 +1,5 @@
 import type { SilverStripeConfig } from '@/types/silverstripe';
+import { adapterConfigSchema, type AdapterConfig } from '@/types/adapter';
 import { ConfigError } from './errors';
 
 const CONTROLLER_FQCN =
@@ -51,4 +52,24 @@ export function getControllerLink(): string {
   }
 
   return section.controllerLink.replace(/\/+$/, '');
+}
+
+/**
+ * Returns the grid adapter configuration from the CMS controller section.
+ * The raw config is validated through the Zod schema at runtime.
+ *
+ * @throws ConfigError if config is not available or the controller section is missing
+ * @throws ZodError if the adapter config does not match the expected shape
+ */
+export function getAdapterConfig(): AdapterConfig {
+  const config = getConfig();
+  const section = config.sections.find((s) => s.name === CONTROLLER_FQCN);
+
+  if (section === undefined) {
+    throw new ConfigError(
+      `Controller section "${CONTROLLER_FQCN}" not found in CMS config.`,
+    );
+  }
+
+  return adapterConfigSchema.parse(section.gridAdapter);
 }

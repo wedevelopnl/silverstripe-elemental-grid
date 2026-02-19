@@ -1,14 +1,36 @@
-import { getConfig, getControllerLink, getSecurityId } from '@/api/config';
+import {
+  getAdapterConfig,
+  getConfig,
+  getControllerLink,
+  getSecurityId,
+} from '@/api/config';
 import { ConfigError } from '@/api/errors';
+import { ZodError } from 'zod';
 
 const CONTROLLER_FQCN =
   'WeDevelop\\ElementalGrid\\Controllers\\ElementalGridController';
 
-function gridSection(controllerLink: string) {
+const validAdapterConfig = {
+  viewports: [
+    { key: 'xs', label: 'Extra Small', minWidth: null },
+    { key: 'md', label: 'Medium', minWidth: 768 },
+  ],
+  defaultViewport: 'md',
+  columnCount: 12,
+  rowClasses: 'row',
+  baseWidthClasses: { '1': 'col-1', '12': 'col-12' },
+  baseOffsetClasses: { '0': 'offset-0', '1': 'offset-1' },
+};
+
+function gridSection(
+  controllerLink: string,
+  gridAdapter?: unknown,
+) {
   return {
     name: CONTROLLER_FQCN,
     url: 'admin/elemental-grid',
     controllerLink,
+    ...(gridAdapter !== undefined ? { gridAdapter } : {}),
   };
 }
 
@@ -86,6 +108,59 @@ describe('config accessors', () => {
 
       expect(() => getControllerLink()).toThrow(ConfigError);
       expect(() => getControllerLink()).toThrow('Controller section');
+    });
+  });
+
+  describe('getAdapterConfig', () => {
+    it('returns parsed adapter config from the controller section', () => {
+      window.ss = {
+        config: {
+          SecurityID: 'x',
+          sections: [
+            gridSection('/admin/elemental-grid/', validAdapterConfig),
+          ],
+        },
+      };
+
+      const result = getAdapterConfig();
+      expect(result.defaultViewport).toBe('md');
+      expect(result.columnCount).toBe(12);
+      expect(result.viewports).toHaveLength(2);
+      expect(result.baseWidthClasses['12']).toBe('col-12');
+      expect(result.baseOffsetClasses['0']).toBe('offset-0');
+    });
+
+    it('throws ConfigError when section is missing', () => {
+      window.ss = {
+        config: { SecurityID: 'x', sections: [] },
+      };
+
+      expect(() => getAdapterConfig()).toThrow(ConfigError);
+      expect(() => getAdapterConfig()).toThrow('Controller section');
+    });
+
+    it('throws ZodError when gridAdapter is undefined', () => {
+      window.ss = {
+        config: {
+          SecurityID: 'x',
+          sections: [gridSection('/admin/elemental-grid/')],
+        },
+      };
+
+      expect(() => getAdapterConfig()).toThrow(ZodError);
+    });
+
+    it('throws ZodError when gridAdapter has invalid shape', () => {
+      window.ss = {
+        config: {
+          SecurityID: 'x',
+          sections: [
+            gridSection('/admin/elemental-grid/', { columnCount: 'not-a-number' }),
+          ],
+        },
+      };
+
+      expect(() => getAdapterConfig()).toThrow(ZodError);
     });
   });
 });

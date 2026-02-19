@@ -56,6 +56,7 @@ export interface SilverStripeSectionConfig {
   name: string;
   url: string;
   controllerLink: string;
+  gridAdapter?: unknown; // Validated via Zod at runtime
   [key: string]: unknown;
 }
 
