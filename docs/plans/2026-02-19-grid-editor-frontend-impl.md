@@ -14,13 +14,15 @@
 
 ## Task 1: Add `gridSettings` to the column node in API response and Zod schema
 
-The `readTree` API response needs to include `gridSettings` on column nodes. The backend `ElementNode` DTO must be updated, and the frontend Zod schema must expect it.
+The `readTree` API response needs to include `gridSettings` on column nodes. The backend `ElementNode` DTO must be updated, and the frontend Zod schema must expect it. E2E fixtures must also be updated with meaningful `GridSettings` values so that later E2E tests can assert viewport switching behavior.
 
 **Files:**
 
 - Modify: `src/Model/ElementNode.php` (PHPStan type, constructor, serialize)
 - Modify: `src/Service/ElementTreeBuilder.php` (pass gridSettings to column nodes)
 - Modify: `client/src/types/elements.ts` (columnNodeSchema)
+- Modify: `tests/E2E/Fixture/ElementTree.yml` (add GridSettings to columns)
+- Modify: `tests/E2E/Fixture/ComplexPage.yml` (add GridSettings to columns)
 - Test: `client/src/tests/types/elements.test.ts`
 - Test: `tests/Unit/Model/ElementNodeTest.php` (create if needed)
 
@@ -195,19 +197,55 @@ gridSettings: {
 },
 ```
 
-### Step 10: Run all tests
+### Step 10: Update E2E fixtures with meaningful GridSettings
+
+The existing E2E fixtures have no `GridSettings` on their columns, so `onBeforeWrite` defaults apply (all viewports full-width). Update both fixtures with varied settings so E2E tests can assert viewport switching, hidden columns, and offsets.
+
+**`tests/E2E/Fixture/ElementTree.yml`** — update the `ElementColumn` section:
+
+```yaml
+WeDevelop\ElementalGrid\Elements\ElementColumn:
+  col1:
+    Title: 'Left Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
+  col2:
+    Title: 'Right Column'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
+```
+
+This gives testable viewport transitions:
+
+| Viewport | col1 | col2 |
+|----------|------|------|
+| xs, sm | 12/12 | **hidden** |
+| md | 8/12 | 4/12 |
+| lg, xl, xxl | 6/12 | 6/12 |
+
+**`tests/E2E/Fixture/ComplexPage.yml`** — same `GridSettings` on its columns (identical split; the publication state variety is what matters for this fixture, not column widths).
+
+**Note:** `ElementColumn::$default_grid_settings` currently covers 5 viewports (xs–xl) but the `BootstrapAdapter` defines 6 (includes `xxl`). The ColumnBlock fallback logic handles missing viewport keys gracefully, but aligning the default should be done as a follow-up (out of scope for this plan).
+
+### Step 11: Run all tests
 
 Run: `npm run test -- --run`
 Expected: ALL PASS
 
-### Step 11: Commit
+### Step 12: Commit
 
 ```bash
 git add src/Model/ElementNode.php src/Service/ElementTreeBuilder.php \
   client/src/types/elements.ts \
   client/src/tests/types/elements.test.ts \
   client/src/tests/components/GridEditor/GridEditor.test.tsx \
-  tests/Unit/Model/ElementNodeTest.php
+  tests/Unit/Model/ElementNodeTest.php \
+  tests/E2E/Fixture/ElementTree.yml \
+  tests/E2E/Fixture/ComplexPage.yml
 git commit -m "feat(grid): include gridSettings in column node API response and Zod schema"
 ```
 
@@ -818,17 +856,271 @@ Expected: ALL PASS
 Run: `npm run typecheck`
 Expected: No errors
 
-### Step 5: Commit
+### Step 5: Update `page-lifecycle.spec.ts` selectors
+
+The existing E2E test (`tests/E2E/specs/page-lifecycle.spec.ts`) asserts on `.grid-editor__tree` and `[data-element-id]` — both from the proof-of-life `<ul>` tree. Update selectors to match the new component hierarchy:
+
+- `.grid-editor__tree` → `.section-block` (check that at least one section rendered)
+- `[data-element-id]` containing "Main Section" → `.section-block` containing "Main Section"
+- `.grid-editor__loading` remains unchanged (still rendered by GridEditor during data fetch)
+
+### Step 6: Commit
 
 ```bash
 git add client/src/components/GridEditor/GridEditor.tsx \
-  client/src/tests/components/GridEditor/GridEditor.test.tsx
+  client/src/tests/components/GridEditor/GridEditor.test.tsx \
+  tests/E2E/specs/page-lifecycle.spec.ts
 git commit -m "feat(grid): replace proof-of-life tree with visual Layered Blocks grid editor"
 ```
 
 ---
 
-## Task 12: Final QA and build verification
+## Task 12: E2E test specs for grid editor features
+
+Define and implement Playwright E2E tests for the viewport switcher, publication state indicators, grid layout rendering, and empty states. These tests exercise the full stack — PHP backend serving real data through to the React frontend rendering it.
+
+**Fixtures used:**
+
+- `element-tree` — full hierarchy with varied `GridSettings` per viewport (updated in Task 1)
+- `complex-page` — three publication states: draft, published, modified (existing post-actions)
+- `empty-page` — bare page with no elements
+
+**Files:**
+
+- Create: `tests/E2E/specs/grid-editor.spec.ts`
+
+### Step 1: Create the E2E spec file
+
+Create `tests/E2E/specs/grid-editor.spec.ts` with the following user story test groups:
+
+```typescript
+import { expect, test } from '@playwright/test';
+import { loadFixture, resetFixtures } from '../helpers/fixtures';
+
+// ────────────────────────────────────────────────────────────────
+// Grid layout rendering
+// ────────────────────────────────────────────────────────────────
+
+test.describe('Grid editor — layout rendering', () => {
+  test.afterAll(async ({ request }) => {
+    await resetFixtures(request);
+  });
+
+  test('editor sees sections, rows, columns, and element cards', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'element-tree');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // Section rendered
+    await expect(page.locator('.section-block')).toHaveCount(1);
+    await expect(
+      page.locator('.section-block', { hasText: 'Main Section' }),
+    ).toBeVisible();
+
+    // Row within section
+    await expect(page.locator('.row-block')).toHaveCount(1);
+
+    // Columns within row
+    await expect(page.locator('.column-block')).toHaveCount(2);
+
+    // Element cards within columns
+    await expect(page.locator('.element-card')).toHaveCount(3);
+    await expect(page.locator('.element-card', { hasText: 'Text Block' })).toBeVisible();
+    await expect(page.locator('.element-card', { hasText: 'Image Block' })).toBeVisible();
+    await expect(page.locator('.element-card', { hasText: 'Video Block' })).toBeVisible();
+  });
+
+  test('columns display fraction badges matching their grid settings', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'element-tree');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // Default viewport is md: col1=8/12, col2=4/12
+    const fractions = page.locator('.column-block__fraction');
+    await expect(fractions.first()).toContainText('8/12');
+    await expect(fractions.nth(1)).toContainText('4/12');
+  });
+});
+
+// ────────────────────────────────────────────────────────────────
+// Viewport switcher
+// ────────────────────────────────────────────────────────────────
+
+test.describe('Grid editor — viewport switcher', () => {
+  test.afterAll(async ({ request }) => {
+    await resetFixtures(request);
+  });
+
+  test('renders a tab for each adapter viewport with default selected', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'element-tree');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    const switcher = page.locator('.viewport-switcher');
+    await expect(switcher).toBeVisible();
+
+    // Bootstrap adapter: 6 viewports (xs, sm, md, lg, xl, xxl)
+    const buttons = switcher.locator('button');
+    await expect(buttons).toHaveCount(6);
+
+    // Default viewport (md) is active
+    const mdButton = buttons.filter({ hasText: 'Medium' });
+    await expect(mdButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('switching viewport updates fraction badges', async ({ page }) => {
+    const fixture = await loadFixture(page.request, 'element-tree');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    const fractions = page.locator('.column-block__fraction');
+
+    // md (default): col1=8/12, col2=4/12
+    await expect(fractions.first()).toContainText('8/12');
+    await expect(fractions.nth(1)).toContainText('4/12');
+
+    // Switch to lg: both columns 6/12
+    await page.locator('.viewport-switcher button', { hasText: 'Large' }).click();
+    await expect(fractions.first()).toContainText('6/12');
+    await expect(fractions.nth(1)).toContainText('6/12');
+  });
+
+  test('switching to viewport where column is hidden shows hidden indicator', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'element-tree');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // Switch to xs: col2 is visible=false
+    await page
+      .locator('.viewport-switcher button', { hasText: 'Extra Small' })
+      .click();
+
+    const col2 = page.locator('.column-block').nth(1);
+    await expect(col2).toHaveClass(/column-block--hidden/);
+
+    // Fraction badge shows "hidden" instead of a width ratio
+    await expect(
+      col2.locator('.column-block__fraction'),
+    ).toContainText('hidden');
+  });
+});
+
+// ────────────────────────────────────────────────────────────────
+// Publication state indicators
+// ────────────────────────────────────────────────────────────────
+
+test.describe('Grid editor — publication state', () => {
+  test.afterAll(async ({ request }) => {
+    await resetFixtures(request);
+  });
+
+  test('element cards show correct status modifier per publication state', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'complex-page');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // Draft element (unpublished after page-level publishRecursive)
+    const draftCard = page.locator('.element-card', {
+      hasText: 'Draft Only Block',
+    });
+    await expect(draftCard).toHaveClass(/element-card--draft/);
+
+    // Published element (remains on both Draft and Live)
+    const publishedCard = page.locator('.element-card', {
+      hasText: 'Published Block',
+    });
+    await expect(publishedCard).toHaveClass(/element-card--published/);
+
+    // Modified element (published, then draft title changed)
+    const modifiedCard = page.locator('.element-card', {
+      hasText: 'Modified Text Block',
+    });
+    await expect(modifiedCard).toHaveClass(/element-card--modified/);
+  });
+
+  test('status borders appear at section, row, column, and element levels', async ({
+    page,
+  }) => {
+    const fixture = await loadFixture(page.request, 'complex-page');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // Each hierarchy level should have a status modifier class
+    await expect(
+      page.locator('[class*="section-block--"]').first(),
+    ).toBeVisible();
+    await expect(
+      page.locator('[class*="row-block--"]').first(),
+    ).toBeVisible();
+    await expect(
+      page.locator('[class*="column-block--"]').first(),
+    ).toBeVisible();
+    await expect(
+      page.locator('[class*="element-card--"]').first(),
+    ).toBeVisible();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────
+// Empty states
+// ────────────────────────────────────────────────────────────────
+
+test.describe('Grid editor — empty states', () => {
+  test.afterAll(async ({ request }) => {
+    await resetFixtures(request);
+  });
+
+  test('empty page shows "No sections yet" message', async ({ page }) => {
+    const fixture = await loadFixture(page.request, 'empty-page');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.locator('.grid-editor__loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    await expect(page.getByText('No sections yet')).toBeVisible();
+  });
+});
+```
+
+### Step 2: Run the E2E tests (requires Docker services running)
+
+Run: `npm run test:e2e -- --grep "Grid editor"`
+Expected: ALL PASS (assuming Docker services and fixture endpoints are available)
+
+### Step 3: Commit
+
+```bash
+git add tests/E2E/specs/grid-editor.spec.ts
+git commit -m "test(e2e): add grid editor specs for layout, viewport switcher, status, and empty states"
+```
+
+---
+
+## Task 13: Final QA and build verification
 
 Run the full QA suite to verify everything works together.
 
