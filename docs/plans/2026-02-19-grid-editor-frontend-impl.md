@@ -4,7 +4,7 @@
 
 **Goal:** Replace the proof-of-life `<ul>` tree with a read-only visual grid editor using the "Layered Blocks" design — sections, rows, columns rendered as a real Bootstrap grid with publication state indicators, a viewport switcher, and fraction badges.
 
-**Architecture:** The GridEditor component is decomposed into small, single-responsibility components (ViewportSwitcher, SectionBlock, RowBlock, ColumnBlock, ElementCard, EmptyState). Grid layout uses actual Bootstrap CSS classes generated for the selected viewport's column widths. A `useViewport` hook manages the active viewport state. Adapter config (viewports, column count) is hardcoded for Bootstrap in this iteration — a future API endpoint will serve it dynamically.
+**Architecture:** The GridEditor component is decomposed into small, single-responsibility components (ViewportSwitcher, SectionBlock, RowBlock, ColumnBlock, ElementCard, EmptyState). Grid layout uses actual Bootstrap CSS classes served by the backend adapter via `getClientConfig()`. The frontend does zero class generation — it reads pre-computed class lookup maps from `window.ss.config`. A `useViewport` hook manages the active viewport state. This ensures custom adapters automatically surface their config to the frontend without any frontend code changes.
 
 **Tech Stack:** React 18, TypeScript 5.9, Vitest + React Testing Library, SCSS (BEM), Bootstrap 4 grid classes (from SS admin), Zod validation
 
@@ -12,16 +12,17 @@
 
 ---
 
-## Task 1: Add `gridSettings` to the column Zod schema and TypeScript types
+## Task 1: Add `gridSettings` to the column node in API response and Zod schema
 
 The `readTree` API response needs to include `gridSettings` on column nodes. The backend `ElementNode` DTO must be updated, and the frontend Zod schema must expect it.
 
 **Files:**
-- Modify: `src/Model/ElementNode.php:15-31` (PHPStan type), `src/Model/ElementNode.php:41-57` (constructor + serialize)
-- Modify: `src/Service/ElementTreeBuilder.php:132-170` (pass gridSettings to node)
-- Modify: `client/src/types/elements.ts:42-46` (columnNodeSchema)
+
+- Modify: `src/Model/ElementNode.php` (PHPStan type, constructor, serialize)
+- Modify: `src/Service/ElementTreeBuilder.php` (pass gridSettings to column nodes)
+- Modify: `client/src/types/elements.ts` (columnNodeSchema)
 - Test: `client/src/tests/types/elements.test.ts`
-- Test: `tests/Unit/Model/ElementNodeTest.php` (if exists, or create)
+- Test: `tests/Unit/Model/ElementNodeTest.php` (create if needed)
 
 ### Step 1: Write the failing PHP unit test
 
@@ -91,9 +92,8 @@ Expected: FAIL — `ElementNode` constructor does not accept `gridSettings` para
 
 ### Step 3: Update `ElementNode` PHP DTO
 
-Add an optional `gridSettings` parameter to the constructor. Include it in `jsonSerialize()` only for column containers.
-
 In `src/Model/ElementNode.php`:
+
 - Add to PHPStan type: `gridSettings?: array<string, array{width: int, offset: int, visible: bool}>|null`
 - Add constructor parameter: `public ?array $gridSettings = null`
 - In `jsonSerialize()`, add `gridSettings` to the output only when `containerType === ContainerType::Column` and `gridSettings !== null`
@@ -101,6 +101,7 @@ In `src/Model/ElementNode.php`:
 ### Step 4: Update `ElementTreeBuilder` to pass grid settings
 
 In `src/Service/ElementTreeBuilder.php`, in the `buildElementNode()` method:
+
 - After the existing container check, if the element is an `ElementColumn`, call `$element->getGridSettingsData()` and pass it as the `gridSettings` parameter to `ElementNode`.
 
 ### Step 5: Run PHP test to verify it passes
@@ -144,13 +145,14 @@ it('parses column node with gridSettings', () => {
 ### Step 7: Run test to verify it fails
 
 Run: `npm run test -- --run client/src/tests/types/elements.test.ts`
-Expected: FAIL — `gridSettings` is not defined in the schema (Zod strips unknown keys or fails)
+Expected: FAIL — `gridSettings` is not defined in the schema
 
 ### Step 8: Update the Zod schema
 
 In `client/src/types/elements.ts`:
 
 Add a `gridSettingsSchema`:
+
 ```typescript
 const viewportSettingsSchema = z.object({
   width: z.number().int(),
@@ -162,6 +164,7 @@ export const gridSettingsSchema = z.record(z.string(), viewportSettingsSchema);
 ```
 
 Add `gridSettings` to `columnNodeSchema`:
+
 ```typescript
 export const columnNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('column'),
@@ -171,18 +174,14 @@ export const columnNodeSchema = baseFieldsSchema.extend({
 });
 ```
 
-Export the inferred type:
+Export the inferred types:
+
 ```typescript
 export type GridSettings = z.infer<typeof gridSettingsSchema>;
 export type ViewportSettings = z.infer<typeof viewportSettingsSchema>;
 ```
 
-### Step 9: Run frontend tests to verify they pass
-
-Run: `npm run test -- --run`
-Expected: PASS (all tests, including existing ones — but the existing `GridEditor.test.tsx` mock data will need `gridSettings` added to column nodes)
-
-### Step 10: Update test fixtures
+### Step 9: Update test fixtures
 
 Add `gridSettings` to the column node in `client/src/tests/components/GridEditor/GridEditor.test.tsx` mock data so existing tests don't break:
 
@@ -196,12 +195,12 @@ gridSettings: {
 },
 ```
 
-### Step 11: Run all tests
+### Step 10: Run all tests
 
 Run: `npm run test -- --run`
 Expected: ALL PASS
 
-### Step 12: Commit
+### Step 11: Commit
 
 ```bash
 git add src/Model/ElementNode.php src/Service/ElementTreeBuilder.php \
@@ -214,136 +213,233 @@ git commit -m "feat(grid): include gridSettings in column node API response and 
 
 ---
 
-## Task 2: Create Bootstrap adapter config for the frontend
+## Task 2: Expose adapter config via `getClientConfig()` on the PHP controller
 
-The frontend needs viewport definitions and a way to generate base CSS classes. For this demo, hardcode the Bootstrap adapter config as a TypeScript module. Future iterations will fetch this from an API endpoint.
+The frontend needs the active adapter's viewport definitions, column count, row classes, and pre-computed CSS class lookup maps. These are static for the lifetime of the admin session, so they belong in `window.ss.config` — not in a separate API endpoint.
 
 **Files:**
-- Create: `client/src/config/bootstrapAdapter.ts`
-- Test: `client/src/tests/config/bootstrapAdapter.test.ts`
+
+- Modify: `src/Controllers/ElementalGridController.php:234-242` (extend `getClientConfig()`)
+- Test: `tests/Unit/Controllers/ElementalGridControllerTest.php` (create or extend)
 
 ### Step 1: Write the failing test
 
+Test that `getClientConfig()` returns a `gridAdapter` key containing the expected shape.
+
+```php
+public function testGetClientConfigIncludesGridAdapter(): void
+{
+    $controller = new ElementalGridController();
+    $config = $controller->getClientConfig();
+
+    self::assertArrayHasKey('gridAdapter', $config);
+
+    $adapter = $config['gridAdapter'];
+    self::assertArrayHasKey('viewports', $adapter);
+    self::assertArrayHasKey('defaultViewport', $adapter);
+    self::assertArrayHasKey('columnCount', $adapter);
+    self::assertArrayHasKey('rowClasses', $adapter);
+    self::assertArrayHasKey('baseWidthClasses', $adapter);
+    self::assertArrayHasKey('baseOffsetClasses', $adapter);
+}
+```
+
+### Step 2: Run test to verify it fails
+
+Run: `make test-unit`
+Expected: FAIL — `gridAdapter` key not present
+
+### Step 3: Implement the adapter config in `getClientConfig()`
+
+In `src/Controllers/ElementalGridController.php`, extend `getClientConfig()`:
+
+- Inject (or instantiate) the `GridAdapterInterface` implementation. For this iteration, instantiate `BootstrapAdapter` directly. (DI registration is a separate task.)
+- Call the adapter methods to build the config:
+  - `viewports`: map `getViewports()` to `[{key, label, minWidth}, ...]`
+  - `defaultViewport`: `getDefaultViewport()->key`
+  - `columnCount`: `getColumnCount()`
+  - `rowClasses`: `getRowClasses()`
+  - `baseWidthClasses`: for each width 1 through columnCount, call `getWidthClass(firstViewportKey, width)` — this produces unprefixed base classes for Bootstrap's xs viewport
+  - `baseOffsetClasses`: for each offset 0 through (columnCount - 1), call `getOffsetClass(firstViewportKey, offset)`
+
+The first viewport key (the one with `minWidth === null`, i.e. `xs` for Bootstrap) produces unprefixed base classes. If no viewport has null minWidth, use the first viewport in the list.
+
+```php
+$clientConfig['gridAdapter'] = [
+    'viewports' => array_map(
+        static fn (Viewport $vp) => [
+            'key' => $vp->key,
+            'label' => $vp->label,
+            'minWidth' => $vp->minWidth,
+        ],
+        $adapter->getViewports(),
+    ),
+    'defaultViewport' => $adapter->getDefaultViewport()->key,
+    'columnCount' => $adapter->getColumnCount(),
+    'rowClasses' => $adapter->getRowClasses(),
+    'baseWidthClasses' => $this->buildBaseWidthClasses($adapter),
+    'baseOffsetClasses' => $this->buildBaseOffsetClasses($adapter),
+];
+```
+
+### Step 4: Run tests
+
+Run: `make test-unit`
+Expected: PASS
+
+### Step 5: Commit
+
+```bash
+git add src/Controllers/ElementalGridController.php \
+  tests/Unit/Controllers/ElementalGridControllerTest.php
+git commit -m "feat(grid): expose adapter config via getClientConfig for frontend consumption"
+```
+
+---
+
+## Task 3: Add adapter config types and accessor to the frontend
+
+The frontend needs TypeScript types for the adapter config shape, a Zod schema for validation, and an accessor function in `client/src/api/config.ts` to read it from `window.ss.config`.
+
+**Files:**
+
+- Create: `client/src/types/adapter.ts` (Zod schema + types)
+- Modify: `client/src/types/index.ts` (add export)
+- Modify: `client/src/types/silverstripe.d.ts` (add `gridAdapter` to section config type)
+- Modify: `client/src/api/config.ts` (add `getAdapterConfig()`)
+- Test: `client/src/tests/types/adapter.test.ts`
+- Test: `client/src/tests/api/config.test.ts` (extend)
+
+### Step 1: Write the failing test for the Zod schema
+
 ```typescript
-import {
-  VIEWPORTS,
-  DEFAULT_VIEWPORT_KEY,
-  COLUMN_COUNT,
-  getBaseWidthClass,
-  getBaseOffsetClass,
-} from '@/config/bootstrapAdapter';
+// client/src/tests/types/adapter.test.ts
+import { adapterConfigSchema } from '@/types/adapter';
 
-describe('bootstrapAdapter', () => {
-  describe('VIEWPORTS', () => {
-    it('has 6 viewports in order', () => {
-      expect(VIEWPORTS).toHaveLength(6);
-      expect(VIEWPORTS.map((v) => v.key)).toEqual(['xs', 'sm', 'md', 'lg', 'xl', 'xxl']);
-    });
+describe('adapterConfigSchema', () => {
+  it('parses valid adapter config', () => {
+    const input = {
+      viewports: [
+        { key: 'xs', label: 'Extra Small', minWidth: null },
+        { key: 'md', label: 'Medium', minWidth: 768 },
+      ],
+      defaultViewport: 'md',
+      columnCount: 12,
+      rowClasses: 'row',
+      baseWidthClasses: { '1': 'col-1', '2': 'col-2', '12': 'col-12' },
+      baseOffsetClasses: { '0': '', '1': 'offset-1', '11': 'offset-11' },
+    };
+
+    const result = adapterConfigSchema.parse(input);
+    expect(result.defaultViewport).toBe('md');
+    expect(result.columnCount).toBe(12);
+    expect(result.baseWidthClasses['12']).toBe('col-12');
   });
 
-  describe('DEFAULT_VIEWPORT_KEY', () => {
-    it('defaults to md', () => {
-      expect(DEFAULT_VIEWPORT_KEY).toBe('md');
-    });
-  });
-
-  describe('COLUMN_COUNT', () => {
-    it('is 12', () => {
-      expect(COLUMN_COUNT).toBe(12);
-    });
-  });
-
-  describe('getBaseWidthClass', () => {
-    it('returns col-{n} for xs viewport', () => {
-      expect(getBaseWidthClass(6)).toBe('col-6');
-    });
-
-    it('returns col-{n} for any width', () => {
-      expect(getBaseWidthClass(12)).toBe('col-12');
-      expect(getBaseWidthClass(1)).toBe('col-1');
-    });
-  });
-
-  describe('getBaseOffsetClass', () => {
-    it('returns offset-{n} for non-zero offset', () => {
-      expect(getBaseOffsetClass(3)).toBe('offset-3');
-    });
-
-    it('returns empty string for zero offset', () => {
-      expect(getBaseOffsetClass(0)).toBe('');
-    });
+  it('rejects missing required fields', () => {
+    expect(() => adapterConfigSchema.parse({})).toThrow();
   });
 });
 ```
 
 ### Step 2: Run test to verify it fails
 
-Run: `npm run test -- --run client/src/tests/config/bootstrapAdapter.test.ts`
+Run: `npm run test -- --run client/src/tests/types/adapter.test.ts`
 Expected: FAIL — module does not exist
 
-### Step 3: Implement the adapter config
+### Step 3: Implement the Zod schema and types
 
-Create `client/src/config/bootstrapAdapter.ts`:
+Create `client/src/types/adapter.ts`:
 
 ```typescript
-export interface ViewportConfig {
-  readonly key: string;
-  readonly label: string;
-  readonly minWidth: number | null;
-}
+import { z } from 'zod';
 
-export const VIEWPORTS: readonly ViewportConfig[] = [
-  { key: 'xs', label: 'Extra Small', minWidth: null },
-  { key: 'sm', label: 'Small', minWidth: 576 },
-  { key: 'md', label: 'Medium', minWidth: 768 },
-  { key: 'lg', label: 'Large', minWidth: 992 },
-  { key: 'xl', label: 'Extra Large', minWidth: 1200 },
-  { key: 'xxl', label: 'Extra Extra Large', minWidth: 1400 },
-] as const;
+const viewportConfigSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  minWidth: z.number().int().nullable(),
+});
 
-export const DEFAULT_VIEWPORT_KEY = 'md';
+export const adapterConfigSchema = z.object({
+  viewports: z.array(viewportConfigSchema),
+  defaultViewport: z.string(),
+  columnCount: z.number().int().positive(),
+  rowClasses: z.string(),
+  baseWidthClasses: z.record(z.string(), z.string()),
+  baseOffsetClasses: z.record(z.string(), z.string()),
+});
 
-export const COLUMN_COUNT = 12;
+export type ViewportConfig = z.infer<typeof viewportConfigSchema>;
+export type AdapterConfig = z.infer<typeof adapterConfigSchema>;
+```
 
-/**
- * Base Bootstrap width class — always applies regardless of viewport.
- * The viewport switcher controls which GridSettings values feed into this.
- */
-export function getBaseWidthClass(width: number): string {
-  return `col-${width}`;
-}
+### Step 4: Update `silverstripe.d.ts`
 
-/**
- * Base Bootstrap offset class. Returns empty string for zero offset.
- */
-export function getBaseOffsetClass(offset: number): string {
-  if (offset === 0) {
-    return '';
-  }
+Add `gridAdapter` to `SilverStripeSectionConfig`:
 
-  return `offset-${offset}`;
+```typescript
+export interface SilverStripeSectionConfig {
+  name: string;
+  url: string;
+  controllerLink: string;
+  gridAdapter?: unknown; // Validated via Zod at runtime
+  [key: string]: unknown;
 }
 ```
 
-### Step 4: Run tests
+### Step 5: Add `getAdapterConfig()` to `client/src/api/config.ts`
 
-Run: `npm run test -- --run client/src/tests/config/bootstrapAdapter.test.ts`
-Expected: PASS
+```typescript
+import { adapterConfigSchema, type AdapterConfig } from '@/types/adapter';
 
-### Step 5: Commit
+export function getAdapterConfig(): AdapterConfig {
+  const config = getConfig();
+  const section = config.sections.find((s) => s.name === CONTROLLER_FQCN);
+
+  if (section === undefined) {
+    throw new ConfigError(
+      `Controller section "${CONTROLLER_FQCN}" not found in CMS config.`,
+    );
+  }
+
+  return adapterConfigSchema.parse(section.gridAdapter);
+}
+```
+
+### Step 6: Write tests for `getAdapterConfig()`
+
+Extend `client/src/tests/api/config.test.ts` to test `getAdapterConfig()` reads from `window.ss.config` and validates through Zod.
+
+### Step 7: Update barrel export
+
+In `client/src/types/index.ts`, add:
+
+```typescript
+export * from './adapter';
+```
+
+### Step 8: Run all tests
+
+Run: `npm run test -- --run`
+Expected: ALL PASS
+
+### Step 9: Commit
 
 ```bash
-git add client/src/config/bootstrapAdapter.ts client/src/tests/config/bootstrapAdapter.test.ts
-git commit -m "feat(grid): add Bootstrap adapter config for frontend viewport and class generation"
+git add client/src/types/adapter.ts client/src/types/index.ts \
+  client/src/types/silverstripe.d.ts client/src/api/config.ts \
+  client/src/tests/types/adapter.test.ts client/src/tests/api/config.test.ts
+git commit -m "feat(grid): add adapter config types, Zod schema, and CMS config accessor"
 ```
 
 ---
 
-## Task 3: Create the `useViewport` hook
+## Task 4: Create the `useViewport` hook
 
-A hook that manages the currently selected viewport key and provides the list of available viewports. Components use this to determine which `GridSettings` values to read.
+A hook that manages the currently selected viewport key, reads the available viewports from the adapter config, and provides class lookup helpers. Components use this to determine which `GridSettings` values to read.
 
 **Files:**
+
 - Create: `client/src/hooks/useViewport.ts`
 - Test: `client/src/tests/hooks/useViewport.test.ts`
 - Modify: `client/src/hooks/index.ts` (add export)
@@ -354,13 +450,39 @@ A hook that manages the currently selected viewport key and provides the list of
 import { renderHook, act } from '@testing-library/react';
 import { useViewport } from '@/hooks/useViewport';
 
+vi.mock('@/api/config', () => ({
+  getAdapterConfig: () => ({
+    viewports: [
+      { key: 'xs', label: 'Extra Small', minWidth: null },
+      { key: 'sm', label: 'Small', minWidth: 576 },
+      { key: 'md', label: 'Medium', minWidth: 768 },
+      { key: 'lg', label: 'Large', minWidth: 992 },
+      { key: 'xl', label: 'Extra Large', minWidth: 1200 },
+      { key: 'xxl', label: 'Extra Extra Large', minWidth: 1400 },
+    ],
+    defaultViewport: 'md',
+    columnCount: 12,
+    rowClasses: 'row',
+    baseWidthClasses: Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [String(i + 1), `col-${i + 1}`]),
+    ),
+    baseOffsetClasses: Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [String(i), i === 0 ? '' : `offset-${i}`]),
+    ),
+  }),
+}));
+
 describe('useViewport', () => {
-  it('initializes with the default viewport key', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('initializes with the default viewport key from adapter config', () => {
     const { result } = renderHook(() => useViewport());
     expect(result.current.activeViewport).toBe('md');
   });
 
-  it('provides the list of viewports', () => {
+  it('provides the list of viewports from adapter config', () => {
     const { result } = renderHook(() => useViewport());
     expect(result.current.viewports).toHaveLength(6);
     expect(result.current.viewports[0].key).toBe('xs');
@@ -376,9 +498,29 @@ describe('useViewport', () => {
     expect(result.current.activeViewport).toBe('lg');
   });
 
-  it('provides the column count', () => {
+  it('provides the column count from adapter config', () => {
     const { result } = renderHook(() => useViewport());
     expect(result.current.columnCount).toBe(12);
+  });
+
+  it('provides row classes from adapter config', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.rowClasses).toBe('row');
+  });
+
+  it('looks up base width class from adapter config', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.getWidthClass(6)).toBe('col-6');
+  });
+
+  it('looks up base offset class from adapter config', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.getOffsetClass(3)).toBe('offset-3');
+  });
+
+  it('returns empty string for zero offset', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.getOffsetClass(0)).toBe('');
   });
 });
 ```
@@ -393,29 +535,42 @@ Expected: FAIL — module does not exist
 Create `client/src/hooks/useViewport.ts`:
 
 ```typescript
-import { useState } from 'react';
-import {
-  VIEWPORTS,
-  DEFAULT_VIEWPORT_KEY,
-  COLUMN_COUNT,
-  type ViewportConfig,
-} from '@/config/bootstrapAdapter';
+import { useState, useMemo } from 'react';
+import { getAdapterConfig } from '@/api/config';
+import type { AdapterConfig, ViewportConfig } from '@/types/adapter';
 
 export interface UseViewportReturn {
   readonly viewports: readonly ViewportConfig[];
   readonly activeViewport: string;
   readonly setActiveViewport: (key: string) => void;
   readonly columnCount: number;
+  readonly rowClasses: string;
+  readonly getWidthClass: (width: number) => string;
+  readonly getOffsetClass: (offset: number) => string;
 }
 
 export function useViewport(): UseViewportReturn {
-  const [activeViewport, setActiveViewport] = useState(DEFAULT_VIEWPORT_KEY);
+  const config: AdapterConfig = useMemo(() => getAdapterConfig(), []);
+  const [activeViewport, setActiveViewport] = useState(config.defaultViewport);
+
+  const getWidthClass = useMemo(
+    () => (width: number) => config.baseWidthClasses[String(width)] ?? '',
+    [config.baseWidthClasses],
+  );
+
+  const getOffsetClass = useMemo(
+    () => (offset: number) => config.baseOffsetClasses[String(offset)] ?? '',
+    [config.baseOffsetClasses],
+  );
 
   return {
-    viewports: VIEWPORTS,
+    viewports: config.viewports,
     activeViewport,
     setActiveViewport,
-    columnCount: COLUMN_COUNT,
+    columnCount: config.columnCount,
+    rowClasses: config.rowClasses,
+    getWidthClass,
+    getOffsetClass,
   };
 }
 ```
@@ -428,6 +583,7 @@ Expected: PASS
 ### Step 5: Add export to barrel
 
 In `client/src/hooks/index.ts`, add:
+
 ```typescript
 export { useViewport } from './useViewport';
 ```
@@ -435,1261 +591,222 @@ export { useViewport } from './useViewport';
 ### Step 6: Commit
 
 ```bash
-git add client/src/hooks/useViewport.ts client/src/tests/hooks/useViewport.test.ts client/src/hooks/index.ts
-git commit -m "feat(grid): add useViewport hook for viewport state management"
+git add client/src/hooks/useViewport.ts client/src/tests/hooks/useViewport.test.ts \
+  client/src/hooks/index.ts
+git commit -m "feat(grid): add useViewport hook reading adapter config from CMS config"
 ```
 
 ---
 
-## Task 4: Create the ViewportSwitcher component
+## Task 5: Create the ViewportSwitcher component
 
-A segmented control that renders viewport tabs and calls `setActiveViewport` on click.
+A segmented control that renders viewport tabs and calls `setActiveViewport` on click. Uses `ViewportConfig` type from the adapter schema — no hardcoded viewport definitions.
 
 **Files:**
+
 - Create: `client/src/components/ViewportSwitcher/ViewportSwitcher.tsx`
 - Create: `client/src/components/ViewportSwitcher/ViewportSwitcher.scss`
 - Test: `client/src/tests/components/ViewportSwitcher/ViewportSwitcher.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
-import { VIEWPORTS } from '@/config/bootstrapAdapter';
+Test with viewport data passed as props (not imported from any hardcoded config). Key assertions: renders a button per viewport, marks active as `aria-pressed`, calls `onViewportChange` on click, does not call when clicking the active tab.
 
-describe('ViewportSwitcher', () => {
-  const defaultProps = {
-    viewports: VIEWPORTS,
-    activeViewport: 'md',
-    onViewportChange: vi.fn(),
-  };
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('renders a button for each viewport', () => {
-    render(<ViewportSwitcher {...defaultProps} />);
-
-    for (const vp of VIEWPORTS) {
-      expect(screen.getByRole('button', { name: vp.label })).toBeDefined();
-    }
-  });
-
-  it('marks the active viewport button as pressed', () => {
-    render(<ViewportSwitcher {...defaultProps} />);
-
-    const activeButton = screen.getByRole('button', { name: 'Medium' });
-    expect(activeButton.getAttribute('aria-pressed')).toBe('true');
-  });
-
-  it('marks non-active viewport buttons as not pressed', () => {
-    render(<ViewportSwitcher {...defaultProps} />);
-
-    const inactiveButton = screen.getByRole('button', { name: 'Large' });
-    expect(inactiveButton.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('calls onViewportChange when a viewport button is clicked', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(<ViewportSwitcher {...defaultProps} onViewportChange={onChange} />);
-
-    await user.click(screen.getByRole('button', { name: 'Large' }));
-
-    expect(onChange).toHaveBeenCalledWith('lg');
-  });
-
-  it('does not call onViewportChange when active viewport is clicked', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    render(<ViewportSwitcher {...defaultProps} onViewportChange={onChange} />);
-
-    await user.click(screen.getByRole('button', { name: 'Medium' }));
-
-    expect(onChange).not.toHaveBeenCalled();
-  });
-});
-```
-
-**Note:** This test requires `@testing-library/user-event`. Check if it's already a dependency; if not, install it: `npm install --save-dev @testing-library/user-event`.
+**Note:** Requires `@testing-library/user-event`. Install if missing: `npm install --save-dev @testing-library/user-event`.
 
 ### Step 2: Run test to verify it fails
 
-Run: `npm run test -- --run client/src/tests/components/ViewportSwitcher/ViewportSwitcher.test.tsx`
-Expected: FAIL — module does not exist
-
 ### Step 3: Implement the component
 
-Create `client/src/components/ViewportSwitcher/ViewportSwitcher.tsx`:
-
-```tsx
-import type { ViewportConfig } from '@/config/bootstrapAdapter';
-
-interface ViewportSwitcherProps {
-  readonly viewports: readonly ViewportConfig[];
-  readonly activeViewport: string;
-  readonly onViewportChange: (key: string) => void;
-}
-
-export default function ViewportSwitcher({
-  viewports,
-  activeViewport,
-  onViewportChange,
-}: ViewportSwitcherProps) {
-  return (
-    <div className="viewport-switcher" role="group" aria-label="Viewport">
-      {viewports.map((vp) => {
-        const isActive = vp.key === activeViewport;
-        return (
-          <button
-            key={vp.key}
-            type="button"
-            className={`viewport-switcher__button${isActive ? ' viewport-switcher__button--active' : ''}`}
-            aria-pressed={isActive}
-            onClick={() => {
-              if (!isActive) {
-                onViewportChange(vp.key);
-              }
-            }}
-          >
-            {vp.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-```
+Props: `viewports: readonly ViewportConfig[]`, `activeViewport: string`, `onViewportChange: (key: string) => void`. Pure presentational — receives everything via props, no internal state.
 
 ### Step 4: Run tests
 
-Run: `npm run test -- --run client/src/tests/components/ViewportSwitcher/ViewportSwitcher.test.tsx`
-Expected: PASS
-
 ### Step 5: Create the SCSS
 
-Create `client/src/components/ViewportSwitcher/ViewportSwitcher.scss`:
-
-```scss
-.viewport-switcher {
-  display: flex;
-  gap: 0;
-  margin-bottom: 16px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  overflow: hidden;
-  width: fit-content;
-}
-
-.viewport-switcher__button {
-  padding: 6px 14px;
-  border: none;
-  border-right: 1px solid #dee2e6;
-  background: #f8f9fa;
-  color: #495057;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-
-  &:last-child {
-    border-right: none;
-  }
-
-  &:hover:not(.viewport-switcher__button--active) {
-    background: #e9ecef;
-  }
-
-  &--active {
-    background: #0071c4;
-    color: #fff;
-    cursor: default;
-  }
-}
-```
+Segmented control: `display: flex`, buttons with shared borders, active button uses SilverStripe primary blue (`#0071c4`), hover state on inactive buttons.
 
 ### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/ViewportSwitcher/ViewportSwitcher';
-```
 
 ### Step 7: Commit
 
 ```bash
-git add client/src/components/ViewportSwitcher/ \
-  client/src/tests/components/ViewportSwitcher/ \
-  client/src/styles/bundle.scss
 git commit -m "feat(grid): add ViewportSwitcher segmented control component"
 ```
 
 ---
 
-## Task 5: Create the ElementCard component
+## Task 6: Create the ElementCard component
 
-A compact read-only card displaying an element's type icon, title, content preview, and publication state border.
+A compact read-only card displaying an element's type, title, content preview, and publication state border.
 
 **Files:**
+
 - Create: `client/src/components/ElementCard/ElementCard.tsx`
 - Create: `client/src/components/ElementCard/ElementCard.scss`
 - Test: `client/src/tests/components/ElementCard/ElementCard.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import ElementCard from '@/components/ElementCard/ElementCard';
-import type { SimpleElementNode } from '@/types/elements';
+Key test cases: renders title, content preview (or "No preview available" fallback), short type name (strips PHP namespace), correct status modifier class (`element-card--draft` / `--published` / `--modified`), "(untitled)" for empty title.
 
-const baseElement: SimpleElementNode = {
-  id: 10,
-  title: 'Welcome Text',
-  blockSchema: {
-    typeName: 'App\\Blocks\\TextBlock',
-    actions: { edit: '/edit/10' },
-    content: 'Welcome to our site',
-  },
-  obsoleteClassName: null,
-  version: 1,
-  isPublished: false,
-  isLiveVersion: false,
-  canDelete: true,
-  canPublish: true,
-  canUnpublish: false,
-  canCreate: true,
-  statusFlags: {},
-};
-
-describe('ElementCard', () => {
-  it('renders the element title', () => {
-    render(<ElementCard element={baseElement} />);
-    expect(screen.getByText('Welcome Text')).toBeDefined();
-  });
-
-  it('renders the content preview', () => {
-    render(<ElementCard element={baseElement} />);
-    expect(screen.getByText('Welcome to our site')).toBeDefined();
-  });
-
-  it('shows fallback text when content is empty', () => {
-    const emptyElement = {
-      ...baseElement,
-      blockSchema: { ...baseElement.blockSchema, content: '' },
-    };
-    render(<ElementCard element={emptyElement} />);
-    expect(screen.getByText('No preview available')).toBeDefined();
-  });
-
-  it('renders the short type name without namespace', () => {
-    render(<ElementCard element={baseElement} />);
-    expect(screen.getByText('TextBlock')).toBeDefined();
-  });
-
-  it('applies draft status modifier class', () => {
-    const { container } = render(<ElementCard element={baseElement} />);
-    expect(container.querySelector('.element-card--draft')).not.toBeNull();
-  });
-
-  it('applies published status modifier class', () => {
-    const publishedElement = { ...baseElement, isPublished: true, isLiveVersion: true };
-    const { container } = render(<ElementCard element={publishedElement} />);
-    expect(container.querySelector('.element-card--published')).not.toBeNull();
-  });
-
-  it('applies modified status modifier class', () => {
-    const modifiedElement = { ...baseElement, isPublished: true, isLiveVersion: false };
-    const { container } = render(<ElementCard element={modifiedElement} />);
-    expect(container.querySelector('.element-card--modified')).not.toBeNull();
-  });
-
-  it('shows (untitled) when title is empty', () => {
-    const untitled = { ...baseElement, title: '' };
-    render(<ElementCard element={untitled} />);
-    expect(screen.getByText('(untitled)')).toBeDefined();
-  });
-});
-```
-
-### Step 2: Run test to verify it fails
-
-Run: `npm run test -- --run client/src/tests/components/ElementCard/ElementCard.test.tsx`
-Expected: FAIL — module does not exist
-
-### Step 3: Implement the component
-
-Create `client/src/components/ElementCard/ElementCard.tsx`:
-
-```tsx
-import type { SimpleElementNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
-
-interface ElementCardProps {
-  readonly element: SimpleElementNode;
-}
-
-/**
- * Extracts the short class name from a fully qualified name.
- * "App\\Blocks\\TextBlock" → "TextBlock"
- */
-function shortTypeName(fqcn: string): string {
-  const parts = fqcn.split('\\');
-  return parts[parts.length - 1];
-}
-
-export default function ElementCard({ element }: ElementCardProps) {
-  const status = deriveElementStatus(element.isPublished, element.isLiveVersion);
-  const title = element.title || '(untitled)';
-  const preview = element.blockSchema.content || '';
-
-  return (
-    <div className={`element-card element-card--${status}`} data-element-id={element.id}>
-      <div className="element-card__header">
-        <span className="element-card__type">{shortTypeName(element.blockSchema.typeName)}</span>
-        <span className="element-card__title">{title}</span>
-      </div>
-      <div className="element-card__preview">
-        {preview !== ''
-          ? preview
-          : <span className="element-card__no-preview">No preview available</span>}
-      </div>
-    </div>
-  );
-}
-```
-
-### Step 4: Run tests
-
-Run: `npm run test -- --run client/src/tests/components/ElementCard/ElementCard.test.tsx`
-Expected: PASS
-
-### Step 5: Create the SCSS
-
-Create `client/src/components/ElementCard/ElementCard.scss`:
-
-```scss
-.element-card {
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding: 8px 10px;
-  border-left: 3px solid transparent;
-
-  &--draft {
-    border-left-color: #0071c4;
-  }
-
-  &--published {
-    border-left-color: #3fa142;
-  }
-
-  &--modified {
-    border-left-color: #d4a017;
-  }
-}
-
-.element-card__header {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: 2px;
-}
-
-.element-card__type {
-  font-size: 11px;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  flex-shrink: 0;
-}
-
-.element-card__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #212529;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.element-card__preview {
-  font-size: 12px;
-  color: #6c757d;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.element-card__no-preview {
-  font-style: italic;
-  color: #adb5bd;
-}
-```
-
-### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/ElementCard/ElementCard';
-```
-
-### Step 7: Commit
+### Step 2-7: Standard TDD cycle (implement, SCSS, bundle import, commit)
 
 ```bash
-git add client/src/components/ElementCard/ \
-  client/src/tests/components/ElementCard/ \
-  client/src/styles/bundle.scss
 git commit -m "feat(grid): add ElementCard component with publication state borders"
 ```
 
 ---
 
-## Task 6: Create the EmptyState component
+## Task 7: Create the EmptyState component
 
-A reusable empty state placeholder for columns with no elements, rows with no columns, and the editor with no sections.
+A reusable empty state placeholder for columns, rows, and the editor.
 
 **Files:**
+
 - Create: `client/src/components/EmptyState/EmptyState.tsx`
 - Create: `client/src/components/EmptyState/EmptyState.scss`
 - Test: `client/src/tests/components/EmptyState/EmptyState.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import EmptyState from '@/components/EmptyState/EmptyState';
+Test: renders message, applies root class, applies optional `variant="centered"` modifier.
 
-describe('EmptyState', () => {
-  it('renders the provided message', () => {
-    render(<EmptyState message="No content blocks" />);
-    expect(screen.getByText('No content blocks')).toBeDefined();
-  });
-
-  it('applies the root CSS class', () => {
-    const { container } = render(<EmptyState message="Empty" />);
-    expect(container.querySelector('.empty-state')).not.toBeNull();
-  });
-
-  it('applies a variant modifier when provided', () => {
-    const { container } = render(<EmptyState message="No sections yet" variant="centered" />);
-    expect(container.querySelector('.empty-state--centered')).not.toBeNull();
-  });
-});
-```
-
-### Step 2: Run test to verify it fails
-
-Run: `npm run test -- --run client/src/tests/components/EmptyState/EmptyState.test.tsx`
-Expected: FAIL
-
-### Step 3: Implement the component
-
-Create `client/src/components/EmptyState/EmptyState.tsx`:
-
-```tsx
-interface EmptyStateProps {
-  readonly message: string;
-  readonly variant?: 'centered';
-}
-
-export default function EmptyState({ message, variant }: EmptyStateProps) {
-  const className = `empty-state${variant !== undefined ? ` empty-state--${variant}` : ''}`;
-
-  return (
-    <div className={className}>
-      <span className="empty-state__message">{message}</span>
-    </div>
-  );
-}
-```
-
-### Step 4: Run tests
-
-Run: `npm run test -- --run client/src/tests/components/EmptyState/EmptyState.test.tsx`
-Expected: PASS
-
-### Step 5: Create the SCSS
-
-Create `client/src/components/EmptyState/EmptyState.scss`:
-
-```scss
-.empty-state {
-  border: 2px dashed #dee2e6;
-  border-radius: 4px;
-  padding: 16px;
-  text-align: center;
-
-  &--centered {
-    padding: 48px 16px;
-  }
-}
-
-.empty-state__message {
-  font-size: 13px;
-  color: #adb5bd;
-  font-style: italic;
-}
-```
-
-### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/EmptyState/EmptyState';
-```
-
-### Step 7: Commit
+### Step 2-7: Standard TDD cycle
 
 ```bash
-git add client/src/components/EmptyState/ \
-  client/src/tests/components/EmptyState/ \
-  client/src/styles/bundle.scss
 git commit -m "feat(grid): add EmptyState component for empty columns, rows, and editor"
 ```
 
 ---
 
-## Task 7: Create the ColumnBlock component
+## Task 8: Create the ColumnBlock component
 
-Renders a single column with its fraction badge, applies Bootstrap base grid classes from `GridSettings`, and stacks ElementCards vertically. Handles hidden columns.
+Renders a single column with its fraction badge, applies Bootstrap base grid classes from `GridSettings` via the adapter config lookup maps passed as props, and stacks ElementCards vertically. Handles hidden columns.
 
 **Files:**
+
 - Create: `client/src/components/ColumnBlock/ColumnBlock.tsx`
 - Create: `client/src/components/ColumnBlock/ColumnBlock.scss`
 - Test: `client/src/tests/components/ColumnBlock/ColumnBlock.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
-import type { ColumnNode } from '@/types/elements';
+Key test cases:
 
-const baseColumn: ColumnNode = {
-  id: 3,
-  title: 'Left Column',
-  containerType: 'column',
-  allowedTypes: null,
-  children: [
-    {
-      id: 10,
-      title: 'Text Block',
-      blockSchema: { typeName: 'App\\Blocks\\TextBlock', actions: { edit: '/edit/10' }, content: 'Hello world' },
-      obsoleteClassName: null,
-      version: 1,
-      isPublished: true,
-      isLiveVersion: true,
-      canDelete: true,
-      canPublish: true,
-      canUnpublish: true,
-      canCreate: true,
-      statusFlags: {},
-    },
-  ],
-  gridSettings: {
-    xs: { width: 12, offset: 0, visible: true },
-    md: { width: 6, offset: 0, visible: true },
-    lg: { width: 4, offset: 2, visible: true },
-  },
-  blockSchema: { typeName: 'Column', actions: { edit: '/edit/3' }, content: '' },
-  obsoleteClassName: null,
-  version: 1,
-  isPublished: false,
-  isLiveVersion: false,
-  canDelete: true,
-  canPublish: true,
-  canUnpublish: false,
-  canCreate: true,
-  statusFlags: {},
-};
-
-describe('ColumnBlock', () => {
-  it('renders the fraction badge for the active viewport', () => {
-    render(<ColumnBlock column={baseColumn} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('6/12')).toBeDefined();
-  });
-
-  it('applies Bootstrap base width class', () => {
-    const { container } = render(<ColumnBlock column={baseColumn} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.col-6')).not.toBeNull();
-  });
-
-  it('applies Bootstrap base offset class when offset > 0', () => {
-    const { container } = render(<ColumnBlock column={baseColumn} activeViewport="lg" columnCount={12} />);
-    expect(container.querySelector('.offset-2')).not.toBeNull();
-  });
-
-  it('does not apply offset class when offset is 0', () => {
-    const { container } = render(<ColumnBlock column={baseColumn} activeViewport="md" columnCount={12} />);
-    const col = container.querySelector('.col-6');
-    expect(col?.classList.contains('offset-0')).toBe(false);
-  });
-
-  it('renders child elements', () => {
-    render(<ColumnBlock column={baseColumn} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('Text Block')).toBeDefined();
-  });
-
-  it('renders empty state when no children', () => {
-    const emptyCol = { ...baseColumn, children: null };
-    render(<ColumnBlock column={emptyCol} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('No content blocks')).toBeDefined();
-  });
-
-  it('shows hidden treatment when not visible at active viewport', () => {
-    const hiddenCol = {
-      ...baseColumn,
-      gridSettings: {
-        ...baseColumn.gridSettings,
-        md: { width: 6, offset: 0, visible: false },
-      },
-    };
-    const { container } = render(<ColumnBlock column={hiddenCol} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.column-block--hidden')).not.toBeNull();
-  });
-
-  it('shows "hidden" instead of fraction when not visible', () => {
-    const hiddenCol = {
-      ...baseColumn,
-      gridSettings: {
-        ...baseColumn.gridSettings,
-        md: { width: 6, offset: 0, visible: false },
-      },
-    };
-    render(<ColumnBlock column={hiddenCol} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('hidden')).toBeDefined();
-  });
-
-  it('applies publication state modifier', () => {
-    const { container } = render(<ColumnBlock column={baseColumn} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.column-block--draft')).not.toBeNull();
-  });
-
-  it('falls back to full width when viewport key is missing from gridSettings', () => {
-    const { container } = render(<ColumnBlock column={baseColumn} activeViewport="xxl" columnCount={12} />);
-    expect(container.querySelector('.col-12')).not.toBeNull();
-  });
-});
-```
+- Renders fraction badge for active viewport (e.g., `6/12`)
+- Applies width class from `getWidthClass()` prop (e.g., `col-6`)
+- Applies offset class from `getOffsetClass()` prop when offset > 0
+- Does not apply offset class when offset is 0
+- Renders child elements as ElementCards
+- Renders EmptyState when no children
+- Shows hidden treatment (`column-block--hidden`) when `visible: false`
+- Shows "hidden" instead of fraction badge when not visible
+- Applies publication state modifier class
+- Falls back to full width when viewport key is missing from gridSettings
 
 ### Step 2: Run test to verify it fails
 
-Run: `npm run test -- --run client/src/tests/components/ColumnBlock/ColumnBlock.test.tsx`
-Expected: FAIL
-
 ### Step 3: Implement the component
 
-Create `client/src/components/ColumnBlock/ColumnBlock.tsx`:
+Props: `column: ColumnNode`, `activeViewport: string`, `columnCount: number`, `getWidthClass: (w: number) => string`, `getOffsetClass: (o: number) => string`.
 
-```tsx
-import type { ColumnNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
-import { getBaseWidthClass, getBaseOffsetClass } from '@/config/bootstrapAdapter';
-import ElementCard from '@/components/ElementCard/ElementCard';
-import EmptyState from '@/components/EmptyState/EmptyState';
+Reads `column.gridSettings[activeViewport]` for the current viewport's width/offset/visible. Falls back to `{ width: columnCount, offset: 0, visible: true }` if viewport key is missing. Uses the `getWidthClass` and `getOffsetClass` callbacks (from `useViewport`) to look up the correct CSS class.
 
-interface ColumnBlockProps {
-  readonly column: ColumnNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-}
+Outer div gets the Bootstrap grid class. Inner div gets `column-block` BEM class with status and hidden modifiers.
 
-const DEFAULT_SETTINGS = { width: 12, offset: 0, visible: true } as const;
-
-export default function ColumnBlock({ column, activeViewport, columnCount }: ColumnBlockProps) {
-  const settings = column.gridSettings[activeViewport] ?? DEFAULT_SETTINGS;
-  const status = deriveElementStatus(column.isPublished, column.isLiveVersion);
-  const isHidden = !settings.visible;
-
-  const gridClasses = [
-    getBaseWidthClass(settings.width),
-    getBaseOffsetClass(settings.offset),
-  ].filter(Boolean).join(' ');
-
-  const blockClasses = [
-    'column-block',
-    `column-block--${status}`,
-    isHidden ? 'column-block--hidden' : '',
-  ].filter(Boolean).join(' ');
-
-  return (
-    <div className={`${gridClasses}`} data-element-id={column.id}>
-      <div className={blockClasses}>
-        <div className="column-block__header">
-          <span className="column-block__badge">
-            {isHidden ? 'hidden' : `${settings.width}/${columnCount}`}
-          </span>
-        </div>
-        <div className="column-block__content">
-          {column.children !== null && column.children.length > 0
-            ? column.children.map((child) => (
-                <ElementCard key={child.id} element={child} />
-              ))
-            : <EmptyState message="No content blocks" />}
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-### Step 4: Run tests
-
-Run: `npm run test -- --run client/src/tests/components/ColumnBlock/ColumnBlock.test.tsx`
-Expected: PASS
-
-### Step 5: Create the SCSS
-
-Create `client/src/components/ColumnBlock/ColumnBlock.scss`:
-
-```scss
-.column-block {
-  background: #f8f9fa;
-  border-radius: 4px;
-  padding: 8px;
-  min-height: 60px;
-  border-left: 3px solid transparent;
-
-  &--draft {
-    border-left-color: #0071c4;
-  }
-
-  &--published {
-    border-left-color: #3fa142;
-  }
-
-  &--modified {
-    border-left-color: #d4a017;
-  }
-
-  &--hidden {
-    opacity: 0.4;
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        -45deg,
-        transparent,
-        transparent 4px,
-        rgba(0, 0, 0, 0.04) 4px,
-        rgba(0, 0, 0, 0.04) 8px
-      );
-    }
-  }
-}
-
-.column-block__header {
-  margin-bottom: 6px;
-}
-
-.column-block__badge {
-  display: inline-block;
-  padding: 1px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #6c757d;
-  background: #e9ecef;
-  border-radius: 3px;
-}
-
-.column-block__content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-```
-
-### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/ColumnBlock/ColumnBlock';
-```
-
-### Step 7: Commit
+### Step 4-7: Standard TDD cycle (run tests, SCSS, bundle import, commit)
 
 ```bash
-git add client/src/components/ColumnBlock/ \
-  client/src/tests/components/ColumnBlock/ \
-  client/src/styles/bundle.scss
-git commit -m "feat(grid): add ColumnBlock component with Bootstrap grid classes and hidden state"
+git commit -m "feat(grid): add ColumnBlock component with adapter-driven grid classes and hidden state"
 ```
 
 ---
 
-## Task 8: Create the RowBlock component
+## Task 9: Create the RowBlock component
 
-Renders a row using the adapter's row classes (Bootstrap `row`), lays out ColumnBlocks horizontally.
+Renders a row using the adapter's row classes (from config), lays out ColumnBlocks horizontally.
 
 **Files:**
+
 - Create: `client/src/components/RowBlock/RowBlock.tsx`
 - Create: `client/src/components/RowBlock/RowBlock.scss`
 - Test: `client/src/tests/components/RowBlock/RowBlock.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import RowBlock from '@/components/RowBlock/RowBlock';
-import type { RowNode } from '@/types/elements';
-
-const baseRow: RowNode = {
-  id: 2,
-  title: 'First Row',
-  containerType: 'row',
-  allowedTypes: null,
-  children: [
-    {
-      id: 3,
-      title: 'Left Column',
-      containerType: 'column',
-      allowedTypes: null,
-      children: [],
-      gridSettings: {
-        md: { width: 6, offset: 0, visible: true },
-      },
-      blockSchema: { typeName: 'Column', actions: { edit: '/edit/3' }, content: '' },
-      obsoleteClassName: null,
-      version: 1,
-      isPublished: false,
-      isLiveVersion: false,
-      canDelete: true,
-      canPublish: true,
-      canUnpublish: false,
-      canCreate: true,
-      statusFlags: {},
-    },
-  ],
-  blockSchema: { typeName: 'Row', actions: { edit: '/edit/2' }, content: '' },
-  obsoleteClassName: null,
-  version: 1,
-  isPublished: false,
-  isLiveVersion: false,
-  canDelete: true,
-  canPublish: true,
-  canUnpublish: false,
-  canCreate: true,
-  statusFlags: {},
-};
-
-describe('RowBlock', () => {
-  it('renders the row title', () => {
-    render(<RowBlock row={baseRow} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('First Row')).toBeDefined();
-  });
-
-  it('applies the Bootstrap row class', () => {
-    const { container } = render(<RowBlock row={baseRow} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.row')).not.toBeNull();
-  });
-
-  it('renders column children', () => {
-    render(<RowBlock row={baseRow} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('6/12')).toBeDefined();
-  });
-
-  it('renders empty state when no columns', () => {
-    const emptyRow = { ...baseRow, children: null };
-    render(<RowBlock row={emptyRow} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('No columns')).toBeDefined();
-  });
-
-  it('applies publication state modifier', () => {
-    const { container } = render(<RowBlock row={baseRow} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.row-block--draft')).not.toBeNull();
-  });
-});
-```
+Key test cases: renders title, applies row classes from `rowClasses` prop, renders column children, EmptyState when no columns, publication state modifier.
 
 ### Step 2: Run test to verify it fails
 
-Run: `npm run test -- --run client/src/tests/components/RowBlock/RowBlock.test.tsx`
-Expected: FAIL
-
 ### Step 3: Implement the component
 
-Create `client/src/components/RowBlock/RowBlock.tsx`:
+Props: `row: RowNode`, `activeViewport: string`, `columnCount: number`, `rowClasses: string`, `getWidthClass`, `getOffsetClass`.
 
-```tsx
-import type { RowNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
-import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
-import EmptyState from '@/components/EmptyState/EmptyState';
+Uses `rowClasses` prop on the column container div. Renders ColumnBlocks inside, passing through viewport and class helpers.
 
-interface RowBlockProps {
-  readonly row: RowNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-}
-
-export default function RowBlock({ row, activeViewport, columnCount }: RowBlockProps) {
-  const status = deriveElementStatus(row.isPublished, row.isLiveVersion);
-
-  return (
-    <div className={`row-block row-block--${status}`} data-element-id={row.id}>
-      <div className="row-block__label">{row.title || '(untitled)'}</div>
-      <div className="row">
-        {row.children !== null && row.children.length > 0
-          ? row.children.map((col) => (
-              <ColumnBlock
-                key={col.id}
-                column={col}
-                activeViewport={activeViewport}
-                columnCount={columnCount}
-              />
-            ))
-          : <div className="col-12"><EmptyState message="No columns" /></div>}
-      </div>
-    </div>
-  );
-}
-```
-
-### Step 4: Run tests
-
-Run: `npm run test -- --run client/src/tests/components/RowBlock/RowBlock.test.tsx`
-Expected: PASS
-
-### Step 5: Create the SCSS
-
-Create `client/src/components/RowBlock/RowBlock.scss`:
-
-```scss
-.row-block {
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 10px;
-  border-left: 3px solid transparent;
-
-  &--draft {
-    border-left-color: #0071c4;
-  }
-
-  &--published {
-    border-left-color: #3fa142;
-  }
-
-  &--modified {
-    border-left-color: #d4a017;
-  }
-
-  & + & {
-    margin-top: 12px;
-  }
-}
-
-.row-block__label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6c757d;
-  margin-bottom: 8px;
-}
-```
-
-### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/RowBlock/RowBlock';
-```
-
-### Step 7: Commit
+### Step 4-7: Standard TDD cycle
 
 ```bash
-git add client/src/components/RowBlock/ \
-  client/src/tests/components/RowBlock/ \
-  client/src/styles/bundle.scss
-git commit -m "feat(grid): add RowBlock component with Bootstrap row class"
+git commit -m "feat(grid): add RowBlock component with adapter-driven row classes"
 ```
 
 ---
 
-## Task 9: Create the SectionBlock component
+## Task 10: Create the SectionBlock component
 
 Renders a section as the outermost container shell with its rows inside.
 
 **Files:**
+
 - Create: `client/src/components/SectionBlock/SectionBlock.tsx`
 - Create: `client/src/components/SectionBlock/SectionBlock.scss`
 - Test: `client/src/tests/components/SectionBlock/SectionBlock.test.tsx`
 
 ### Step 1: Write the failing test
 
-```typescript
-import { render, screen } from '@testing-library/react';
-import SectionBlock from '@/components/SectionBlock/SectionBlock';
-import type { SectionNode } from '@/types/elements';
+Key test cases: renders title, renders row children, EmptyState when no rows, publication state modifier.
 
-const baseSection: SectionNode = {
-  id: 1,
-  title: 'Main Section',
-  containerType: 'section',
-  allowedTypes: null,
-  children: [
-    {
-      id: 2,
-      title: 'First Row',
-      containerType: 'row',
-      allowedTypes: null,
-      children: [],
-      blockSchema: { typeName: 'Row', actions: { edit: '/edit/2' }, content: '' },
-      obsoleteClassName: null,
-      version: 1,
-      isPublished: false,
-      isLiveVersion: false,
-      canDelete: true,
-      canPublish: true,
-      canUnpublish: false,
-      canCreate: true,
-      statusFlags: {},
-    },
-  ],
-  blockSchema: { typeName: 'Section', actions: { edit: '/edit/1' }, content: '' },
-  obsoleteClassName: null,
-  version: 1,
-  isPublished: true,
-  isLiveVersion: true,
-  canDelete: true,
-  canPublish: true,
-  canUnpublish: true,
-  canCreate: true,
-  statusFlags: {},
-};
+### Step 2-7: Standard TDD cycle
 
-describe('SectionBlock', () => {
-  it('renders the section title', () => {
-    render(<SectionBlock section={baseSection} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('Main Section')).toBeDefined();
-  });
-
-  it('renders row children', () => {
-    render(<SectionBlock section={baseSection} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('First Row')).toBeDefined();
-  });
-
-  it('renders empty state when no rows', () => {
-    const emptySection = { ...baseSection, children: null };
-    render(<SectionBlock section={emptySection} activeViewport="md" columnCount={12} />);
-    expect(screen.getByText('No rows')).toBeDefined();
-  });
-
-  it('applies publication state modifier', () => {
-    const { container } = render(<SectionBlock section={baseSection} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.section-block--published')).not.toBeNull();
-  });
-
-  it('applies the section-block root class', () => {
-    const { container } = render(<SectionBlock section={baseSection} activeViewport="md" columnCount={12} />);
-    expect(container.querySelector('.section-block')).not.toBeNull();
-  });
-});
-```
-
-### Step 2: Run test to verify it fails
-
-Run: `npm run test -- --run client/src/tests/components/SectionBlock/SectionBlock.test.tsx`
-Expected: FAIL
-
-### Step 3: Implement the component
-
-Create `client/src/components/SectionBlock/SectionBlock.tsx`:
-
-```tsx
-import type { SectionNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
-import RowBlock from '@/components/RowBlock/RowBlock';
-import EmptyState from '@/components/EmptyState/EmptyState';
-
-interface SectionBlockProps {
-  readonly section: SectionNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-}
-
-export default function SectionBlock({ section, activeViewport, columnCount }: SectionBlockProps) {
-  const status = deriveElementStatus(section.isPublished, section.isLiveVersion);
-
-  return (
-    <div className={`section-block section-block--${status}`} data-element-id={section.id}>
-      <div className="section-block__title">{section.title || '(untitled)'}</div>
-      <div className="section-block__body">
-        {section.children !== null && section.children.length > 0
-          ? section.children.map((row) => (
-              <RowBlock
-                key={row.id}
-                row={row}
-                activeViewport={activeViewport}
-                columnCount={columnCount}
-              />
-            ))
-          : <EmptyState message="No rows" />}
-      </div>
-    </div>
-  );
-}
-```
-
-### Step 4: Run tests
-
-Run: `npm run test -- --run client/src/tests/components/SectionBlock/SectionBlock.test.tsx`
-Expected: PASS
-
-### Step 5: Create the SCSS
-
-Create `client/src/components/SectionBlock/SectionBlock.scss`:
-
-```scss
-.section-block {
-  background: #f0f4f8;
-  border: 2px solid #d1d9e0;
-  border-radius: 6px;
-  padding: 16px;
-  border-left: 3px solid transparent;
-
-  &--draft {
-    border-left-color: #0071c4;
-  }
-
-  &--published {
-    border-left-color: #3fa142;
-  }
-
-  &--modified {
-    border-left-color: #d4a017;
-  }
-
-  & + & {
-    margin-top: 16px;
-  }
-}
-
-.section-block__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #343a40;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 12px;
-}
-
-.section-block__body {
-  // Rows stack vertically within
-}
-```
-
-### Step 6: Import SCSS in bundle
-
-In `client/src/styles/bundle.scss`, add:
-```scss
-@import '../components/SectionBlock/SectionBlock';
-```
-
-### Step 7: Commit
+Props pass through all adapter-driven values to RowBlocks.
 
 ```bash
-git add client/src/components/SectionBlock/ \
-  client/src/tests/components/SectionBlock/ \
-  client/src/styles/bundle.scss
 git commit -m "feat(grid): add SectionBlock component with double-line border and title"
 ```
 
 ---
 
-## Task 10: Rewrite the GridEditor component to use the new component tree
+## Task 11: Rewrite the GridEditor component to use the new component tree
 
-Replace the proof-of-life `<ul>` tree with the composed component hierarchy: ViewportSwitcher + SectionBlocks.
+Replace the proof-of-life `<ul>` tree with the composed component hierarchy: ViewportSwitcher + SectionBlocks. The GridEditor is the integration point that connects `useElementTree` (data) with `useViewport` (adapter config + state).
 
 **Files:**
+
 - Modify: `client/src/components/GridEditor/GridEditor.tsx` (full rewrite)
 - Modify: `client/src/tests/components/GridEditor/GridEditor.test.tsx` (rewrite tests)
 
 ### Step 1: Rewrite the GridEditor component
 
-Replace the contents of `client/src/components/GridEditor/GridEditor.tsx`:
+The component:
 
-```tsx
-import { useElementTree } from '@/hooks/useElementTree';
-import { useViewport } from '@/hooks/useViewport';
-import { isSectionNode } from '@/types/elements';
-import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
-import SectionBlock from '@/components/SectionBlock/SectionBlock';
-import EmptyState from '@/components/EmptyState/EmptyState';
-
-interface GridEditorProps {
-  readonly areaId: number;
-  readonly pageId: number | null;
-}
-
-export default function GridEditor({ areaId, pageId }: GridEditorProps) {
-  const { data, isLoading, error } = useElementTree(pageId);
-  const { viewports, activeViewport, setActiveViewport, columnCount } = useViewport();
-
-  if (isLoading) {
-    return (
-      <div className="grid-editor" data-area-id={areaId}>
-        <p className="grid-editor__loading">Loading elements...</p>
-      </div>
-    );
-  }
-
-  if (error !== null) {
-    return (
-      <div className="grid-editor" data-area-id={areaId}>
-        <p className="grid-editor__error">Failed to load elements: {error.message}</p>
-      </div>
-    );
-  }
-
-  const sections = data !== undefined
-    ? Object.values(data).flat().filter(isSectionNode)
-    : [];
-
-  return (
-    <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
-      <ViewportSwitcher
-        viewports={viewports}
-        activeViewport={activeViewport}
-        onViewportChange={setActiveViewport}
-      />
-      <div className="grid-editor__content">
-        {sections.length > 0
-          ? sections.map((section) => (
-              <SectionBlock
-                key={section.id}
-                section={section}
-                activeViewport={activeViewport}
-                columnCount={columnCount}
-              />
-            ))
-          : <EmptyState message="No sections yet" variant="centered" />}
-      </div>
-    </div>
-  );
-}
-```
+- Calls `useElementTree(pageId)` for data
+- Calls `useViewport()` for adapter config, active viewport state, and class lookup helpers
+- Renders `ViewportSwitcher` with viewports from adapter config
+- Flattens the tree response and filters for section nodes
+- Renders `SectionBlock` for each section, passing through all adapter-driven props (`activeViewport`, `columnCount`, `rowClasses`, `getWidthClass`, `getOffsetClass`)
+- Shows `EmptyState` with "No sections yet" if no sections exist
+- Preserves existing loading/error states and data attributes
 
 ### Step 2: Rewrite the GridEditor tests
 
-Update `client/src/tests/components/GridEditor/GridEditor.test.tsx` to test the new visual grid behavior. Key tests:
+The test must:
 
-- Shows loading state
-- Shows error state
-- Renders viewport switcher with viewport buttons
-- Renders section blocks from tree data
-- Renders the empty state when no sections exist
-- Preserves data-area-id and data-page-id attributes
-- Switching viewport updates column fraction badges
-
-The mock data needs `gridSettings` on column nodes and should test that the composed tree renders correctly.
+- Mock `@/api/endpoints` (existing pattern)
+- Mock `@/api/config` to provide `getAdapterConfig()` with Bootstrap adapter config
+- Test: loading state, error state, viewport switcher renders, section blocks render, empty state renders, data attributes preserved
+- Test: switching viewport updates column fraction badges (requires `userEvent`)
+- Mock data needs `gridSettings` on column nodes
 
 ### Step 3: Run all tests
 
@@ -1711,7 +828,7 @@ git commit -m "feat(grid): replace proof-of-life tree with visual Layered Blocks
 
 ---
 
-## Task 11: Final QA and build verification
+## Task 12: Final QA and build verification
 
 Run the full QA suite to verify everything works together.
 
@@ -1733,15 +850,14 @@ Expected: Vite builds successfully, outputs `client/dist/js/bundle.js` and `clie
 ### Step 4: Run PHP tests (if Docker is available)
 
 Run: `make test-unit`
-Expected: ALL PASS (including the new ElementNode gridSettings tests)
+Expected: ALL PASS (including new ElementNode gridSettings + controller getClientConfig tests)
 
 ### Step 5: Commit any remaining fixes
 
 If any issues were found and fixed, commit them.
 
-### Step 6: Final commit message
+### Step 6: Verify clean working tree
 
-If all clean:
 ```bash
-git status  # verify clean working tree
+git status
 ```
