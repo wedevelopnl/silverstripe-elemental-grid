@@ -5,11 +5,14 @@ $viewport-switcher-radius: 4px;
 
 .viewport-switcher {
   display: flex;
+  border: 1px solid $viewport-switcher-border-color;
+  border-radius: $viewport-switcher-radius;
+  overflow: hidden;
 }
 
 .viewport-switcher__button {
   padding: 6px 16px;
-  border: 1px solid $viewport-switcher-border-color;
+  border: none;
   background: #fff;
   color: #333;
   font-size: 13px;
@@ -17,22 +20,8 @@ $viewport-switcher-radius: 4px;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 
-  // Collapse shared borders between adjacent buttons
   & + & {
-    margin-left: -1px;
-  }
-
-  &:first-child {
-    border-radius: $viewport-switcher-radius 0 0 $viewport-switcher-radius;
-  }
-
-  &:last-child {
-    border-radius: 0 $viewport-switcher-radius $viewport-switcher-radius 0;
-  }
-
-  // Single button gets full rounding
-  &:first-child:last-child {
-    border-radius: $viewport-switcher-radius;
+    border-left: 1px solid $viewport-switcher-border-color;
   }
 
   &:hover:not(.viewport-switcher__button--active) {
@@ -41,11 +30,6 @@ $viewport-switcher-radius: 4px;
 
   &--active {
     background-color: $viewport-switcher-active-bg;
-    border-color: $viewport-switcher-active-bg;
     color: #fff;
-
-    // Ensure active border renders above adjacent inactive borders
-    position: relative;
-    z-index: 1;
   }
 }
