@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import GridEditorErrorBoundary from '@/components/GridEditorErrorBoundary/GridEditorErrorBoundary';
 import GridQueryProvider from '@/hooks/QueryProvider';
 import { loadComponent } from './Injector';
 
@@ -14,20 +15,28 @@ import { loadComponent } from './Injector';
 window.jQuery.entwine('ss', ($) => {
   $('.js-injector-boot .grid-editor__container').entwine({
     onmatch() {
-      const GridEditor = loadComponent('GridEditor');
-      const schema = this.data('schema') as Record<string, unknown>;
-      const areaId = schema['grid-area-id'] as number;
-      const pageId = (schema['grid-page-id'] as number | null) ?? null;
+      try {
+        const GridEditor = loadComponent('GridEditor');
+        const schema = this.data('schema') as Record<string, unknown>;
+        const areaId = schema['grid-area-id'] as number;
+        const pageId = (schema['grid-page-id'] as number | null) ?? null;
 
-      const root = createRoot(this[0]);
-      this.setReactRoot(root);
-      root.render(
-        createElement(
-          GridQueryProvider,
-          null,
-          createElement(GridEditor, { areaId, pageId }),
-        ),
-      );
+        const root = createRoot(this[0]);
+        this.setReactRoot(root);
+        root.render(
+          createElement(
+            GridQueryProvider,
+            null,
+            createElement(
+              GridEditorErrorBoundary,
+              null,
+              createElement(GridEditor, { areaId, pageId }),
+            ),
+          ),
+        );
+      } catch (error: unknown) {
+        console.warn('[GridEditor] Failed to mount grid editor.', error);
+      }
     },
 
     onunmatch() {

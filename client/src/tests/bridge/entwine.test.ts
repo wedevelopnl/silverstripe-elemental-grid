@@ -12,6 +12,11 @@ vi.mock('@/bridge/Injector', () => ({
   loadComponent: mockLoadComponent,
 }));
 
+const MockGridEditorErrorBoundary = vi.fn(({ children }) => children);
+vi.mock('@/components/GridEditorErrorBoundary/GridEditorErrorBoundary', () => ({
+  default: MockGridEditorErrorBoundary,
+}));
+
 const MockGridQueryProvider = vi.fn(({ children }) => children);
 vi.mock('@/hooks/QueryProvider', () => ({
   default: MockGridQueryProvider,
@@ -31,6 +36,7 @@ describe('entwine bridge', () => {
   beforeEach(async () => {
     vi.resetModules();
     mockLoadComponent.mockReset();
+    MockGridEditorErrorBoundary.mockClear();
     MockGridQueryProvider.mockClear();
     mockCreateRoot.mockReset().mockReturnValue(mockRoot);
     mockRoot.render.mockReset();
@@ -89,7 +95,11 @@ describe('entwine bridge', () => {
       createElement(
         MockGridQueryProvider,
         null,
-        createElement(MockGridEditor, { areaId: 42, pageId: 7 }),
+        createElement(
+          MockGridEditorErrorBoundary,
+          null,
+          createElement(MockGridEditor, { areaId: 42, pageId: 7 }),
+        ),
       ),
     );
   });
@@ -118,5 +128,25 @@ describe('entwine bridge', () => {
 
     expect(mockRoot.unmount).not.toHaveBeenCalled();
     expect(setReactRoot).not.toHaveBeenCalled();
+  });
+
+  it('onmatch catches loadComponent failures and warns', () => {
+    const error = new TypeError('Injector not available');
+    mockLoadComponent.mockImplementation(() => { throw error; });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = {
+      data: vi.fn().mockReturnValue({ 'grid-area-id': 42, 'grid-page-id': 7 }),
+      setReactRoot: vi.fn(),
+      0: document.createElement('div'),
+    };
+
+    expect(() => capturedRules.onmatch!.call(context as never)).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[GridEditor] Failed to mount grid editor.',
+      error,
+    );
+
+    warnSpy.mockRestore();
   });
 });
