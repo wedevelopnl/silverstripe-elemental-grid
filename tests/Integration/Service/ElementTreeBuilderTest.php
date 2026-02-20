@@ -43,7 +43,7 @@ final class ElementTreeBuilderTest extends SapphireTest
     }
 
     /**
-     * @return array<string, list<ElementNode>>
+     * @return array<int, list<ElementNode>>
      */
     private function buildTree(): array
     {
@@ -55,16 +55,27 @@ final class ElementTreeBuilderTest extends SapphireTest
         return $builder->buildForPage($page);
     }
 
+    /**
+     * Get the area ID for the test page's ElementalArea relation.
+     */
+    private function getAreaId(): int
+    {
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        return (int) $page->ElementalAreaID;
+    }
+
     // ---- Full tree structure ----
 
     public function testTreeShapeMatchesFixtureHierarchy(): void
     {
         $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
 
-        $this->assertArrayHasKey('ElementalArea', $tree);
+        $this->assertArrayHasKey($areaId, $tree);
 
         // 2 sections at root
-        $sections = $tree['ElementalArea'];
+        $sections = $tree[$areaId];
         $this->assertCount(2, $sections);
         $this->assertSame('First Section', $sections[0]->title);
         $this->assertSame('Second Section', $sections[1]->title);
@@ -109,21 +120,22 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testSiblingsOrderedBySort(): void
     {
         $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
 
         // Sections ordered by Sort
-        $sectionTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree['ElementalArea']);
+        $sectionTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree[$areaId]);
         $this->assertSame(['First Section', 'Second Section'], $sectionTitles);
 
         // Rows in section 1 ordered by Sort
-        $rowTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree['ElementalArea'][0]->children);
+        $rowTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree[$areaId][0]->children);
         $this->assertSame(['First Row', 'Second Row', 'Empty Row'], $rowTitles);
 
         // Columns in row 1 ordered by Sort
-        $columnTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree['ElementalArea'][0]->children[0]->children);
+        $columnTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree[$areaId][0]->children[0]->children);
         $this->assertSame(['Left Column', 'Right Column'], $columnTitles);
 
         // Leaves in column 1 ordered by Sort
-        $leafTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree['ElementalArea'][0]->children[0]->children[0]->children);
+        $leafTitles = \array_map(static fn (ElementNode $n): string => $n->title, $tree[$areaId][0]->children[0]->children[0]->children);
         $this->assertSame(['Text Block', 'Image Block'], $leafTitles);
     }
 
@@ -132,7 +144,8 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testContainerNodeIncludesContainerFields(): void
     {
         $tree = $this->buildTree();
-        $section = $tree['ElementalArea'][0];
+        $areaId = $this->getAreaId();
+        $section = $tree[$areaId][0];
 
         $this->assertNotNull($section->containerType);
         $this->assertSame('section', $section->containerType->value);
@@ -147,7 +160,8 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testLeafNodeExcludesContainerFields(): void
     {
         $tree = $this->buildTree();
-        $leaf = $tree['ElementalArea'][0]->children[0]->children[0]->children[0];
+        $areaId = $this->getAreaId();
+        $leaf = $tree[$areaId][0]->children[0]->children[0]->children[0];
 
         $this->assertNull($leaf->containerType);
         $this->assertNull($leaf->allowedTypes);
@@ -159,7 +173,8 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testBaseFieldsMatchElementData(): void
     {
         $tree = $this->buildTree();
-        $leaf = $tree['ElementalArea'][0]->children[0]->children[0]->children[0];
+        $areaId = $this->getAreaId();
+        $leaf = $tree[$areaId][0]->children[0]->children[0]->children[0];
         $fixtureId = $this->idFromFixture(BaseElement::class, 'leaf1');
 
         $this->assertSame($fixtureId, $leaf->id);
@@ -179,7 +194,8 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testBlockSchemaStructure(): void
     {
         $tree = $this->buildTree();
-        $leaf = $tree['ElementalArea'][0]->children[0]->children[0]->children[0];
+        $areaId = $this->getAreaId();
+        $leaf = $tree[$areaId][0]->children[0]->children[0]->children[0];
 
         $schema = $leaf->blockSchema;
 
@@ -199,19 +215,20 @@ final class ElementTreeBuilderTest extends SapphireTest
     public function testEmptyContainerHasEmptyChildrenArray(): void
     {
         $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
 
         // Section 2 (no rows)
-        $section2 = $tree['ElementalArea'][1];
+        $section2 = $tree[$areaId][1];
         $this->assertSame('Second Section', $section2->title);
         $this->assertSame([], $section2->children);
 
         // Row 3 (no columns)
-        $row3 = $tree['ElementalArea'][0]->children[2];
+        $row3 = $tree[$areaId][0]->children[2];
         $this->assertSame('Empty Row', $row3->title);
         $this->assertSame([], $row3->children);
 
         // Column 3 (no leaves)
-        $col3 = $tree['ElementalArea'][0]->children[1]->children[0];
+        $col3 = $tree[$areaId][0]->children[1]->children[0];
         $this->assertSame('Full Width Column', $col3->title);
         $this->assertSame([], $col3->children);
     }
@@ -224,8 +241,9 @@ final class ElementTreeBuilderTest extends SapphireTest
 
         try {
             $tree = $this->buildTree();
+            $areaId = $this->getAreaId();
 
-            $this->assertSame([], $tree['ElementalArea']);
+            $this->assertSame([], $tree[$areaId]);
         } finally {
             BaseElement::remove_extension(DenyViewExtension::class);
         }
@@ -270,8 +288,11 @@ final class ElementTreeBuilderTest extends SapphireTest
         $builder = Injector::inst()->get(ElementTreeBuilder::class);
         $tree = $builder->buildForPage($page);
 
-        $this->assertArrayHasKey('ElementalArea', $tree);
-        $this->assertSame([], $tree['ElementalArea']);
+        // ElementalPageExtension auto-creates an area on write, so the tree
+        // contains the area key with an empty element list.
+        $areaId = (int) $page->ElementalAreaID;
+        $this->assertArrayHasKey($areaId, $tree);
+        $this->assertSame([], $tree[$areaId]);
     }
 }
 

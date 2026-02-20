@@ -3,8 +3,6 @@ import { deriveElementStatus } from '@/types/status';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
-import './RowBlock.scss';
-
 interface RowBlockProps {
   readonly row: RowNode;
   readonly activeViewport: string;

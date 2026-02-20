@@ -56,7 +56,7 @@ function createWrapper() {
 }
 
 const mockTree: ElementTreeResponse = {
-  ElementalArea: [
+  '42': [
     {
       id: 1,
       title: 'Main Section',
@@ -156,11 +156,11 @@ const mockTree: ElementTreeResponse = {
 };
 
 const emptyTree: ElementTreeResponse = {
-  ElementalArea: [],
+  '42': [],
 };
 
 const noSectionsTree: ElementTreeResponse = {
-  ElementalArea: [
+  '42': [
     {
       id: 99,
       title: 'Standalone Block',
@@ -318,6 +318,21 @@ describe('GridEditor', () => {
     // At lg viewport: Left Column = 6/12, Right Column = 6/12
     const badges = screen.getAllByText('6/12');
     expect(badges.length).toBe(2);
+  });
+
+  it('renders empty state when areaId is not present in the response', async () => {
+    const treeForDifferentArea: ElementTreeResponse = {
+      '99': [mockTree['42'][0]],
+    };
+    mockFetchElementTree.mockResolvedValue(treeForDifferentArea);
+
+    render(<GridEditor areaId={42} pageId={7} />, {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('No sections yet')).toBeDefined();
+    });
   });
 
   it('does not render content area when still loading', () => {

@@ -3,8 +3,6 @@ import { deriveElementStatus } from '@/types/status';
 import ElementCard from '@/components/ElementCard/ElementCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
-import './ColumnBlock.scss';
-
 interface ColumnBlockProps {
   readonly column: ColumnNode;
   readonly activeViewport: string;

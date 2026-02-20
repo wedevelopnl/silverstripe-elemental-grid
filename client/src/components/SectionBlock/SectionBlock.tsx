@@ -3,8 +3,6 @@ import { deriveElementStatus } from '@/types/status';
 import RowBlock from '@/components/RowBlock/RowBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
-import './SectionBlock.scss';
-
 interface SectionBlockProps {
   readonly section: SectionNode;
   readonly activeViewport: string;

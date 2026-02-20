@@ -1,8 +1,7 @@
+@use '../../styles/variables' as vars;
+
 $section-block-bg: #f0f4f8;
 $section-block-border: #c0c8d0;
-$section-block-border-draft: #0071c4;
-$section-block-border-published: #3fa142;
-$section-block-border-modified: #d4a017;
 
 .section-block {
   background: $section-block-bg;
@@ -13,15 +12,15 @@ $section-block-border-modified: #d4a017;
   width: 100%;
 
   &--draft {
-    border-left-color: $section-block-border-draft;
+    border-left-color: vars.$color-status-draft;
   }
 
   &--published {
-    border-left-color: $section-block-border-published;
+    border-left-color: vars.$color-status-published;
   }
 
   &--modified {
-    border-left-color: $section-block-border-modified;
+    border-left-color: vars.$color-status-modified;
   }
 
   &__title {

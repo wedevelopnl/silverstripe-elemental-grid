@@ -1,6 +1,4 @@
-$column-block-border-draft: #0071c4;
-$column-block-border-published: #3fa142;
-$column-block-border-modified: #d4a017;
+@use '../../styles/variables' as vars;
 
 .column-block {
   background: #f8f9fa;
@@ -9,15 +7,15 @@ $column-block-border-modified: #d4a017;
   min-height: 60px;
 
   &--draft {
-    border-left-color: $column-block-border-draft;
+    border-left-color: vars.$color-status-draft;
   }
 
   &--published {
-    border-left-color: $column-block-border-published;
+    border-left-color: vars.$color-status-published;
   }
 
   &--modified {
-    border-left-color: $column-block-border-modified;
+    border-left-color: vars.$color-status-modified;
   }
 
   &--hidden {
@@ -50,7 +48,7 @@ $column-block-border-modified: #d4a017;
     display: inline-block;
     padding: 2px 8px;
     border-radius: 10px;
-    background: #dee2e6;
+    background: vars.$color-border-light;
     font-size: 0.75em;
     font-weight: 600;
     line-height: 1.4;

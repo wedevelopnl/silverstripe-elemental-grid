@@ -266,6 +266,66 @@ final class ElementalGridControllerTest extends TestCase
         self::assertSame('offset-xs-0', $config['baseOffsetClasses']->{'0'});
     }
 
+    public function testThrowsOnEmptyViewportList(): void
+    {
+        $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {
+            public function getViewports(): array
+            {
+                return [];
+            }
+
+            public function getColumnCount(): int
+            {
+                return 12;
+            }
+
+            public function getDefaultViewport(): \WeDevelop\ElementalGrid\Contract\Viewport
+            {
+                return new \WeDevelop\ElementalGrid\Contract\Viewport('xs', 'XS', null);
+            }
+
+            public function getWidthClass(string $viewport, int $width): string
+            {
+                return '';
+            }
+
+            public function getOffsetClass(string $viewport, int $offset): string
+            {
+                return '';
+            }
+
+            public function getVisibilityClasses(string $viewport): array
+            {
+                return [];
+            }
+
+            public function getRowClasses(): string
+            {
+                return 'row';
+            }
+
+            public function getContainerClass(bool $fluid): string
+            {
+                return 'container';
+            }
+
+            public function getTitleClassOptions(): array
+            {
+                return [];
+            }
+
+            public function getCssPath(): ?string
+            {
+                return null;
+            }
+        };
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Adapter must define at least one viewport.');
+
+        ElementalGridController::buildAdapterConfig($adapter);
+    }
+
     public function testFallsBackToFirstViewportWhenNoneHasNullMinWidth(): void
     {
         $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {

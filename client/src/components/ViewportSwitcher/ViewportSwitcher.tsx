@@ -1,7 +1,5 @@
 import type { ViewportConfig } from '@/types/adapter';
 
-import './ViewportSwitcher.scss';
-
 interface ViewportSwitcherProps {
   readonly viewports: readonly ViewportConfig[];
   readonly activeViewport: string;
@@ -24,6 +22,7 @@ export default function ViewportSwitcher({
             type="button"
             className={`viewport-switcher__button${isActive ? ' viewport-switcher__button--active' : ''}`}
             aria-pressed={isActive}
+            aria-disabled={isActive || undefined}
             onClick={() => {
               if (!isActive) {
                 onViewportChange(viewport.key);

@@ -60,7 +60,13 @@ final readonly class ElementNode implements \JsonSerializable
         public ?array $children = null,
         public ?array $gridSettings = null,
         public array $extensions = [],
-    ) {}
+    ) {
+        if ($gridSettings !== null && $containerType !== ContainerType::Column) {
+            throw new \InvalidArgumentException(
+                'gridSettings may only be provided for Column container type',
+            );
+        }
+    }
 
     /** @return SerializedNode */
     #[\Override]
@@ -97,7 +103,6 @@ final readonly class ElementNode implements \JsonSerializable
         if ($this->extensions !== []) {
             $data['extensions'] = $this->extensions;
         }
-
 
         return $data;
     }

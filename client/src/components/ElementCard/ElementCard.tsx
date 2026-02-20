@@ -1,8 +1,6 @@
 import type { SimpleElementNode } from '@/types/elements';
 import { deriveElementStatus } from '@/types/status';
 
-import './ElementCard.scss';
-
 interface ElementCardProps {
   readonly element: SimpleElementNode;
 }

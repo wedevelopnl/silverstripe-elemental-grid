@@ -372,7 +372,7 @@ class ElementalGridController extends AdminController
 
     private function reorderElements(BaseElement $element, int $afterElementID): void
     {
-        if ($afterElementID < 0) {
+        if ($afterElementID < 1) {
             $this->jsonError(400);
         }
 
@@ -418,6 +418,10 @@ class ElementalGridController extends AdminController
      */
     private static function resolveBaseViewportKey(array $viewports): string
     {
+        if ($viewports === []) {
+            throw new \InvalidArgumentException('Adapter must define at least one viewport.');
+        }
+
         foreach ($viewports as $viewport) {
             if ($viewport->minWidth === null) {
                 return $viewport->key;

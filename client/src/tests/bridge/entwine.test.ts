@@ -130,6 +130,46 @@ describe('entwine bridge', () => {
     expect(setReactRoot).not.toHaveBeenCalled();
   });
 
+  it('onmatch warns when schema has wrong types', () => {
+    mockLoadComponent.mockReturnValue(vi.fn());
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = {
+      data: vi.fn().mockReturnValue({ 'grid-area-id': 'not-a-number', 'grid-page-id': 7 }),
+      setReactRoot: vi.fn(),
+      0: document.createElement('div'),
+    };
+
+    expect(() => capturedRules.onmatch!.call(context as never)).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[GridEditor] Failed to mount grid editor.',
+      expect.any(Error),
+    );
+    expect(mockRoot.render).not.toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it('onmatch warns when schema has missing keys', () => {
+    mockLoadComponent.mockReturnValue(vi.fn());
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const context = {
+      data: vi.fn().mockReturnValue({ 'grid-page-id': 7 }),
+      setReactRoot: vi.fn(),
+      0: document.createElement('div'),
+    };
+
+    expect(() => capturedRules.onmatch!.call(context as never)).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[GridEditor] Failed to mount grid editor.',
+      expect.any(Error),
+    );
+    expect(mockRoot.render).not.toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
   it('onmatch catches loadComponent failures and warns', () => {
     const error = new TypeError('Injector not available');
     mockLoadComponent.mockImplementation(() => { throw error; });

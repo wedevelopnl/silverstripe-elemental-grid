@@ -33,7 +33,7 @@ describe('useElementTree', () => {
 
   it('fetches element tree for given pageId', async () => {
     const mockTree: ElementTreeResponse = {
-      ElementalArea: [],
+      '42': [],
     };
     mockFetchElementTree.mockResolvedValue(mockTree);
 

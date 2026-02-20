@@ -127,6 +127,27 @@ describe('ViewportSwitcher', () => {
     }
   });
 
+  it('marks active viewport button as aria-disabled', () => {
+    const onViewportChange = vi.fn();
+
+    render(
+      <ViewportSwitcher
+        viewports={viewports}
+        activeViewport="sm"
+        onViewportChange={onViewportChange}
+      />,
+    );
+
+    const activeButton = screen.getByText('Small');
+    expect(activeButton.getAttribute('aria-disabled')).toBe('true');
+
+    const inactiveLabels = ['Extra Small', 'Medium', 'Large'];
+    for (const label of inactiveLabels) {
+      const button = screen.getByText(label);
+      expect(button.hasAttribute('aria-disabled')).toBe(false);
+    }
+  });
+
   it('does NOT call onViewportChange when clicking the already-active tab', async () => {
     const user = userEvent.setup();
     const onViewportChange = vi.fn();

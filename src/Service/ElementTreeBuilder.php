@@ -49,9 +49,13 @@ class ElementTreeBuilder
     }
 
     /**
-     * Build the full element tree for a page, keyed by elemental relation name.
+     * Build the full element tree for a page, keyed by area ID.
      *
-     * @return array<string, list<ElementNode>>
+     * Keys are numeric area IDs. PHP coerces numeric string keys to int,
+     * but json_encode() serializes non-sequential int keys as a JSON object
+     * with string keys (e.g. {"42": [...], "99": [...]}).
+     *
+     * @return array<int, list<ElementNode>>
      */
     public function buildForPage(SiteTree $page): array
     {
@@ -61,7 +65,7 @@ class ElementTreeBuilder
             return [];
         }
 
-        /** @var array<string, list<ElementNode>> $tree */
+        /** @var array<int, list<ElementNode>> $tree */
         $tree = [];
         foreach ($relations as $relation) {
             $areaId = (int) $page->{$relation . 'ID'}; // @phpstan-ignore cast.int (ORM dynamic property)
@@ -71,7 +75,7 @@ class ElementTreeBuilder
             }
 
             $elementsByParent = $this->loadAllElements($areaId);
-            $tree[$relation] = $this->assembleSubTree($elementsByParent, $areaId);
+            $tree[$areaId] = $this->assembleSubTree($elementsByParent, $areaId);
         }
 
         return $tree;

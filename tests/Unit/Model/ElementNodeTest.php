@@ -288,6 +288,31 @@ final class ElementNodeTest extends TestCase
         self::assertSame($gridSettings, $serialized['gridSettings']);
     }
 
+    public function testConstructorRejectsGridSettingsForNonColumnType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('gridSettings may only be provided for Column container type');
+
+        new ElementNode(
+            id: 99,
+            title: 'Row with grid settings',
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 1,
+            isPublished: false,
+            isLiveVersion: false,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Row,
+            allowedTypes: null,
+            children: [],
+            gridSettings: ['xs' => ['width' => 12, 'offset' => 0, 'visible' => true]],
+        );
+    }
+
     public function testNonColumnNodeOmitsGridSettings(): void
     {
         $node = new ElementNode(

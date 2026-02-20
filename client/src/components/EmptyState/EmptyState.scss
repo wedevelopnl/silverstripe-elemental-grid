@@ -1,6 +1,8 @@
+@use '../../styles/variables' as vars;
+
 .empty-state {
-  border: 1px dashed #dee2e6;
-  color: #6c757d;
+  border: 1px dashed vars.$color-border-light;
+  color: vars.$color-text-muted;
   padding: 16px;
   text-align: center;
 

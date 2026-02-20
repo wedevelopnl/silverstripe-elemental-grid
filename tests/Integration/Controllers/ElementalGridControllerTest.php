@@ -79,11 +79,17 @@ final class ElementalGridControllerTest extends FunctionalTest
         $this->assertStringContainsString('application/json', $response->getHeader('Content-Type'));
 
         $body = json_decode($response->getBody(), associative: true, flags: JSON_THROW_ON_ERROR);
-        $this->assertArrayHasKey('ElementalArea', $body);
-        $this->assertNotEmpty($body['ElementalArea']);
+
+        // Response is keyed by area ID (numeric), not relation name
+        $areaKeys = array_keys($body);
+        $this->assertNotEmpty($areaKeys);
+        $this->assertIsInt($areaKeys[0]);
+
+        $firstArea = $body[$areaKeys[0]];
+        $this->assertNotEmpty($firstArea);
 
         // Verify nested structure exists
-        $firstSection = $body['ElementalArea'][0];
+        $firstSection = $firstArea[0];
         $this->assertSame('First Section', $firstSection['title']);
         $this->assertArrayHasKey('children', $firstSection);
     }

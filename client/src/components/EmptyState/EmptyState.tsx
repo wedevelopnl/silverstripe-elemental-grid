@@ -1,5 +1,3 @@
-import './EmptyState.scss';
-
 interface EmptyStateProps {
   readonly message: string;
   readonly variant?: 'centered';

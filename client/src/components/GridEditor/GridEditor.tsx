@@ -32,7 +32,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
 
   const sections = data === undefined
     ? []
-    : Object.values(data).flat().filter(isSectionNode);
+    : (data[String(areaId)] ?? []).filter(isSectionNode);
 
   return (
     <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
