@@ -81,6 +81,21 @@ describe('ElementCard', () => {
     expect(screen.queryByText(String.raw`DNADesign\Elemental\Models\BaseElement`)).toBeNull();
   });
 
+  it('strips single-character namespace prefix', () => {
+    const element = makeElement({
+      blockSchema: {
+        typeName: String.raw`A\Widget`,
+        actions: { edit: '/edit/1' },
+        content: 'preview',
+      },
+    });
+
+    render(<ElementCard element={element} />);
+
+    expect(screen.getByText('Widget')).toBeDefined();
+    expect(screen.queryByText(String.raw`A\Widget`)).toBeNull();
+  });
+
   it('renders unqualified typeName unchanged', () => {
     const element = makeElement({
       blockSchema: {
@@ -93,6 +108,30 @@ describe('ElementCard', () => {
     render(<ElementCard element={element} />);
 
     expect(screen.getByText('Content')).toBeDefined();
+  });
+
+  it('applies element-card__content--empty class when content is empty', () => {
+    const element = makeElement({
+      blockSchema: {
+        typeName: 'Content',
+        actions: { edit: '/edit/1' },
+        content: '',
+      },
+    });
+
+    const { container } = render(<ElementCard element={element} />);
+
+    expect(
+      container.querySelector('.element-card__content')?.classList.contains('element-card__content--empty'),
+    ).toBe(true);
+  });
+
+  it('does not apply element-card__content--empty class when content is non-empty', () => {
+    const { container } = render(<ElementCard element={makeElement()} />);
+
+    expect(
+      container.querySelector('.element-card__content')?.classList.contains('element-card__content--empty'),
+    ).toBe(false);
   });
 
   it('applies "element-card--draft" class for unpublished elements', () => {

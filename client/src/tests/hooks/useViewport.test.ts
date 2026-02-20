@@ -73,4 +73,14 @@ describe('useViewport', () => {
     const { result } = renderHook(() => useViewport());
     expect(result.current.getOffsetClass(0)).toBe('offset-0');
   });
+
+  it('returns empty string for unmapped width key', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.getWidthClass(99)).toBe('');
+  });
+
+  it('returns empty string for unmapped offset key', () => {
+    const { result } = renderHook(() => useViewport());
+    expect(result.current.getOffsetClass(99)).toBe('');
+  });
 });

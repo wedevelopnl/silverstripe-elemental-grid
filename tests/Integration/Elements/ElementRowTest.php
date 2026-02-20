@@ -12,6 +12,7 @@ use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\ElementalGrid\Tests\Integration\Fixture\OnAfterWriteSpy;
 
 #[CoversClass(ElementRow::class)]
 final class ElementRowTest extends ElementContainerContractTestCase
@@ -231,5 +232,42 @@ final class ElementRowTest extends ElementContainerContractTestCase
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Column.');
         $row->write();
+    }
+
+    public function testOnAfterWriteInvokesParentHook(): void
+    {
+        OnAfterWriteSpy::$called = false;
+        ElementRow::add_extension(OnAfterWriteSpy::class);
+
+        try {
+            $row = ElementRow::create();
+            $row->write();
+
+            $this->assertTrue(OnAfterWriteSpy::$called);
+        } finally {
+            ElementRow::remove_extension(OnAfterWriteSpy::class);
+        }
+    }
+
+    public function testRewriteOnNonDraftStageDoesNotScaffold(): void
+    {
+        $row = $this->createContainer();
+        /** @var ElementRow $row */
+
+        // Remove the scaffolded child so ChildArea is empty
+        $child = $row->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementColumn::class, $child);
+        $child->delete();
+
+        $this->assertCount(0, $row->getChildArea()->Elements());
+
+        // Re-write on LIVE stage — should NOT scaffold a new child
+        Versioned::withVersionedMode(function () use ($row): void {
+            Versioned::set_stage(Versioned::LIVE);
+            $row->Title = 'Rewritten on LIVE';
+            $row->write();
+        });
+
+        $this->assertCount(0, $row->getChildArea()->Elements());
     }
 }

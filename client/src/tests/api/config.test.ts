@@ -58,6 +58,7 @@ describe('config accessors', () => {
 
       expect(() => getConfig()).toThrow(ConfigError);
       expect(() => getConfig()).toThrow('SilverStripe config is not available');
+      expect(() => getConfig()).toThrow('admin bundle is loaded');
     });
 
     it('throws ConfigError when window.ss.config is undefined', () => {
@@ -83,7 +84,10 @@ describe('config accessors', () => {
       window.ss = {
         config: {
           SecurityID: 'x',
-          sections: [gridSection('/admin/elemental-grid/')],
+          sections: [
+            { name: 'Other\\Controller', url: 'admin/other', controllerLink: '/admin/other/' },
+            gridSection('/admin/elemental-grid/'),
+          ],
         },
       };
 
@@ -108,6 +112,7 @@ describe('config accessors', () => {
 
       expect(() => getControllerLink()).toThrow(ConfigError);
       expect(() => getControllerLink()).toThrow('Controller section');
+      expect(() => getControllerLink()).toThrow('elemental grid module is installed');
     });
   });
 
@@ -117,6 +122,7 @@ describe('config accessors', () => {
         config: {
           SecurityID: 'x',
           sections: [
+            { name: 'Other\\Controller', url: 'admin/other', controllerLink: '/admin/other/' },
             gridSection('/admin/elemental-grid/', validAdapterConfig),
           ],
         },

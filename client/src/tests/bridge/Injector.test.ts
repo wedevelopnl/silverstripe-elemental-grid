@@ -24,6 +24,7 @@ describe('Injector bridge', () => {
 
       expect(() => getInjector()).toThrow(TypeError);
       expect(() => getInjector()).toThrow('SilverStripe Injector is not available');
+      expect(() => getInjector()).toThrow('admin bundle is loaded');
     });
 
     it('throws TypeError when Injector.default is undefined', () => {
@@ -66,6 +67,7 @@ describe('Injector bridge', () => {
 
       expect(() => loadComponent('TestComponent')).toThrow(TypeError);
       expect(() => loadComponent('TestComponent')).toThrow('SilverStripe Injector is not available');
+      expect(() => loadComponent('TestComponent')).toThrow('admin bundle is loaded');
     });
 
     it('throws TypeError when loadComponent is not a function', () => {

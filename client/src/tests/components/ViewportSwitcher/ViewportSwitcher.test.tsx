@@ -94,6 +94,39 @@ describe('ViewportSwitcher', () => {
     expect(onViewportChange).toHaveBeenCalledWith('md');
   });
 
+  it('applies active modifier class to the active viewport button', () => {
+    const onViewportChange = vi.fn();
+
+    render(
+      <ViewportSwitcher
+        viewports={viewports}
+        activeViewport="sm"
+        onViewportChange={onViewportChange}
+      />,
+    );
+
+    const activeButton = screen.getByText('Small');
+    expect(activeButton.classList.contains('viewport-switcher__button--active')).toBe(true);
+  });
+
+  it('does not apply active modifier class to inactive viewport buttons', () => {
+    const onViewportChange = vi.fn();
+
+    render(
+      <ViewportSwitcher
+        viewports={viewports}
+        activeViewport="sm"
+        onViewportChange={onViewportChange}
+      />,
+    );
+
+    const inactiveLabels = ['Extra Small', 'Medium', 'Large'];
+    for (const label of inactiveLabels) {
+      const button = screen.getByText(label);
+      expect(button.classList.contains('viewport-switcher__button--active')).toBe(false);
+    }
+  });
+
   it('does NOT call onViewportChange when clicking the already-active tab', async () => {
     const user = userEvent.setup();
     const onViewportChange = vi.fn();

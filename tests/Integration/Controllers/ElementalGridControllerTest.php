@@ -135,6 +135,25 @@ final class ElementalGridControllerTest extends FunctionalTest
         );
     }
 
+    public function testReadTreeFindsPageRegardlessOfAmbientStage(): void
+    {
+        $this->logInForHttp();
+
+        // Load page ID while in DRAFT (the page is only on draft stage)
+        $pageId = Versioned::withVersionedMode(function (): int {
+            Versioned::set_stage(Versioned::DRAFT);
+
+            return $this->objFromFixture(TestPage::class, 'testpage')->ID;
+        });
+
+        // Set ambient stage to LIVE — the controller must internally switch to DRAFT
+        Versioned::set_stage(Versioned::LIVE);
+
+        $response = $this->get($this->apiUrl($pageId));
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
     public function testResponseMatchesTreeBuilderOutput(): void
     {
         $this->logInForHttp();
