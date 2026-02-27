@@ -26,6 +26,8 @@ src/Forms/            # Form field implementations
 src/Model/            # DTOs and value objects (ElementNode)
 src/Service/          # Domain services (ElementTreeBuilder)
 src/Validation/       # Hierarchy validation service
+src/Exception/        # Domain exceptions
+src/Repository/       # Repository interfaces + ORM implementations
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
 tests/E2E/            # Playwright E2E tests
@@ -41,10 +43,10 @@ client/src/components/ # React components
 client/src/hooks/     # React hooks (TanStack Query, mutations)
 client/src/styles/    # SCSS styles
 client/src/types/     # Zod schemas, TypeScript types
+client/src/utils/     # Frontend utility functions
+client/src/tests/     # Frontend test files (Vitest + RTL)
 client/dist/          # Vite build output (exposed, created by build)
-client/images/        # Static images (exposed, not yet created)
-client/lang/          # Frontend translations (exposed, not yet created)
-lang/                 # PHP translations (exposed, not yet created)
+phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 .docker/              # Docker dev env: Caddy + PHP + MySQL 8
 ```
 
@@ -65,13 +67,12 @@ lang/                 # PHP translations (exposed, not yet created)
 - `.docker/compose.yml` — Docker service definitions
 - `.docker/env.sh` — Generates `.docker/.env` with deterministic ports
 - `.docker/app/infection.json5` — Infection mutation testing config
-- `.docker/app/phpunit.mutation.xml.dist` — PHPUnit config for mutation testing
 - `.docker/app/phpstan.neon.dist` — PHPStan config (level max + Silverstan + 100% type coverage)
 
 ### PHP Testing
 
 - PHPUnit 11 — runs inside Docker via `make test`
-- PHPUnit configs: `.docker/app/phpunit.unit.xml.dist` (unit), `.docker/app/phpunit.xml.dist` (integration)
+- PHPUnit config: `.docker/app/phpunit.xml.dist` (defines `unit` and `integration` testsuites, selected via `--testsuite` flag)
 - Test namespace: `WeDevelop\ElementalGrid\Tests\` → `tests/` (Unit/ + Integration/)
 
 ### Static Analysis
@@ -129,7 +130,7 @@ lang/                 # PHP translations (exposed, not yet created)
 | `make test-e2e` | Run Playwright E2E tests (requires Docker) |
 | `make test-e2e-ui` | Playwright E2E with interactive UI |
 | `make qa` | Full QA suite (PHPStan + PHP tests + JS QA) |
-| `make qa-js` | JavaScript QA (lint + typecheck + test) |
+| `make qa-js` | JavaScript QA — **not yet functional** (target body commented out; use `npm run qa` directly) |
 
 ## Docker Dev Environment
 
