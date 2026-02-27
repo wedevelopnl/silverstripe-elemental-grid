@@ -16,13 +16,31 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 
 ```
 src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
+src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma)
+src/Contract/         # Interfaces and enums (GridAdapterInterface, ContainerType, Viewport)
+src/Controllers/      # API controllers (ElementalGridController)
+src/Dev/              # Development tools (FixtureController, FixtureLoader)
+src/Elements/         # Element models (ElementSection, ElementRow, ElementColumn)
+src/Extensions/       # SilverStripe extensions
+src/Forms/            # Form field implementations
+src/Model/            # DTOs and value objects (ElementNode)
+src/Service/          # Domain services (ElementTreeBuilder)
+src/Validation/       # Hierarchy validation service
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
 tests/E2E/            # Playwright E2E tests
 tests/E2E/Fixture/    # YAML fixtures for E2E test data
 tests/E2E/specs/      # E2E test specs
 tests/E2E/helpers/    # Shared E2E test utilities
-client/src/           # Frontend source (React/TS/SCSS) — not yet scaffolded
+client/src/           # Frontend source (React/TS/SCSS)
+client/src/api/       # API endpoint definitions
+client/src/boot/      # Component registration
+client/src/bridge/    # SilverStripe CMS integration (entwine, Injector)
+client/src/bundles/   # Entry points
+client/src/components/ # React components
+client/src/hooks/     # React hooks (TanStack Query, mutations)
+client/src/styles/    # SCSS styles
+client/src/types/     # Zod schemas, TypeScript types
 client/dist/          # Vite build output (exposed, created by build)
 client/images/        # Static images (exposed, not yet created)
 client/lang/          # Frontend translations (exposed, not yet created)
@@ -122,7 +140,6 @@ lang/                 # PHP translations (exposed, not yet created)
 
 ## Gotchas
 
-- **Early stage**: `client/src/` has only a `tests/` subdirectory — no frontend source code scaffolded yet
 - This is a **ground-up rewrite** for SS6 — do not copy SS5 patterns blindly from `main`/`master` branches
 - The SS5 version lives on `main` (and legacy `master`) for architectural reference only
 - Active development happens on branch `6` (orphaned from `main`)
