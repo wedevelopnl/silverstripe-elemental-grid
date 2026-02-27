@@ -1,0 +1,25 @@
+---
+Name: elemental-grid-adapter
+---
+
+SilverStripe\Core\Injector\Injector:
+  WeDevelop\ElementalGrid\Contract\GridAdapterInterface:
+    class: WeDevelop\ElementalGrid\Adapter\BootstrapAdapter
+
+---
+Name: elemental-grid-config
+After:
+  - '#elemental-grid-adapter'
+---
+
+SilverStripe\Core\Injector\Injector:
+  WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface:
+    class: WeDevelop\ElementalGrid\Service\GridConfigService
+    constructor:
+      adapter: '%$WeDevelop\ElementalGrid\Contract\GridAdapterInterface'
+
+# To override the adapter's defaults, configure GridConfigService:
+#
+# WeDevelop\ElementalGrid\Service\GridConfigService:
+#   total_columns: 16
+#   default_viewport: lg
