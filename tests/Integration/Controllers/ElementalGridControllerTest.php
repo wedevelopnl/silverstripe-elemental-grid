@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
+use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
+use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
 
@@ -133,6 +135,31 @@ final class ElementalGridControllerTest extends FunctionalTest
             "Sorry, it seems you were trying to access a section or object that doesn't exist.",
             $response,
         );
+    }
+
+    public function testCreateReturns422ForInvalidHierarchyPlacement(): void
+    {
+        $this->logInForHttp();
+
+        // ElementRow has can_be_root: false — placing it directly in a page's area is invalid
+        $pageArea = $this->objFromFixture(ElementalArea::class, 'page_area');
+
+        $response = $this->post(
+            '/admin/elemental-grid/api/create',
+            null,
+            ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'elementClass' => ElementRow::class,
+                'elementalAreaID' => $pageArea->ID,
+                'insertAfterElementID' => null,
+            ]),
+        );
+
+        $this->assertSame(422, $response->getStatusCode());
+
+        $body = json_decode($response->getBody(), associative: true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame('error', $body['status']);
+        $this->assertNotEmpty($body['errors']);
     }
 
     public function testResponseMatchesTreeBuilderOutput(): void

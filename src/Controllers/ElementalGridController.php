@@ -12,6 +12,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
@@ -129,10 +130,14 @@ class ElementalGridController extends AdminController
         $newElement->ParentID = $area->ID;
         $newElement->ensureSortSet();
 
-        if ($body['insertAfterElementID'] !== null) {
-            $this->reorderElements($newElement, $body['insertAfterElementID']);
-        } else {
-            $newElement->write();
+        try {
+            if ($body['insertAfterElementID'] !== null) {
+                $this->reorderElements($newElement, $body['insertAfterElementID']);
+            } else {
+                $newElement->write();
+            }
+        } catch (ValidationException $e) {
+            $this->jsonError(422, $e->getMessage());
         }
 
         return $this->jsonSuccess(204);
