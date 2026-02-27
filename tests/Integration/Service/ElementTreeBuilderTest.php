@@ -257,8 +257,9 @@ final class ElementTreeBuilderTest extends SapphireTest
 
         try {
             $tree = $this->buildTree();
+            $areaId = $this->getAreaId();
 
-            $section = $tree['ElementalArea'][0];
+            $section = $tree[$areaId][0];
             $data = $section->jsonSerialize();
 
             $this->assertArrayHasKey('extensions', $data);
