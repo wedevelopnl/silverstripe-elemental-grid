@@ -21,6 +21,18 @@ class ElementRow extends BaseElement implements ElementContainerInterface
 
     private static string $singular_name = 'Row';
 
+    private static string $plural_name = 'Rows';
+
+    private static string $icon = 'font-icon-columns';
+
+    private static string $class_description = 'Horizontal container that holds columns within a section';
+
+    /** @var array<string, string> */
+    private static array $summary_fields = [
+        'Title' => 'Title',
+        'getChildCountSummary' => 'Contents',
+    ];
+
     /** @var array<string, class-string> */
     private static array $has_one = [
         'ChildArea' => ElementalArea::class,
@@ -42,6 +54,23 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     ];
 
     private static string $default_column_title = '';
+
+    public function getType(): string
+    {
+        return 'Row';
+    }
+
+    public function getChildCountSummary(): string
+    {
+        $count = $this->getChildArea()->Elements()->count();
+
+        return sprintf('%d %s', $count, $count === 1 ? 'column' : 'columns');
+    }
+
+    public function getSummary(): string
+    {
+        return $this->getChildCountSummary();
+    }
 
     public function getChildArea(): ElementalArea
     {

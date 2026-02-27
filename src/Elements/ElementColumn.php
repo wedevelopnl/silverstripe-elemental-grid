@@ -19,6 +19,19 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
 
     private static string $singular_name = 'Column';
 
+    private static string $plural_name = 'Columns';
+
+    private static string $icon = 'font-icon-block-content';
+
+    private static string $class_description = 'Responsive grid column that holds content blocks';
+
+    /** @var array<string, string> */
+    private static array $summary_fields = [
+        'Title' => 'Title',
+        'getChildCountSummary' => 'Contents',
+        'getGridWidthSummary' => 'Width',
+    ];
+
     /** @var array<string, class-string> */
     private static array $has_one = [
         'ChildArea' => ElementalArea::class,
@@ -74,6 +87,39 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Column;
+    }
+
+    public function getType(): string
+    {
+        return 'Column';
+    }
+
+    public function getChildCountSummary(): string
+    {
+        $count = $this->getChildArea()->Elements()->count();
+
+        return sprintf('%d %s', $count, $count === 1 ? 'element' : 'elements');
+    }
+
+    /** Returns the first viewport's width as a fraction, e.g. '6/12'. */
+    public function getGridWidthSummary(): string
+    {
+        $settings = $this->getGridSettingsData();
+        $defaults = static::config()->get('default_grid_settings');
+
+        $firstKey = array_key_first($settings);
+        $defaultKey = array_key_first($defaults);
+
+        if ($firstKey === null || $defaultKey === null) {
+            return '';
+        }
+
+        return sprintf('%d/%d', $settings[$firstKey]['width'], $defaults[$defaultKey]['width']);
+    }
+
+    public function getSummary(): string
+    {
+        return $this->getChildCountSummary();
     }
 
     /**

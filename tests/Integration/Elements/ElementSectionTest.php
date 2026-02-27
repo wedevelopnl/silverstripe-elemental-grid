@@ -196,6 +196,61 @@ final class ElementSectionTest extends ElementContainerContractTestCase
         $this->assertTrue($result->isValid());
     }
 
+    public function testIconConfig(): void
+    {
+        $this->assertSame('font-icon-block-layout', ElementSection::config()->get('icon'));
+    }
+
+    public function testPluralNameConfig(): void
+    {
+        $this->assertSame('Sections', ElementSection::config()->get('plural_name'));
+    }
+
+    public function testClassDescriptionConfig(): void
+    {
+        $this->assertSame(
+            'Top-level layout container that holds rows',
+            ElementSection::config()->get('class_description'),
+        );
+    }
+
+    public function testGetTypeReturnsSection(): void
+    {
+        $section = $this->createContainer();
+        /** @var ElementSection $section */
+
+        $this->assertSame('Section', $section->getType());
+    }
+
+    public function testGetSummaryReturnsSingularRowCount(): void
+    {
+        $section = $this->createContainer();
+        /** @var ElementSection $section */
+
+        // Scaffolding creates 1 row
+        $this->assertSame('1 row', $section->getSummary());
+    }
+
+    public function testGetSummaryReturnsPluralRowCount(): void
+    {
+        $section = $this->createContainer();
+        /** @var ElementSection $section */
+
+        $extraRow = ElementRow::create();
+        $extraRow->ParentID = $section->getChildArea()->ID;
+        $extraRow->write();
+
+        $this->assertSame('2 rows', $section->getSummary());
+    }
+
+    public function testSummaryFieldsIncludesContentsColumn(): void
+    {
+        $fields = ElementSection::config()->get('summary_fields');
+
+        $this->assertArrayHasKey('getChildCountSummary', $fields);
+        $this->assertSame('Contents', $fields['getChildCountSummary']);
+    }
+
     /**
      * Regression: moving a section into its own row's area would create a
      * circular reference. The fixed hierarchy type rules prevent this —

@@ -22,6 +22,18 @@ class ElementSection extends BaseElement implements ElementContainerInterface
 
     private static string $singular_name = 'Section';
 
+    private static string $plural_name = 'Sections';
+
+    private static string $icon = 'font-icon-block-layout';
+
+    private static string $class_description = 'Top-level layout container that holds rows';
+
+    /** @var array<string, string> */
+    private static array $summary_fields = [
+        'Title' => 'Title',
+        'getChildCountSummary' => 'Contents',
+    ];
+
     /** @var array<string, class-string> */
     private static array $has_one = [
         'ChildArea' => ElementalArea::class,
@@ -43,6 +55,23 @@ class ElementSection extends BaseElement implements ElementContainerInterface
     ];
 
     private static string $default_row_title = '';
+
+    public function getType(): string
+    {
+        return 'Section';
+    }
+
+    public function getChildCountSummary(): string
+    {
+        $count = $this->getChildArea()->Elements()->count();
+
+        return sprintf('%d %s', $count, $count === 1 ? 'row' : 'rows');
+    }
+
+    public function getSummary(): string
+    {
+        return $this->getChildCountSummary();
+    }
 
     #[\Override]
     public function getChildArea(): ElementalArea

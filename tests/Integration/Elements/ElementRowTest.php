@@ -154,6 +154,61 @@ final class ElementRowTest extends ElementContainerContractTestCase
         });
     }
 
+    public function testIconConfig(): void
+    {
+        $this->assertSame('font-icon-columns', ElementRow::config()->get('icon'));
+    }
+
+    public function testPluralNameConfig(): void
+    {
+        $this->assertSame('Rows', ElementRow::config()->get('plural_name'));
+    }
+
+    public function testClassDescriptionConfig(): void
+    {
+        $this->assertSame(
+            'Horizontal container that holds columns within a section',
+            ElementRow::config()->get('class_description'),
+        );
+    }
+
+    public function testGetTypeReturnsRow(): void
+    {
+        $row = $this->createContainer();
+        /** @var ElementRow $row */
+
+        $this->assertSame('Row', $row->getType());
+    }
+
+    public function testGetSummaryReturnsSingularColumnCount(): void
+    {
+        $row = $this->createContainer();
+        /** @var ElementRow $row */
+
+        // Scaffolding creates 1 column
+        $this->assertSame('1 column', $row->getSummary());
+    }
+
+    public function testGetSummaryReturnsPluralColumnCount(): void
+    {
+        $row = $this->createContainer();
+        /** @var ElementRow $row */
+
+        $extraColumn = ElementColumn::create();
+        $extraColumn->ParentID = $row->getChildArea()->ID;
+        $extraColumn->write();
+
+        $this->assertSame('2 columns', $row->getSummary());
+    }
+
+    public function testSummaryFieldsIncludesContentsColumn(): void
+    {
+        $fields = ElementRow::config()->get('summary_fields');
+
+        $this->assertArrayHasKey('getChildCountSummary', $fields);
+        $this->assertSame('Contents', $fields['getChildCountSummary']);
+    }
+
     /**
      * Regression: moving a row into its own column's area would create a
      * circular reference. The fixed hierarchy type rules prevent this —

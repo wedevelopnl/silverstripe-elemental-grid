@@ -99,6 +99,71 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         $this->assertFalse($column->hasChildren());
     }
 
+    public function testIconConfig(): void
+    {
+        $this->assertSame('font-icon-block-content', ElementColumn::config()->get('icon'));
+    }
+
+    public function testPluralNameConfig(): void
+    {
+        $this->assertSame('Columns', ElementColumn::config()->get('plural_name'));
+    }
+
+    public function testClassDescriptionConfig(): void
+    {
+        $this->assertSame(
+            'Responsive grid column that holds content blocks',
+            ElementColumn::config()->get('class_description'),
+        );
+    }
+
+    public function testGetTypeReturnsColumn(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $this->assertSame('Column', $column->getType());
+    }
+
+    public function testGetSummaryReturnsZeroElementsForEmptyColumn(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $this->assertSame('0 elements', $column->getSummary());
+    }
+
+    public function testGetGridWidthSummaryWithDefaultSettings(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $this->assertSame('12/12', $column->getGridWidthSummary());
+    }
+
+    public function testGetGridWidthSummaryWithCustomSettings(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $settings = $column->getGridSettingsData();
+        $settings['xs']['width'] = 6;
+        $column->setGridSettingsData($settings);
+        $column->write();
+
+        $this->assertSame('6/12', $column->getGridWidthSummary());
+    }
+
+    public function testSummaryFieldsIncludesContentsAndWidthColumns(): void
+    {
+        $fields = ElementColumn::config()->get('summary_fields');
+
+        $this->assertArrayHasKey('getChildCountSummary', $fields);
+        $this->assertSame('Contents', $fields['getChildCountSummary']);
+        $this->assertArrayHasKey('getGridWidthSummary', $fields);
+        $this->assertSame('Width', $fields['getGridWidthSummary']);
+    }
+
     public function testDefaultGridSettingsAppliedFromConfig(): void
     {
         $column = $this->createContainer();
