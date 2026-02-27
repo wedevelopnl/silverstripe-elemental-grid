@@ -17,7 +17,7 @@ final class ElementNodeTest extends TestCase
         return new ElementNode(
             id: $id,
             title: $title,
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -37,7 +37,7 @@ final class ElementNodeTest extends TestCase
         return new ElementNode(
             id: 10,
             title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
             isPublished: true,
@@ -70,7 +70,7 @@ final class ElementNodeTest extends TestCase
 
         $this->assertSame(42, $data['id']);
         $this->assertSame('My Block', $data['title']);
-        $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''], $data['blockSchema']);
+        $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'], $data['blockSchema']);
         $this->assertNull($data['obsoleteClassName']);
         $this->assertSame(1, $data['version']);
         $this->assertFalse($data['isPublished']);
@@ -131,7 +131,7 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -163,7 +163,7 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -190,7 +190,7 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 10,
             title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
             isPublished: true,
@@ -225,7 +225,7 @@ final class ElementNodeTest extends TestCase
         $outerContainer = new ElementNode(
             id: 50,
             title: 'Outer',
-            blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -267,7 +267,7 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 1,
             title: 'Test Column',
-            blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -296,7 +296,7 @@ final class ElementNodeTest extends TestCase
         new ElementNode(
             id: 99,
             title: 'Row with grid settings',
-            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => ''],
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,
@@ -318,7 +318,7 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 2,
             title: 'Test Row',
-            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => ''],
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
             isPublished: false,

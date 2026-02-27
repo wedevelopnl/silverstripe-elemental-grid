@@ -9,6 +9,7 @@ function makeElement(overrides: Partial<SimpleElementNode> = {}): SimpleElementN
     title: 'My Element',
     blockSchema: {
       typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,
+      label: 'Base Element',
       actions: { edit: '/admin/elemental/edit/1' },
       content: 'Some preview text',
     },
@@ -42,6 +43,7 @@ describe('ElementCard', () => {
     const element = makeElement({
       blockSchema: {
         typeName: 'Content',
+        label: 'Content',
         actions: { edit: '/edit/1' },
         content: 'A detailed paragraph about widgets.',
       },
@@ -56,6 +58,7 @@ describe('ElementCard', () => {
     const element = makeElement({
       blockSchema: {
         typeName: 'Content',
+        label: 'Content',
         actions: { edit: '/edit/1' },
         content: '',
       },
@@ -66,10 +69,11 @@ describe('ElementCard', () => {
     expect(screen.getByText('No preview available')).toBeDefined();
   });
 
-  it('strips PHP namespace from typeName to show short type name', () => {
+  it('renders blockSchema.label as the type display name', () => {
     const element = makeElement({
       blockSchema: {
         typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,
+        label: 'Content Block',
         actions: { edit: '/edit/1' },
         content: 'preview',
       },
@@ -77,43 +81,14 @@ describe('ElementCard', () => {
 
     render(<ElementCard element={element} />);
 
-    expect(screen.getByText('BaseElement')).toBeDefined();
-    expect(screen.queryByText(String.raw`DNADesign\Elemental\Models\BaseElement`)).toBeNull();
-  });
-
-  it('strips single-character namespace prefix', () => {
-    const element = makeElement({
-      blockSchema: {
-        typeName: String.raw`A\Widget`,
-        actions: { edit: '/edit/1' },
-        content: 'preview',
-      },
-    });
-
-    render(<ElementCard element={element} />);
-
-    expect(screen.getByText('Widget')).toBeDefined();
-    expect(screen.queryByText(String.raw`A\Widget`)).toBeNull();
-  });
-
-  it('renders unqualified typeName unchanged', () => {
-    const element = makeElement({
-      blockSchema: {
-        typeName: 'Content',
-        actions: { edit: '/edit/1' },
-        content: 'preview',
-      },
-    });
-
-    render(<ElementCard element={element} />);
-
-    expect(screen.getByText('Content')).toBeDefined();
+    expect(screen.getByText('Content Block')).toBeDefined();
   });
 
   it('applies element-card__content--empty class when content is empty', () => {
     const element = makeElement({
       blockSchema: {
         typeName: 'Content',
+        label: 'Content',
         actions: { edit: '/edit/1' },
         content: '',
       },

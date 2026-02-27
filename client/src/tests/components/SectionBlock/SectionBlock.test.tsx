@@ -9,6 +9,7 @@ function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
     title: 'Section',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Section',
+      label: 'Section',
       actions: { edit: '/admin/elemental/edit/1' },
       content: '',
     },
@@ -34,6 +35,7 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
     title,
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Row',
+      label: 'Row',
       actions: { edit: `/admin/elemental/edit/${id}` },
       content: '',
     },
@@ -258,6 +260,7 @@ describe('SectionBlock', () => {
               title: 'Column',
               blockSchema: {
                 typeName: 'WeDevelop\\ElementalGrid\\Column',
+                label: 'Column',
                 actions: { edit: '/admin/elemental/edit/30' },
                 content: '',
               },

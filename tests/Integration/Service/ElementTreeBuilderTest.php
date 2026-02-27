@@ -208,6 +208,10 @@ final class ElementTreeBuilderTest extends SapphireTest
 
         $this->assertArrayHasKey('content', $schema);
         $this->assertIsString($schema['content']);
+
+        $this->assertArrayHasKey('label', $schema);
+        $this->assertIsString($schema['label']);
+        $this->assertNotEmpty($schema['label']);
     }
 
     // ---- Empty containers ----

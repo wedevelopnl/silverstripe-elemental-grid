@@ -15,7 +15,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  * @phpstan-type SerializedNode array{
  *     id: int,
  *     title: string,
- *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string},
+ *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string, label: string},
  *     obsoleteClassName: string|null,
  *     version: int,
  *     isPublished: bool,
@@ -35,7 +35,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
 final readonly class ElementNode implements \JsonSerializable
 {
     /**
-     * @param array{typeName: string, actions: array{edit: string}, content: string} $blockSchema
+     * @param array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema
      * @param array<string, mixed> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children

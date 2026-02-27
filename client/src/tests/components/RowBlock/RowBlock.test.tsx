@@ -9,6 +9,7 @@ function makeRow(overrides: Partial<RowNode> = {}): RowNode {
     title: 'Row',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Row',
+      label: 'Row',
       actions: { edit: '/admin/elemental/edit/20' },
       content: '',
     },
@@ -44,6 +45,7 @@ function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = 
     title,
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Column',
+      label: 'Column',
       actions: { edit: `/admin/elemental/edit/${id}` },
       content: '',
     },

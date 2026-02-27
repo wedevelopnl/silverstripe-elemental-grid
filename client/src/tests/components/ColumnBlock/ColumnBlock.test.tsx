@@ -9,6 +9,7 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
     title: 'Column',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Column',
+      label: 'Column',
       actions: { edit: '/admin/elemental/edit/10' },
       content: '',
     },
@@ -125,6 +126,7 @@ describe('ColumnBlock', () => {
           title: 'Hero Banner',
           blockSchema: {
             typeName: 'Content',
+            label: 'Content',
             actions: { edit: '/edit/100' },
             content: 'Hero content',
           },
@@ -143,6 +145,7 @@ describe('ColumnBlock', () => {
           title: 'Text Block',
           blockSchema: {
             typeName: 'Content',
+            label: 'Content',
             actions: { edit: '/edit/101' },
             content: 'Text content',
           },

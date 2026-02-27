@@ -18,6 +18,7 @@ import type { ColumnNode } from '@/types/elements';
 
 const validBlockSchema = {
   typeName: String.raw`SilverStripe\ElementalGrid\Model\ElementContent`,
+  label: 'Content',
   actions: { edit: '/admin/elemental-grid/api/edit/1' },
   content: '<p>Hello world</p>',
 };
@@ -162,7 +163,7 @@ describe('columnNodeSchema', () => {
         xs: { width: 12, offset: 0, visible: true },
         md: { width: 6, offset: 0, visible: true },
       },
-      blockSchema: { typeName: 'Column', actions: { edit: '/edit/3' }, content: '' },
+      blockSchema: { typeName: 'Column', label: 'Column', actions: { edit: '/edit/3' }, content: '' },
       obsoleteClassName: null,
       version: 1,
       isPublished: false,
