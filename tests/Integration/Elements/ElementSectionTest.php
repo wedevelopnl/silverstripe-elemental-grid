@@ -195,4 +195,49 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
         $this->assertTrue($result->isValid());
     }
+
+    /**
+     * Regression: moving a section into its own row's area would create a
+     * circular reference. The fixed hierarchy type rules prevent this —
+     * sections are never allowed inside rows.
+     */
+    public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnRow(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
+
+        // Attempt to reparent the section into its own row's child area
+        $section->ParentID = $row->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Section cannot be placed inside Row.');
+        $section->write();
+    }
+
+    /**
+     * Regression: moving a section into its own column's area would create a
+     * circular reference. The fixed hierarchy type rules prevent this —
+     * sections are never allowed inside columns.
+     */
+    public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnColumn(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
+
+        $column = $row->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementColumn::class, $column);
+
+        // Attempt to reparent the section into its own column's child area
+        $section->ParentID = $column->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Section cannot be placed inside Column.');
+        $section->write();
+    }
 }

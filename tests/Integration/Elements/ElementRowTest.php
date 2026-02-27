@@ -153,4 +153,28 @@ final class ElementRowTest extends ElementContainerContractTestCase
             $this->assertFalse($row->hasChildren());
         });
     }
+
+    /**
+     * Regression: moving a row into its own column's area would create a
+     * circular reference. The fixed hierarchy type rules prevent this —
+     * rows are never allowed inside columns.
+     */
+    public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnColumn(): void
+    {
+        $section = ElementSection::create();
+        $section->write();
+
+        $row = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $row);
+
+        $column = $row->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementColumn::class, $column);
+
+        // Attempt to reparent the row into its own column's child area
+        $row->ParentID = $column->getChildArea()->ID;
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Row cannot be placed inside Column.');
+        $row->write();
+    }
 }
