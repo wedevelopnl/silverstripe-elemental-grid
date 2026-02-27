@@ -70,7 +70,6 @@ class ElementTreeBuilder
         foreach ($relations as $relation) {
             $areaId = (int) $page->{$relation . 'ID'}; // @phpstan-ignore cast.int (ORM dynamic property)
             if ($areaId <= 0) {
-                $tree[$relation] = [];
                 continue;
             }
 
