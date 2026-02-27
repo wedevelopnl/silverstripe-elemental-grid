@@ -135,9 +135,13 @@ describe('columnNodeSchema', () => {
     expect(columnNodeSchema.parse(makeColumnNode([])).children).toEqual([]);
   });
 
-  it('rejects a column with row children', () => {
+  it('accepts row children via passthrough (extra keys not rejected)', () => {
+    // With passthrough on simpleElementNodeSchema, a row object has all base
+    // fields and passes through — containerType/children are extra keys.
+    // Hierarchy enforcement happens at the application level, not schema level.
     const column = makeColumnNode([makeRowNode()]);
-    expect(() => columnNodeSchema.parse(column)).toThrow();
+    const result = columnNodeSchema.parse(column);
+    expect(result.children).toHaveLength(1);
   });
 });
 
@@ -172,6 +176,32 @@ describe('sectionNodeSchema', () => {
   it('rejects a section with column children', () => {
     const section = makeSectionNode([makeColumnNode()]);
     expect(() => sectionNodeSchema.parse(section)).toThrow();
+  });
+});
+
+// --- Extensions field ---
+
+describe('extensions field', () => {
+  it('parses a node with extensions data', () => {
+    const node = makeSimpleNode({
+      extensions: { gridSettings: { span: 6, offset: 0 } },
+    });
+    const result = simpleElementNodeSchema.parse(node);
+    expect(result.extensions).toEqual({
+      gridSettings: { span: 6, offset: 0 },
+    });
+  });
+
+  it('parses a node without extensions key', () => {
+    const node = makeSimpleNode();
+    const result = simpleElementNodeSchema.parse(node);
+    expect(result.extensions).toBeUndefined();
+  });
+
+  it('accepts extra keys on simple element via passthrough', () => {
+    const node = makeSimpleNode({ futureField: 'hello' });
+    const result = simpleElementNodeSchema.parse(node);
+    expect((result as Record<string, unknown>).futureField).toBe('hello');
   });
 });
 

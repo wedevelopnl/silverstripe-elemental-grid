@@ -28,6 +28,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
+ *     extensions?: array<string, mixed>,
  * }
  */
 final readonly class ElementNode implements \JsonSerializable
@@ -37,6 +38,7 @@ final readonly class ElementNode implements \JsonSerializable
      * @param array<string, mixed> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children
+     * @param array<string, mixed> $extensions
      */
     public function __construct(
         public int $id,
@@ -54,6 +56,7 @@ final readonly class ElementNode implements \JsonSerializable
         public ?ContainerType $containerType = null,
         public ?array $allowedTypes = null,
         public ?array $children = null,
+        public array $extensions = [],
     ) {}
 
     /** @return SerializedNode */
@@ -79,6 +82,10 @@ final readonly class ElementNode implements \JsonSerializable
             $data['containerType'] = $this->containerType->value;
             $data['allowedTypes'] = $this->allowedTypes;
             $data['children'] = $this->children;
+        }
+
+        if ($this->extensions !== []) {
+            $data['extensions'] = $this->extensions;
         }
 
         return $data;

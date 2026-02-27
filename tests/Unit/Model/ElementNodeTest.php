@@ -126,6 +126,95 @@ final class ElementNodeTest extends TestCase
         $this->assertArrayNotHasKey('children', $decoded['children'][0]);
     }
 
+    public function testExtensionsIncludedInSerialization(): void
+    {
+        $node = new ElementNode(
+            id: 1,
+            title: 'Leaf',
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 1,
+            isPublished: false,
+            isLiveVersion: false,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            extensions: ['gridSettings' => ['span' => 6, 'offset' => 0]],
+        );
+
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayHasKey('extensions', $data);
+        $this->assertSame(['span' => 6, 'offset' => 0], $data['extensions']['gridSettings']);
+    }
+
+    public function testEmptyExtensionsOmittedFromSerialization(): void
+    {
+        $node = $this->createLeafNode();
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayNotHasKey('extensions', $data);
+    }
+
+    public function testExtensionsOnLeafNode(): void
+    {
+        $node = new ElementNode(
+            id: 1,
+            title: 'Leaf',
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 1,
+            isPublished: false,
+            isLiveVersion: false,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            extensions: ['custom' => 'value'],
+        );
+
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayHasKey('extensions', $data);
+        $this->assertSame(['custom' => 'value'], $data['extensions']);
+        $this->assertArrayNotHasKey('containerType', $data);
+        $this->assertArrayNotHasKey('allowedTypes', $data);
+        $this->assertArrayNotHasKey('children', $data);
+    }
+
+    public function testExtensionsOnContainerNode(): void
+    {
+        $node = new ElementNode(
+            id: 10,
+            title: 'Container',
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => ''],
+            obsoleteClassName: null,
+            version: 2,
+            isPublished: true,
+            isLiveVersion: true,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: true,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Section,
+            allowedTypes: ['App\\Elements\\Row' => 'Row'],
+            children: [],
+            extensions: ['layout' => 'fluid'],
+        );
+
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayHasKey('containerType', $data);
+        $this->assertArrayHasKey('allowedTypes', $data);
+        $this->assertArrayHasKey('children', $data);
+        $this->assertArrayHasKey('extensions', $data);
+        $this->assertSame(['layout' => 'fluid'], $data['extensions']);
+    }
+
     public function testNestedContainersSerializeRecursively(): void
     {
         $leaf = $this->createLeafNode(id: 200, title: 'Deep Leaf');

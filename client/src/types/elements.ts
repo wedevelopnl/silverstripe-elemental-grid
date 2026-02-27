@@ -29,13 +29,14 @@ const baseFieldsSchema = z.object({
   canUnpublish: z.boolean(),
   canCreate: z.boolean(),
   statusFlags: z.record(z.string(), z.unknown()),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
 // --- Leaf node schema (no containerType field) ---
-// Strict mode rejects objects with extra keys (like containerType),
-// preventing container nodes from being accepted as simple elements.
+// Passthrough allows extra keys from extension enrichers while still
+// rejecting container nodes via the discriminated union ordering.
 
-export const simpleElementNodeSchema = baseFieldsSchema.strict();
+export const simpleElementNodeSchema = baseFieldsSchema.passthrough();
 
 // --- Container node schemas (bottom-up: column → row → section) ---
 

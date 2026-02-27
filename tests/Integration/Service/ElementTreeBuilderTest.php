@@ -231,6 +231,33 @@ final class ElementTreeBuilderTest extends SapphireTest
         }
     }
 
+    // ---- Extension hook ----
+
+    public function testExtensionCanEnrichElementNode(): void
+    {
+        ElementTreeBuilder::add_extension(TestEnricherExtension::class);
+
+        try {
+            $tree = $this->buildTree();
+
+            $section = $tree['ElementalArea'][0];
+            $data = $section->jsonSerialize();
+
+            $this->assertArrayHasKey('extensions', $data);
+            $this->assertArrayHasKey('testEnricher', $data['extensions']);
+            $this->assertSame('enriched', $data['extensions']['testEnricher']);
+
+            // Verify enrichment propagates to nested nodes
+            $leaf = $section->children[0]->children[0]->children[0];
+            $leafData = $leaf->jsonSerialize();
+
+            $this->assertArrayHasKey('extensions', $leafData);
+            $this->assertSame('enriched', $leafData['extensions']['testEnricher']);
+        } finally {
+            ElementTreeBuilder::remove_extension(TestEnricherExtension::class);
+        }
+    }
+
     // ---- Empty states ----
 
     public function testPageWithNoElements(): void
@@ -259,5 +286,19 @@ class DenyViewExtension extends Extension
     public function canView($member): false
     {
         return false;
+    }
+}
+
+/**
+ * Test extension that enriches element nodes via the updateElementData hook.
+ */
+class TestEnricherExtension extends Extension
+{
+    /**
+     * @param array<string, mixed> $extensions
+     */
+    public function updateElementData(BaseElement $element, array &$extensions): void
+    {
+        $extensions['testEnricher'] = 'enriched';
     }
 }

@@ -6,6 +6,8 @@ namespace WeDevelop\ElementalGrid\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Model\ElementNode;
@@ -33,6 +35,8 @@ use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
  */
 class ElementTreeBuilder
 {
+    use Configurable;
+    use Extensible;
     use Injectable;
 
     /** @var array<class-string, array<class-string, string>> */
@@ -150,28 +154,45 @@ class ElementTreeBuilder
                 : [];
         }
 
+        $id = (int) $element->ID;
+        $title = $element->Title;
+        $obsoleteClassName = $element->getObsoleteClassName();
+        $version = (int) $element->Version;
+        $isPublished = $element->isPublished();
+        $isLiveVersion = $element->isLiveVersion();
+        $canDelete = $element->canDelete();
+        $canPublish = $element->canPublish();
+        $canUnpublish = (bool) $element->canUnpublish();
+        $canCreate = $element->canCreate();
+
         /** @var array{typeName: string, actions: array{edit: string}, content: string} $blockSchema */
         $blockSchema = $element->getBlockSchema();
 
         /** @var array<string, mixed> $statusFlags */
         $statusFlags = $element->getStatusFlags();
 
+        /** @var array<string, mixed> $extensions */
+        $extensions = [];
+        $this->extend('updateElementData', $element, $extensions);
+        /** @var array<string, mixed> $extensions PHPStan: extend() widens by-ref params */
+
         return new ElementNode(
-            id: (int) $element->ID,
-            title: $element->Title,
+            id: $id,
+            title: $title,
             blockSchema: $blockSchema,
-            obsoleteClassName: $element->getObsoleteClassName(),
-            version: (int) $element->Version,
-            isPublished: $element->isPublished(),
-            isLiveVersion: $element->isLiveVersion(),
-            canDelete: $element->canDelete(),
-            canPublish: $element->canPublish(),
-            canUnpublish: (bool) $element->canUnpublish(),
-            canCreate: $element->canCreate(),
+            obsoleteClassName: $obsoleteClassName,
+            version: $version,
+            isPublished: $isPublished,
+            isLiveVersion: $isLiveVersion,
+            canDelete: $canDelete,
+            canPublish: $canPublish,
+            canUnpublish: $canUnpublish,
+            canCreate: $canCreate,
             statusFlags: $statusFlags,
             containerType: $containerType,
             allowedTypes: $allowedTypes,
             children: $children,
+            extensions: $extensions,
         );
     }
 
