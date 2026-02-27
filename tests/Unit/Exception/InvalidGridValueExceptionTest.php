@@ -86,6 +86,22 @@ final class InvalidGridValueExceptionTest extends TestCase
         $this->assertSame('Viewport key "xxl" is not a valid breakpoint.', $exception->getMessage());
     }
 
+    public function testForColumnCountUserMessageContainsNoValues(): void
+    {
+        $exception = InvalidGridValueException::forColumnCount(-5);
+
+        $this->assertSame(422, $exception->getStatusCode());
+        $this->assertSame('The configured column count is invalid.', $exception->getUserMessage());
+        $this->assertStringNotContainsString('-5', $exception->getUserMessage());
+    }
+
+    public function testForColumnCountDetailedMessageContainsValue(): void
+    {
+        $exception = InvalidGridValueException::forColumnCount(0);
+
+        $this->assertSame("Column count must be a positive integer, got 0 (int).", $exception->getMessage());
+    }
+
     public function testPreviousThrowablePropagates(): void
     {
         $cause = new \LogicException('validation root');
