@@ -149,3 +149,7 @@ lang/                 # PHP translations (exposed, not yet created)
 - **E2E tests are opt-in**: `make test-e2e` is NOT part of `make test` or `make qa` — E2E tests require running Docker services and are slow
 - **E2E fixtures**: loaded via HTTP (`/dev/elemental-grid-fixtures/{load,reset}`), gated to dev environment only
 - **E2E TypeScript**: `tests/E2E/` has its own `tsconfig.json` (no vitest globals, includes Playwright types)
+- **SilverStripe controller DI**: `AdminController` subclasses cannot use constructor injection (framework calls `new $class()` with no args). Use `private static array $dependencies` for property injection instead.
+- **SilverStripe Injector constructor wiring**: Injector does NOT auto-wire constructor params from YAML interface bindings. Services with constructor injection need explicit `constructor:` config in YAML.
+- **PHPStan `positive-int` narrowing**: `!== 0` does not narrow `int` to `positive-int`; use `> 0` (or `<= 0` for the guard clause) instead.
+- **Beads export in commits**: `bd sync` does not update `.beads/issues.jsonl`. Run `bd export > .beads/issues.jsonl` and include the change in the same commit as the implementation, not a separate commit.

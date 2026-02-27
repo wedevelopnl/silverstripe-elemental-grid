@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WeDevelop\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
 use DNADesign\Elemental\Services\ReorderElements;
 use SilverStripe\Admin\AdminController;
 use SilverStripe\CMS\Model\SiteTree;
@@ -15,6 +14,8 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
+use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 
 /**
@@ -24,12 +25,29 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  *   insertAfterElementID: positive-int|null,
  * }
  * @phpstan-type ElementIdBody array{id: positive-int}
+ *
+ * @property ElementRepositoryInterface $elementRepository
+ * @property ElementalAreaRepositoryInterface $areaRepository
+ * @property ElementTreeBuilder $treeBuilder
  */
 class ElementalGridController extends AdminController
 {
     private static string $url_segment = 'elemental-grid';
 
     private static string $required_permission_codes = 'CMS_ACCESS';
+
+    /** @var array<string, string> */
+    private static array $dependencies = [
+        'elementRepository' => '%$' . ElementRepositoryInterface::class,
+        'areaRepository' => '%$' . ElementalAreaRepositoryInterface::class,
+        'treeBuilder' => '%$' . ElementTreeBuilder::class,
+    ];
+
+    public ElementRepositoryInterface $elementRepository;
+
+    public ElementalAreaRepositoryInterface $areaRepository;
+
+    public ElementTreeBuilder $treeBuilder;
 
     /** @var array<string, string> */
     private static array $url_handlers = [
@@ -80,7 +98,7 @@ class ElementalGridController extends AdminController
             $this->jsonError(404);
         }
 
-        $tree = ElementTreeBuilder::create()->buildForPage($page);
+        $tree = $this->treeBuilder->buildForPage($page);
 
         return $this->jsonSuccess(200, $tree);
     }
@@ -93,8 +111,7 @@ class ElementalGridController extends AdminController
 
         $body = $this->parseCreateBody($request);
 
-        /** @var ElementalArea|null $area */
-        $area = ElementalArea::get()->byID($body['elementalAreaID']);
+        $area = $this->areaRepository->findById($body['elementalAreaID']);
         if ($area === null) {
             $this->jsonError(400);
         }
@@ -129,8 +146,7 @@ class ElementalGridController extends AdminController
 
         $id = $this->requireElementId($request);
 
-        /** @var BaseElement|null $element */
-        $element = BaseElement::get()->byID($id);
+        $element = $this->elementRepository->findById($id);
         if ($element === null) {
             $this->jsonError(400);
         }
@@ -152,8 +168,7 @@ class ElementalGridController extends AdminController
 
         $id = $this->requireElementId($request);
 
-        /** @var BaseElement|null $element */
-        $element = BaseElement::get()->byID($id);
+        $element = $this->elementRepository->findById($id);
         if ($element === null) {
             $this->jsonError(400);
         }
@@ -175,8 +190,7 @@ class ElementalGridController extends AdminController
 
         $id = $this->requireElementId($request);
 
-        /** @var BaseElement|null $element */
-        $element = BaseElement::get()->byID($id);
+        $element = $this->elementRepository->findById($id);
         if ($element === null) {
             $this->jsonError(400);
         }
@@ -198,8 +212,7 @@ class ElementalGridController extends AdminController
 
         $id = $this->requireElementId($request);
 
-        /** @var BaseElement|null $element */
-        $element = BaseElement::get()->byID($id);
+        $element = $this->elementRepository->findById($id);
         if ($element === null) {
             $this->jsonError(400);
         }
@@ -208,8 +221,9 @@ class ElementalGridController extends AdminController
             $this->jsonError(403);
         }
 
-        /** @var ElementalArea|null $area */
-        $area = ElementalArea::get()->byID($element->ParentID);
+        /** @var positive-int $parentId */
+        $parentId = (int) $element->ParentID;
+        $area = $this->areaRepository->findById($parentId);
         if ($area === null) {
             $this->jsonError(400);
         }

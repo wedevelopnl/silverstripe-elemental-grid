@@ -9,6 +9,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Model\ElementNode;
+use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 
 /**
  * Builds a recursive element tree for a page using batch-loading to avoid N+1 queries.
@@ -37,6 +38,11 @@ class ElementTreeBuilder
     /** @var array<class-string, array<class-string, string>> */
     private array $allowedTypesCache = [];
 
+    public function __construct(
+        private readonly ElementRepositoryInterface $elementRepository,
+    ) {
+    }
+
     /**
      * Build the full element tree for a page, keyed by elemental relation name.
      *
@@ -54,7 +60,7 @@ class ElementTreeBuilder
         $tree = [];
         foreach ($relations as $relation) {
             $areaId = (int) $page->{$relation . 'ID'}; // @phpstan-ignore cast.int (ORM dynamic property)
-            if ($areaId === 0) {
+            if ($areaId <= 0) {
                 $tree[$relation] = [];
                 continue;
             }
@@ -69,6 +75,7 @@ class ElementTreeBuilder
     /**
      * Breadth-first batch loading: one query per hierarchy depth level.
      *
+     * @param positive-int $rootAreaId
      * @return array<int, list<BaseElement>> Map of area ID → elements in that area
      */
     private function loadAllElements(int $rootAreaId): array
@@ -78,9 +85,7 @@ class ElementTreeBuilder
         $pendingAreaIds = [$rootAreaId];
 
         while ($pendingAreaIds !== []) {
-            $elements = BaseElement::get()
-                ->filter('ParentID', $pendingAreaIds)
-                ->sort(['Sort' => 'ASC', 'ID' => 'ASC']);
+            $elements = $this->elementRepository->findByAreaIds($pendingAreaIds);
 
             $nextAreaIds = [];
 
@@ -91,7 +96,7 @@ class ElementTreeBuilder
 
                 if ($element instanceof ElementContainerInterface) {
                     $childAreaId = (int) $element->ChildAreaID; // @phpstan-ignore cast.int (ORM dynamic property)
-                    if ($childAreaId !== 0) {
+                    if ($childAreaId > 0) {
                         $nextAreaIds[] = $childAreaId;
                     }
                 }

@@ -8,6 +8,7 @@ use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use DNADesign\Elemental\Models\BaseElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Extension;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
@@ -47,7 +48,9 @@ final class ElementTreeBuilderTest extends SapphireTest
     private function buildTree(): array
     {
         $page = $this->objFromFixture(TestPage::class, 'testpage');
-        $builder = ElementTreeBuilder::create();
+
+        /** @var ElementTreeBuilder $builder */
+        $builder = Injector::inst()->get(ElementTreeBuilder::class);
 
         return $builder->buildForPage($page);
     }
@@ -236,7 +239,8 @@ final class ElementTreeBuilderTest extends SapphireTest
         $page->Title = 'Empty Page';
         $page->write();
 
-        $builder = ElementTreeBuilder::create();
+        /** @var ElementTreeBuilder $builder */
+        $builder = Injector::inst()->get(ElementTreeBuilder::class);
         $tree = $builder->buildForPage($page);
 
         $this->assertArrayHasKey('ElementalArea', $tree);

@@ -45,3 +45,10 @@ After:
 SilverStripe\Core\Injector\Injector:
   WeDevelop\ElementalGrid\Validation\HierarchyValidatorInterface:
     class: WeDevelop\ElementalGrid\Validation\HierarchyValidationService
+  WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface:
+    class: WeDevelop\ElementalGrid\Repository\OrmElementRepository
+  WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface:
+    class: WeDevelop\ElementalGrid\Repository\OrmElementalAreaRepository
+  WeDevelop\ElementalGrid\Service\ElementTreeBuilder:
+    constructor:
+      elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
