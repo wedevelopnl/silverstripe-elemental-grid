@@ -1,22 +1,12 @@
 @use '../../styles/variables' as vars;
+@use '../../styles/mixins';
 
 .column-block {
+  @include mixins.status-indicator;
+
   background: #f8f9fa;
-  border-left: 3px solid transparent;
   padding: 8px;
   min-height: 60px;
-
-  &--draft {
-    border-left-color: vars.$color-status-draft;
-  }
-
-  &--published {
-    border-left-color: vars.$color-status-published;
-  }
-
-  &--modified {
-    border-left-color: vars.$color-status-modified;
-  }
 
   &--hidden {
     opacity: 0.4;

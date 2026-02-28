@@ -1,23 +1,13 @@
 @use '../../styles/variables' as vars;
+@use '../../styles/mixins';
 
 .row-block {
   background: #ffffff;
   border: 1px solid vars.$color-border-light;
-  border-left: 3px solid transparent;
   border-radius: 4px;
   padding: 12px;
 
-  &--draft {
-    border-left-color: vars.$color-status-draft;
-  }
-
-  &--published {
-    border-left-color: vars.$color-status-published;
-  }
-
-  &--modified {
-    border-left-color: vars.$color-status-modified;
-  }
+  @include mixins.status-indicator;
 
   &__title {
     font-size: 0.75em;

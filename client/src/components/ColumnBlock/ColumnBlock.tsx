@@ -1,14 +1,11 @@
 import type { ColumnNode, ViewportSettings } from '@/types/elements';
 import { deriveElementStatus } from '@/types/status';
+import { useViewportContext } from '@/hooks/ViewportContext';
 import ElementCard from '@/components/ElementCard/ElementCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface ColumnBlockProps {
   readonly column: ColumnNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-  readonly getWidthClass: (width: number) => string;
-  readonly getOffsetClass: (offset: number) => string;
 }
 
 function resolveViewportSettings(
@@ -23,13 +20,8 @@ function resolveViewportSettings(
   };
 }
 
-export default function ColumnBlock({
-  column,
-  activeViewport,
-  columnCount,
-  getWidthClass,
-  getOffsetClass,
-}: ColumnBlockProps) {
+export default function ColumnBlock({ column }: ColumnBlockProps) {
+  const { activeViewport, columnCount, getWidthClass, getOffsetClass } = useViewportContext();
   const settings = resolveViewportSettings(column, activeViewport, columnCount);
   const status = deriveElementStatus(column.isPublished, column.isLiveVersion);
 

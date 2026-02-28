@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import type { ColumnNode } from '@/types/elements';
+import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 
 function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
   return {
@@ -32,16 +33,6 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
   };
 }
 
-const COLUMN_COUNT = 12;
-
-function stubGetWidthClass(width: number): string {
-  return `col-${width}`;
-}
-
-function stubGetOffsetClass(offset: number): string {
-  return `offset-${offset}`;
-}
-
 describe('ColumnBlock', () => {
   it('renders fraction badge for the active viewport', () => {
     const column = makeColumn({
@@ -49,13 +40,8 @@ describe('ColumnBlock', () => {
     });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('6/12')).toBeDefined();
@@ -67,13 +53,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -86,13 +67,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -105,13 +81,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -163,13 +134,8 @@ describe('ColumnBlock', () => {
     });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('Hero Banner')).toBeDefined();
@@ -180,13 +146,8 @@ describe('ColumnBlock', () => {
     const column = makeColumn({ children: null });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No content blocks')).toBeDefined();
@@ -196,13 +157,8 @@ describe('ColumnBlock', () => {
     const column = makeColumn({ children: [] });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No content blocks')).toBeDefined();
@@ -214,13 +170,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -233,13 +184,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -252,13 +198,8 @@ describe('ColumnBlock', () => {
     });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('hidden')).toBeDefined();
@@ -272,13 +213,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -292,13 +228,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -312,13 +243,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -331,13 +257,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="lg"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
     );
 
     // Falls back to full width (columnCount = 12)
@@ -352,13 +273,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="lg"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
     );
 
     const outerDiv = container.firstElementChild;
@@ -372,13 +288,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="lg"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
     );
 
     const inner = container.querySelector('.column-block');
@@ -393,13 +304,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={customGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ getWidthClass: customGetWidthClass }) },
     );
 
     expect(customGetWidthClass).toHaveBeenCalledWith(8);
@@ -414,13 +320,8 @@ describe('ColumnBlock', () => {
     });
 
     const { container } = render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={customGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ getOffsetClass: customGetOffsetClass }) },
     );
 
     expect(customGetOffsetClass).toHaveBeenCalledWith(3);
@@ -435,13 +336,8 @@ describe('ColumnBlock', () => {
     });
 
     render(
-      <ColumnBlock
-        column={column}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={customGetOffsetClass}
-      />,
+      <ColumnBlock column={column} />,
+      { wrapper: createViewportWrapper({ getOffsetClass: customGetOffsetClass }) },
     );
 
     expect(customGetOffsetClass).not.toHaveBeenCalled();

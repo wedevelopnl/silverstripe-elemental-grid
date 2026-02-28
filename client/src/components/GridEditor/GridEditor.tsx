@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { useElementTree } from '@/hooks/useElementTree';
 import { useViewport } from '@/hooks/useViewport';
+import { ViewportProvider } from '@/hooks/ViewportContext';
+import type { ViewportContextValue } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
 import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
@@ -30,6 +33,14 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
     getOffsetClass,
   } = useViewport();
 
+  const viewportContextValue: ViewportContextValue = useMemo(() => ({
+    activeViewport,
+    columnCount,
+    rowClasses,
+    getWidthClass,
+    getOffsetClass,
+  }), [activeViewport, columnCount, rowClasses, getWidthClass, getOffsetClass]);
+
   const sections = data === undefined
     ? []
     : (data[String(areaId)] ?? []).filter(isSectionNode);
@@ -43,7 +54,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
         </p>
       )}
       {data !== undefined && (
-        <>
+        <ViewportProvider value={viewportContextValue}>
           <ViewportSwitcher
             viewports={viewports}
             activeViewport={activeViewport}
@@ -54,15 +65,10 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
               <SectionBlock
                 key={section.id}
                 section={section}
-                activeViewport={activeViewport}
-                columnCount={columnCount}
-                rowClasses={rowClasses}
-                getWidthClass={getWidthClass}
-                getOffsetClass={getOffsetClass}
               />
             ))
             : <EmptyState message="No sections yet" variant="centered" />}
-        </>
+        </ViewportProvider>
       )}
     </div>
   );

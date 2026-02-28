@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 
 import RowBlock from '@/components/RowBlock/RowBlock';
 import type { ColumnNode, RowNode } from '@/types/elements';
+import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 
 function makeRow(overrides: Partial<RowNode> = {}): RowNode {
   return {
@@ -27,16 +28,6 @@ function makeRow(overrides: Partial<RowNode> = {}): RowNode {
     children: null,
     ...overrides,
   };
-}
-
-const COLUMN_COUNT = 12;
-
-function stubGetWidthClass(width: number): string {
-  return `col-${width}`;
-}
-
-function stubGetOffsetClass(offset: number): string {
-  return `offset-${offset}`;
 }
 
 function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = {}) {
@@ -73,14 +64,8 @@ describe('RowBlock', () => {
     const row = makeRow({ title: 'Main Row' });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const titleElement = container.querySelector('.row-block__title');
@@ -88,36 +73,24 @@ describe('RowBlock', () => {
     expect(titleElement?.textContent).toBe('Main Row');
   });
 
-  it('applies rowClasses prop on the column container div', () => {
+  it('applies rowClasses from context on the column container div', () => {
     const row = makeRow();
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const columnContainer = container.querySelector('.row');
     expect(columnContainer).not.toBeNull();
   });
 
-  it('applies custom rowClasses value (not just "row")', () => {
+  it('applies custom rowClasses value from context', () => {
     const row = makeRow();
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="columns is-multiline"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper({ rowClasses: 'columns is-multiline' }) },
     );
 
     const columnContainer = container.querySelector('.columns.is-multiline');
@@ -133,17 +106,10 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
-    // ColumnBlocks render a badge with width/columnCount fraction
     const badges = container.querySelectorAll('.column-block__badge');
     expect(badges.length).toBe(2);
   });
@@ -152,14 +118,8 @@ describe('RowBlock', () => {
     const row = makeRow({ children: null });
 
     render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No columns')).toBeDefined();
@@ -169,14 +129,8 @@ describe('RowBlock', () => {
     const row = makeRow({ children: [] });
 
     render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No columns')).toBeDefined();
@@ -189,14 +143,8 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
@@ -210,14 +158,8 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
@@ -231,21 +173,15 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
     expect(outer?.classList.contains('row-block--modified')).toBe(true);
   });
 
-  it('passes activeViewport through to ColumnBlocks', () => {
+  it('passes activeViewport through to ColumnBlocks via context', () => {
     const row = makeRow({
       children: [
         makeColumn(10, 'Column', {
@@ -258,14 +194,8 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="lg"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
     );
 
     // When activeViewport is "lg", the ColumnBlock should use lg settings (width 4)
@@ -273,7 +203,7 @@ describe('RowBlock', () => {
     expect(badge?.textContent).toBe('4/12');
   });
 
-  it('passes getWidthClass and getOffsetClass through to ColumnBlocks', () => {
+  it('passes getWidthClass and getOffsetClass through to ColumnBlocks via context', () => {
     const customGetWidthClass = vi.fn().mockReturnValue('custom-w-8');
     const customGetOffsetClass = vi.fn().mockReturnValue('custom-o-2');
 
@@ -288,21 +218,20 @@ describe('RowBlock', () => {
     });
 
     render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={customGetWidthClass}
-        getOffsetClass={customGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      {
+        wrapper: createViewportWrapper({
+          getWidthClass: customGetWidthClass,
+          getOffsetClass: customGetOffsetClass,
+        }),
+      },
     );
 
     expect(customGetWidthClass).toHaveBeenCalledWith(8);
     expect(customGetOffsetClass).toHaveBeenCalledWith(2);
   });
 
-  it('passes columnCount through to ColumnBlocks', () => {
+  it('passes columnCount through to ColumnBlocks via context', () => {
     const row = makeRow({
       children: [
         makeColumn(10, 'Column', {
@@ -314,14 +243,8 @@ describe('RowBlock', () => {
     });
 
     const { container } = render(
-      <RowBlock
-        row={row}
-        activeViewport="md"
-        columnCount={16}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <RowBlock row={row} />,
+      { wrapper: createViewportWrapper({ columnCount: 16 }) },
     );
 
     // ColumnBlock shows width/columnCount, so with columnCount=16 and width=6

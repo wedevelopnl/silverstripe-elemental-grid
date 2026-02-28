@@ -1,25 +1,15 @@
 import type { RowNode } from '@/types/elements';
 import { deriveElementStatus } from '@/types/status';
+import { useViewportContext } from '@/hooks/ViewportContext';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface RowBlockProps {
   readonly row: RowNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-  readonly rowClasses: string;
-  readonly getWidthClass: (width: number) => string;
-  readonly getOffsetClass: (offset: number) => string;
 }
 
-export default function RowBlock({
-  row,
-  activeViewport,
-  columnCount,
-  rowClasses,
-  getWidthClass,
-  getOffsetClass,
-}: RowBlockProps) {
+export default function RowBlock({ row }: RowBlockProps) {
+  const { rowClasses } = useViewportContext();
   const status = deriveElementStatus(row.isPublished, row.isLiveVersion);
 
   return (
@@ -31,10 +21,6 @@ export default function RowBlock({
             <ColumnBlock
               key={column.id}
               column={column}
-              activeViewport={activeViewport}
-              columnCount={columnCount}
-              getWidthClass={getWidthClass}
-              getOffsetClass={getOffsetClass}
             />
           ))
           : <EmptyState message="No columns" />}

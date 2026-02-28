@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
 import type { RowNode, SectionNode } from '@/types/elements';
+import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 
 function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
   return {
@@ -55,29 +56,13 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
   };
 }
 
-const COLUMN_COUNT = 12;
-
-function stubGetWidthClass(width: number): string {
-  return `col-${width}`;
-}
-
-function stubGetOffsetClass(offset: number): string {
-  return `offset-${offset}`;
-}
-
 describe('SectionBlock', () => {
   it('renders title with bold text and small caps style', () => {
     const section = makeSection({ title: 'Hero Section' });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const titleElement = container.querySelector('.section-block__title');
@@ -94,14 +79,8 @@ describe('SectionBlock', () => {
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const rowBlocks = container.querySelectorAll('.row-block');
@@ -112,14 +91,8 @@ describe('SectionBlock', () => {
     const section = makeSection({ children: null });
 
     render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No rows')).toBeDefined();
@@ -129,14 +102,8 @@ describe('SectionBlock', () => {
     const section = makeSection({ children: [] });
 
     render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     expect(screen.getByText('No rows')).toBeDefined();
@@ -149,14 +116,8 @@ describe('SectionBlock', () => {
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
@@ -170,14 +131,8 @@ describe('SectionBlock', () => {
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
@@ -191,63 +146,43 @@ describe('SectionBlock', () => {
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
     expect(outer?.classList.contains('section-block--modified')).toBe(true);
   });
 
-  it('passes activeViewport through to RowBlocks', () => {
+  it('passes activeViewport through to RowBlocks via context', () => {
     const section = makeSection({
       children: [makeRow(10, 'Row')],
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="lg"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
     );
 
-    // RowBlock renders, confirming pass-through works without error
     const rowBlocks = container.querySelectorAll('.row-block');
     expect(rowBlocks.length).toBe(1);
   });
 
-  it('passes rowClasses through to RowBlocks', () => {
+  it('passes rowClasses through to RowBlocks via context', () => {
     const section = makeSection({
       children: [makeRow(10, 'Row')],
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="columns is-multiline"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper({ rowClasses: 'columns is-multiline' }) },
     );
 
-    // RowBlock applies rowClasses on its column container div
     const columnContainer = container.querySelector('.columns.is-multiline');
     expect(columnContainer).not.toBeNull();
   });
 
-  it('passes getWidthClass and getOffsetClass through to RowBlocks', () => {
+  it('passes getWidthClass and getOffsetClass through to RowBlocks via context', () => {
     const customGetWidthClass = vi.fn().mockReturnValue('custom-w-8');
     const customGetOffsetClass = vi.fn().mockReturnValue('custom-o-2');
 
@@ -286,17 +221,15 @@ describe('SectionBlock', () => {
     });
 
     render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={customGetWidthClass}
-        getOffsetClass={customGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      {
+        wrapper: createViewportWrapper({
+          getWidthClass: customGetWidthClass,
+          getOffsetClass: customGetOffsetClass,
+        }),
+      },
     );
 
-    // ColumnBlock calls these functions with the column's grid settings
     expect(customGetWidthClass).toHaveBeenCalledWith(8);
     expect(customGetOffsetClass).toHaveBeenCalledWith(2);
   });
@@ -307,14 +240,8 @@ describe('SectionBlock', () => {
     });
 
     const { container } = render(
-      <SectionBlock
-        section={section}
-        activeViewport="md"
-        columnCount={COLUMN_COUNT}
-        rowClasses="row"
-        getWidthClass={stubGetWidthClass}
-        getOffsetClass={stubGetOffsetClass}
-      />,
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
     );
 
     const body = container.querySelector('.section-block__body');

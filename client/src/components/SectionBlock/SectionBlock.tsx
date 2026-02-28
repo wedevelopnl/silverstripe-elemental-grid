@@ -5,21 +5,9 @@ import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface SectionBlockProps {
   readonly section: SectionNode;
-  readonly activeViewport: string;
-  readonly columnCount: number;
-  readonly rowClasses: string;
-  readonly getWidthClass: (width: number) => string;
-  readonly getOffsetClass: (offset: number) => string;
 }
 
-export default function SectionBlock({
-  section,
-  activeViewport,
-  columnCount,
-  rowClasses,
-  getWidthClass,
-  getOffsetClass,
-}: SectionBlockProps) {
+export default function SectionBlock({ section }: SectionBlockProps) {
   const status = deriveElementStatus(section.isPublished, section.isLiveVersion);
 
   return (
@@ -31,11 +19,6 @@ export default function SectionBlock({
             <RowBlock
               key={row.id}
               row={row}
-              activeViewport={activeViewport}
-              columnCount={columnCount}
-              rowClasses={rowClasses}
-              getWidthClass={getWidthClass}
-              getOffsetClass={getOffsetClass}
             />
           ))
           : <EmptyState message="No rows" />}
