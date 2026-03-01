@@ -1,5 +1,5 @@
 import type { ColumnNode, ViewportSettings } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
+import { getElementStatus } from '@/types/status';
 import { useViewportContext } from '@/hooks/ViewportContext';
 import ElementCard from '@/components/ElementCard/ElementCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
@@ -23,7 +23,7 @@ function resolveViewportSettings(
 export default function ColumnBlock({ column }: ColumnBlockProps) {
   const { activeViewport, columnCount, getWidthClass, getOffsetClass } = useViewportContext();
   const settings = resolveViewportSettings(column, activeViewport, columnCount);
-  const status = deriveElementStatus(column.isPublished, column.isLiveVersion);
+  const status = getElementStatus(column.statusFlags);
 
   const outerClasses = [getWidthClass(settings.width)];
   if (settings.offset > 0) {

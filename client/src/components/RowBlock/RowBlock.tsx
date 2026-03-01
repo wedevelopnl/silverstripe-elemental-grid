@@ -1,5 +1,5 @@
 import type { RowNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
+import { getElementStatus } from '@/types/status';
 import { useViewportContext } from '@/hooks/ViewportContext';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
@@ -10,7 +10,7 @@ interface RowBlockProps {
 
 export default function RowBlock({ row }: RowBlockProps) {
   const { rowClasses } = useViewportContext();
-  const status = deriveElementStatus(row.isPublished, row.isLiveVersion);
+  const status = getElementStatus(row.statusFlags);
 
   return (
     <div className={`row-block row-block--${status}`}>

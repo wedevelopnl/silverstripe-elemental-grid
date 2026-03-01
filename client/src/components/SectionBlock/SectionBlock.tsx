@@ -1,5 +1,5 @@
 import type { SectionNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
+import { getElementStatus } from '@/types/status';
 import RowBlock from '@/components/RowBlock/RowBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
@@ -8,7 +8,7 @@ interface SectionBlockProps {
 }
 
 export default function SectionBlock({ section }: SectionBlockProps) {
-  const status = deriveElementStatus(section.isPublished, section.isLiveVersion);
+  const status = getElementStatus(section.statusFlags);
 
   return (
     <section className={`section-block section-block--${status}`} data-testid="section-block">

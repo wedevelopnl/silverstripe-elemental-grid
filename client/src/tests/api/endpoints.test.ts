@@ -39,8 +39,6 @@ describe('endpoints', () => {
             blockSchema: { typeName: 'Section', label: 'Section', actions: { edit: '/edit/1' }, content: '' },
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,

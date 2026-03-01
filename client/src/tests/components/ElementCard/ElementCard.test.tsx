@@ -15,8 +15,6 @@ function makeElement(overrides: Partial<SimpleElementNode> = {}): SimpleElementN
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: false,
-    isLiveVersion: false,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -104,8 +102,8 @@ describe('ElementCard', () => {
     ).toBe(false);
   });
 
-  it('applies "element-card--draft" class for unpublished elements', () => {
-    const element = makeElement({ isPublished: false, isLiveVersion: false });
+  it('applies "element-card--draft" class for draft elements', () => {
+    const element = makeElement({ statusFlags: { addedtodraft: 'Draft' } });
 
     const { container } = render(<ElementCard element={element} />);
 
@@ -113,8 +111,8 @@ describe('ElementCard', () => {
     expect(card?.classList.contains('element-card--draft')).toBe(true);
   });
 
-  it('applies "element-card--published" class for published live elements', () => {
-    const element = makeElement({ isPublished: true, isLiveVersion: true });
+  it('applies "element-card--published" class for published elements', () => {
+    const element = makeElement({ statusFlags: {} });
 
     const { container } = render(<ElementCard element={element} />);
 
@@ -122,8 +120,8 @@ describe('ElementCard', () => {
     expect(card?.classList.contains('element-card--published')).toBe(true);
   });
 
-  it('applies "element-card--modified" class for published but not live elements', () => {
-    const element = makeElement({ isPublished: true, isLiveVersion: false });
+  it('applies "element-card--modified" class for modified elements', () => {
+    const element = makeElement({ statusFlags: { modified: 'Modified' } });
 
     const { container } = render(<ElementCard element={element} />);
 

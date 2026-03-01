@@ -16,8 +16,6 @@ function makeRow(overrides: Partial<RowNode> = {}): RowNode {
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -42,8 +40,6 @@ function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = 
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -137,8 +133,7 @@ describe('RowBlock', () => {
 
   it('applies draft publication state modifier class', () => {
     const row = makeRow({
-      isPublished: false,
-      isLiveVersion: false,
+      statusFlags: { addedtodraft: 'Draft' },
     });
 
     const { container } = render(
@@ -152,8 +147,7 @@ describe('RowBlock', () => {
 
   it('applies published publication state modifier class', () => {
     const row = makeRow({
-      isPublished: true,
-      isLiveVersion: true,
+      statusFlags: {},
     });
 
     const { container } = render(
@@ -167,8 +161,7 @@ describe('RowBlock', () => {
 
   it('applies modified publication state modifier class', () => {
     const row = makeRow({
-      isPublished: true,
-      isLiveVersion: false,
+      statusFlags: { modified: 'Modified' },
     });
 
     const { container } = render(

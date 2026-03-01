@@ -167,8 +167,6 @@ class ElementTreeBuilder
         $title = $element->Title ?: _t(BaseElement::class . '.UNTITLED', '(untitled)');
         $obsoleteClassName = $element->getObsoleteClassName();
         $version = (int) $element->Version;
-        $isPublished = $element->isPublished();
-        $isLiveVersion = $element->isLiveVersion();
         $canDelete = $element->canDelete();
         $canPublish = $element->canPublish();
         $canUnpublish = (bool) $element->canUnpublish();
@@ -193,8 +191,6 @@ class ElementTreeBuilder
             blockSchema: $blockSchema,
             obsoleteClassName: $obsoleteClassName,
             version: $version,
-            isPublished: $isPublished,
-            isLiveVersion: $isLiveVersion,
             canDelete: $canDelete,
             canPublish: $canPublish,
             canUnpublish: $canUnpublish,

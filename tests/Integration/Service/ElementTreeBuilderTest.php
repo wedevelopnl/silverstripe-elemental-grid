@@ -181,8 +181,6 @@ final class ElementTreeBuilderTest extends SapphireTest
         $this->assertSame('Text Block', $leaf->title);
         $this->assertIsInt($leaf->version);
         $this->assertGreaterThan(0, $leaf->version);
-        $this->assertFalse($leaf->isPublished);
-        $this->assertFalse($leaf->isLiveVersion);
         $this->assertNull($leaf->obsoleteClassName);
         $this->assertIsBool($leaf->canDelete);
         $this->assertIsBool($leaf->canPublish);

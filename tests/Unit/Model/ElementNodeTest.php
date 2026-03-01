@@ -20,8 +20,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -40,8 +38,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
-            isPublished: true,
-            isLiveVersion: true,
             canDelete: true,
             canPublish: true,
             canUnpublish: true,
@@ -73,8 +69,6 @@ final class ElementNodeTest extends TestCase
         $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'], $data['blockSchema']);
         $this->assertNull($data['obsoleteClassName']);
         $this->assertSame(1, $data['version']);
-        $this->assertFalse($data['isPublished']);
-        $this->assertFalse($data['isLiveVersion']);
         $this->assertTrue($data['canDelete']);
         $this->assertTrue($data['canPublish']);
         $this->assertFalse($data['canUnpublish']);
@@ -134,8 +128,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -166,8 +158,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -193,8 +183,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
-            isPublished: true,
-            isLiveVersion: true,
             canDelete: true,
             canPublish: true,
             canUnpublish: true,
@@ -228,8 +216,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -270,8 +256,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -299,8 +283,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -321,8 +303,6 @@ final class ElementNodeTest extends TestCase
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,

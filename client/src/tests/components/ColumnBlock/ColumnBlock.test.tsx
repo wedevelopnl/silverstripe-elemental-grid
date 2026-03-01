@@ -16,8 +16,6 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -122,8 +120,6 @@ describe('ColumnBlock', () => {
           },
           obsoleteClassName: null,
           version: 1,
-          isPublished: false,
-          isLiveVersion: false,
           canDelete: true,
           canPublish: true,
           canUnpublish: false,
@@ -208,8 +204,7 @@ describe('ColumnBlock', () => {
 
   it('applies publication state modifier class for draft column', () => {
     const column = makeColumn({
-      isPublished: false,
-      isLiveVersion: false,
+      statusFlags: { addedtodraft: 'Draft' },
     });
 
     const { container } = render(
@@ -223,8 +218,7 @@ describe('ColumnBlock', () => {
 
   it('applies publication state modifier class for published column', () => {
     const column = makeColumn({
-      isPublished: true,
-      isLiveVersion: true,
+      statusFlags: {},
     });
 
     const { container } = render(
@@ -238,8 +232,7 @@ describe('ColumnBlock', () => {
 
   it('applies publication state modifier class for modified column', () => {
     const column = makeColumn({
-      isPublished: true,
-      isLiveVersion: false,
+      statusFlags: { modified: 'Modified' },
     });
 
     const { container } = render(

@@ -1,5 +1,5 @@
 import type { SimpleElementNode } from '@/types/elements';
-import { deriveElementStatus } from '@/types/status';
+import { getElementStatus } from '@/types/status';
 
 interface ElementCardProps {
   readonly element: SimpleElementNode;
@@ -10,7 +10,7 @@ interface ElementCardProps {
  * and publication state via a colored left border.
  */
 export default function ElementCard({ element }: ElementCardProps) {
-  const status = deriveElementStatus(element.isPublished, element.isLiveVersion);
+  const status = getElementStatus(element.statusFlags);
   const label = element.blockSchema.label;
   const content = element.blockSchema.content;
 

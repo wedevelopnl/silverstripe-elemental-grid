@@ -23,8 +23,6 @@ const baseFieldsSchema = z.object({
   blockSchema: blockSchemaSchema,
   obsoleteClassName: z.string().nullable(),
   version: z.number().int(),
-  isPublished: z.boolean(),
-  isLiveVersion: z.boolean(),
   canDelete: z.boolean(),
   canPublish: z.boolean(),
   canUnpublish: z.boolean(),

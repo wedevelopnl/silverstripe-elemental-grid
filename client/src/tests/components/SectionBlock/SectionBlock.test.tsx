@@ -16,8 +16,6 @@ function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -42,8 +40,6 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
     },
     obsoleteClassName: null,
     version: 1,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: false,
@@ -121,8 +117,7 @@ describe('SectionBlock', () => {
 
   it('applies draft publication state modifier class', () => {
     const section = makeSection({
-      isPublished: false,
-      isLiveVersion: false,
+      statusFlags: { addedtodraft: 'Draft' },
     });
 
     const { container } = render(
@@ -136,8 +131,7 @@ describe('SectionBlock', () => {
 
   it('applies published publication state modifier class', () => {
     const section = makeSection({
-      isPublished: true,
-      isLiveVersion: true,
+      statusFlags: {},
     });
 
     const { container } = render(
@@ -151,8 +145,7 @@ describe('SectionBlock', () => {
 
   it('applies modified publication state modifier class', () => {
     const section = makeSection({
-      isPublished: true,
-      isLiveVersion: false,
+      statusFlags: { modified: 'Modified' },
     });
 
     const { container } = render(
@@ -211,8 +204,6 @@ describe('SectionBlock', () => {
               },
               obsoleteClassName: null,
               version: 1,
-              isPublished: true,
-              isLiveVersion: true,
               canDelete: true,
               canPublish: true,
               canUnpublish: false,
