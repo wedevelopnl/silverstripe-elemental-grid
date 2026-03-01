@@ -60,17 +60,16 @@ function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = 
 }
 
 describe('RowBlock', () => {
-  it('renders title as a small muted label', () => {
+  it('renders title as an h3 heading', () => {
     const row = makeRow({ title: 'Main Row' });
 
-    const { container } = render(
+    render(
       <RowBlock row={row} />,
       { wrapper: createViewportWrapper() },
     );
 
-    const titleElement = container.querySelector('.row-block__title');
-    expect(titleElement).not.toBeNull();
-    expect(titleElement?.textContent).toBe('Main Row');
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(heading.textContent).toBe('Main Row');
   });
 
   it('applies rowClasses from context on the column container div', () => {

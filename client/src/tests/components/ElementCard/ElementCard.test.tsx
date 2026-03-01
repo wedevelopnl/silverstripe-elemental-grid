@@ -27,10 +27,11 @@ function makeElement(overrides: Partial<SimpleElementNode> = {}): SimpleElementN
 }
 
 describe('ElementCard', () => {
-  it('renders the element title', () => {
+  it('renders the element title as an h4 heading', () => {
     render(<ElementCard element={makeElement({ title: 'Hero Banner' })} />);
 
-    expect(screen.getByText('Hero Banner')).toBeDefined();
+    const heading = screen.getByRole('heading', { level: 4 });
+    expect(heading.textContent).toBe('Hero Banner');
   });
 
   it('renders "(untitled)" when title is empty', () => {

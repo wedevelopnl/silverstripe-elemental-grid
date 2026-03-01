@@ -13,6 +13,7 @@ $section-block-border: #c0c8d0;
   @include mixins.status-indicator;
 
   &__title {
+    margin: 0;
     font-weight: 700;
     font-variant: small-caps;
     font-size: 0.85em;

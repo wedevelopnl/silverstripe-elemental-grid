@@ -57,17 +57,27 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
 }
 
 describe('SectionBlock', () => {
-  it('renders title with bold text and small caps style', () => {
-    const section = makeSection({ title: 'Hero Section' });
+  it('renders as a <section> element', () => {
+    const section = makeSection();
 
     const { container } = render(
       <SectionBlock section={section} />,
       { wrapper: createViewportWrapper() },
     );
 
-    const titleElement = container.querySelector('.section-block__title');
-    expect(titleElement).not.toBeNull();
-    expect(titleElement?.textContent).toBe('Hero Section');
+    expect(container.querySelector('section.section-block')).not.toBeNull();
+  });
+
+  it('renders title as an h2 heading', () => {
+    const section = makeSection({ title: 'Hero Section' });
+
+    render(
+      <SectionBlock section={section} />,
+      { wrapper: createViewportWrapper() },
+    );
+
+    const heading = screen.getByRole('heading', { level: 2 });
+    expect(heading.textContent).toBe('Hero Section');
   });
 
   it('renders row children as RowBlocks', () => {

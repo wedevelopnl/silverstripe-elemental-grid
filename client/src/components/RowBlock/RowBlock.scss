@@ -10,6 +10,7 @@
   @include mixins.status-indicator;
 
   &__title {
+    margin: 0;
     font-size: 0.75em;
     font-weight: 600;
     color: vars.$color-text-muted;

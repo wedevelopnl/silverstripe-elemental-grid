@@ -19,7 +19,7 @@ export default function ElementCard({ element }: ElementCardProps) {
     <div className={`element-card element-card--${status}`}>
       <div className="element-card__header">
         <span className="element-card__type">{label}</span>
-        <span className="element-card__title">{title}</span>
+        <h4 className="element-card__title">{title}</h4>
       </div>
       <div className={`element-card__content${content === '' ? ' element-card__content--empty' : ''}`}>
         {content || 'No preview available'}

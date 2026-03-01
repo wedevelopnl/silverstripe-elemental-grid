@@ -14,7 +14,7 @@ export default function RowBlock({ row }: RowBlockProps) {
 
   return (
     <div className={`row-block row-block--${status}`}>
-      <div className="row-block__title">{row.title}</div>
+      <h3 className="row-block__title">{row.title}</h3>
       <div className={rowClasses}>
         {row.children !== null && row.children.length > 0
           ? row.children.map((column) => (

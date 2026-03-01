@@ -11,8 +11,8 @@ export default function SectionBlock({ section }: SectionBlockProps) {
   const status = deriveElementStatus(section.isPublished, section.isLiveVersion);
 
   return (
-    <div className={`section-block section-block--${status}`}>
-      <div className="section-block__title">{section.title}</div>
+    <section className={`section-block section-block--${status}`}>
+      <h2 className="section-block__title">{section.title}</h2>
       <div className="section-block__body">
         {section.children !== null && section.children.length > 0
           ? section.children.map((row) => (
@@ -23,6 +23,6 @@ export default function SectionBlock({ section }: SectionBlockProps) {
           ))
           : <EmptyState message="No rows" />}
       </div>
-    </div>
+    </section>
   );
 }
