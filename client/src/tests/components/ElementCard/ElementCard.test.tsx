@@ -34,12 +34,6 @@ describe('ElementCard', () => {
     expect(heading.textContent).toBe('Hero Banner');
   });
 
-  it('renders "(untitled)" when title is empty', () => {
-    render(<ElementCard element={makeElement({ title: '' })} />);
-
-    expect(screen.getByText('(untitled)')).toBeDefined();
-  });
-
   it('renders content preview from blockSchema.content', () => {
     const element = makeElement({
       blockSchema: {

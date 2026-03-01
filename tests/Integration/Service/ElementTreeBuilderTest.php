@@ -281,6 +281,60 @@ final class ElementTreeBuilderTest extends SapphireTest
         }
     }
 
+    // ---- Empty title fallback ----
+
+    public function testEmptyTitleReturnsFallbackForLeafElement(): void
+    {
+        $leaf = $this->objFromFixture(BaseElement::class, 'leaf1');
+        $leaf->Title = '';
+        $leaf->write();
+
+        $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
+
+        $node = $tree[$areaId][0]->children[0]->children[0]->children[0];
+        $this->assertSame('(untitled)', $node->title);
+    }
+
+    public function testEmptyTitleReturnsFallbackForColumn(): void
+    {
+        $col = $this->objFromFixture(ElementColumn::class, 'col1');
+        $col->Title = '';
+        $col->write();
+
+        $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
+
+        $node = $tree[$areaId][0]->children[0]->children[0];
+        $this->assertSame('(untitled)', $node->title);
+    }
+
+    public function testEmptyTitleReturnsFallbackForRow(): void
+    {
+        $row = $this->objFromFixture(ElementRow::class, 'row1');
+        $row->Title = '';
+        $row->write();
+
+        $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
+
+        $node = $tree[$areaId][0]->children[0];
+        $this->assertSame('(untitled)', $node->title);
+    }
+
+    public function testEmptyTitleReturnsFallbackForSection(): void
+    {
+        $section = $this->objFromFixture(ElementSection::class, 'section1');
+        $section->Title = '';
+        $section->write();
+
+        $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
+
+        $node = $tree[$areaId][0];
+        $this->assertSame('(untitled)', $node->title);
+    }
+
     // ---- Empty states ----
 
     public function testPageWithNoElements(): void

@@ -19,7 +19,7 @@ export const blockSchemaSchema = z.object({
 
 const baseFieldsSchema = z.object({
   id: z.number().int(),
-  title: z.string(),
+  title: z.string().min(1),
   blockSchema: blockSchemaSchema,
   obsoleteClassName: z.string().nullable(),
   version: z.number().int(),

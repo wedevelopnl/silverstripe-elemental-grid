@@ -164,7 +164,7 @@ class ElementTreeBuilder
         }
 
         $id = (int) $element->ID;
-        $title = $element->Title;
+        $title = $element->Title ?: _t(BaseElement::class . '.UNTITLED', '(untitled)');
         $obsoleteClassName = $element->getObsoleteClassName();
         $version = (int) $element->Version;
         $isPublished = $element->isPublished();

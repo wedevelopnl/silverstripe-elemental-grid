@@ -125,6 +125,10 @@ describe('simpleElementNodeSchema', () => {
       simpleElementNodeSchema.parse(makeSimpleNode({ id: 'abc' })),
     ).toThrow();
   });
+
+  it('rejects a node with empty title', () => {
+    expect(() => simpleElementNodeSchema.parse(makeSimpleNode({ title: '' }))).toThrow();
+  });
 });
 
 // --- Container node schemas ---
@@ -141,6 +145,10 @@ describe('columnNodeSchema', () => {
 
   it('parses a column with empty children', () => {
     expect(columnNodeSchema.parse(makeColumnNode([])).children).toEqual([]);
+  });
+
+  it('rejects a column with empty title', () => {
+    expect(() => columnNodeSchema.parse(makeColumnNode([], { title: '' }))).toThrow();
   });
 
   it('accepts row children via passthrough (extra keys not rejected)', () => {
@@ -186,6 +194,10 @@ describe('rowNodeSchema', () => {
     expect(rowNodeSchema.parse(row).children).toHaveLength(1);
   });
 
+  it('rejects a row with empty title', () => {
+    expect(() => rowNodeSchema.parse(makeRowNode([], { title: '' }))).toThrow();
+  });
+
   it('parses a row with null children', () => {
     expect(rowNodeSchema.parse(makeRowNode(null)).children).toBeNull();
   });
@@ -200,6 +212,10 @@ describe('sectionNodeSchema', () => {
   it('parses a section with row children', () => {
     const section = makeSectionNode([makeRowNode([makeColumnNode()])]);
     expect(sectionNodeSchema.parse(section).children).toHaveLength(1);
+  });
+
+  it('rejects a section with empty title', () => {
+    expect(() => sectionNodeSchema.parse(makeSectionNode([], { title: '' }))).toThrow();
   });
 
   it('parses a section with null children', () => {
