@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
+use DNADesign\Elemental\Models\BaseElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
+use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
 
@@ -158,6 +161,69 @@ final class ElementalGridControllerTest extends FunctionalTest
         $response = $this->get($this->apiUrl($pageId));
 
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    /**
+     * POST a JSON body to an API endpoint with security token disabled.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function postJson(string $url, array $body): mixed
+    {
+        SecurityToken::disable();
+
+        try {
+            return $this->post(
+                $url,
+                data: null,
+                headers: ['Content-Type' => 'application/json'],
+                body: json_encode($body, JSON_THROW_ON_ERROR),
+            );
+        } finally {
+            SecurityToken::enable();
+        }
+    }
+
+    // --- apiCreate -----------------------------------------------------------
+
+    public function testCreateReturns422WhenValidationFails(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        // ElementRow has can_be_root: false — placing it in the page area triggers validation
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => ElementRow::class,
+            'elementalAreaID' => $page->ElementalArea()->ID,
+            'insertAfterElementID' => null,
+        ]);
+
+        $this->assertJsonError(422, 'Row cannot be placed inside Test Page.', $response);
+    }
+
+    // --- apiDuplicate --------------------------------------------------------
+
+    public function testDuplicateReturns422WhenValidationFails(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        // Create a Row directly in the page area, bypassing validation
+        // so we have an "invalid" record to duplicate via the API
+        $row = ElementRow::create();
+        $row->Title = 'Invalid Row';
+        $row->ParentID = $page->ElementalArea()->ID;
+        $row->write(skipValidation: true);
+
+        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+            'id' => $row->ID,
+        ]);
+
+        $this->assertJsonError(422, 'Row cannot be placed inside Test Page.', $response);
     }
 
     public function testResponseMatchesTreeBuilderOutput(): void

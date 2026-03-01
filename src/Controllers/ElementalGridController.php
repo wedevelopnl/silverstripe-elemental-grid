@@ -12,6 +12,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
@@ -148,10 +149,14 @@ class ElementalGridController extends AdminController
         $newElement->ParentID = $area->ID;
         $newElement->ensureSortSet();
 
-        if ($body['insertAfterElementID'] !== null) {
-            $this->reorderElements($newElement, $body['insertAfterElementID']);
-        } else {
-            $newElement->write();
+        try {
+            if ($body['insertAfterElementID'] !== null) {
+                $this->reorderElements($newElement, $body['insertAfterElementID']);
+            } else {
+                $newElement->write();
+            }
+        } catch (ValidationException $e) {
+            $this->jsonError(422, $this->extractValidationMessages($e));
         }
 
         return $this->jsonSuccess(204);
@@ -251,12 +256,16 @@ class ElementalGridController extends AdminController
             $this->jsonError(403);
         }
 
-        $clone = $element->duplicate(false);
-        $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
-        $clone->Sort = 0;
-        $area->Elements()->add($clone);
+        try {
+            $clone = $element->duplicate(false);
+            $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
+            $clone->Sort = 0;
+            $area->Elements()->add($clone);
 
-        $this->reorderElements($clone, $id);
+            $this->reorderElements($clone, $id);
+        } catch (ValidationException $e) {
+            $this->jsonError(422, $this->extractValidationMessages($e));
+        }
 
         return $this->jsonSuccess(204);
     }
@@ -379,6 +388,23 @@ class ElementalGridController extends AdminController
         /** @var ReorderElements $reorderer */
         $reorderer = Injector::inst()->create(ReorderElements::class, $element);
         $reorderer->reorder($afterElementID);
+    }
+
+    /**
+     * Extract user-safe messages from a ValidationException.
+     *
+     * Returns the joined messages from the ValidationResult (added via addError()),
+     * or a generic fallback if no messages exist.
+     */
+    private function extractValidationMessages(ValidationException $e): string
+    {
+        $messages = $e->getResult()->getMessages();
+
+        if ($messages === []) {
+            return 'Validation failed.';
+        }
+
+        return implode(' ', array_column($messages, 'message'));
     }
 
     /**

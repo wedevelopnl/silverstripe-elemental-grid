@@ -389,4 +389,5 @@ final class ElementalGridControllerTest extends TestCase
         self::assertSame('col-sm-1', $config['baseWidthClasses']->{'1'});
         self::assertSame('offset-sm-0', $config['baseOffsetClasses']->{'0'});
     }
+
 }
