@@ -11,7 +11,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
   const status = deriveElementStatus(section.isPublished, section.isLiveVersion);
 
   return (
-    <section className={`section-block section-block--${status}`}>
+    <section className={`section-block section-block--${status}`} data-testid="section-block">
       <h2 className="section-block__title">{section.title}</h2>
       <div className="section-block__body">
         {section.children !== null && section.children.length > 0

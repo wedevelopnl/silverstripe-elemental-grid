@@ -21,6 +21,7 @@ export default function ViewportSwitcher({
             key={viewport.key}
             type="button"
             className={`viewport-switcher__button${isActive ? ' viewport-switcher__button--active' : ''}`}
+            data-testid="viewport-button"
             aria-pressed={isActive}
             aria-disabled={isActive || undefined}
             onClick={() => {

@@ -37,9 +37,9 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
 
   return (
     <div className={outerClasses.join(' ')}>
-      <div className={innerClasses.join(' ')}>
+      <div className={innerClasses.join(' ')} data-testid="column-block">
         <div className="column-block__header">
-          <span className="column-block__badge">
+          <span className="column-block__badge" data-testid="column-badge">
             {settings.visible ? `${settings.width}/${columnCount}` : 'hidden'}
           </span>
         </div>

@@ -47,7 +47,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
 
   return (
     <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
-      {isLoading && <p className="grid-editor__loading">Loading elements...</p>}
+      {isLoading && <p className="grid-editor__loading" data-testid="grid-editor-loading">Loading elements...</p>}
       {error !== null && (
         <p className="grid-editor__error">
           Failed to load elements: {error.message}
