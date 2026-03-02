@@ -103,7 +103,7 @@ describe('ElementCard', () => {
   });
 
   it('applies "element-card--draft" class for draft elements', () => {
-    const element = makeElement({ statusFlags: { addedtodraft: 'Draft' } });
+    const element = makeElement({ statusFlags: { addedtodraft: { text: 'Draft', title: 'Item has not been published yet' } } });
 
     const { container } = render(<ElementCard element={element} />);
 
@@ -121,7 +121,7 @@ describe('ElementCard', () => {
   });
 
   it('applies "element-card--modified" class for modified elements', () => {
-    const element = makeElement({ statusFlags: { modified: 'Modified' } });
+    const element = makeElement({ statusFlags: { modified: { text: 'Modified', title: 'Item has unpublished changes' } } });
 
     const { container } = render(<ElementCard element={element} />);
 

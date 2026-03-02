@@ -42,7 +42,7 @@ final class ElementNodeTest extends TestCase
             canPublish: true,
             canUnpublish: true,
             canCreate: true,
-            statusFlags: ['modified' => true],
+            statusFlags: ['modified' => ['text' => 'Modified', 'title' => 'Item has unpublished changes']],
             containerType: $containerType,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: $children,

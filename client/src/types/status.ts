@@ -1,12 +1,12 @@
+import type { StatusFlags } from './elements';
+
 export type ElementStatus = 'draft' | 'published' | 'modified';
 
-export function getElementStatus(
-  statusFlags: Record<string, unknown>,
-): ElementStatus {
-  if ('addedtodraft' in statusFlags) {
+export function getElementStatus(statusFlags: StatusFlags): ElementStatus {
+  if (statusFlags.addedtodraft !== undefined) {
     return 'draft';
   }
-  if ('modified' in statusFlags) {
+  if (statusFlags.modified !== undefined) {
     return 'modified';
   }
   return 'published';

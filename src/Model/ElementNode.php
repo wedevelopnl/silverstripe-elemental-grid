@@ -22,7 +22,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     canPublish: bool,
  *     canUnpublish: bool,
  *     canCreate: bool,
- *     statusFlags: \stdClass&object{addedtodraft?: string, modified?: string, removedfromdraft?: string},
+ *     statusFlags: \stdClass&object{addedtodraft?: array{text: string, title: string}, modified?: array{text: string, title: string}, removedfromdraft?: array{text: string, title: string}},
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
@@ -34,7 +34,7 @@ final readonly class ElementNode implements \JsonSerializable
 {
     /**
      * @param array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema
-     * @param array<string, mixed> $statusFlags
+     * @param array<string, array{text: string, title: string}> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children
      * @param array<string, array{width: int, offset: int, visible: bool}>|null $gridSettings

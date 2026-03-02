@@ -17,6 +17,17 @@ export const blockSchemaSchema = z.object({
   content: z.string(),
 });
 
+const statusFlagValueSchema = z.object({
+  text: z.string(),
+  title: z.string(),
+});
+
+export const statusFlagsSchema = z.object({
+  addedtodraft: statusFlagValueSchema.optional(),
+  modified: statusFlagValueSchema.optional(),
+  removedfromdraft: statusFlagValueSchema.optional(),
+});
+
 const baseFieldsSchema = z.object({
   id: z.number().int(),
   title: z.string().min(1),
@@ -27,7 +38,7 @@ const baseFieldsSchema = z.object({
   canPublish: z.boolean(),
   canUnpublish: z.boolean(),
   canCreate: z.boolean(),
-  statusFlags: z.record(z.string(), z.unknown()),
+  statusFlags: statusFlagsSchema,
   extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -96,6 +107,7 @@ export type SectionNode = z.infer<typeof sectionNodeSchema>;
 export type ElementNode = z.infer<typeof elementNodeSchema>;
 export type ContainerNode = SectionNode | RowNode | ColumnNode;
 export type ElementTreeResponse = z.infer<typeof elementTreeResponseSchema>;
+export type StatusFlags = z.infer<typeof statusFlagsSchema>;
 export type BlockSchema = z.infer<typeof blockSchemaSchema>;
 export type GridSettings = z.infer<typeof gridSettingsSchema>;
 export type ViewportSettings = z.infer<typeof viewportSettingsSchema>;

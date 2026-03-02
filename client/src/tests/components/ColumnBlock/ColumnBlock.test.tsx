@@ -219,7 +219,7 @@ describe('ColumnBlock', () => {
 
   it('applies publication state modifier class for draft column', () => {
     const column = makeColumn({
-      statusFlags: { addedtodraft: 'Draft' },
+      statusFlags: { addedtodraft: { text: 'Draft', title: 'Item has not been published yet' } },
     });
 
     const { container } = render(
@@ -247,7 +247,7 @@ describe('ColumnBlock', () => {
 
   it('applies publication state modifier class for modified column', () => {
     const column = makeColumn({
-      statusFlags: { modified: 'Modified' },
+      statusFlags: { modified: { text: 'Modified', title: 'Item has unpublished changes' } },
     });
 
     const { container } = render(

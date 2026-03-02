@@ -156,7 +156,7 @@ describe('RowBlock', () => {
 
   it('applies draft publication state modifier class', () => {
     const row = makeRow({
-      statusFlags: { addedtodraft: 'Draft' },
+      statusFlags: { addedtodraft: { text: 'Draft', title: 'Item has not been published yet' } },
     });
 
     const { container } = render(
@@ -184,7 +184,7 @@ describe('RowBlock', () => {
 
   it('applies modified publication state modifier class', () => {
     const row = makeRow({
-      statusFlags: { modified: 'Modified' },
+      statusFlags: { modified: { text: 'Modified', title: 'Item has unpublished changes' } },
     });
 
     const { container } = render(

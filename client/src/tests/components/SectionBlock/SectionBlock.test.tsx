@@ -137,7 +137,7 @@ describe('SectionBlock', () => {
 
   it('applies draft publication state modifier class', () => {
     const section = makeSection({
-      statusFlags: { addedtodraft: 'Draft' },
+      statusFlags: { addedtodraft: { text: 'Draft', title: 'Item has not been published yet' } },
     });
 
     const { container } = render(
@@ -165,7 +165,7 @@ describe('SectionBlock', () => {
 
   it('applies modified publication state modifier class', () => {
     const section = makeSection({
-      statusFlags: { modified: 'Modified' },
+      statusFlags: { modified: { text: 'Modified', title: 'Item has unpublished changes' } },
     });
 
     const { container } = render(

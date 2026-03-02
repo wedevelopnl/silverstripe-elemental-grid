@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   type ColumnNode,
   type SectionNode,
+  type StatusFlags,
   elementTreeResponseSchema,
 } from '@/types/elements';
 import { loadFixture, resetFixtures } from '../helpers/fixtures';
@@ -44,7 +45,7 @@ test.describe('API contract', () => {
     const tree = elementTreeResponseSchema.parse(body);
 
     // Collect all containers and leaf elements across the tree
-    type FlaggedNode = { title: string; statusFlags: Record<string, unknown> };
+    type FlaggedNode = { title: string; statusFlags: StatusFlags };
     const leaves: FlaggedNode[] = [];
     const containers: FlaggedNode[] = [];
 
