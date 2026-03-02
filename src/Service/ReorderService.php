@@ -15,6 +15,7 @@ class ReorderService
     public function __construct(
         private readonly ReorderValidatorInterface $validator,
         private readonly ReorderExecutorInterface $executor,
+        private readonly ElementPersistenceService $persistenceService,
     ) {
     }
 
@@ -29,6 +30,13 @@ class ReorderService
             return $validationResult;
         }
 
-        return $this->executor->execute($element, $targetArea, $targetPosition);
+        $dirtyElements = $this->executor->execute($element, $targetArea, $targetPosition);
+
+        $persistResult = $this->persistenceService->persistBatch($dirtyElements);
+        if ($persistResult->isErr()) {
+            return $persistResult;
+        }
+
+        return Result::ok($element);
     }
 }

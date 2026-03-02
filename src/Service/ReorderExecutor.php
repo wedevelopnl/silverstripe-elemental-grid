@@ -6,10 +6,7 @@ namespace WeDevelop\ElementalGrid\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use SilverStripe\Core\Validation\ValidationException;
 use WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 
 class ReorderExecutor implements ReorderExecutorInterface
@@ -21,10 +18,10 @@ class ReorderExecutor implements ReorderExecutorInterface
 
     /**
      * @param non-negative-int $targetPosition
-     * @return Result<BaseElement>
+     * @return list<BaseElement>
      */
     #[\Override]
-    public function execute(BaseElement $element, ElementalArea $targetArea, int $targetPosition): Result
+    public function execute(BaseElement $element, ElementalArea $targetArea, int $targetPosition): array
     {
         /** @var positive-int $targetAreaId */
         $targetAreaId = $targetArea->ID;
@@ -50,58 +47,33 @@ class ReorderExecutor implements ReorderExecutorInterface
             $element->ParentID = $targetAreaId;
         }
 
-        try {
-            $this->renumberAndWrite($siblings, $element, $isCrossArea);
-        } catch (ValidationException $e) {
-            return Result::fail(...$this->translateValidationException($e));
-        }
-
-        return Result::ok($element);
+        return $this->applySort($siblings, $element, $isCrossArea);
     }
 
     /**
-     * Renumber Sort values (1-based) and write only elements that changed.
+     * Assign 1-based Sort values and return only elements that changed.
      *
      * @param list<BaseElement> $siblings
+     * @return list<BaseElement>
      */
-    private function renumberAndWrite(array $siblings, BaseElement $movedElement, bool $isCrossArea): void
+    private function applySort(array $siblings, BaseElement $movedElement, bool $isCrossArea): array
     {
+        $dirty = [];
+
         foreach ($siblings as $index => $sibling) {
             $newSort = $index + 1;
             $sortChanged = $sibling->Sort !== $newSort;
             $isMovedCrossArea = $isCrossArea && $sibling->ID === $movedElement->ID;
 
-            if (!$sortChanged && !$isMovedCrossArea) {
-                continue;
+            if ($sortChanged) {
+                $sibling->Sort = $newSort;
             }
 
-            $sibling->Sort = $newSort;
-            $sibling->write();
-        }
-    }
-
-    /**
-     * @return non-empty-list<ValidationError>
-     */
-    private function translateValidationException(ValidationException $e): array
-    {
-        /** @var array<array{message: string, fieldName: string}> $messages */
-        $messages = $e->getResult()->getMessages();
-
-        if ($messages === []) {
-            return [new ValidationError(message: 'Validation failed.')];
+            if ($sortChanged || $isMovedCrossArea) {
+                $dirty[] = $sibling;
+            }
         }
 
-        $errors = [];
-
-        foreach ($messages as $msg) {
-            $errors[] = new ValidationError(
-                message: $msg['message'],
-                field: $msg['fieldName'] !== '' ? $msg['fieldName'] : null,
-            );
-        }
-
-        /** @var non-empty-list<ValidationError> $errors Guaranteed non-empty: $messages is non-empty */
-        return $errors;
+        return $dirty;
     }
 }

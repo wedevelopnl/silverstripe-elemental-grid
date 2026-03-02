@@ -13,6 +13,7 @@ use WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface;
 use WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface;
 use WeDevelop\ElementalGrid\Model\Result;
 use WeDevelop\ElementalGrid\Model\ValidationError;
+use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
 use WeDevelop\ElementalGrid\Service\ReorderService;
 
 #[CoversClass(ReorderService::class)]
@@ -22,19 +23,23 @@ final class ReorderServiceTest extends TestCase
 
     private ReorderExecutorInterface&MockObject $executor;
 
+    private ElementPersistenceService&MockObject $persistenceService;
+
     private ReorderService $service;
 
     protected function setUp(): void
     {
         $this->validator = $this->createMock(ReorderValidatorInterface::class);
         $this->executor = $this->createMock(ReorderExecutorInterface::class);
-        $this->service = new ReorderService($this->validator, $this->executor);
+        $this->persistenceService = $this->createMock(ElementPersistenceService::class);
+        $this->service = new ReorderService($this->validator, $this->executor, $this->persistenceService);
     }
 
-    public function testHappyPathCallsValidatorThenExecutor(): void
+    public function testHappyPathCallsValidatorThenExecutorThenPersist(): void
     {
         $element = $this->createMock(BaseElement::class);
         $area = $this->createMock(ElementalArea::class);
+        $dirtyElements = [$element];
 
         $this->validator->expects($this->once())
             ->method('validate')
@@ -44,7 +49,12 @@ final class ReorderServiceTest extends TestCase
         $this->executor->expects($this->once())
             ->method('execute')
             ->with($element, $area, 2)
-            ->willReturn(Result::ok($element));
+            ->willReturn($dirtyElements);
+
+        $this->persistenceService->expects($this->once())
+            ->method('persistBatch')
+            ->with($dirtyElements)
+            ->willReturn(Result::ok(null));
 
         $result = $this->service->reorder($element, $area, 2);
 
@@ -61,6 +71,7 @@ final class ReorderServiceTest extends TestCase
             ->willReturn(Result::fail(new ValidationError(message: 'Not allowed.')));
 
         $this->executor->expects($this->never())->method('execute');
+        $this->persistenceService->expects($this->never())->method('persistBatch');
 
         $result = $this->service->reorder($element, $area, 0);
 
@@ -88,34 +99,39 @@ final class ReorderServiceTest extends TestCase
         $this->assertSame('Second error.', $result->errors()[1]->message);
     }
 
-    public function testExecutorResultReturnedAsIs(): void
+    public function testPersistenceFailurePropagated(): void
     {
         $element = $this->createMock(BaseElement::class);
         $area = $this->createMock(ElementalArea::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
+        $this->executor->method('execute')->willReturn([$element]);
 
-        $executorResult = Result::ok($element);
-        $this->executor->method('execute')->willReturn($executorResult);
-
-        $result = $this->service->reorder($element, $area, 5);
-
-        $this->assertSame($executorResult, $result);
-    }
-
-    public function testExecutorFailurePropagated(): void
-    {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
-
-        $this->validator->method('validate')->willReturn(Result::ok($element));
-
-        $this->executor->method('execute')
+        $this->persistenceService->method('persistBatch')
             ->willReturn(Result::fail(new ValidationError(message: 'Write failed.')));
 
         $result = $this->service->reorder($element, $area, 0);
 
         $this->assertTrue($result->isErr());
         $this->assertSame('Write failed.', $result->errors()[0]->message);
+    }
+
+    public function testEmptyDirtyListStillCallsPersistBatch(): void
+    {
+        $element = $this->createMock(BaseElement::class);
+        $area = $this->createMock(ElementalArea::class);
+
+        $this->validator->method('validate')->willReturn(Result::ok($element));
+        $this->executor->method('execute')->willReturn([]);
+
+        $this->persistenceService->expects($this->once())
+            ->method('persistBatch')
+            ->with([])
+            ->willReturn(Result::ok(null));
+
+        $result = $this->service->reorder($element, $area, 5);
+
+        $this->assertTrue($result->isOk());
+        $this->assertSame($element, $result->unwrap());
     }
 }

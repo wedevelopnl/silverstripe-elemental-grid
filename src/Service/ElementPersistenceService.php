@@ -74,6 +74,25 @@ class ElementPersistenceService
     }
 
     /**
+     * Write a batch of elements. Stops on first failure.
+     *
+     * @param list<BaseElement> $elements
+     * @return Result<null>
+     */
+    public function persistBatch(array $elements): Result
+    {
+        try {
+            foreach ($elements as $element) {
+                $element->write();
+            }
+        } catch (ValidationException $e) {
+            return Result::fail(...$this->translateValidationException($e));
+        }
+
+        return Result::ok(null);
+    }
+
+    /**
      * Translate a SilverStripe ValidationException into ValidationError list.
      *
      * @return non-empty-list<ValidationError>

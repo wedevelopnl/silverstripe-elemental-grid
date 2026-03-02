@@ -111,6 +111,51 @@ final class ElementPersistenceServiceTest extends TestCase
         $this->assertSame('Validation failed.', $result->errors()[0]->message);
     }
 
+    public function testPersistBatchWritesAllElements(): void
+    {
+        $a = $this->createMock(BaseElement::class);
+        $b = $this->createMock(BaseElement::class);
+        $c = $this->createMock(BaseElement::class);
+
+        $a->expects($this->once())->method('write');
+        $b->expects($this->once())->method('write');
+        $c->expects($this->once())->method('write');
+
+        $service = new ElementPersistenceService();
+        $result = $service->persistBatch([$a, $b, $c]);
+
+        $this->assertTrue($result->isOk());
+        $this->assertNull($result->unwrap());
+    }
+
+    public function testPersistBatchReturnsFailOnValidationException(): void
+    {
+        $a = $this->createMock(BaseElement::class);
+        $b = $this->createMock(BaseElement::class);
+
+        $a->expects($this->once())->method('write');
+        $b->expects($this->once())
+            ->method('write')
+            ->willThrowException($this->createValidationException([
+                ['message' => 'Write failed on second element.', 'fieldName' => ''],
+            ]));
+
+        $service = new ElementPersistenceService();
+        $result = $service->persistBatch([$a, $b]);
+
+        $this->assertTrue($result->isErr());
+        $this->assertSame('Write failed on second element.', $result->errors()[0]->message);
+    }
+
+    public function testPersistBatchEmptyArrayReturnsOk(): void
+    {
+        $service = new ElementPersistenceService();
+        $result = $service->persistBatch([]);
+
+        $this->assertTrue($result->isOk());
+        $this->assertNull($result->unwrap());
+    }
+
     /**
      * Build a mocked ValidationException with the given message list.
      *

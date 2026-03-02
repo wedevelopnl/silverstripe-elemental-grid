@@ -9,8 +9,6 @@ use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SilverStripe\Core\Validation\ValidationException;
-use SilverStripe\Core\Validation\ValidationResult;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 use WeDevelop\ElementalGrid\Service\ReorderExecutor;
 
@@ -42,20 +40,16 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
 
-        // D, B, C should be written (Sort changes); A and E unchanged
-        $d->expects($this->once())->method('write');
-        $b->expects($this->once())->method('write');
-        $c->expects($this->once())->method('write');
-        $a->expects($this->never())->method('write');
-        $e->expects($this->never())->method('write');
+        $dirty = $this->executor->execute($d, $area, 1);
 
-        $result = $this->executor->execute($d, $area, 1);
-
-        $this->assertTrue($result->isOk());
-        $this->assertSame($d, $result->unwrap());
         $this->assertSame(2, $d->Sort);
         $this->assertSame(3, $b->Sort);
         $this->assertSame(4, $c->Sort);
+        // A and E unchanged
+        $this->assertSame(1, $a->Sort);
+        $this->assertSame(5, $e->Sort);
+        // Only D, B, C are dirty
+        $this->assertSame([$d, $b, $c], $dirty);
     }
 
     public function testSameAreaMoveForward(): void
@@ -73,18 +67,12 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
 
-        $b->expects($this->once())->method('write');
-        $c->expects($this->once())->method('write');
-        $d->expects($this->once())->method('write');
-        $a->expects($this->never())->method('write');
-        $e->expects($this->never())->method('write');
+        $dirty = $this->executor->execute($b, $area, 3);
 
-        $result = $this->executor->execute($b, $area, 3);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(2, $c->Sort);
         $this->assertSame(3, $d->Sort);
         $this->assertSame(4, $b->Sort);
+        $this->assertSame([$c, $d, $b], $dirty);
     }
 
     public function testSamePositionIsNoOp(): void
@@ -99,13 +87,9 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c]);
 
-        $a->expects($this->never())->method('write');
-        $b->expects($this->never())->method('write');
-        $c->expects($this->never())->method('write');
+        $dirty = $this->executor->execute($b, $area, 1);
 
-        $result = $this->executor->execute($b, $area, 1);
-
-        $this->assertTrue($result->isOk());
+        $this->assertSame([], $dirty);
     }
 
     public function testCrossAreaMoveUpdatesParentId(): void
@@ -120,17 +104,13 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([20])->willReturn([$x, $y]);
 
-        $b->expects($this->once())->method('write');
-        $x->expects($this->once())->method('write');
-        $y->expects($this->once())->method('write');
+        $dirty = $this->executor->execute($b, $targetArea, 0);
 
-        $result = $this->executor->execute($b, $targetArea, 0);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(20, $b->ParentID);
         $this->assertSame(1, $b->Sort);
         $this->assertSame(2, $x->Sort);
         $this->assertSame(3, $y->Sort);
+        $this->assertSame([$b, $x, $y], $dirty);
     }
 
     public function testPositionClampedToEnd(): void
@@ -144,14 +124,11 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b]);
 
-        $a->expects($this->once())->method('write');
-        $b->expects($this->once())->method('write');
+        $dirty = $this->executor->execute($a, $area, 999);
 
-        $result = $this->executor->execute($a, $area, 999);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(1, $b->Sort);
         $this->assertSame(2, $a->Sort);
+        $this->assertSame([$b, $a], $dirty);
     }
 
     public function testEmptyTargetAreaCrossArea(): void
@@ -162,13 +139,11 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([20])->willReturn([]);
 
-        $element->expects($this->once())->method('write');
+        $dirty = $this->executor->execute($element, $targetArea, 0);
 
-        $result = $this->executor->execute($element, $targetArea, 0);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(20, $element->ParentID);
         $this->assertSame(1, $element->Sort);
+        $this->assertSame([$element], $dirty);
     }
 
     public function testMoveToPositionZero(): void
@@ -184,42 +159,12 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c]);
 
-        $c->expects($this->once())->method('write');
-        $a->expects($this->once())->method('write');
-        $b->expects($this->once())->method('write');
+        $dirty = $this->executor->execute($c, $area, 0);
 
-        $result = $this->executor->execute($c, $area, 0);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(1, $c->Sort);
         $this->assertSame(2, $a->Sort);
         $this->assertSame(3, $b->Sort);
-    }
-
-    public function testValidationExceptionFromWriteReturnsFail(): void
-    {
-        $area = $this->createAreaMock(10);
-        [$a, $b] = $this->createElementMocks([
-            ['id' => 1, 'sort' => 1, 'parentId' => 10],
-            ['id' => 2, 'sort' => 2, 'parentId' => 10],
-        ]);
-
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b]);
-
-        $validationResult = $this->createMock(ValidationResult::class);
-        $validationResult->method('getMessages')->willReturn([
-            ['message' => 'Write failed.', 'fieldName' => ''],
-        ]);
-
-        $exception = $this->createMock(ValidationException::class);
-        $exception->method('getResult')->willReturn($validationResult);
-
-        $a->method('write')->willThrowException($exception);
-
-        $result = $this->executor->execute($b, $area, 0);
-
-        $this->assertTrue($result->isErr());
-        $this->assertSame('Write failed.', $result->errors()[0]->message);
+        $this->assertSame([$c, $a, $b], $dirty);
     }
 
     public function testCrossAreaMoveToMiddle(): void
@@ -234,17 +179,14 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([20])->willReturn([$x, $y]);
 
-        $b->expects($this->once())->method('write');
-        $y->expects($this->once())->method('write');
-        $x->expects($this->never())->method('write');
+        $dirty = $this->executor->execute($b, $targetArea, 1);
 
-        $result = $this->executor->execute($b, $targetArea, 1);
-
-        $this->assertTrue($result->isOk());
         $this->assertSame(20, $b->ParentID);
         $this->assertSame(1, $x->Sort);
         $this->assertSame(2, $b->Sort);
         $this->assertSame(3, $y->Sort);
+        // X unchanged (Sort stays 1), only B and Y dirty
+        $this->assertSame([$b, $y], $dirty);
     }
 
     public function testSameAreaSingleElementNoOp(): void
@@ -255,11 +197,9 @@ final class ReorderExecutorTest extends TestCase
 
         $this->repository->method('findByAreaIds')->with([10])->willReturn([$a]);
 
-        $a->expects($this->never())->method('write');
+        $dirty = $this->executor->execute($a, $area, 0);
 
-        $result = $this->executor->execute($a, $area, 0);
-
-        $this->assertTrue($result->isOk());
+        $this->assertSame([], $dirty);
     }
 
     public function testSameAreaMoveDoesNotTouchChildAreaElements(): void
@@ -278,11 +218,11 @@ final class ReorderExecutorTest extends TestCase
             ->with([10])
             ->willReturn([$a, $section]);
 
-        $result = $this->executor->execute($section, $area, 0);
+        $dirty = $this->executor->execute($section, $area, 0);
 
-        $this->assertTrue($result->isOk());
         $this->assertSame(1, $section->Sort);
         $this->assertSame(2, $a->Sort);
+        $this->assertSame([$section, $a], $dirty);
     }
 
     public function testCrossAreaMoveDoesNotTouchChildAreaElements(): void
@@ -301,12 +241,12 @@ final class ReorderExecutorTest extends TestCase
             ->with([20])
             ->willReturn([$x]);
 
-        $result = $this->executor->execute($section, $targetArea, 0);
+        $dirty = $this->executor->execute($section, $targetArea, 0);
 
-        $this->assertTrue($result->isOk());
         $this->assertSame(20, $section->ParentID);
         $this->assertSame(1, $section->Sort);
         $this->assertSame(2, $x->Sort);
+        $this->assertSame([$section, $x], $dirty);
     }
 
     /**
