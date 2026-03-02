@@ -20,17 +20,22 @@ class ReorderService
     }
 
     /**
-     * @param non-negative-int $targetPosition
+     * @param positive-int|null $afterElementId
      * @return Result<BaseElement>
      */
-    public function reorder(BaseElement $element, ElementalArea $targetArea, int $targetPosition): Result
+    public function reorder(BaseElement $element, ElementalArea $targetArea, ?int $afterElementId): Result
     {
         $validationResult = $this->validator->validate($element, $targetArea);
         if ($validationResult->isErr()) {
             return $validationResult;
         }
 
-        $dirtyElements = $this->executor->execute($element, $targetArea, $targetPosition);
+        $executeResult = $this->executor->execute($element, $targetArea, $afterElementId);
+        if ($executeResult->isErr()) {
+            return Result::fail(...$executeResult->errors());
+        }
+
+        $dirtyElements = $executeResult->unwrap();
 
         $persistResult = $this->persistenceService->persistBatch($dirtyElements);
         if ($persistResult->isErr()) {

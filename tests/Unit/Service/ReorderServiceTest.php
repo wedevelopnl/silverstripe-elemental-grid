@@ -48,18 +48,18 @@ final class ReorderServiceTest extends TestCase
 
         $this->executor->expects($this->once())
             ->method('execute')
-            ->with($element, $area, 2)
-            ->willReturn($dirtyElements);
+            ->with($element, $area, 42)
+            ->willReturn(Result::ok($dirtyElements));
 
         $this->persistenceService->expects($this->once())
             ->method('persistBatch')
             ->with($dirtyElements)
             ->willReturn(Result::ok(null));
 
-        $result = $this->service->reorder($element, $area, 2);
+        $result = $this->service->reorder($element, $area, 42);
 
-        $this->assertTrue($result->isOk());
-        $this->assertSame($element, $result->unwrap());
+        self::assertTrue($result->isOk());
+        self::assertSame($element, $result->unwrap());
     }
 
     public function testValidationFailureShortCircuitsExecution(): void
@@ -73,10 +73,10 @@ final class ReorderServiceTest extends TestCase
         $this->executor->expects($this->never())->method('execute');
         $this->persistenceService->expects($this->never())->method('persistBatch');
 
-        $result = $this->service->reorder($element, $area, 0);
+        $result = $this->service->reorder($element, $area, null);
 
-        $this->assertTrue($result->isErr());
-        $this->assertSame('Not allowed.', $result->errors()[0]->message);
+        self::assertTrue($result->isErr());
+        self::assertSame('Not allowed.', $result->errors()[0]->message);
     }
 
     public function testValidationErrorsPropagatedToResult(): void
@@ -90,13 +90,13 @@ final class ReorderServiceTest extends TestCase
                 new ValidationError(message: 'Second error.'),
             ));
 
-        $result = $this->service->reorder($element, $area, 0);
+        $result = $this->service->reorder($element, $area, null);
 
-        $this->assertTrue($result->isErr());
-        $this->assertCount(2, $result->errors());
-        $this->assertSame('First error.', $result->errors()[0]->message);
-        $this->assertSame('placement', $result->errors()[0]->field);
-        $this->assertSame('Second error.', $result->errors()[1]->message);
+        self::assertTrue($result->isErr());
+        self::assertCount(2, $result->errors());
+        self::assertSame('First error.', $result->errors()[0]->message);
+        self::assertSame('placement', $result->errors()[0]->field);
+        self::assertSame('Second error.', $result->errors()[1]->message);
     }
 
     public function testPersistenceFailurePropagated(): void
@@ -105,15 +105,15 @@ final class ReorderServiceTest extends TestCase
         $area = $this->createMock(ElementalArea::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
-        $this->executor->method('execute')->willReturn([$element]);
+        $this->executor->method('execute')->willReturn(Result::ok([$element]));
 
         $this->persistenceService->method('persistBatch')
             ->willReturn(Result::fail(new ValidationError(message: 'Write failed.')));
 
-        $result = $this->service->reorder($element, $area, 0);
+        $result = $this->service->reorder($element, $area, null);
 
-        $this->assertTrue($result->isErr());
-        $this->assertSame('Write failed.', $result->errors()[0]->message);
+        self::assertTrue($result->isErr());
+        self::assertSame('Write failed.', $result->errors()[0]->message);
     }
 
     public function testEmptyDirtyListStillCallsPersistBatch(): void
@@ -122,7 +122,7 @@ final class ReorderServiceTest extends TestCase
         $area = $this->createMock(ElementalArea::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
-        $this->executor->method('execute')->willReturn([]);
+        $this->executor->method('execute')->willReturn(Result::ok([]));
 
         $this->persistenceService->expects($this->once())
             ->method('persistBatch')
@@ -131,7 +131,28 @@ final class ReorderServiceTest extends TestCase
 
         $result = $this->service->reorder($element, $area, 5);
 
-        $this->assertTrue($result->isOk());
-        $this->assertSame($element, $result->unwrap());
+        self::assertTrue($result->isOk());
+        self::assertSame($element, $result->unwrap());
+    }
+
+    public function testExecutorFailurePropagated(): void
+    {
+        $element = $this->createMock(BaseElement::class);
+        $area = $this->createMock(ElementalArea::class);
+
+        $this->validator->method('validate')->willReturn(Result::ok($element));
+
+        $this->executor->method('execute')
+            ->willReturn(Result::fail(new ValidationError(
+                message: 'The reference element no longer exists in the target area.',
+                field: 'afterElementID',
+            )));
+
+        $this->persistenceService->expects($this->never())->method('persistBatch');
+
+        $result = $this->service->reorder($element, $area, 999);
+
+        self::assertTrue($result->isErr());
+        self::assertSame('afterElementID', $result->errors()[0]->field);
     }
 }

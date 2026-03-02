@@ -4,6 +4,7 @@ import {
   duplicateElement,
   fetchElementTree,
   publishElement,
+  reorderElement,
   unpublishElement,
 } from '@/api/endpoints';
 
@@ -133,6 +134,46 @@ describe('endpoints', () => {
       expect(mockApiPost).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/duplicate',
         { id: 9 },
+      );
+    });
+  });
+
+  describe('reorderElement', () => {
+    it('sends correct POST body with afterElementID', async () => {
+      mockApiPost.mockResolvedValue(undefined);
+
+      await reorderElement({
+        elementID: 5,
+        targetAreaID: 10,
+        afterElementID: 3,
+      });
+
+      expect(mockApiPost).toHaveBeenCalledWith(
+        '/admin/elemental-grid/api/reorder',
+        {
+          elementID: 5,
+          targetAreaID: 10,
+          afterElementID: 3,
+        },
+      );
+    });
+
+    it('sends null afterElementID for first position', async () => {
+      mockApiPost.mockResolvedValue(undefined);
+
+      await reorderElement({
+        elementID: 5,
+        targetAreaID: 10,
+        afterElementID: null,
+      });
+
+      expect(mockApiPost).toHaveBeenCalledWith(
+        '/admin/elemental-grid/api/reorder',
+        {
+          elementID: 5,
+          targetAreaID: 10,
+          afterElementID: null,
+        },
       );
     });
   });

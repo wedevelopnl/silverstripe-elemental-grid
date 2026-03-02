@@ -34,7 +34,7 @@ use WeDevelop\ElementalGrid\Service\ReorderService;
  * @phpstan-type ReorderBody array{
  *   elementID: positive-int,
  *   targetAreaID: positive-int,
- *   targetPosition: non-negative-int,
+ *   afterElementID: positive-int|null,
  * }
  * @phpstan-type AdapterConfig array{
  *   viewports: list<array{key: string, label: string, minWidth: int|null}>,
@@ -318,7 +318,7 @@ class ElementalGridController extends AdminController
             }
         }
 
-        $result = $this->reorderService->reorder($element, $targetArea, $body['targetPosition']);
+        $result = $this->reorderService->reorder($element, $targetArea, $body['afterElementID']);
         if ($result->isErr()) {
             return $this->resultToResponse($result);
         }
@@ -428,7 +428,7 @@ class ElementalGridController extends AdminController
 
         $elementID = $data['elementID'] ?? null;
         $targetAreaID = $data['targetAreaID'] ?? null;
-        $targetPosition = $data['targetPosition'] ?? null;
+        $afterElementID = $data['afterElementID'] ?? null;
 
         if (!is_int($elementID) || $elementID < 1) {
             $this->jsonError(400);
@@ -438,14 +438,14 @@ class ElementalGridController extends AdminController
             $this->jsonError(400);
         }
 
-        if (!is_int($targetPosition) || $targetPosition < 0) {
+        if ($afterElementID !== null && (!is_int($afterElementID) || $afterElementID < 1)) {
             $this->jsonError(400);
         }
 
         return [
             'elementID' => $elementID,
             'targetAreaID' => $targetAreaID,
-            'targetPosition' => $targetPosition,
+            'afterElementID' => $afterElementID,
         ];
     }
 
