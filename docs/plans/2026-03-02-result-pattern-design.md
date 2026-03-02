@@ -84,7 +84,7 @@ This is the **only** place in our code that catches `ValidationException`. One b
 
 ### `HierarchyValidationService`
 
-Returns `Result<true>` instead of SilverStripe's `ValidationResult`. Pure domain logic, no framework coupling.
+Returns `Result<BaseElement>` instead of SilverStripe's `ValidationResult`. Returns the validated element on success, giving callers a typed value. Pure domain logic, no framework coupling.
 
 ### `HierarchyValidationExtension`
 
