@@ -3,6 +3,14 @@ import { render, screen } from '@testing-library/react';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import type { ColumnNode } from '@/types/elements';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
+
+vi.mock('@/utils/gridAdapter', () => ({
+  getColumnCount: vi.fn(() => 12),
+  getWidthClass: vi.fn((width: number) => `col-${width}`),
+  getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
+  getDefaultViewport: vi.fn(() => 'md'),
+}));
 
 function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
   return {
@@ -32,6 +40,13 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
 }
 
 describe('ColumnBlock', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getColumnCount).mockReturnValue(12);
+    vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
+    vi.mocked(getOffsetClass).mockImplementation((offset: number) => `offset-${offset}`);
+  });
+
   it('renders fraction badge for the active viewport', () => {
     const column = makeColumn({
       gridSettings: { md: { width: 6, offset: 0, visible: true } },
@@ -251,7 +266,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
+      { wrapper: createViewportWrapper('lg') },
     );
 
     // Falls back to full width (columnCount = 12)
@@ -267,7 +282,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
+      { wrapper: createViewportWrapper('lg') },
     );
 
     const outerDiv = container.firstElementChild;
@@ -282,7 +297,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
+      { wrapper: createViewportWrapper('lg') },
     );
 
     const inner = container.querySelector('.column-block');
@@ -290,49 +305,48 @@ describe('ColumnBlock', () => {
     expect(screen.getByText('12/12')).toBeDefined();
   });
 
-  it('uses getWidthClass callback to determine the CSS class', () => {
-    const customGetWidthClass = vi.fn().mockReturnValue('custom-col-8');
+  it('calls getWidthClass with the resolved column width', () => {
+    vi.mocked(getWidthClass).mockReturnValue('custom-col-8');
     const column = makeColumn({
       gridSettings: { md: { width: 8, offset: 0, visible: true } },
     });
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ getWidthClass: customGetWidthClass }) },
+      { wrapper: createViewportWrapper() },
     );
 
-    expect(customGetWidthClass).toHaveBeenCalledWith(8);
+    expect(getWidthClass).toHaveBeenCalledWith(8);
     const outerDiv = container.firstElementChild;
     expect(outerDiv?.classList.contains('custom-col-8')).toBe(true);
   });
 
-  it('uses getOffsetClass callback to determine the offset CSS class', () => {
-    const customGetOffsetClass = vi.fn().mockReturnValue('custom-offset-3');
+  it('calls getOffsetClass with the resolved column offset', () => {
+    vi.mocked(getOffsetClass).mockReturnValue('custom-offset-3');
     const column = makeColumn({
       gridSettings: { md: { width: 6, offset: 3, visible: true } },
     });
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ getOffsetClass: customGetOffsetClass }) },
+      { wrapper: createViewportWrapper() },
     );
 
-    expect(customGetOffsetClass).toHaveBeenCalledWith(3);
+    expect(getOffsetClass).toHaveBeenCalledWith(3);
     const outerDiv = container.firstElementChild;
     expect(outerDiv?.classList.contains('custom-offset-3')).toBe(true);
   });
 
   it('does not call getOffsetClass when offset is 0', () => {
-    const customGetOffsetClass = vi.fn().mockReturnValue('offset-0');
     const column = makeColumn({
       gridSettings: { md: { width: 6, offset: 0, visible: true } },
     });
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper({ getOffsetClass: customGetOffsetClass }) },
+      { wrapper: createViewportWrapper() },
     );
 
-    expect(customGetOffsetClass).not.toHaveBeenCalled();
+    expect(getOffsetClass).not.toHaveBeenCalled();
   });
 });

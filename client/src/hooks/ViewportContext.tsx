@@ -1,22 +1,29 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { getDefaultViewport } from '@/utils/gridAdapter';
 
 export interface ViewportContextValue {
   readonly activeViewport: string;
-  readonly columnCount: number;
-  readonly rowClasses: string;
-  readonly getWidthClass: (width: number) => string;
-  readonly getOffsetClass: (offset: number) => string;
+  readonly setActiveViewport: (key: string) => void;
 }
 
 const ViewportContext = createContext<ViewportContextValue | null>(null);
 
 interface ViewportProviderProps {
-  readonly value: ViewportContextValue;
+  readonly initialViewport?: string;
   readonly children: ReactNode;
 }
 
-export function ViewportProvider({ value, children }: ViewportProviderProps) {
+export function ViewportProvider({ initialViewport, children }: ViewportProviderProps) {
+  const [activeViewport, setActiveViewport] = useState(
+    () => initialViewport ?? getDefaultViewport(),
+  );
+
+  const value: ViewportContextValue = useMemo(
+    () => ({ activeViewport, setActiveViewport }),
+    [activeViewport],
+  );
+
   return (
     <ViewportContext.Provider value={value}>
       {children}

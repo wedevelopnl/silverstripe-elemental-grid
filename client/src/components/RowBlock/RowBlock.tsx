@@ -1,6 +1,6 @@
 import type { RowNode } from '@/types/elements';
 import { getElementStatus } from '@/types/status';
-import { useViewportContext } from '@/hooks/ViewportContext';
+import { getRowClasses } from '@/utils/gridAdapter';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
@@ -9,7 +9,7 @@ interface RowBlockProps {
 }
 
 export default function RowBlock({ row }: RowBlockProps) {
-  const { rowClasses } = useViewportContext();
+  const rowClasses = getRowClasses();
   const status = getElementStatus(row.statusFlags);
 
   return (

@@ -1,6 +1,7 @@
 import type { ColumnNode, ViewportSettings } from '@/types/elements';
 import { getElementStatus } from '@/types/status';
 import { useViewportContext } from '@/hooks/ViewportContext';
+import { getColumnCount, getWidthClass, getOffsetClass } from '@/utils/gridAdapter';
 import ElementCard from '@/components/ElementCard/ElementCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
@@ -21,7 +22,8 @@ function resolveViewportSettings(
 }
 
 export default function ColumnBlock({ column }: ColumnBlockProps) {
-  const { activeViewport, columnCount, getWidthClass, getOffsetClass } = useViewportContext();
+  const { activeViewport } = useViewportContext();
+  const columnCount = getColumnCount();
   const settings = resolveViewportSettings(column, activeViewport, columnCount);
   const status = getElementStatus(column.statusFlags);
 

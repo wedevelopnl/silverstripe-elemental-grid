@@ -1,8 +1,5 @@
-import { useMemo } from 'react';
 import { useElementTree } from '@/hooks/useElementTree';
-import { useViewport } from '@/hooks/useViewport';
 import { ViewportProvider } from '@/hooks/ViewportContext';
-import type { ViewportContextValue } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
 import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
@@ -23,23 +20,6 @@ interface GridEditorProps {
  */
 export default function GridEditor({ areaId, pageId }: GridEditorProps) {
   const { data, isLoading, error } = useElementTree(pageId);
-  const {
-    viewports,
-    activeViewport,
-    setActiveViewport,
-    columnCount,
-    rowClasses,
-    getWidthClass,
-    getOffsetClass,
-  } = useViewport();
-
-  const viewportContextValue: ViewportContextValue = useMemo(() => ({
-    activeViewport,
-    columnCount,
-    rowClasses,
-    getWidthClass,
-    getOffsetClass,
-  }), [activeViewport, columnCount, rowClasses, getWidthClass, getOffsetClass]);
 
   const sections = data === undefined
     ? []
@@ -54,12 +34,8 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
         </p>
       )}
       {data !== undefined && (
-        <ViewportProvider value={viewportContextValue}>
-          <ViewportSwitcher
-            viewports={viewports}
-            activeViewport={activeViewport}
-            onViewportChange={setActiveViewport}
-          />
+        <ViewportProvider>
+          <ViewportSwitcher />
           {sections.length > 0
             ? sections.map((section) => (
               <SectionBlock

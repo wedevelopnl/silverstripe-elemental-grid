@@ -3,6 +3,20 @@ import { render, screen } from '@testing-library/react';
 import RowBlock from '@/components/RowBlock/RowBlock';
 import type { ColumnNode, RowNode } from '@/types/elements';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import {
+  getRowClasses,
+  getColumnCount,
+  getWidthClass,
+  getOffsetClass,
+} from '@/utils/gridAdapter';
+
+vi.mock('@/utils/gridAdapter', () => ({
+  getColumnCount: vi.fn(() => 12),
+  getRowClasses: vi.fn(() => 'row'),
+  getWidthClass: vi.fn((width: number) => `col-${width}`),
+  getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
+  getDefaultViewport: vi.fn(() => 'md'),
+}));
 
 function makeRow(overrides: Partial<RowNode> = {}): RowNode {
   return {
@@ -56,6 +70,14 @@ function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = 
 }
 
 describe('RowBlock', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getRowClasses).mockReturnValue('row');
+    vi.mocked(getColumnCount).mockReturnValue(12);
+    vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
+    vi.mocked(getOffsetClass).mockImplementation((offset: number) => `offset-${offset}`);
+  });
+
   it('renders title as an h3 heading', () => {
     const row = makeRow({ title: 'Main Row' });
 
@@ -68,7 +90,7 @@ describe('RowBlock', () => {
     expect(heading.textContent).toBe('Main Row');
   });
 
-  it('applies rowClasses from context on the column container div', () => {
+  it('applies rowClasses from gridAdapter on the column container div', () => {
     const row = makeRow();
 
     const { container } = render(
@@ -80,12 +102,13 @@ describe('RowBlock', () => {
     expect(columnContainer).not.toBeNull();
   });
 
-  it('applies custom rowClasses value from context', () => {
+  it('applies custom rowClasses value from gridAdapter', () => {
+    vi.mocked(getRowClasses).mockReturnValue('columns is-multiline');
     const row = makeRow();
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper({ rowClasses: 'columns is-multiline' }) },
+      { wrapper: createViewportWrapper() },
     );
 
     const columnContainer = container.querySelector('.columns.is-multiline');
@@ -173,7 +196,7 @@ describe('RowBlock', () => {
     expect(outer?.classList.contains('row-block--modified')).toBe(true);
   });
 
-  it('passes activeViewport through to ColumnBlocks via context', () => {
+  it('child columns resolve settings based on activeViewport from context', () => {
     const row = makeRow({
       children: [
         makeColumn(10, 'Column', {
@@ -187,7 +210,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
+      { wrapper: createViewportWrapper('lg') },
     );
 
     // When activeViewport is "lg", the ColumnBlock should use lg settings (width 4)
@@ -195,9 +218,9 @@ describe('RowBlock', () => {
     expect(badge?.textContent).toBe('4/12');
   });
 
-  it('passes getWidthClass and getOffsetClass through to ColumnBlocks via context', () => {
-    const customGetWidthClass = vi.fn().mockReturnValue('custom-w-8');
-    const customGetOffsetClass = vi.fn().mockReturnValue('custom-o-2');
+  it('child columns use getWidthClass and getOffsetClass from gridAdapter', () => {
+    vi.mocked(getWidthClass).mockReturnValue('custom-w-8');
+    vi.mocked(getOffsetClass).mockReturnValue('custom-o-2');
 
     const row = makeRow({
       children: [
@@ -211,19 +234,16 @@ describe('RowBlock', () => {
 
     render(
       <RowBlock row={row} />,
-      {
-        wrapper: createViewportWrapper({
-          getWidthClass: customGetWidthClass,
-          getOffsetClass: customGetOffsetClass,
-        }),
-      },
+      { wrapper: createViewportWrapper() },
     );
 
-    expect(customGetWidthClass).toHaveBeenCalledWith(8);
-    expect(customGetOffsetClass).toHaveBeenCalledWith(2);
+    expect(getWidthClass).toHaveBeenCalledWith(8);
+    expect(getOffsetClass).toHaveBeenCalledWith(2);
   });
 
-  it('passes columnCount through to ColumnBlocks via context', () => {
+  it('child columns use getColumnCount from gridAdapter for badge display', () => {
+    vi.mocked(getColumnCount).mockReturnValue(16);
+
     const row = makeRow({
       children: [
         makeColumn(10, 'Column', {
@@ -236,7 +256,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper({ columnCount: 16 }) },
+      { wrapper: createViewportWrapper() },
     );
 
     // ColumnBlock shows width/columnCount, so with columnCount=16 and width=6

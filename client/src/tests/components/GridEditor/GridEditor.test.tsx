@@ -12,31 +12,20 @@ vi.mock('@/api/endpoints', () => ({
   fetchElementTree: (...args: unknown[]) => mockFetchElementTree(...args),
 }));
 
-vi.mock('@/api/config', () => ({
-  getConfig: vi.fn(),
-  getAdapterConfig: vi.fn().mockReturnValue({
-    viewports: [
-      { key: 'xs', label: 'XS', minWidth: null },
-      { key: 'sm', label: 'SM', minWidth: 576 },
-      { key: 'md', label: 'MD', minWidth: 768 },
-      { key: 'lg', label: 'LG', minWidth: 992 },
-      { key: 'xl', label: 'XL', minWidth: 1200 },
-      { key: 'xxl', label: 'XXL', minWidth: 1400 },
-    ],
-    defaultViewport: 'md',
-    columnCount: 12,
-    rowClasses: 'row',
-    baseWidthClasses: {
-      '1': 'col-1', '2': 'col-2', '3': 'col-3', '4': 'col-4',
-      '5': 'col-5', '6': 'col-6', '7': 'col-7', '8': 'col-8',
-      '9': 'col-9', '10': 'col-10', '11': 'col-11', '12': 'col-12',
-    },
-    baseOffsetClasses: {
-      '0': 'offset-0', '1': 'offset-1', '2': 'offset-2', '3': 'offset-3',
-      '4': 'offset-4', '5': 'offset-5', '6': 'offset-6', '7': 'offset-7',
-      '8': 'offset-8', '9': 'offset-9', '10': 'offset-10', '11': 'offset-11',
-    },
-  }),
+vi.mock('@/utils/gridAdapter', () => ({
+  getViewports: vi.fn(() => [
+    { key: 'xs', label: 'XS', minWidth: null },
+    { key: 'sm', label: 'SM', minWidth: 576 },
+    { key: 'md', label: 'MD', minWidth: 768 },
+    { key: 'lg', label: 'LG', minWidth: 992 },
+    { key: 'xl', label: 'XL', minWidth: 1200 },
+    { key: 'xxl', label: 'XXL', minWidth: 1400 },
+  ]),
+  getDefaultViewport: vi.fn(() => 'md'),
+  getColumnCount: vi.fn(() => 12),
+  getRowClasses: vi.fn(() => 'row'),
+  getWidthClass: vi.fn((width: number) => `col-${width}`),
+  getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
 }));
 
 function createWrapper() {

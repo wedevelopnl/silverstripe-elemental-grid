@@ -3,6 +3,19 @@ import { render, screen } from '@testing-library/react';
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
 import type { RowNode, SectionNode } from '@/types/elements';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import {
+  getRowClasses,
+  getWidthClass,
+  getOffsetClass,
+} from '@/utils/gridAdapter';
+
+vi.mock('@/utils/gridAdapter', () => ({
+  getColumnCount: vi.fn(() => 12),
+  getRowClasses: vi.fn(() => 'row'),
+  getWidthClass: vi.fn((width: number) => `col-${width}`),
+  getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
+  getDefaultViewport: vi.fn(() => 'md'),
+}));
 
 function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
   return {
@@ -53,6 +66,13 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
 }
 
 describe('SectionBlock', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getRowClasses).mockReturnValue('row');
+    vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
+    vi.mocked(getOffsetClass).mockImplementation((offset: number) => `offset-${offset}`);
+  });
+
   it('renders as a <section> element', () => {
     const section = makeSection();
 
@@ -157,37 +177,39 @@ describe('SectionBlock', () => {
     expect(outer?.classList.contains('section-block--modified')).toBe(true);
   });
 
-  it('passes activeViewport through to RowBlocks via context', () => {
+  it('child columns resolve settings based on activeViewport from context', () => {
     const section = makeSection({
       children: [makeRow(10, 'Row')],
     });
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper({ activeViewport: 'lg' }) },
+      { wrapper: createViewportWrapper('lg') },
     );
 
     const rowBlocks = container.querySelectorAll('.row-block');
     expect(rowBlocks.length).toBe(1);
   });
 
-  it('passes rowClasses through to RowBlocks via context', () => {
+  it('rows apply rowClasses from gridAdapter', () => {
+    vi.mocked(getRowClasses).mockReturnValue('columns is-multiline');
+
     const section = makeSection({
       children: [makeRow(10, 'Row')],
     });
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper({ rowClasses: 'columns is-multiline' }) },
+      { wrapper: createViewportWrapper() },
     );
 
     const columnContainer = container.querySelector('.columns.is-multiline');
     expect(columnContainer).not.toBeNull();
   });
 
-  it('passes getWidthClass and getOffsetClass through to RowBlocks via context', () => {
-    const customGetWidthClass = vi.fn().mockReturnValue('custom-w-8');
-    const customGetOffsetClass = vi.fn().mockReturnValue('custom-o-2');
+  it('nested columns use getWidthClass and getOffsetClass from gridAdapter', () => {
+    vi.mocked(getWidthClass).mockReturnValue('custom-w-8');
+    vi.mocked(getOffsetClass).mockReturnValue('custom-o-2');
 
     const section = makeSection({
       children: [
@@ -223,16 +245,11 @@ describe('SectionBlock', () => {
 
     render(
       <SectionBlock section={section} />,
-      {
-        wrapper: createViewportWrapper({
-          getWidthClass: customGetWidthClass,
-          getOffsetClass: customGetOffsetClass,
-        }),
-      },
+      { wrapper: createViewportWrapper() },
     );
 
-    expect(customGetWidthClass).toHaveBeenCalledWith(8);
-    expect(customGetOffsetClass).toHaveBeenCalledWith(2);
+    expect(getWidthClass).toHaveBeenCalledWith(8);
+    expect(getOffsetClass).toHaveBeenCalledWith(2);
   });
 
   it('renders rows in the body area within section-block__body', () => {

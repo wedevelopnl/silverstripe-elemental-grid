@@ -1,16 +1,10 @@
-import type { ViewportConfig } from '@/types/adapter';
+import { useViewportContext } from '@/hooks/ViewportContext';
+import { getViewports } from '@/utils/gridAdapter';
 
-interface ViewportSwitcherProps {
-  readonly viewports: readonly ViewportConfig[];
-  readonly activeViewport: string;
-  readonly onViewportChange: (key: string) => void;
-}
+export default function ViewportSwitcher() {
+  const viewports = getViewports();
+  const { activeViewport, setActiveViewport } = useViewportContext();
 
-export default function ViewportSwitcher({
-  viewports,
-  activeViewport,
-  onViewportChange,
-}: ViewportSwitcherProps) {
   return (
     <div className="viewport-switcher" role="group" aria-label="Viewport size">
       {viewports.map((viewport) => {
@@ -26,7 +20,7 @@ export default function ViewportSwitcher({
             aria-disabled={isActive || undefined}
             onClick={() => {
               if (!isActive) {
-                onViewportChange(viewport.key);
+                setActiveViewport(viewport.key);
               }
             }}
           >
