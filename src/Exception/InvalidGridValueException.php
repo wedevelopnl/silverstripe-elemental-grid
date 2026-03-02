@@ -34,4 +34,17 @@ final class InvalidGridValueException extends GridDomainException
             statusCode: self::STATUS_CODE,
         );
     }
+
+    public static function forColumnCount(mixed $value): self
+    {
+        return new self(
+            userMessage: 'The configured column count is invalid.',
+            detailedMessage: sprintf(
+                'Column count must be a positive integer, got %s (%s).',
+                var_export($value, true),
+                get_debug_type($value),
+            ),
+            statusCode: self::STATUS_CODE,
+        );
+    }
 }

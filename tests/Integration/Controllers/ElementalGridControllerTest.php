@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
-use DNADesign\Elemental\Models\BaseElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\FunctionalTest;
@@ -225,6 +224,7 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         $this->assertJsonError(422, 'Row cannot be placed inside Test Page.', $response);
     }
+
 
     public function testResponseMatchesTreeBuilderOutput(): void
     {
