@@ -1,11 +1,14 @@
 # E2E fixture for collapse testing: multiple siblings at every level.
 #
 # Structure:
-#   Section A
-#     Row A1 (2 columns: Col A1-L, Col A1-R)
-#     Row A2 (1 column: Col A2)
-#   Section B
-#     Row B1 (1 column: Col B1)
+#   Page 1 (E2E Collapse Test Page):
+#     Section A
+#       Row A1 (2 columns: Col A1-L, Col A1-R)
+#       Row A2 (1 column: Col A2)
+#     Section B
+#       Row B1 (1 column: Col B1)
+#
+#   Page 2 (E2E Other Page): minimal page for CMS navigation testing.
 #
 # Provides sibling coverage: 2 sections, 2 rows in section A, 2 columns in row A1.
 #
@@ -29,6 +32,9 @@ Page:
     Title: 'E2E Collapse Test Page'
     URLSegment: 'e2e-collapse-test'
     ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
+  e2e_other_page:
+    Title: 'E2E Other Page'
+    URLSegment: 'e2e-other-page'
 
 # --- Leaves ---
 DNADesign\Elemental\Models\BaseElement:

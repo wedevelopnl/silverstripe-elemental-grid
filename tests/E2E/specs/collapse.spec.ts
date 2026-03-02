@@ -6,9 +6,11 @@ test.describe('Collapsible containers', () => {
     await resetFixtures(request);
   });
 
-  test('editor collapses containers to focus on content, state survives reload', async ({ page }) => {
+  test('editor collapses containers to focus on content, state survives navigation and reload', async ({ page }) => {
     // Fixture: Section A (Row A1 [Col A1-L, Col A1-R], Row A2 [Col A2]), Section B (Row B1 [Col B1])
+    // Plus a second page (e2e_other_page) for CMS navigation testing
     const fixture = await loadFixture(page.request, 'collapse-test');
+    const otherPageId = fixture.fixtureMap['Page']['e2e_other_page'];
 
     await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
     await expect(
@@ -93,25 +95,57 @@ test.describe('Collapsible containers', () => {
     await expect(colA1L.getByText('Block A1-Left')).toBeHidden();
     await expect(colA1R.getByText('Block A1-Right')).toBeVisible();
 
-    // --- Collapse Section A again for the reload test ---
-    await sectionAToggle.click();
-    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'false');
+    // --- Navigate to a different page via CMS (SPA transition) ---
+    // This unmounts the React grid editor without a full browser reload.
+    await page.goto(`/admin/pages/edit/show/${otherPageId}`);
+    await expect(
+      page.locator('#Form_EditForm_Title'),
+    ).toHaveValue('E2E Other Page', { timeout: 15_000 });
 
-    // --- Reload page — all collapsed state persists ---
+    // --- Navigate back to the original page ---
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(
+      page.getByTestId('grid-editor-loading'),
+    ).toBeHidden({ timeout: 15_000 });
+
+    // State after CMS navigation: Section A expanded, Row A2 collapsed,
+    // Col A1-Left collapsed (same as before navigating away)
+    const sectionANav = page.getByTestId('section-block').filter({ hasText: 'Section A' });
+    const sectionBNav = page.getByTestId('section-block').filter({ hasText: 'Section B' });
+
+    await expect(sectionANav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
+    await expect(sectionBNav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
+
+    const rowA1Nav = sectionANav.locator('.row-block').filter({ hasText: 'Row A1' });
+    const rowA2Nav = sectionANav.locator('.row-block').filter({ hasText: 'Row A2' });
+
+    await expect(rowA1Nav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
+    await expect(rowA2Nav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'false');
+    await expect(rowA2Nav.getByText('Block A2')).toBeHidden();
+
+    const colA1LNav = rowA1Nav.getByTestId('column-block').filter({ hasText: 'Block A1-Left' });
+    const colA1RNav = rowA1Nav.getByTestId('column-block').filter({ hasText: 'Block A1-Right' });
+
+    await expect(colA1LNav.getByTestId('collapse-toggle')).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1LNav.getByText('Block A1-Left')).toBeHidden();
+    await expect(colA1RNav.getByText('Block A1-Right')).toBeVisible();
+
+    // --- Collapse Section A for the hard reload test ---
+    await sectionANav.getByTestId('collapse-toggle').first().click();
+    await expect(sectionANav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'false');
+
+    // --- Hard reload — all collapsed state persists ---
     await page.reload();
     await expect(
       page.getByTestId('grid-editor-loading'),
     ).toBeHidden({ timeout: 15_000 });
 
-    // Re-locate toggles after reload
     const sectionAReload = page.getByTestId('section-block').filter({ hasText: 'Section A' });
     const sectionBReload = page.getByTestId('section-block').filter({ hasText: 'Section B' });
     const sectionAToggleReload = sectionAReload.getByTestId('collapse-toggle').first();
-    const sectionBToggleReload = sectionBReload.getByTestId('collapse-toggle').first();
 
-    // Section A collapsed, Section B still expanded
     await expect(sectionAToggleReload).toHaveAttribute('aria-expanded', 'false');
-    await expect(sectionBToggleReload).toHaveAttribute('aria-expanded', 'true');
+    await expect(sectionBReload.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
 
     // Expand Section A to verify nested states survived the reload
     await sectionAToggleReload.click();
