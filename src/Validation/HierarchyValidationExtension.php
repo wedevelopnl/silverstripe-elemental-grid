@@ -10,7 +10,8 @@ use SilverStripe\Core\Validation\ValidationResult;
 
 /**
  * Applied to BaseElement via YAML. Delegates hierarchy validation
- * to the centralized HierarchyValidationService.
+ * to the centralized HierarchyValidationService, then translates
+ * Result errors into the framework's ValidationResult.
  *
  * @extends Extension<\DNADesign\Elemental\Models\BaseElement>
  */
@@ -22,10 +23,12 @@ class HierarchyValidationExtension extends Extension
         $service = Injector::inst()->get(HierarchyValidatorInterface::class);
         $serviceResult = $service->validate($this->owner);
 
-        /** @var array<array{message: string, messageType: string, messageCast: string, fieldName: string|null}> $messages */
-        $messages = $serviceResult->getMessages();
-        foreach ($messages as $message) {
-            $result->addError($message['message']);
+        if ($serviceResult->isOk()) {
+            return;
+        }
+
+        foreach ($serviceResult->errors() as $error) {
+            $result->addError($error->message);
         }
     }
 }

@@ -7,50 +7,58 @@ namespace WeDevelop\ElementalGrid\Validation;
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\ORM\DataObject;
+use WeDevelop\ElementalGrid\Model\Result;
+use WeDevelop\ElementalGrid\Model\ValidationError;
 
 class HierarchyValidationService implements HierarchyValidatorInterface
 {
+    /** @return Result<true> */
     #[\Override]
-    public function validate(BaseElement $element): ValidationResult
+    public function validate(BaseElement $element): Result
     {
-        $result = ValidationResult::create();
-
         $parent = $element->Parent();
         if (!$parent->exists()) {
-            return $result;
+            /** @var Result<true> */
+            return Result::ok(true);
         }
 
         $owner = $parent->getOwnerPage();
         if ($owner === null) {
-            return $result;
+            /** @var Result<true> */
+            return Result::ok(true);
         }
 
         // Page-level: owner has ElementalPageExtension (applied to any SiteTree subclass)
         if ($owner->hasExtension(ElementalPageExtension::class)) {
             if ($element->config()->get('can_be_root') === false) {
-                $result->addError(sprintf(
-                    '%s cannot be placed inside %s.',
-                    $element->singular_name(),
-                    $owner->singular_name(),
+                return Result::fail(new ValidationError(
+                    message: sprintf(
+                        '%s cannot be placed inside %s.',
+                        $element->singular_name(),
+                        $owner->singular_name(),
+                    ),
+                    field: 'placement',
                 ));
             }
 
-            return $result;
+            /** @var Result<true> */
+            return Result::ok(true);
         }
 
         if ($this->isElementAllowed($element::class, $owner)) {
-            return $result;
+            /** @var Result<true> */
+            return Result::ok(true);
         }
 
-        $result->addError(sprintf(
-            '%s cannot be placed inside %s.',
-            $element->singular_name(),
-            $owner->singular_name(),
+        return Result::fail(new ValidationError(
+            message: sprintf(
+                '%s cannot be placed inside %s.',
+                $element->singular_name(),
+                $owner->singular_name(),
+            ),
+            field: 'placement',
         ));
-
-        return $result;
     }
 
     /**
