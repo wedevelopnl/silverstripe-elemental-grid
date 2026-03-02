@@ -5,21 +5,22 @@ declare(strict_types=1);
 namespace WeDevelop\ElementalGrid\Controllers;
 
 use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Services\ReorderElements;
 use SilverStripe\Admin\AdminController;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\ElementalGrid\Model\Result;
+use WeDevelop\ElementalGrid\Model\ValidationError;
 use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
+use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 
 /**
@@ -49,6 +50,7 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  * @property ElementRepositoryInterface $elementRepository
  * @property ElementalAreaRepositoryInterface $areaRepository
  * @property ElementTreeBuilder $treeBuilder
+ * @property ElementPersistenceService $persistenceService
  */
 class ElementalGridController extends AdminController
 {
@@ -61,6 +63,7 @@ class ElementalGridController extends AdminController
         'elementRepository' => '%$' . ElementRepositoryInterface::class,
         'areaRepository' => '%$' . ElementalAreaRepositoryInterface::class,
         'treeBuilder' => '%$' . ElementTreeBuilder::class,
+        'persistenceService' => '%$' . ElementPersistenceService::class,
     ];
 
     public ElementRepositoryInterface $elementRepository;
@@ -68,6 +71,8 @@ class ElementalGridController extends AdminController
     public ElementalAreaRepositoryInterface $areaRepository;
 
     public ElementTreeBuilder $treeBuilder;
+
+    public ElementPersistenceService $persistenceService;
 
     /** @var array<string, string> */
     private static array $url_handlers = [
@@ -149,14 +154,9 @@ class ElementalGridController extends AdminController
         $newElement->ParentID = $area->ID;
         $newElement->ensureSortSet();
 
-        try {
-            if ($body['insertAfterElementID'] !== null) {
-                $this->reorderElements($newElement, $body['insertAfterElementID']);
-            } else {
-                $newElement->write();
-            }
-        } catch (ValidationException $e) {
-            $this->jsonError(422, $this->extractValidationMessages($e));
+        $result = $this->persistenceService->persistNew($newElement, $body['insertAfterElementID']);
+        if ($result->isErr()) {
+            return $this->resultToResponse($result);
         }
 
         return $this->jsonSuccess(204);
@@ -256,15 +256,14 @@ class ElementalGridController extends AdminController
             $this->jsonError(403);
         }
 
-        try {
-            $clone = $element->duplicate(false);
-            $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
-            $clone->Sort = 0;
-            $area->Elements()->add($clone);
+        $clone = $element->duplicate(false);
+        $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
+        $clone->Sort = 0;
+        $clone->ParentID = $area->ID;
 
-            $this->reorderElements($clone, $id);
-        } catch (ValidationException $e) {
-            $this->jsonError(422, $this->extractValidationMessages($e));
+        $result = $this->persistenceService->persistDuplicate($clone, $id);
+        if ($result->isErr()) {
+            return $this->resultToResponse($result);
         }
 
         return $this->jsonSuccess(204);
@@ -379,32 +378,20 @@ class ElementalGridController extends AdminController
         return $id;
     }
 
-    private function reorderElements(BaseElement $element, int $afterElementID): void
-    {
-        if ($afterElementID < 1) {
-            $this->jsonError(400);
-        }
-
-        /** @var ReorderElements $reorderer */
-        $reorderer = Injector::inst()->create(ReorderElements::class, $element);
-        $reorderer->reorder($afterElementID);
-    }
-
     /**
-     * Extract user-safe messages from a ValidationException.
+     * Convert a failed Result into a 422 JSON error response.
      *
-     * Returns the joined messages from the ValidationResult (added via addError()),
-     * or a generic fallback if no messages exist.
+     * @template T
+     * @param Result<T> $result
      */
-    private function extractValidationMessages(ValidationException $e): string
+    private function resultToResponse(Result $result): never
     {
-        $messages = $e->getResult()->getMessages();
+        $messages = array_map(
+            static fn (ValidationError $error): string => $error->message,
+            $result->errors(),
+        );
 
-        if ($messages === []) {
-            return 'Validation failed.';
-        }
-
-        return implode(' ', array_column($messages, 'message'));
+        $this->jsonError(422, implode(' ', $messages));
     }
 
     /**
