@@ -58,6 +58,11 @@ class ElementPersistenceService
         return Result::ok($element);
     }
 
+    /**
+     * Injector::inst()->create() used because ReorderElements requires
+     * the element instance as a constructor argument — cannot be
+     * statically injected via YAML. Covered by integration tests.
+     */
     private function reorderElement(BaseElement $element, int $afterElementId): void
     {
         /** @var ReorderElements $reorderer */
