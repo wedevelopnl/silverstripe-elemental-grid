@@ -9,6 +9,7 @@ import {
   getWidthClass,
   getOffsetClass,
 } from '@/utils/gridAdapter';
+import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
@@ -16,6 +17,10 @@ vi.mock('@/utils/gridAdapter', () => ({
   getWidthClass: vi.fn((width: number) => `col-${width}`),
   getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
   getDefaultViewport: vi.fn(() => 'md'),
+}));
+
+vi.mock('@/hooks/useCollapse', () => ({
+  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
 }));
 
 function makeRow(overrides: Partial<RowNode> = {}): RowNode {
@@ -262,5 +267,57 @@ describe('RowBlock', () => {
     // ColumnBlock shows width/columnCount, so with columnCount=16 and width=6
     const badge = container.querySelector('.column-block__badge');
     expect(badge?.textContent).toBe('6/16');
+  });
+
+  describe('collapse', () => {
+    it('renders a collapse toggle button', () => {
+      const row = makeRow();
+
+      render(
+        <RowBlock row={row} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(screen.getByTestId('collapse-toggle')).toBeDefined();
+    });
+
+    it('passes the row ID to useCollapse', () => {
+      const row = makeRow({ id: 77 });
+
+      render(
+        <RowBlock row={row} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(useCollapse).toHaveBeenCalledWith(77);
+    });
+
+    it('applies --collapsed modifier when collapsed', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
+
+      const row = makeRow();
+
+      const { container } = render(
+        <RowBlock row={row} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const outer = container.querySelector('.row-block');
+      expect(outer?.classList.contains('row-block--collapsed')).toBe(true);
+    });
+
+    it('does not apply --collapsed modifier when expanded', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
+
+      const row = makeRow();
+
+      const { container } = render(
+        <RowBlock row={row} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const outer = container.querySelector('.row-block');
+      expect(outer?.classList.contains('row-block--collapsed')).toBe(false);
+    });
   });
 });

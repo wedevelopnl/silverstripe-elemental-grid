@@ -10,3 +10,5 @@ export {
   useDeleteElement,
   useDuplicateElement,
 } from './useElementMutations';
+export { useCollapse } from './useCollapse';
+export type { CollapseState } from './useCollapse';

@@ -12,18 +12,28 @@ $section-block-border: #c0c8d0;
 
   @include mixins.status-indicator;
 
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
   &__title {
     margin: 0;
     font-weight: 700;
     font-variant: small-caps;
     font-size: 0.85em;
     color: #3a4a5c;
-    margin-bottom: 12px;
   }
 
   &__body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  &--collapsed &__body {
+    display: none;
   }
 }

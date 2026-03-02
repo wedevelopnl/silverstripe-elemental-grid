@@ -4,12 +4,17 @@ import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import type { ColumnNode } from '@/types/elements';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
+import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
   getWidthClass: vi.fn((width: number) => `col-${width}`),
   getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
   getDefaultViewport: vi.fn(() => 'md'),
+}));
+
+vi.mock('@/hooks/useCollapse', () => ({
+  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
 }));
 
 function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
@@ -348,5 +353,57 @@ describe('ColumnBlock', () => {
     );
 
     expect(getOffsetClass).not.toHaveBeenCalled();
+  });
+
+  describe('collapse', () => {
+    it('renders a collapse toggle button', () => {
+      const column = makeColumn();
+
+      render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(screen.getByTestId('collapse-toggle')).toBeDefined();
+    });
+
+    it('passes the column ID to useCollapse', () => {
+      const column = makeColumn({ id: 55 });
+
+      render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(useCollapse).toHaveBeenCalledWith(55);
+    });
+
+    it('applies --collapsed modifier when collapsed', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
+
+      const column = makeColumn();
+
+      const { container } = render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const inner = container.querySelector('.column-block');
+      expect(inner?.classList.contains('column-block--collapsed')).toBe(true);
+    });
+
+    it('does not apply --collapsed modifier when expanded', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
+
+      const column = makeColumn();
+
+      const { container } = render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const inner = container.querySelector('.column-block');
+      expect(inner?.classList.contains('column-block--collapsed')).toBe(false);
+    });
   });
 });

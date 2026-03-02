@@ -8,6 +8,7 @@ import {
   getWidthClass,
   getOffsetClass,
 } from '@/utils/gridAdapter';
+import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
@@ -15,6 +16,10 @@ vi.mock('@/utils/gridAdapter', () => ({
   getWidthClass: vi.fn((width: number) => `col-${width}`),
   getOffsetClass: vi.fn((offset: number) => `offset-${offset}`),
   getDefaultViewport: vi.fn(() => 'md'),
+}));
+
+vi.mock('@/hooks/useCollapse', () => ({
+  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
 }));
 
 function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
@@ -267,5 +272,61 @@ describe('SectionBlock', () => {
 
     const rowsInsideBody = body?.querySelectorAll('.row-block');
     expect(rowsInsideBody?.length).toBe(1);
+  });
+
+  describe('collapse', () => {
+    it('renders a collapse toggle button', () => {
+      const section = makeSection();
+
+      render(
+        <SectionBlock section={section} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(screen.getByTestId('collapse-toggle')).toBeDefined();
+    });
+
+    it('passes the section ID to useCollapse', () => {
+      const section = makeSection({ id: 42 });
+
+      render(
+        <SectionBlock section={section} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(useCollapse).toHaveBeenCalledWith(42);
+    });
+
+    it('hides body when collapsed', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
+
+      const section = makeSection({
+        children: [makeRow(10, 'First Row')],
+      });
+
+      const { container } = render(
+        <SectionBlock section={section} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const outer = container.querySelector('.section-block');
+      expect(outer?.classList.contains('section-block--collapsed')).toBe(true);
+    });
+
+    it('shows body when expanded', () => {
+      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
+
+      const section = makeSection({
+        children: [makeRow(10, 'First Row')],
+      });
+
+      const { container } = render(
+        <SectionBlock section={section} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const outer = container.querySelector('.section-block');
+      expect(outer?.classList.contains('section-block--collapsed')).toBe(false);
+    });
   });
 });
