@@ -1,6 +1,8 @@
 # Dolt database (managed by Dolt, not git)
 dolt/
 dolt-access.lock
+dolt-server.*
+dolt-monitor.pid
 
 # Runtime files
 bd.sock
@@ -21,6 +23,9 @@ redirect
 .jsonl.lock
 sync_base.jsonl
 export-state/
+
+# Local backup (machine-specific Dolt database dump)
+backup/
 
 # Ephemeral store (SQLite - wisps/molecules, intentionally not versioned)
 ephemeral.sqlite3
