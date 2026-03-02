@@ -81,10 +81,16 @@ final class ResultTest extends TestCase
     {
         $error = new ValidationError('bad');
         $result = Result::fail($error);
-        $mapped = $result->map(static fn (mixed $v): string => 'should not run');
+        $called = false;
+        $mapped = $result->map(static function (mixed $v) use (&$called): string {
+            $called = true;
+
+            return 'should not run';
+        });
 
         $this->assertTrue($mapped->isErr());
         $this->assertSame([$error], $mapped->errors());
+        $this->assertFalse($called, 'map() must not invoke the callable on a failed Result');
     }
 
     public function testOkWithNullValue(): void

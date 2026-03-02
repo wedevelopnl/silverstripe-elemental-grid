@@ -87,7 +87,8 @@ final readonly class Result
     public function map(callable $fn): self
     {
         if (!$this->ok) {
-            /** @var self<U> Safe: failed Results carry no typed value, only errors */
+            // Reconstruct instead of returning $this so PHPStan can narrow self<T> → self<U>
+            /** @var self<U> */
             $result = new self(ok: false, value: null, errors: $this->errors);
 
             return $result;
