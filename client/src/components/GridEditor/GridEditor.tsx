@@ -1,5 +1,5 @@
 import { useElementTree } from '@/hooks/useElementTree';
-import { CollapseProvider } from '@/hooks/CollapseContext';
+import { useCollapseEnrichment } from '@/hooks/useCollapseEnrichment';
 import { ViewportProvider } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
 import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
@@ -26,6 +26,8 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
     ? []
     : (data[String(areaId)] ?? []).filter(isSectionNode);
 
+  const enrichedSections = useCollapseEnrichment(sections, areaId);
+
   return (
     <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
       {isLoading && <p className="grid-editor__loading" data-testid="grid-editor-loading">Loading elements...</p>}
@@ -35,19 +37,17 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
         </p>
       )}
       {data !== undefined && (
-        <CollapseProvider areaId={areaId}>
-          <ViewportProvider>
-            <ViewportSwitcher />
-            {sections.length > 0
-              ? sections.map((section) => (
-                <SectionBlock
-                  key={section.id}
-                  section={section}
-                />
-              ))
-              : <EmptyState message="No sections yet" variant="centered" />}
-          </ViewportProvider>
-        </CollapseProvider>
+        <ViewportProvider>
+          <ViewportSwitcher />
+          {enrichedSections.length > 0
+            ? enrichedSections.map((section) => (
+              <SectionBlock
+                key={section.id}
+                section={section}
+              />
+            ))
+            : <EmptyState message="No sections yet" variant="centered" />}
+        </ViewportProvider>
       )}
     </div>
   );

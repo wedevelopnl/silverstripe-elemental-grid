@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import RowBlock from '@/components/RowBlock/RowBlock';
-import type { ColumnNode, RowNode } from '@/types/elements';
+import type { EnrichedRowNode, EnrichedColumnNode } from '@/types/enriched';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 import {
   getRowClasses,
@@ -9,7 +10,6 @@ import {
   getWidthClass,
   getOffsetClass,
 } from '@/utils/gridAdapter';
-import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
@@ -19,35 +19,7 @@ vi.mock('@/utils/gridAdapter', () => ({
   getDefaultViewport: vi.fn(() => 'md'),
 }));
 
-vi.mock('@/hooks/useCollapse', () => ({
-  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
-}));
-
-function makeRow(overrides: Partial<RowNode> = {}): RowNode {
-  return {
-    id: 20,
-    title: 'Row',
-    blockSchema: {
-      typeName: 'WeDevelop\\ElementalGrid\\Row',
-      label: 'Row',
-      actions: { edit: '/admin/elemental/edit/20' },
-      content: '',
-    },
-    obsoleteClassName: null,
-    version: 1,
-    canDelete: true,
-    canPublish: true,
-    canUnpublish: false,
-    canCreate: true,
-    statusFlags: {},
-    containerType: 'row',
-    allowedTypes: null,
-    children: null,
-    ...overrides,
-  };
-}
-
-function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = {}) {
+function makeColumn(id: number, title: string, overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumnNode {
   return {
     id,
     title,
@@ -70,6 +42,34 @@ function makeColumn(id: number, title: string, overrides: Partial<ColumnNode> = 
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
+    isCollapsed: false,
+    toggle: vi.fn(),
+    ...overrides,
+  };
+}
+
+function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
+  return {
+    id: 20,
+    title: 'Row',
+    blockSchema: {
+      typeName: 'WeDevelop\\ElementalGrid\\Row',
+      label: 'Row',
+      actions: { edit: '/admin/elemental/edit/20' },
+      content: '',
+    },
+    obsoleteClassName: null,
+    version: 1,
+    canDelete: true,
+    canPublish: true,
+    canUnpublish: false,
+    canCreate: true,
+    statusFlags: {},
+    containerType: 'row',
+    allowedTypes: null,
+    children: null,
+    isCollapsed: false,
+    toggle: vi.fn(),
     ...overrides,
   };
 }
@@ -281,21 +281,22 @@ describe('RowBlock', () => {
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
     });
 
-    it('passes the row ID to useCollapse', () => {
-      const row = makeRow({ id: 77 });
+    it('wires toggle to CollapseToggle onToggle', async () => {
+      const toggle = vi.fn();
+      const row = makeRow({ id: 77, toggle });
+      const user = userEvent.setup();
 
       render(
         <RowBlock row={row} />,
         { wrapper: createViewportWrapper() },
       );
 
-      expect(useCollapse).toHaveBeenCalledWith(77);
+      await user.click(screen.getByTestId('collapse-toggle'));
+      expect(toggle).toHaveBeenCalledOnce();
     });
 
     it('applies --collapsed modifier when collapsed', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
-
-      const row = makeRow();
+      const row = makeRow({ isCollapsed: true });
 
       const { container } = render(
         <RowBlock row={row} />,
@@ -307,9 +308,7 @@ describe('RowBlock', () => {
     });
 
     it('does not apply --collapsed modifier when expanded', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
-
-      const row = makeRow();
+      const row = makeRow({ isCollapsed: false });
 
       const { container } = render(
         <RowBlock row={row} />,

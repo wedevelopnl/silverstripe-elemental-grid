@@ -1,19 +1,18 @@
-import type { RowNode } from '@/types/elements';
+import type { EnrichedRowNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { useCollapse } from '@/hooks/useCollapse';
 import { getRowClasses } from '@/utils/gridAdapter';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface RowBlockProps {
-  readonly row: RowNode;
+  readonly row: EnrichedRowNode;
 }
 
 export default function RowBlock({ row }: RowBlockProps) {
   const rowClasses = getRowClasses();
   const status = getElementStatus(row.statusFlags);
-  const { isCollapsed, toggle } = useCollapse(row.id);
+  const { isCollapsed, toggle } = row;
 
   const rootClasses = [
     'row-block',

@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
-import type { ColumnNode } from '@/types/elements';
+import type { EnrichedColumnNode } from '@/types/enriched';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
-import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
@@ -13,11 +13,7 @@ vi.mock('@/utils/gridAdapter', () => ({
   getDefaultViewport: vi.fn(() => 'md'),
 }));
 
-vi.mock('@/hooks/useCollapse', () => ({
-  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
-}));
-
-function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
+function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumnNode {
   return {
     id: 10,
     title: 'Column',
@@ -40,6 +36,8 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
+    isCollapsed: false,
+    toggle: vi.fn(),
     ...overrides,
   };
 }
@@ -367,21 +365,22 @@ describe('ColumnBlock', () => {
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
     });
 
-    it('passes the column ID to useCollapse', () => {
-      const column = makeColumn({ id: 55 });
+    it('wires toggle to CollapseToggle onToggle', async () => {
+      const toggle = vi.fn();
+      const column = makeColumn({ id: 55, toggle });
+      const user = userEvent.setup();
 
       render(
         <ColumnBlock column={column} />,
         { wrapper: createViewportWrapper() },
       );
 
-      expect(useCollapse).toHaveBeenCalledWith(55);
+      await user.click(screen.getByTestId('collapse-toggle'));
+      expect(toggle).toHaveBeenCalledOnce();
     });
 
     it('applies --collapsed modifier when collapsed', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
-
-      const column = makeColumn();
+      const column = makeColumn({ isCollapsed: true });
 
       const { container } = render(
         <ColumnBlock column={column} />,
@@ -393,9 +392,7 @@ describe('ColumnBlock', () => {
     });
 
     it('does not apply --collapsed modifier when expanded', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
-
-      const column = makeColumn();
+      const column = makeColumn({ isCollapsed: false });
 
       const { container } = render(
         <ColumnBlock column={column} />,

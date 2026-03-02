@@ -1,17 +1,16 @@
-import type { SectionNode } from '@/types/elements';
+import type { EnrichedSectionNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { useCollapse } from '@/hooks/useCollapse';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import RowBlock from '@/components/RowBlock/RowBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface SectionBlockProps {
-  readonly section: SectionNode;
+  readonly section: EnrichedSectionNode;
 }
 
 export default function SectionBlock({ section }: SectionBlockProps) {
   const status = getElementStatus(section.statusFlags);
-  const { isCollapsed, toggle } = useCollapse(section.id);
+  const { isCollapsed, toggle } = section;
 
   const rootClasses = [
     'section-block',

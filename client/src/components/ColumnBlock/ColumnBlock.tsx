@@ -1,18 +1,18 @@
-import type { ColumnNode, ViewportSettings } from '@/types/elements';
+import type { ViewportSettings } from '@/types/elements';
+import type { EnrichedColumnNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
 import { useViewportContext } from '@/hooks/ViewportContext';
-import { useCollapse } from '@/hooks/useCollapse';
 import { getColumnCount, getWidthClass, getOffsetClass } from '@/utils/gridAdapter';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import ElementCard from '@/components/ElementCard/ElementCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
 
 interface ColumnBlockProps {
-  readonly column: ColumnNode;
+  readonly column: EnrichedColumnNode;
 }
 
 function resolveViewportSettings(
-  column: ColumnNode,
+  column: EnrichedColumnNode,
   activeViewport: string,
   columnCount: number,
 ): ViewportSettings {
@@ -28,7 +28,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   const columnCount = getColumnCount();
   const settings = resolveViewportSettings(column, activeViewport, columnCount);
   const status = getElementStatus(column.statusFlags);
-  const { isCollapsed, toggle } = useCollapse(column.id);
+  const { isCollapsed, toggle } = column;
 
   const outerClasses = [getWidthClass(settings.width)];
   if (settings.offset > 0) {

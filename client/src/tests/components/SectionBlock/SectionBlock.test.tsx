@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
-import type { RowNode, SectionNode } from '@/types/elements';
+import type { EnrichedSectionNode, EnrichedRowNode } from '@/types/enriched';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 import {
   getRowClasses,
   getWidthClass,
   getOffsetClass,
 } from '@/utils/gridAdapter';
-import { useCollapse } from '@/hooks/useCollapse';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
@@ -18,35 +18,7 @@ vi.mock('@/utils/gridAdapter', () => ({
   getDefaultViewport: vi.fn(() => 'md'),
 }));
 
-vi.mock('@/hooks/useCollapse', () => ({
-  useCollapse: vi.fn(() => ({ isCollapsed: false, toggle: vi.fn() })),
-}));
-
-function makeSection(overrides: Partial<SectionNode> = {}): SectionNode {
-  return {
-    id: 1,
-    title: 'Section',
-    blockSchema: {
-      typeName: 'WeDevelop\\ElementalGrid\\Section',
-      label: 'Section',
-      actions: { edit: '/admin/elemental/edit/1' },
-      content: '',
-    },
-    obsoleteClassName: null,
-    version: 1,
-    canDelete: true,
-    canPublish: true,
-    canUnpublish: false,
-    canCreate: true,
-    statusFlags: {},
-    containerType: 'section',
-    allowedTypes: null,
-    children: null,
-    ...overrides,
-  };
-}
-
-function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): RowNode {
+function makeRow(id: number, title: string, overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
   return {
     id,
     title,
@@ -66,6 +38,34 @@ function makeRow(id: number, title: string, overrides: Partial<RowNode> = {}): R
     containerType: 'row',
     allowedTypes: null,
     children: null,
+    isCollapsed: false,
+    toggle: vi.fn(),
+    ...overrides,
+  };
+}
+
+function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSectionNode {
+  return {
+    id: 1,
+    title: 'Section',
+    blockSchema: {
+      typeName: 'WeDevelop\\ElementalGrid\\Section',
+      label: 'Section',
+      actions: { edit: '/admin/elemental/edit/1' },
+      content: '',
+    },
+    obsoleteClassName: null,
+    version: 1,
+    canDelete: true,
+    canPublish: true,
+    canUnpublish: false,
+    canCreate: true,
+    statusFlags: {},
+    containerType: 'section',
+    allowedTypes: null,
+    children: null,
+    isCollapsed: false,
+    toggle: vi.fn(),
     ...overrides,
   };
 }
@@ -242,6 +242,8 @@ describe('SectionBlock', () => {
               gridSettings: {
                 md: { width: 8, offset: 2, visible: true },
               },
+              isCollapsed: false,
+              toggle: vi.fn(),
             },
           ],
         }),
@@ -286,21 +288,23 @@ describe('SectionBlock', () => {
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
     });
 
-    it('passes the section ID to useCollapse', () => {
-      const section = makeSection({ id: 42 });
+    it('wires toggle to CollapseToggle onToggle', async () => {
+      const toggle = vi.fn();
+      const section = makeSection({ toggle });
+      const user = userEvent.setup();
 
       render(
         <SectionBlock section={section} />,
         { wrapper: createViewportWrapper() },
       );
 
-      expect(useCollapse).toHaveBeenCalledWith(42);
+      await user.click(screen.getByTestId('collapse-toggle'));
+      expect(toggle).toHaveBeenCalledOnce();
     });
 
     it('hides body when collapsed', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: true, toggle: vi.fn() });
-
       const section = makeSection({
+        isCollapsed: true,
         children: [makeRow(10, 'First Row')],
       });
 
@@ -314,9 +318,8 @@ describe('SectionBlock', () => {
     });
 
     it('shows body when expanded', () => {
-      vi.mocked(useCollapse).mockReturnValue({ isCollapsed: false, toggle: vi.fn() });
-
       const section = makeSection({
+        isCollapsed: false,
         children: [makeRow(10, 'First Row')],
       });
 
