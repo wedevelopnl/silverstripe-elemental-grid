@@ -177,7 +177,7 @@ class ElementTreeBuilder
         $blockSchema = $element->getBlockSchema();
         $blockSchema['label'] = $element->getType();
 
-        /** @var array<string, mixed> $statusFlags */
+        /** @var array<string, array{text: string, title: string}> $statusFlags */
         $statusFlags = $element->getStatusFlags();
 
         /** @var array<string, mixed> $extensions */
