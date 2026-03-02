@@ -52,3 +52,4 @@ SilverStripe\Core\Injector\Injector:
   WeDevelop\ElementalGrid\Service\ElementTreeBuilder:
     constructor:
       elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
+  WeDevelop\ElementalGrid\Service\ElementPersistenceService: ~
