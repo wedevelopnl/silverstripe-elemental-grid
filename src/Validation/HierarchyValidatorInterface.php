@@ -9,6 +9,6 @@ use WeDevelop\ElementalGrid\Model\Result;
 
 interface HierarchyValidatorInterface
 {
-    /** @return Result<true> */
+    /** @return Result<BaseElement> */
     public function validate(BaseElement $element): Result;
 }

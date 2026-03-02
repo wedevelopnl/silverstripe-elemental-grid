@@ -13,20 +13,18 @@ use WeDevelop\ElementalGrid\Model\ValidationError;
 
 class HierarchyValidationService implements HierarchyValidatorInterface
 {
-    /** @return Result<true> */
+    /** @return Result<BaseElement> */
     #[\Override]
     public function validate(BaseElement $element): Result
     {
         $parent = $element->Parent();
         if (!$parent->exists()) {
-            /** @var Result<true> */
-            return Result::ok(true);
+            return Result::ok($element);
         }
 
         $owner = $parent->getOwnerPage();
         if ($owner === null) {
-            /** @var Result<true> */
-            return Result::ok(true);
+            return Result::ok($element);
         }
 
         // Page-level: owner has ElementalPageExtension (applied to any SiteTree subclass)
@@ -42,13 +40,11 @@ class HierarchyValidationService implements HierarchyValidatorInterface
                 ));
             }
 
-            /** @var Result<true> */
-            return Result::ok(true);
+            return Result::ok($element);
         }
 
         if ($this->isElementAllowed($element::class, $owner)) {
-            /** @var Result<true> */
-            return Result::ok(true);
+            return Result::ok($element);
         }
 
         return Result::fail(new ValidationError(
