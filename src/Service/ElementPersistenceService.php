@@ -25,6 +25,7 @@ class ElementPersistenceService
     /**
      * Persist a new element, optionally inserting after another element.
      *
+     * @param positive-int|null $afterElementId
      * @return Result<BaseElement>
      */
     public function persistNew(BaseElement $element, ?int $afterElementId = null): Result
@@ -45,6 +46,7 @@ class ElementPersistenceService
     /**
      * Persist a duplicated element after the original.
      *
+     * @param positive-int $afterElementId
      * @return Result<BaseElement>
      */
     public function persistDuplicate(BaseElement $element, int $afterElementId): Result
@@ -63,6 +65,7 @@ class ElementPersistenceService
      * the element instance as a constructor argument — cannot be
      * statically injected via YAML. Covered by integration tests.
      */
+    /** @param positive-int $afterElementId */
     private function reorderElement(BaseElement $element, int $afterElementId): void
     {
         /** @var ReorderElements $reorderer */
