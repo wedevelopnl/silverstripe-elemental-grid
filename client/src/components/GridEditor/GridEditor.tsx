@@ -1,4 +1,5 @@
 import { useElementTree } from '@/hooks/useElementTree';
+import { CollapseProvider } from '@/hooks/CollapseContext';
 import { ViewportProvider } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
 import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
@@ -34,17 +35,19 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
         </p>
       )}
       {data !== undefined && (
-        <ViewportProvider>
-          <ViewportSwitcher />
-          {sections.length > 0
-            ? sections.map((section) => (
-              <SectionBlock
-                key={section.id}
-                section={section}
-              />
-            ))
-            : <EmptyState message="No sections yet" variant="centered" />}
-        </ViewportProvider>
+        <CollapseProvider areaId={areaId}>
+          <ViewportProvider>
+            <ViewportSwitcher />
+            {sections.length > 0
+              ? sections.map((section) => (
+                <SectionBlock
+                  key={section.id}
+                  section={section}
+                />
+              ))
+              : <EmptyState message="No sections yet" variant="centered" />}
+          </ViewportProvider>
+        </CollapseProvider>
       )}
     </div>
   );
