@@ -6,112 +6,132 @@ test.describe('Collapsible containers', () => {
     await resetFixtures(request);
   });
 
-  test('collapse and expand section, row, and column containers', async ({ page }) => {
-    const fixture = await loadFixture(page.request, 'element-tree');
+  test('editor collapses containers to focus on content, state survives reload', async ({ page }) => {
+    // Fixture: Section A (Row A1 [Col A1-L, Col A1-R], Row A2 [Col A2]), Section B (Row B1 [Col B1])
+    const fixture = await loadFixture(page.request, 'collapse-test');
 
     await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
     await expect(
       page.getByTestId('grid-editor-loading'),
     ).toBeHidden({ timeout: 15_000 });
 
-    const sectionBlock = page.getByTestId('section-block').first();
-    const sectionToggle = sectionBlock.getByTestId('collapse-toggle').first();
+    // Locate sections by their heading text
+    const sectionA = page.getByTestId('section-block').filter({ hasText: 'Section A' });
+    const sectionB = page.getByTestId('section-block').filter({ hasText: 'Section B' });
+    const sectionAToggle = sectionA.getByTestId('collapse-toggle').first();
 
-    // --- Default state: section is expanded, rows visible ---
-    const sectionBody = sectionBlock.locator('.section-block__body');
-    await expect(sectionBody).toBeVisible();
+    // Locate rows within Section A by heading text
+    const rowA1 = sectionA.locator('.row-block').filter({ hasText: 'Row A1' });
+    const rowA2 = sectionA.locator('.row-block').filter({ hasText: 'Row A2' });
+    const rowA1Toggle = rowA1.getByTestId('collapse-toggle').first();
+    const rowA2Toggle = rowA2.getByTestId('collapse-toggle').first();
 
-    // --- Collapse section: rows should be hidden ---
-    await sectionToggle.click();
-    await expect(sectionBody).toBeHidden();
-    await expect(sectionBlock).toHaveClass(/section-block--collapsed/);
+    // Locate columns within Row A1
+    const colA1L = rowA1.getByTestId('column-block').filter({ hasText: 'Block A1-Left' });
+    const colA1R = rowA1.getByTestId('column-block').filter({ hasText: 'Block A1-Right' });
+    const colA1LToggle = colA1L.getByTestId('collapse-toggle');
 
-    // --- Expand section: rows reappear ---
-    await sectionToggle.click();
-    await expect(sectionBody).toBeVisible();
-    await expect(sectionBlock).not.toHaveClass(/section-block--collapsed/);
-  });
+    // --- Everything starts expanded ---
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(sectionA.getByRole('heading', { name: 'Row A1' })).toBeVisible();
+    await expect(sectionA.getByRole('heading', { name: 'Row A2' })).toBeVisible();
+    await expect(sectionB.getByText('Block B1')).toBeVisible();
+    await expect(colA1L.getByText('Block A1-Left')).toBeVisible();
+    await expect(colA1R.getByText('Block A1-Right')).toBeVisible();
 
-  test('collapsed state persists across page reload', async ({ page }) => {
-    const fixture = await loadFixture(page.request, 'element-tree');
+    // --- Collapse Section A — Section B stays expanded ---
+    const urlBefore = page.url();
+    await sectionAToggle.click();
 
-    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
-    await expect(
-      page.getByTestId('grid-editor-loading'),
-    ).toBeHidden({ timeout: 15_000 });
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(sectionA.getByRole('heading', { name: 'Row A1' })).toBeHidden();
+    await expect(sectionA.getByRole('heading', { name: 'Row A2' })).toBeHidden();
+    await expect(sectionB.getByText('Block B1')).toBeVisible();
+    // Toggle click did not navigate away
+    expect(page.url()).toBe(urlBefore);
 
-    const sectionBlock = page.getByTestId('section-block').first();
-    const sectionToggle = sectionBlock.getByTestId('collapse-toggle').first();
+    // --- Expand Section A back ---
+    await sectionAToggle.click();
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(sectionA.getByRole('heading', { name: 'Row A1' })).toBeVisible();
 
-    // Collapse the section
-    await sectionToggle.click();
-    await expect(sectionBlock).toHaveClass(/section-block--collapsed/);
+    // --- Collapse Row A1 — sibling Row A2 stays expanded ---
+    await rowA1Toggle.click();
+    await expect(rowA1Toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1L.getByText('Block A1-Left')).toBeHidden();
+    await expect(rowA2Toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(rowA2.getByText('Block A2')).toBeVisible();
 
-    // Reload the page
+    // --- Expand Row A1 to access columns ---
+    await rowA1Toggle.click();
+    await expect(rowA1Toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(colA1L.getByText('Block A1-Left')).toBeVisible();
+
+    // --- Collapse Column A1-Left — sibling Column A1-Right stays expanded ---
+    await colA1LToggle.click();
+    await expect(colA1LToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1L.getByText('Block A1-Left')).toBeHidden();
+    await expect(colA1R.getByText('Block A1-Right')).toBeVisible();
+
+    // --- Build up nested collapsed state for persistence test ---
+    // Collapse Row A2 (Row A1 stays expanded with collapsed column inside)
+    await rowA2Toggle.click();
+    await expect(rowA2Toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(rowA2.getByText('Block A2')).toBeHidden();
+    await expect(rowA1Toggle).toHaveAttribute('aria-expanded', 'true');
+
+    // Collapse parent Section A to test child state independence
+    await sectionAToggle.click();
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'false');
+
+    // --- Expand Section A — child states preserved ---
+    await sectionAToggle.click();
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(rowA1Toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(rowA2Toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1LToggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1L.getByText('Block A1-Left')).toBeHidden();
+    await expect(colA1R.getByText('Block A1-Right')).toBeVisible();
+
+    // --- Collapse Section A again for the reload test ---
+    await sectionAToggle.click();
+    await expect(sectionAToggle).toHaveAttribute('aria-expanded', 'false');
+
+    // --- Reload page — all collapsed state persists ---
     await page.reload();
     await expect(
       page.getByTestId('grid-editor-loading'),
     ).toBeHidden({ timeout: 15_000 });
 
-    // Section should still be collapsed after reload
-    const sectionBlockAfterReload = page.getByTestId('section-block').first();
-    await expect(sectionBlockAfterReload).toHaveClass(/section-block--collapsed/);
+    // Re-locate toggles after reload
+    const sectionAReload = page.getByTestId('section-block').filter({ hasText: 'Section A' });
+    const sectionBReload = page.getByTestId('section-block').filter({ hasText: 'Section B' });
+    const sectionAToggleReload = sectionAReload.getByTestId('collapse-toggle').first();
+    const sectionBToggleReload = sectionBReload.getByTestId('collapse-toggle').first();
 
-    // Clean up: expand it again so localStorage doesn't leak to other tests
-    const toggleAfterReload = sectionBlockAfterReload.getByTestId('collapse-toggle').first();
-    await toggleAfterReload.click();
-    await expect(sectionBlockAfterReload).not.toHaveClass(/section-block--collapsed/);
-  });
+    // Section A collapsed, Section B still expanded
+    await expect(sectionAToggleReload).toHaveAttribute('aria-expanded', 'false');
+    await expect(sectionBToggleReload).toHaveAttribute('aria-expanded', 'true');
 
-  test('child collapse state is independent of parent', async ({ page }) => {
-    const fixture = await loadFixture(page.request, 'element-tree');
+    // Expand Section A to verify nested states survived the reload
+    await sectionAToggleReload.click();
+    await expect(sectionAToggleReload).toHaveAttribute('aria-expanded', 'true');
 
-    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
-    await expect(
-      page.getByTestId('grid-editor-loading'),
-    ).toBeHidden({ timeout: 15_000 });
+    const rowA1Reload = sectionAReload.locator('.row-block').filter({ hasText: 'Row A1' });
+    const rowA2Reload = sectionAReload.locator('.row-block').filter({ hasText: 'Row A2' });
+    const colA1LReload = rowA1Reload.getByTestId('column-block').filter({ hasText: 'Block A1-Left' });
+    const colA1RReload = rowA1Reload.getByTestId('column-block').filter({ hasText: 'Block A1-Right' });
 
-    const sectionBlock = page.getByTestId('section-block').first();
-    const sectionToggle = sectionBlock.getByTestId('collapse-toggle').first();
-    const rowBlock = sectionBlock.locator('.row-block').first();
-    const rowToggle = rowBlock.getByTestId('collapse-toggle').first();
+    await expect(rowA1Reload.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
+    await expect(rowA2Reload.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1LReload.getByTestId('collapse-toggle')).toHaveAttribute('aria-expanded', 'false');
+    await expect(colA1LReload.getByText('Block A1-Left')).toBeHidden();
+    await expect(colA1RReload.getByText('Block A1-Right')).toBeVisible();
 
-    // Collapse a row within the section
-    await rowToggle.click();
-    await expect(rowBlock).toHaveClass(/row-block--collapsed/);
-
-    // Collapse the parent section
-    await sectionToggle.click();
-    await expect(sectionBlock).toHaveClass(/section-block--collapsed/);
-
-    // Expand the section — the row should still be collapsed
-    await sectionToggle.click();
-    await expect(sectionBlock).not.toHaveClass(/section-block--collapsed/);
-    await expect(rowBlock).toHaveClass(/row-block--collapsed/);
-
-    // Clean up
-    await rowToggle.click();
-    await expect(rowBlock).not.toHaveClass(/row-block--collapsed/);
-  });
-
-  test('clicking collapse toggle does not navigate to edit form', async ({ page }) => {
-    const fixture = await loadFixture(page.request, 'element-tree');
-
-    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
-    await expect(
-      page.getByTestId('grid-editor-loading'),
-    ).toBeHidden({ timeout: 15_000 });
-
-    const urlBefore = page.url();
-
-    const sectionBlock = page.getByTestId('section-block').first();
-    const sectionToggle = sectionBlock.getByTestId('collapse-toggle').first();
-    await sectionToggle.click();
-
-    // URL should not have changed (no navigation to edit form)
-    expect(page.url()).toBe(urlBefore);
-
-    // Clean up
-    await sectionToggle.click();
+    // --- Round-trip: expand everything back to starting state ---
+    await colA1LReload.getByTestId('collapse-toggle').click();
+    await rowA2Reload.getByTestId('collapse-toggle').first().click();
+    await expect(colA1LReload.getByText('Block A1-Left')).toBeVisible();
+    await expect(rowA2Reload.getByText('Block A2')).toBeVisible();
   });
 });
