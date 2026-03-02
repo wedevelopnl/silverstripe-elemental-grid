@@ -1,0 +1,52 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins';
+
+.column-block {
+  @include mixins.status-indicator;
+
+  background: #f8f9fa;
+  padding: 8px;
+  min-height: 60px;
+
+  &--hidden {
+    opacity: 0.4;
+    position: relative;
+
+    // Diagonal stripe overlay communicating the column is hidden
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(0, 0, 0, 0.06) 4px,
+        rgba(0, 0, 0, 0.06) 8px
+      );
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: vars.$color-border-light;
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

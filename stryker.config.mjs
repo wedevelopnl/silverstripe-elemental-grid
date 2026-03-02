@@ -17,7 +17,7 @@ export default {
   thresholds: {
     high: 80,
     low: 60,
-    break: 0,
+    break: 70,
   },
   // Allow clean exit when no source files exist to mutate yet
   allowEmpty: true,

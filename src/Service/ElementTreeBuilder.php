@@ -10,6 +10,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Model\ElementNode;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 
@@ -48,9 +49,13 @@ class ElementTreeBuilder
     }
 
     /**
-     * Build the full element tree for a page, keyed by elemental relation name.
+     * Build the full element tree for a page, keyed by area ID.
      *
-     * @return array<string, list<ElementNode>>
+     * Keys are numeric area IDs. PHP coerces numeric string keys to int,
+     * but json_encode() serializes non-sequential int keys as a JSON object
+     * with string keys (e.g. {"42": [...], "99": [...]}).
+     *
+     * @return array<int, list<ElementNode>>
      */
     public function buildForPage(SiteTree $page): array
     {
@@ -60,17 +65,16 @@ class ElementTreeBuilder
             return [];
         }
 
-        /** @var array<string, list<ElementNode>> $tree */
+        /** @var array<int, list<ElementNode>> $tree */
         $tree = [];
         foreach ($relations as $relation) {
             $areaId = (int) $page->{$relation . 'ID'}; // @phpstan-ignore cast.int (ORM dynamic property)
             if ($areaId <= 0) {
-                $tree[$relation] = [];
                 continue;
             }
 
             $elementsByParent = $this->loadAllElements($areaId);
-            $tree[$relation] = $this->assembleSubTree($elementsByParent, $areaId);
+            $tree[$areaId] = $this->assembleSubTree($elementsByParent, $areaId);
         }
 
         return $tree;
@@ -143,6 +147,7 @@ class ElementTreeBuilder
         $containerType = null;
         $allowedTypes = null;
         $children = null;
+        $gridSettings = null;
 
         if ($element instanceof ElementContainerInterface) {
             $containerType = $element->getContainerType();
@@ -154,21 +159,25 @@ class ElementTreeBuilder
                 : [];
         }
 
+        if ($element instanceof ElementColumn) {
+            $gridSettings = $element->getGridSettingsData();
+        }
+
         $id = (int) $element->ID;
-        $title = $element->Title;
+        $title = $element->Title ?: _t(BaseElement::class . '.UNTITLED', '(untitled)');
         $obsoleteClassName = $element->getObsoleteClassName();
         $version = (int) $element->Version;
-        $isPublished = $element->isPublished();
-        $isLiveVersion = $element->isLiveVersion();
         $canDelete = $element->canDelete();
         $canPublish = $element->canPublish();
         $canUnpublish = (bool) $element->canUnpublish();
         $canCreate = $element->canCreate();
 
-        /** @var array{typeName: string, actions: array{edit: string}, content: string} $blockSchema */
-        $blockSchema = $element->getBlockSchema();
 
-        /** @var array<string, mixed> $statusFlags */
+        /** @var array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema */
+        $blockSchema = $element->getBlockSchema();
+        $blockSchema['label'] = $element->getType();
+
+        /** @var array<string, array{text: string, title: string}> $statusFlags */
         $statusFlags = $element->getStatusFlags();
 
         /** @var array<string, mixed> $extensions */
@@ -182,8 +191,6 @@ class ElementTreeBuilder
             blockSchema: $blockSchema,
             obsoleteClassName: $obsoleteClassName,
             version: $version,
-            isPublished: $isPublished,
-            isLiveVersion: $isLiveVersion,
             canDelete: $canDelete,
             canPublish: $canPublish,
             canUnpublish: $canUnpublish,
@@ -192,6 +199,7 @@ class ElementTreeBuilder
             containerType: $containerType,
             allowedTypes: $allowedTypes,
             children: $children,
+            gridSettings: $gridSettings,
             extensions: $extensions,
         );
     }

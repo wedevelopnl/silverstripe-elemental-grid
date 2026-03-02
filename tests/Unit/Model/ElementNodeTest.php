@@ -17,11 +17,9 @@ final class ElementNodeTest extends TestCase
         return new ElementNode(
             id: $id,
             title: $title,
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -37,16 +35,14 @@ final class ElementNodeTest extends TestCase
         return new ElementNode(
             id: 10,
             title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
-            isPublished: true,
-            isLiveVersion: true,
             canDelete: true,
             canPublish: true,
             canUnpublish: true,
             canCreate: true,
-            statusFlags: ['modified' => true],
+            statusFlags: ['modified' => ['text' => 'Modified', 'title' => 'Item has unpublished changes']],
             containerType: $containerType,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: $children,
@@ -70,16 +66,14 @@ final class ElementNodeTest extends TestCase
 
         $this->assertSame(42, $data['id']);
         $this->assertSame('My Block', $data['title']);
-        $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''], $data['blockSchema']);
+        $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'], $data['blockSchema']);
         $this->assertNull($data['obsoleteClassName']);
         $this->assertSame(1, $data['version']);
-        $this->assertFalse($data['isPublished']);
-        $this->assertFalse($data['isLiveVersion']);
         $this->assertTrue($data['canDelete']);
         $this->assertTrue($data['canPublish']);
         $this->assertFalse($data['canUnpublish']);
         $this->assertTrue($data['canCreate']);
-        $this->assertSame([], $data['statusFlags']);
+        $this->assertEquals(new \stdClass(), $data['statusFlags']);
     }
 
     public function testContainerNodeSerializesWithContainerFields(): void
@@ -131,11 +125,9 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -163,11 +155,9 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => ''],
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -190,11 +180,9 @@ final class ElementNodeTest extends TestCase
         $node = new ElementNode(
             id: 10,
             title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
             version: 2,
-            isPublished: true,
-            isLiveVersion: true,
             canDelete: true,
             canPublish: true,
             canUnpublish: true,
@@ -225,11 +213,9 @@ final class ElementNodeTest extends TestCase
         $outerContainer = new ElementNode(
             id: 50,
             title: 'Outer',
-            blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => ''],
+            blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
             version: 1,
-            isPublished: false,
-            isLiveVersion: false,
             canDelete: true,
             canPublish: true,
             canUnpublish: false,
@@ -255,5 +241,79 @@ final class ElementNodeTest extends TestCase
         $this->assertSame(200, $deepLeaf['id']);
         $this->assertSame('Deep Leaf', $deepLeaf['title']);
         $this->assertArrayNotHasKey('containerType', $deepLeaf);
+    }
+
+    public function testColumnNodeIncludesGridSettings(): void
+    {
+        $gridSettings = [
+            'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
+            'md' => ['width' => 6, 'offset' => 0, 'visible' => true],
+        ];
+
+        $node = new ElementNode(
+            id: 1,
+            title: 'Test Column',
+            blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Column,
+            allowedTypes: null,
+            children: [],
+            gridSettings: $gridSettings,
+        );
+
+        $serialized = $node->jsonSerialize();
+        self::assertArrayHasKey('gridSettings', $serialized);
+        self::assertSame($gridSettings, $serialized['gridSettings']);
+    }
+
+    public function testConstructorRejectsGridSettingsForNonColumnType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('gridSettings may only be provided for Column container type');
+
+        new ElementNode(
+            id: 99,
+            title: 'Row with grid settings',
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Row'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Row,
+            allowedTypes: null,
+            children: [],
+            gridSettings: ['xs' => ['width' => 12, 'offset' => 0, 'visible' => true]],
+        );
+    }
+
+    public function testNonColumnNodeOmitsGridSettings(): void
+    {
+        $node = new ElementNode(
+            id: 2,
+            title: 'Test Row',
+            blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => '', 'label' => 'Row'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Row,
+            allowedTypes: null,
+            children: [],
+        );
+
+        $serialized = $node->jsonSerialize();
+        self::assertArrayNotHasKey('gridSettings', $serialized);
     }
 }

@@ -10,8 +10,15 @@ import { queryKeys } from './queryKeys';
  */
 export function useElementTree(pageId: number | null) {
   return useQuery<ElementTreeResponse, ApiError>({
-    queryKey: queryKeys.elementTree.byPage(pageId!),
-    queryFn: () => fetchElementTree(pageId!),
+    queryKey: pageId !== null
+      ? queryKeys.elementTree.byPage(pageId)
+      : ['elementTree', 'disabled'],
+    queryFn: () => {
+      if (pageId === null) {
+        throw new Error('pageId is required — query should be disabled');
+      }
+      return fetchElementTree(pageId);
+    },
     enabled: pageId !== null,
   });
 }

@@ -1,8 +1,15 @@
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import { z } from 'zod';
 
+import GridEditorErrorBoundary from '@/components/GridEditorErrorBoundary/GridEditorErrorBoundary';
 import GridQueryProvider from '@/hooks/QueryProvider';
 import { loadComponent } from './Injector';
+
+const bridgeSchemaSchema = z.object({
+  'grid-area-id': z.number().int(),
+  'grid-page-id': z.number().int().nullable(),
+});
 
 /**
  * jQuery entwine bridge that mounts the React grid editor inside CMS pages.
@@ -14,20 +21,28 @@ import { loadComponent } from './Injector';
 window.jQuery.entwine('ss', ($) => {
   $('.js-injector-boot .grid-editor__container').entwine({
     onmatch() {
-      const GridEditor = loadComponent('GridEditor');
-      const schema = this.data('schema') as Record<string, unknown>;
-      const areaId = schema['grid-area-id'] as number;
-      const pageId = (schema['grid-page-id'] as number | null) ?? null;
+      try {
+        const GridEditor = loadComponent('GridEditor');
+        const schema = bridgeSchemaSchema.parse(this.data('schema'));
+        const areaId = schema['grid-area-id'];
+        const pageId = schema['grid-page-id'] ?? null;
 
-      const root = createRoot(this[0]);
-      this.setReactRoot(root);
-      root.render(
-        createElement(
-          GridQueryProvider,
-          null,
-          createElement(GridEditor, { areaId, pageId }),
-        ),
-      );
+        const root = createRoot(this[0]);
+        this.setReactRoot(root);
+        root.render(
+          createElement(
+            GridQueryProvider,
+            null,
+            createElement(
+              GridEditorErrorBoundary,
+              null,
+              createElement(GridEditor, { areaId, pageId }),
+            ),
+          ),
+        );
+      } catch (error: unknown) {
+        console.warn('[GridEditor] Failed to mount grid editor.', error);
+      }
     },
 
     onunmatch() {

@@ -1,3 +1,10 @@
+@use '../components/ColumnBlock/ColumnBlock';
+@use '../components/ElementCard/ElementCard';
+@use '../components/EmptyState/EmptyState';
+@use '../components/RowBlock/RowBlock';
+@use '../components/SectionBlock/SectionBlock';
+@use '../components/ViewportSwitcher/ViewportSwitcher';
+
 // Grid editor styles
 .grid-editor {
   position: relative;

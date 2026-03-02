@@ -1,0 +1,39 @@
+@use '../../styles/mixins';
+@use '../../styles/variables' as vars;
+
+.element-card {
+  @include mixins.status-indicator;
+
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 8px 12px;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: inherit;
+    font-weight: 600;
+  }
+
+  &__type {
+    font-size: 0.8em;
+    color: vars.$color-text-muted;
+  }
+
+  &__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: vars.$color-text-muted;
+  }
+
+  &__content--empty {
+    font-style: italic;
+  }
+}

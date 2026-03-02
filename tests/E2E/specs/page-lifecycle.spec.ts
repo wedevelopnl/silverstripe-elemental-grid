@@ -23,11 +23,11 @@ test.describe('Page lifecycle', () => {
 
     // Assert the elemental grid editor loaded its element tree from the API
     await expect(
-      page.locator('.grid-editor__loading'),
+      page.getByTestId('grid-editor-loading'),
     ).toBeHidden({ timeout: 15_000 });
-    await expect(page.locator('.grid-editor__tree')).toBeVisible();
+    await expect(page.getByTestId('section-block').first()).toBeVisible();
     await expect(
-      page.locator('[data-element-id]', { hasText: 'Main Section' }),
+      page.getByTestId('section-block').filter({ hasText: 'Main Section' }),
     ).toBeVisible();
 
     // Publish the page

@@ -1,0 +1,15 @@
+@use '../../styles/variables' as vars;
+
+.empty-state {
+  border: 1px dashed vars.$color-border-light;
+  color: vars.$color-text-muted;
+  padding: 16px;
+  text-align: center;
+
+  &--centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+  }
+}

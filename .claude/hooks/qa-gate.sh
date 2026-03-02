@@ -14,7 +14,7 @@ fi
 
 echo "Pre-push QA gate: running make qa before push..." >&2
 
-cd "${CLAUDE_PROJECT_DIR:-.}"
+cd "$(git rev-parse --show-toplevel 2>/dev/null || echo "${CLAUDE_PROJECT_DIR:-.}")"
 
 if ! make qa; then
   echo "QA failed — push blocked." >&2

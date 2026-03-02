@@ -1,10 +1,17 @@
-# E2E fixture: page with Section > Row > Columns > leaves for testing
-# manipulation workflows with versioned states.
+# E2E fixture: page with two sections for testing versioned states.
 #
-# Post-actions (configured in dev.yml) produce three leaf states:
-#   draft_leaf    — unpublished after page publishRecursive (draft-only)
+# Section 1 (Main Section): published section with modified row and leaf states:
+#   section1       — stays published (on both Draft and Live)
+#   row1           — title changed after publishRecursive (modified)
+#   draft_leaf     — unpublished after page publishRecursive (draft-only)
 #   published_leaf — stays published (on both Draft and Live)
 #   modified_leaf  — published, then draft title changed (differs between stages)
+#
+# Section 2 (Draft Section): unpublished after publishRecursive.
+#   Unpublishing a section cascades via $owns to all descendants,
+#   so section2, row2, col3, and section2_leaf all become draft-only.
+#
+# Post-actions are configured in dev.yml.
 #
 # Bottom-up ordering: children written before parents to prevent
 # auto-scaffolding of Row/Column elements.
@@ -15,6 +22,9 @@ DNADesign\Elemental\Models\ElementalArea:
   row_area: {}
   col1_area: {}
   col2_area: {}
+  section2_area: {}
+  row2_area: {}
+  col3_area: {}
 
 Page:
   e2e_page:
@@ -36,6 +46,10 @@ DNADesign\Elemental\Models\BaseElement:
     Title: 'Modified Text Block'
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+  section2_leaf:
+    Title: 'Section Two Block'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.col3_area
 
 # --- Columns (into row area) ---
 WeDevelop\ElementalGrid\Elements\ElementColumn:
@@ -44,11 +58,19 @@ WeDevelop\ElementalGrid\Elements\ElementColumn:
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col2:
     Title: 'Right Column'
     Sort: 2
     Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
+  col3:
+    Title: 'Draft Section Column'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.row2_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col3_area
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
 # --- Row (into section area) ---
 WeDevelop\ElementalGrid\Elements\ElementRow:
@@ -57,6 +79,11 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.section_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_area
+  row2:
+    Title: 'Second Row'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.section2_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row2_area
 
 # --- Section (into page area) ---
 WeDevelop\ElementalGrid\Elements\ElementSection:
@@ -65,3 +92,8 @@ WeDevelop\ElementalGrid\Elements\ElementSection:
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_area
+  section2:
+    Title: 'Draft Section'
+    Sort: 2
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
+    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section2_area

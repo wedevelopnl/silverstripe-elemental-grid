@@ -15,29 +15,29 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  * @phpstan-type SerializedNode array{
  *     id: int,
  *     title: string,
- *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string},
+ *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string, label: string},
  *     obsoleteClassName: string|null,
  *     version: int,
- *     isPublished: bool,
- *     isLiveVersion: bool,
  *     canDelete: bool,
  *     canPublish: bool,
  *     canUnpublish: bool,
  *     canCreate: bool,
- *     statusFlags: array<string, mixed>,
+ *     statusFlags: \stdClass&object{addedtodraft?: array{text: string, title: string}, modified?: array{text: string, title: string}, removedfromdraft?: array{text: string, title: string}},
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
+ *     gridSettings?: array<string, array{width: int, offset: int, visible: bool}>,
  *     extensions?: array<string, mixed>,
  * }
  */
 final readonly class ElementNode implements \JsonSerializable
 {
     /**
-     * @param array{typeName: string, actions: array{edit: string}, content: string} $blockSchema
-     * @param array<string, mixed> $statusFlags
+     * @param array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema
+     * @param array<string, array{text: string, title: string}> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children
+     * @param array<string, array{width: int, offset: int, visible: bool}>|null $gridSettings
      * @param array<string, mixed> $extensions
      */
     public function __construct(
@@ -46,8 +46,6 @@ final readonly class ElementNode implements \JsonSerializable
         public array $blockSchema,
         public ?string $obsoleteClassName,
         public int $version,
-        public bool $isPublished,
-        public bool $isLiveVersion,
         public bool $canDelete,
         public bool $canPublish,
         public bool $canUnpublish,
@@ -56,32 +54,44 @@ final readonly class ElementNode implements \JsonSerializable
         public ?ContainerType $containerType = null,
         public ?array $allowedTypes = null,
         public ?array $children = null,
+        public ?array $gridSettings = null,
         public array $extensions = [],
-    ) {}
+    ) {
+        if ($gridSettings !== null && $containerType !== ContainerType::Column) {
+            throw new \InvalidArgumentException(
+                'gridSettings may only be provided for Column container type',
+            );
+        }
+    }
 
     /** @return SerializedNode */
     #[\Override]
     public function jsonSerialize(): array
     {
+        /** @var SerializedNode['statusFlags'] $statusFlags */
+        $statusFlags = (object) $this->statusFlags;
+
         $data = [
             'id' => $this->id,
             'title' => $this->title,
             'blockSchema' => $this->blockSchema,
             'obsoleteClassName' => $this->obsoleteClassName,
             'version' => $this->version,
-            'isPublished' => $this->isPublished,
-            'isLiveVersion' => $this->isLiveVersion,
             'canDelete' => $this->canDelete,
             'canPublish' => $this->canPublish,
             'canUnpublish' => $this->canUnpublish,
             'canCreate' => $this->canCreate,
-            'statusFlags' => $this->statusFlags,
+            'statusFlags' => $statusFlags,
         ];
 
         if ($this->containerType !== null) {
             $data['containerType'] = $this->containerType->value;
             $data['allowedTypes'] = $this->allowedTypes;
             $data['children'] = $this->children;
+        }
+
+        if ($this->containerType === ContainerType::Column && $this->gridSettings !== null) {
+            $data['gridSettings'] = $this->gridSettings;
         }
 
         if ($this->extensions !== []) {

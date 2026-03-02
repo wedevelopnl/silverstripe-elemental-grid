@@ -10,25 +10,35 @@ export type ContainerType = (typeof CONTAINER_TYPES)[number];
 
 export const blockSchemaSchema = z.object({
   typeName: z.string(),
+  label: z.string(),
   actions: z.object({
     edit: z.string(),
   }),
   content: z.string(),
 });
 
+const statusFlagValueSchema = z.object({
+  text: z.string(),
+  title: z.string(),
+});
+
+export const statusFlagsSchema = z.object({
+  addedtodraft: statusFlagValueSchema.optional(),
+  modified: statusFlagValueSchema.optional(),
+  removedfromdraft: statusFlagValueSchema.optional(),
+});
+
 const baseFieldsSchema = z.object({
   id: z.number().int(),
-  title: z.string(),
+  title: z.string().min(1),
   blockSchema: blockSchemaSchema,
   obsoleteClassName: z.string().nullable(),
   version: z.number().int(),
-  isPublished: z.boolean(),
-  isLiveVersion: z.boolean(),
   canDelete: z.boolean(),
   canPublish: z.boolean(),
   canUnpublish: z.boolean(),
   canCreate: z.boolean(),
-  statusFlags: z.record(z.string(), z.unknown()),
+  statusFlags: statusFlagsSchema,
   extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -38,12 +48,23 @@ const baseFieldsSchema = z.object({
 
 export const simpleElementNodeSchema = baseFieldsSchema.passthrough();
 
+// --- Grid settings schema (column-specific) ---
+
+const viewportSettingsSchema = z.object({
+  width: z.number().int(),
+  offset: z.number().int(),
+  visible: z.boolean(),
+});
+
+export const gridSettingsSchema = z.record(z.string(), viewportSettingsSchema);
+
 // --- Container node schemas (bottom-up: column → row → section) ---
 
 export const columnNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('column'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(simpleElementNodeSchema).nullable(),
+  gridSettings: gridSettingsSchema,
 });
 
 export const rowNodeSchema = baseFieldsSchema.extend({
@@ -86,7 +107,10 @@ export type SectionNode = z.infer<typeof sectionNodeSchema>;
 export type ElementNode = z.infer<typeof elementNodeSchema>;
 export type ContainerNode = SectionNode | RowNode | ColumnNode;
 export type ElementTreeResponse = z.infer<typeof elementTreeResponseSchema>;
+export type StatusFlags = z.infer<typeof statusFlagsSchema>;
 export type BlockSchema = z.infer<typeof blockSchemaSchema>;
+export type GridSettings = z.infer<typeof gridSettingsSchema>;
+export type ViewportSettings = z.infer<typeof viewportSettingsSchema>;
 
 // --- Type guards ---
 

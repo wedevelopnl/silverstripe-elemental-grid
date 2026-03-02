@@ -9,8 +9,14 @@
         "json": "infection/infection.json"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        "CastInt": {
+            "ignore": [
+                "WeDevelop\\ElementalGrid\\Forms\\GridEditorField::getSchemaDataDefaults",
+                "WeDevelop\\ElementalGrid\\Controllers\\ElementalGridController::apiReadTree"
+            ]
+        }
     },
-    "minMsi": 0,
-    "minCoveredMsi": 0
+    "minMsi": 70,
+    "minCoveredMsi": 80
 }

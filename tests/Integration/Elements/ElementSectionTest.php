@@ -13,6 +13,7 @@ use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\ElementalGrid\Tests\Integration\Fixture\OnAfterWriteSpy;
 use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(ElementSection::class)]
@@ -181,6 +182,43 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
             $this->assertFalse($section->hasChildren());
         });
+    }
+
+    public function testOnAfterWriteInvokesParentHook(): void
+    {
+        OnAfterWriteSpy::$called = false;
+        ElementSection::add_extension(OnAfterWriteSpy::class);
+
+        try {
+            $section = ElementSection::create();
+            $section->write();
+
+            $this->assertTrue(OnAfterWriteSpy::$called);
+        } finally {
+            ElementSection::remove_extension(OnAfterWriteSpy::class);
+        }
+    }
+
+    public function testRewriteOnNonDraftStageDoesNotScaffold(): void
+    {
+        $section = $this->createContainer();
+        /** @var ElementSection $section */
+
+        // Remove the scaffolded child so ChildArea is empty
+        $child = $section->getChildArea()->Elements()->first();
+        $this->assertInstanceOf(ElementRow::class, $child);
+        $child->delete();
+
+        $this->assertCount(0, $section->getChildArea()->Elements());
+
+        // Re-write on LIVE stage — should NOT scaffold a new child
+        Versioned::withVersionedMode(function () use ($section): void {
+            Versioned::set_stage(Versioned::LIVE);
+            $section->Title = 'Rewritten on LIVE';
+            $section->write();
+        });
+
+        $this->assertCount(0, $section->getChildArea()->Elements());
     }
 
     public function testValidationPassesInsidePage(): void

@@ -33,3 +33,11 @@ WeDevelop\ElementalGrid\Dev\FixtureLoader:
           identifier: modified_leaf
           fields:
             Title: 'Modified Text Block (draft)'
+        - action: modify
+          class: 'WeDevelop\ElementalGrid\Elements\ElementRow'
+          identifier: row1
+          fields:
+            Title: 'First Row (modified)'
+        - action: unpublish
+          class: 'WeDevelop\ElementalGrid\Elements\ElementSection'
+          identifier: section2

@@ -18,6 +18,7 @@ import type { ColumnNode } from '@/types/elements';
 
 const validBlockSchema = {
   typeName: String.raw`SilverStripe\ElementalGrid\Model\ElementContent`,
+  label: 'Content',
   actions: { edit: '/admin/elemental-grid/api/edit/1' },
   content: '<p>Hello world</p>',
 };
@@ -29,8 +30,6 @@ function makeSimpleNode(overrides: Record<string, unknown> = {}) {
     blockSchema: validBlockSchema,
     obsoleteClassName: null,
     version: 3,
-    isPublished: true,
-    isLiveVersion: true,
     canDelete: true,
     canPublish: true,
     canUnpublish: true,
@@ -51,6 +50,13 @@ function makeColumnNode(
     containerType: 'column',
     allowedTypes: { 'App\\Model\\ElementContent': 'Content' },
     children,
+    gridSettings: {
+      xs: { width: 12, offset: 0, visible: true },
+      sm: { width: 12, offset: 0, visible: true },
+      md: { width: 12, offset: 0, visible: true },
+      lg: { width: 12, offset: 0, visible: true },
+      xl: { width: 12, offset: 0, visible: true },
+    },
     ...overrides,
   };
 }
@@ -117,6 +123,10 @@ describe('simpleElementNodeSchema', () => {
       simpleElementNodeSchema.parse(makeSimpleNode({ id: 'abc' })),
     ).toThrow();
   });
+
+  it('rejects a node with empty title', () => {
+    expect(() => simpleElementNodeSchema.parse(makeSimpleNode({ title: '' }))).toThrow();
+  });
 });
 
 // --- Container node schemas ---
@@ -135,6 +145,10 @@ describe('columnNodeSchema', () => {
     expect(columnNodeSchema.parse(makeColumnNode([])).children).toEqual([]);
   });
 
+  it('rejects a column with empty title', () => {
+    expect(() => columnNodeSchema.parse(makeColumnNode([], { title: '' }))).toThrow();
+  });
+
   it('accepts row children via passthrough (extra keys not rejected)', () => {
     // With passthrough on simpleElementNodeSchema, a row object has all base
     // fields and passes through — containerType/children are extra keys.
@@ -143,12 +157,41 @@ describe('columnNodeSchema', () => {
     const result = columnNodeSchema.parse(column);
     expect(result.children).toHaveLength(1);
   });
+
+  it('parses column node with gridSettings', () => {
+    const input = {
+      id: 3,
+      title: 'Left Column',
+      containerType: 'column',
+      allowedTypes: null,
+      children: [],
+      gridSettings: {
+        xs: { width: 12, offset: 0, visible: true },
+        md: { width: 6, offset: 0, visible: true },
+      },
+      blockSchema: { typeName: 'Column', label: 'Column', actions: { edit: '/edit/3' }, content: '' },
+      obsoleteClassName: null,
+      version: 1,
+      canDelete: true,
+      canPublish: true,
+      canUnpublish: false,
+      canCreate: true,
+      statusFlags: {},
+    };
+
+    const result = columnNodeSchema.parse(input);
+    expect(result.gridSettings).toEqual(input.gridSettings);
+  });
 });
 
 describe('rowNodeSchema', () => {
   it('parses a row with column children', () => {
     const row = makeRowNode([makeColumnNode([makeSimpleNode()])]);
     expect(rowNodeSchema.parse(row).children).toHaveLength(1);
+  });
+
+  it('rejects a row with empty title', () => {
+    expect(() => rowNodeSchema.parse(makeRowNode([], { title: '' }))).toThrow();
   });
 
   it('parses a row with null children', () => {
@@ -165,6 +208,10 @@ describe('sectionNodeSchema', () => {
   it('parses a section with row children', () => {
     const section = makeSectionNode([makeRowNode([makeColumnNode()])]);
     expect(sectionNodeSchema.parse(section).children).toHaveLength(1);
+  });
+
+  it('rejects a section with empty title', () => {
+    expect(() => sectionNodeSchema.parse(makeSectionNode([], { title: '' }))).toThrow();
   });
 
   it('parses a section with null children', () => {

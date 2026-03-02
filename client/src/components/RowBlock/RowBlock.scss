@@ -1,0 +1,19 @@
+@use '../../styles/variables' as vars;
+@use '../../styles/mixins';
+
+.row-block {
+  background: #ffffff;
+  border: 1px solid vars.$color-border-light;
+  border-radius: 4px;
+  padding: 12px;
+
+  @include mixins.status-indicator;
+
+  &__title {
+    margin: 0;
+    font-size: 0.75em;
+    font-weight: 600;
+    color: vars.$color-text-muted;
+    margin-bottom: 8px;
+  }
+}

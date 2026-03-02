@@ -40,6 +40,17 @@ final readonly class FixturePostAction
      */
     public function apply(DataObject $record): void
     {
+        if (
+            $this->action !== 'modify'
+            && !$record->hasExtension(Versioned::class)
+        ) {
+            throw new \InvalidArgumentException(sprintf(
+                'Post-action "%s" requires Versioned extension, but %s does not have it.',
+                $this->action,
+                $record::class,
+            ));
+        }
+
         /** @var DataObject&Versioned $record */
         match ($this->action) {
             'publish_recursive' => $record->publishRecursive(),

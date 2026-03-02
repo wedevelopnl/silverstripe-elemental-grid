@@ -15,6 +15,9 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
+use WeDevelop\ElementalGrid\Contract\Viewport;
 use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
@@ -26,6 +29,22 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  *   insertAfterElementID: positive-int|null,
  * }
  * @phpstan-type ElementIdBody array{id: positive-int}
+ * @phpstan-type AdapterConfig array{
+ *   viewports: list<array{key: string, label: string, minWidth: int|null}>,
+ *   defaultViewport: string,
+ *   columnCount: positive-int,
+ *   rowClasses: string,
+ *   baseWidthClasses: \stdClass&object{
+ *     '1': string, '2': string, '3': string, '4': string,
+ *     '5': string, '6': string, '7': string, '8': string,
+ *     '9': string, '10': string, '11': string, '12': string,
+ *   },
+ *   baseOffsetClasses: \stdClass&object{
+ *     '0': string, '1': string, '2': string, '3': string,
+ *     '4': string, '5': string, '6': string, '7': string,
+ *     '8': string, '9': string, '10': string, '11': string,
+ *   },
+ * }
  *
  * @property ElementRepositoryInterface $elementRepository
  * @property ElementalAreaRepositoryInterface $areaRepository
@@ -137,7 +156,7 @@ class ElementalGridController extends AdminController
                 $newElement->write();
             }
         } catch (ValidationException $e) {
-            $this->jsonError(422, $e->getMessage());
+            $this->jsonError(422, $this->extractValidationMessages($e));
         }
 
         return $this->jsonSuccess(204);
@@ -237,12 +256,16 @@ class ElementalGridController extends AdminController
             $this->jsonError(403);
         }
 
-        $clone = $element->duplicate(false);
-        $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
-        $clone->Sort = 0;
-        $area->Elements()->add($clone);
+        try {
+            $clone = $element->duplicate(false);
+            $clone->Title = $this->generateCopyTitle($clone->Title ?? '');
+            $clone->Sort = 0;
+            $area->Elements()->add($clone);
 
-        $this->reorderElements($clone, $id);
+            $this->reorderElements($clone, $id);
+        } catch (ValidationException $e) {
+            $this->jsonError(422, $this->extractValidationMessages($e));
+        }
 
         return $this->jsonSuccess(204);
     }
@@ -256,8 +279,46 @@ class ElementalGridController extends AdminController
         /** @var array<string, mixed> $clientConfig */
         $clientConfig = parent::getClientConfig();
         $clientConfig['controllerLink'] = $this->Link();
+        $clientConfig['gridAdapter'] = self::buildAdapterConfig(new BootstrapAdapter());
 
         return $clientConfig;
+    }
+
+    /**
+     * Build the grid adapter config for frontend consumption.
+     *
+     * Exposed as a static method so unit tests can verify the adapter config
+     * shape without requiring the full SilverStripe framework bootstrap that
+     * {@see getClientConfig()} depends on via its parent class.
+     *
+     * @return AdapterConfig
+     */
+    public static function buildAdapterConfig(GridAdapterInterface $adapter): array
+    {
+        $viewports = $adapter->getViewports();
+        $baseViewportKey = self::resolveBaseViewportKey($viewports);
+
+        /** @var AdapterConfig['baseWidthClasses'] $baseWidthClasses */
+        $baseWidthClasses = (object) self::buildBaseWidthClasses($adapter, $baseViewportKey);
+
+        /** @var AdapterConfig['baseOffsetClasses'] $baseOffsetClasses */
+        $baseOffsetClasses = (object) self::buildBaseOffsetClasses($adapter, $baseViewportKey);
+
+        return [
+            'viewports' => array_map(
+                static fn (Viewport $vp): array => [
+                    'key' => $vp->key,
+                    'label' => $vp->label,
+                    'minWidth' => $vp->minWidth,
+                ],
+                $viewports,
+            ),
+            'defaultViewport' => $adapter->getDefaultViewport()->key,
+            'columnCount' => $adapter->getColumnCount(),
+            'rowClasses' => $adapter->getRowClasses(),
+            'baseWidthClasses' => $baseWidthClasses,
+            'baseOffsetClasses' => $baseOffsetClasses,
+        ];
     }
 
     /**
@@ -320,13 +381,30 @@ class ElementalGridController extends AdminController
 
     private function reorderElements(BaseElement $element, int $afterElementID): void
     {
-        if ($afterElementID < 0) {
+        if ($afterElementID < 1) {
             $this->jsonError(400);
         }
 
         /** @var ReorderElements $reorderer */
         $reorderer = Injector::inst()->create(ReorderElements::class, $element);
         $reorderer->reorder($afterElementID);
+    }
+
+    /**
+     * Extract user-safe messages from a ValidationException.
+     *
+     * Returns the joined messages from the ValidationResult (added via addError()),
+     * or a generic fallback if no messages exist.
+     */
+    private function extractValidationMessages(ValidationException $e): string
+    {
+        $messages = $e->getResult()->getMessages();
+
+        if ($messages === []) {
+            return 'Validation failed.';
+        }
+
+        return implode(' ', array_column($messages, 'message'));
     }
 
     /**
@@ -355,5 +433,67 @@ class ElementalGridController extends AdminController
         }
 
         return $title . ' copy';
+    }
+
+    /**
+     * Find the base viewport key — the one with null minWidth (mobile-first default).
+     *
+     * Falls back to the first viewport if none has null minWidth.
+     *
+     * @param list<Viewport> $viewports
+     */
+    private static function resolveBaseViewportKey(array $viewports): string
+    {
+        if ($viewports === []) {
+            throw new \InvalidArgumentException('Adapter must define at least one viewport.');
+        }
+
+        foreach ($viewports as $viewport) {
+            if ($viewport->minWidth === null) {
+                return $viewport->key;
+            }
+        }
+
+        return $viewports[0]->key;
+    }
+
+    /**
+     * Build a map of column widths (1..columnCount) to their base CSS classes.
+     *
+     * Uses the base viewport (the one with null minWidth) to produce unprefixed
+     * classes. For Bootstrap, this yields 'col-1' through 'col-12'.
+     *
+     * @return array<int, string>
+     */
+    private static function buildBaseWidthClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
+    {
+        $classes = [];
+        $columnCount = $adapter->getColumnCount();
+
+        for ($width = 1; $width <= $columnCount; $width++) {
+            $classes[$width] = $adapter->getWidthClass($baseViewportKey, $width);
+        }
+
+        return $classes;
+    }
+
+    /**
+     * Build a map of column offsets (0..columnCount-1) to their base CSS classes.
+     *
+     * Uses the base viewport (the one with null minWidth) to produce unprefixed
+     * classes. For Bootstrap, this yields 'offset-0' through 'offset-11'.
+     *
+     * @return array<int, string>
+     */
+    private static function buildBaseOffsetClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
+    {
+        $classes = [];
+        $columnCount = $adapter->getColumnCount();
+
+        for ($offset = 0; $offset < $columnCount; $offset++) {
+            $classes[$offset] = $adapter->getOffsetClass($baseViewportKey, $offset);
+        }
+
+        return $classes;
     }
 }

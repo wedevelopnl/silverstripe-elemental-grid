@@ -56,6 +56,7 @@ export interface SilverStripeSectionConfig {
   name: string;
   url: string;
   controllerLink: string;
+  gridAdapter?: unknown; // Validated via Zod at runtime
   [key: string]: unknown;
 }
 
@@ -70,6 +71,9 @@ declare global {
   interface Window {
     Injector: InjectorGlobal;
     jQuery: JQueryStatic;
-    ss: { config: SilverStripeConfig };
+    ss: {
+      config: SilverStripeConfig;
+      store?: { dispatch(action: unknown): void };
+    };
   }
 }

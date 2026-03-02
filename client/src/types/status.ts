@@ -1,18 +1,13 @@
+import type { StatusFlags } from './elements';
+
 export type ElementStatus = 'draft' | 'published' | 'modified';
 
-/**
- * Derives the display status from the API's publish/version flags.
- *
- * Priority: unpublished elements are always 'draft', regardless of isLiveVersion.
- * Published elements are 'published' only when the live version matches the draft.
- */
-export function deriveElementStatus(
-  isPublished: boolean,
-  isLiveVersion: boolean,
-): ElementStatus {
-  if (!isPublished) {
+export function getElementStatus(statusFlags: StatusFlags): ElementStatus {
+  if (statusFlags.addedtodraft !== undefined) {
     return 'draft';
   }
-
-  return isLiveVersion ? 'published' : 'modified';
+  if (statusFlags.modified !== undefined) {
+    return 'modified';
+  }
+  return 'published';
 }

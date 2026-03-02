@@ -1,0 +1,35 @@
+$viewport-switcher-active-bg: #0071c4;
+$viewport-switcher-border-color: #ccc;
+$viewport-switcher-hover-bg: #f0f0f0;
+$viewport-switcher-radius: 4px;
+
+.viewport-switcher {
+  display: flex;
+  border: 1px solid $viewport-switcher-border-color;
+  border-radius: $viewport-switcher-radius;
+  overflow: hidden;
+}
+
+.viewport-switcher__button {
+  padding: 6px 16px;
+  border: none;
+  background: #fff;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  & + & {
+    border-left: 1px solid $viewport-switcher-border-color;
+  }
+
+  &:hover:not(.viewport-switcher__button--active) {
+    background-color: $viewport-switcher-hover-bg;
+  }
+
+  &--active {
+    background-color: $viewport-switcher-active-bg;
+    color: #fff;
+  }
+}
