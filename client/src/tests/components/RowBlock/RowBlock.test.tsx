@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 import RowBlock from '@/components/RowBlock/RowBlock';
 import type { EnrichedRowNode, EnrichedColumnNode } from '@/types/enriched';
-import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import { createDndWrapper } from '@/tests/helpers/dndTestUtils';
 import {
   getRowClasses,
   getColumnCount,
@@ -90,7 +90,7 @@ describe('RowBlock', () => {
 
     render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const heading = screen.getByRole('heading', { level: 3 });
@@ -102,7 +102,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const columnContainer = container.querySelector('.row');
@@ -115,7 +115,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const columnContainer = container.querySelector('.columns.is-multiline');
@@ -132,7 +132,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const badges = container.querySelectorAll('.column-block__badge');
@@ -144,7 +144,7 @@ describe('RowBlock', () => {
 
     render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No columns')).toBeDefined();
@@ -155,7 +155,7 @@ describe('RowBlock', () => {
 
     render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No columns')).toBeDefined();
@@ -168,7 +168,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
@@ -182,7 +182,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
@@ -196,7 +196,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.row-block');
@@ -217,7 +217,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper('lg') },
+      { wrapper: createDndWrapper('lg') },
     );
 
     // When activeViewport is "lg", the ColumnBlock should use lg settings (width 4)
@@ -241,7 +241,7 @@ describe('RowBlock', () => {
 
     render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(getWidthClass).toHaveBeenCalledWith(8);
@@ -263,7 +263,7 @@ describe('RowBlock', () => {
 
     const { container } = render(
       <RowBlock row={row} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     // ColumnBlock shows width/columnCount, so with columnCount=16 and width=6
@@ -277,7 +277,7 @@ describe('RowBlock', () => {
 
       render(
         <RowBlock row={row} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
@@ -290,7 +290,7 @@ describe('RowBlock', () => {
 
       render(
         <RowBlock row={row} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       await user.click(screen.getByTestId('collapse-toggle'));
@@ -302,7 +302,7 @@ describe('RowBlock', () => {
 
       const { container } = render(
         <RowBlock row={row} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const outer = container.querySelector('.row-block');
@@ -314,11 +314,24 @@ describe('RowBlock', () => {
 
       const { container } = render(
         <RowBlock row={row} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const outer = container.querySelector('.row-block');
       expect(outer?.classList.contains('row-block--collapsed')).toBe(false);
     });
+  });
+
+  it('renders a drag handle', () => {
+    const row = makeRow({ title: 'Main Row' });
+
+    render(
+      <RowBlock row={row} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const handle = screen.getByTestId('drag-handle');
+    expect(handle).toBeDefined();
+    expect(handle.getAttribute('aria-label')).toBe('Move Main Row');
   });
 });

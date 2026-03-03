@@ -10,6 +10,7 @@ const mockFetchElementTree = vi.fn();
 
 vi.mock('@/api/endpoints', () => ({
   fetchElementTree: (...args: unknown[]) => mockFetchElementTree(...args),
+  reorderElement: vi.fn(),
 }));
 
 vi.mock('@/utils/gridAdapter', () => ({
@@ -51,18 +52,21 @@ const mockTree: ElementTreeResponse = {
       title: 'Main Section',
       containerType: 'section',
       allowedTypes: null,
+      childAreaId: 100,
       children: [
         {
           id: 2,
           title: 'First Row',
           containerType: 'row',
           allowedTypes: null,
+          childAreaId: 200,
           children: [
             {
               id: 3,
               title: 'Left Column',
               containerType: 'column',
               allowedTypes: null,
+              childAreaId: 300,
               children: [
                 {
                   id: 4,
@@ -98,6 +102,7 @@ const mockTree: ElementTreeResponse = {
               title: 'Right Column',
               containerType: 'column',
               allowedTypes: null,
+              childAreaId: 301,
               children: null,
               gridSettings: {
                 xs: { width: 12, offset: 0, visible: true },
@@ -330,5 +335,19 @@ describe('GridEditor', () => {
     expect(container.querySelector('.section-block')).toBeNull();
     expect(container.querySelector('.viewport-switcher')).toBeNull();
     expect(screen.queryByText('No sections yet')).toBeNull();
+  });
+
+  it('does not render DragOverlayContent when no drag is active', async () => {
+    mockFetchElementTree.mockResolvedValue(mockTree);
+
+    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Main Section')).toBeDefined();
+    });
+
+    expect(container.querySelector('.drag-overlay-content')).toBeNull();
   });
 });
