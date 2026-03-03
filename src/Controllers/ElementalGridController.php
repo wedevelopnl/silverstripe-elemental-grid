@@ -22,6 +22,7 @@ use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
+use WeDevelop\ElementalGrid\Service\ReorderService;
 
 /**
  * @phpstan-type CreateElementBody array{
@@ -30,6 +31,11 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  *   insertAfterElementID: positive-int|null,
  * }
  * @phpstan-type ElementIdBody array{id: positive-int}
+ * @phpstan-type ReorderBody array{
+ *   elementID: positive-int,
+ *   targetAreaID: positive-int,
+ *   afterElementID: positive-int|null,
+ * }
  * @phpstan-type AdapterConfig array{
  *   viewports: list<array{key: string, label: string, minWidth: int|null}>,
  *   defaultViewport: string,
@@ -51,6 +57,7 @@ use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
  * @property ElementalAreaRepositoryInterface $areaRepository
  * @property ElementTreeBuilder $treeBuilder
  * @property ElementPersistenceService $persistenceService
+ * @property ReorderService $reorderService
  */
 class ElementalGridController extends AdminController
 {
@@ -64,6 +71,7 @@ class ElementalGridController extends AdminController
         'areaRepository' => '%$' . ElementalAreaRepositoryInterface::class,
         'treeBuilder' => '%$' . ElementTreeBuilder::class,
         'persistenceService' => '%$' . ElementPersistenceService::class,
+        'reorderService' => '%$' . ReorderService::class,
     ];
 
     public ElementRepositoryInterface $elementRepository;
@@ -74,6 +82,8 @@ class ElementalGridController extends AdminController
 
     public ElementPersistenceService $persistenceService;
 
+    public ReorderService $reorderService;
+
     /** @var array<string, string> */
     private static array $url_handlers = [
         'GET api/readTree/$PageID!' => 'apiReadTree',
@@ -82,6 +92,7 @@ class ElementalGridController extends AdminController
         'POST api/unpublish' => 'apiUnpublish',
         'POST api/delete' => 'apiDelete',
         'POST api/duplicate' => 'apiDuplicate',
+        'POST api/reorder' => 'apiReorder',
     ];
 
     /** @var list<string> */
@@ -92,6 +103,7 @@ class ElementalGridController extends AdminController
         'apiUnpublish',
         'apiDelete',
         'apiDuplicate',
+        'apiReorder',
     ];
 
     public function apiReadTree(HTTPRequest $request): HTTPResponse
@@ -269,6 +281,51 @@ class ElementalGridController extends AdminController
         return $this->jsonSuccess(204);
     }
 
+    public function apiReorder(HTTPRequest $request): HTTPResponse
+    {
+        if (!SecurityToken::inst()->checkRequest($request)) {
+            $this->jsonError(400);
+        }
+
+        $body = $this->parseReorderBody($request);
+
+        $element = $this->elementRepository->findById($body['elementID']);
+        if ($element === null) {
+            $this->jsonError(400);
+        }
+
+        if (!$element->canEdit()) {
+            $this->jsonError(403);
+        }
+
+        $targetArea = $this->areaRepository->findById($body['targetAreaID']);
+        if ($targetArea === null) {
+            $this->jsonError(400);
+        }
+
+        if (!$targetArea->canEdit()) {
+            $this->jsonError(403);
+        }
+
+        /** @var positive-int $sourceParentId */
+        $sourceParentId = (int) $element->ParentID;
+        $isCrossArea = $sourceParentId !== $body['targetAreaID'];
+
+        if ($isCrossArea) {
+            $sourceArea = $this->areaRepository->findById($sourceParentId);
+            if ($sourceArea === null || !$sourceArea->canEdit()) {
+                $this->jsonError(403);
+            }
+        }
+
+        $result = $this->reorderService->reorder($element, $targetArea, $body['afterElementID']);
+        if ($result->isErr()) {
+            return $this->resultToResponse($result);
+        }
+
+        return $this->jsonSuccess(204);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -353,6 +410,42 @@ class ElementalGridController extends AdminController
             'elementClass' => $elementClass,
             'elementalAreaID' => $elementalAreaID,
             'insertAfterElementID' => $afterElementID,
+        ];
+    }
+
+    /**
+     * Parse and validate the JSON body for element reordering.
+     *
+     * @return ReorderBody
+     */
+    private function parseReorderBody(HTTPRequest $request): array
+    {
+        $data = json_decode($request->getBody() ?? '', true);
+
+        if (!is_array($data)) {
+            $this->jsonError(400);
+        }
+
+        $elementID = $data['elementID'] ?? null;
+        $targetAreaID = $data['targetAreaID'] ?? null;
+        $afterElementID = $data['afterElementID'] ?? null;
+
+        if (!is_int($elementID) || $elementID < 1) {
+            $this->jsonError(400);
+        }
+
+        if (!is_int($targetAreaID) || $targetAreaID < 1) {
+            $this->jsonError(400);
+        }
+
+        if ($afterElementID !== null && (!is_int($afterElementID) || $afterElementID < 1)) {
+            $this->jsonError(400);
+        }
+
+        return [
+            'elementID' => $elementID,
+            'targetAreaID' => $targetAreaID,
+            'afterElementID' => $afterElementID,
         ];
     }
 

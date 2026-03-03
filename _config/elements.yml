@@ -53,3 +53,14 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
   WeDevelop\ElementalGrid\Service\ElementPersistenceService: ~
+  WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface:
+    class: WeDevelop\ElementalGrid\Validation\ReorderValidator
+  WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface:
+    class: WeDevelop\ElementalGrid\Service\ReorderExecutor
+    constructor:
+      elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
+  WeDevelop\ElementalGrid\Service\ReorderService:
+    constructor:
+      validator: '%$WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface'
+      executor: '%$WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface'
+      persistenceService: '%$WeDevelop\ElementalGrid\Service\ElementPersistenceService'

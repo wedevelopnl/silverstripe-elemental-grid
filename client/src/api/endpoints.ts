@@ -50,3 +50,16 @@ export async function duplicateElement(id: number): Promise<void> {
   const base = getControllerLink();
   await apiPost(`${base}/api/duplicate`, { id });
 }
+
+export interface ReorderElementParams {
+  elementID: number;
+  targetAreaID: number;
+  afterElementID: number | null;
+}
+
+export async function reorderElement(
+  params: ReorderElementParams,
+): Promise<void> {
+  const base = getControllerLink();
+  await apiPost(`${base}/api/reorder`, params);
+}
