@@ -26,7 +26,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
- *     childAreaId?: positive-int,
+ *     childAreaId?: positive-int|null,
  *     gridSettings?: array<string, array{width: int, offset: int, visible: bool}>,
  *     extensions?: array<string, mixed>,
  * }
@@ -64,6 +64,12 @@ final readonly class ElementNode implements \JsonSerializable
                 'gridSettings may only be provided for Column container type',
             );
         }
+
+        if ($childAreaId !== null && $containerType === null) {
+            throw new \InvalidArgumentException(
+                'childAreaId may only be provided for container types',
+            );
+        }
     }
 
     /** @return SerializedNode */
@@ -91,9 +97,7 @@ final readonly class ElementNode implements \JsonSerializable
             $data['allowedTypes'] = $this->allowedTypes;
             $data['children'] = $this->children;
 
-            if ($this->childAreaId !== null) {
-                $data['childAreaId'] = $this->childAreaId;
-            }
+            $data['childAreaId'] = $this->childAreaId;
         }
 
         if ($this->containerType === ContainerType::Column && $this->gridSettings !== null) {
