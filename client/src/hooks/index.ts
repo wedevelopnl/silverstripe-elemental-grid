@@ -9,5 +9,6 @@ export {
   useUnpublishElement,
   useDeleteElement,
   useDuplicateElement,
+  useReorderElement,
 } from './useElementMutations';
 export { useCollapseEnrichment, buildStorageKey } from './useCollapseEnrichment';
