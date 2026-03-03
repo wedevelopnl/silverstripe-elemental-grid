@@ -9,7 +9,6 @@ use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
-use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface;
 use WeDevelop\ElementalGrid\Model\Result;
 use WeDevelop\ElementalGrid\Model\ValidationError;
@@ -24,51 +23,7 @@ class ReorderValidator implements ReorderValidatorInterface
             return Result::ok($element);
         }
 
-        // Circular reference check: only containers can create cycles
-        if ($element instanceof ElementContainerInterface) {
-            $circularResult = $this->checkCircularReference($element, $targetArea);
-            if ($circularResult !== null) {
-                return $circularResult;
-            }
-        }
-
         return $this->checkHierarchyRules($element, $targetArea);
-    }
-
-    /**
-     * Walk from targetArea upward through the ownership chain.
-     * If the element being moved is found as an ancestor, it would create a cycle.
-     *
-     * @return Result<BaseElement>|null Null means no circular reference found
-     */
-    private function checkCircularReference(BaseElement $element, ElementalArea $area): ?Result
-    {
-        $current = $area->getOwnerPage();
-
-        while ($current !== null) {
-            if ($current instanceof BaseElement && $current->ID === $element->ID) {
-                return Result::fail(new ValidationError(
-                    message: sprintf(
-                        'Moving %s here would create a circular reference.',
-                        $element->singular_name(),
-                    ),
-                    field: 'placement',
-                ));
-            }
-
-            if (!$current instanceof BaseElement) {
-                break;
-            }
-
-            $parentArea = $current->Parent();
-            if (!$parentArea->exists()) {
-                break;
-            }
-
-            $current = $parentArea->getOwnerPage();
-        }
-
-        return null;
     }
 
     /** @return Result<BaseElement> */
