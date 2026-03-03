@@ -9,6 +9,7 @@ WeDevelop\ElementalGrid\Elements\ElementSection:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   allowed_elements:
     - WeDevelop\ElementalGrid\Elements\ElementRow
+  controller_template: ElementSectionHolder
 
 WeDevelop\ElementalGrid\Elements\ElementRow:
   extensions:
@@ -16,6 +17,7 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
   can_be_root: false
   allowed_elements:
     - WeDevelop\ElementalGrid\Elements\ElementColumn
+  controller_template: ElementRowHolder
 
 WeDevelop\ElementalGrid\Elements\ElementColumn:
   extensions:
@@ -25,6 +27,7 @@ WeDevelop\ElementalGrid\Elements\ElementColumn:
     - WeDevelop\ElementalGrid\Elements\ElementSection
     - WeDevelop\ElementalGrid\Elements\ElementRow
     - WeDevelop\ElementalGrid\Elements\ElementColumn
+  controller_template: ElementColumnHolder
 
 ---
 Name: elemental-grid-validation

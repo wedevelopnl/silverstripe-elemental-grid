@@ -45,5 +45,9 @@ test.describe('Page lifecycle', () => {
 
     // Assert the page title renders on the frontend
     await expect(page.locator('h1')).toContainText('E2E Grid Test Page');
+
+    // Assert the grid container structure renders on the frontend
+    // Section renders as <section> with container class
+    await expect(page.locator('section.element')).toBeVisible();
   });
 });

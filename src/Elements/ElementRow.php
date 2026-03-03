@@ -9,6 +9,7 @@ use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
 
 /**
  * Mid-level container in the Section > Row > Column hierarchy.
@@ -26,6 +27,13 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     private static string $icon = 'font-icon-columns';
 
     private static string $class_description = 'Horizontal container that holds columns within a section';
+
+    /** @var array<string, string> */
+    private static array $dependencies = [
+        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+    ];
+
+    public GridConfigServiceInterface $gridConfigService;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -72,6 +80,7 @@ class ElementRow extends BaseElement implements ElementContainerInterface
         return $this->getChildCountSummary();
     }
 
+    #[\Override]
     public function getChildArea(): ElementalArea
     {
         return $this->ChildArea();
@@ -87,6 +96,16 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Row;
+    }
+
+    /** CSS classes for the grid row wrapper. */
+    public function getRowClasses(): string
+    {
+        $classes = $this->gridConfigService->getRowClasses();
+
+        $this->extend('updateRowClasses', $classes);
+
+        return $classes;
     }
 
     #[\Override]
