@@ -12,3 +12,5 @@ export {
   useReorderElement,
 } from './useElementMutations';
 export { useCollapseEnrichment, buildStorageKey } from './useCollapseEnrichment';
+export { useDragAndDrop, findNodeById, findContainerForNode } from './useDragAndDrop';
+export type { DragState, UseDragAndDropOptions, UseDragAndDropReturn } from './useDragAndDrop';
