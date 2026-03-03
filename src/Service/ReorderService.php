@@ -32,7 +32,7 @@ class ReorderService
 
         $executeResult = $this->executor->execute($element, $targetArea, $afterElementId);
         if ($executeResult->isErr()) {
-            return Result::fail(...$executeResult->errors());
+            return $executeResult;
         }
 
         $dirtyElements = $executeResult->unwrap();
