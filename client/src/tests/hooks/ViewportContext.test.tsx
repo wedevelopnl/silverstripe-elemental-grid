@@ -9,13 +9,16 @@ vi.mock('@/utils/gridAdapter', () => ({
 
 describe('ViewportContext', () => {
   it('throws when useViewportContext is used outside a ViewportProvider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const suppressJsdomErrors = (event: ErrorEvent) => event.preventDefault();
+    window.addEventListener('error', suppressJsdomErrors);
 
     expect(() => {
       renderHook(() => useViewportContext());
     }).toThrow('useViewportContext must be used within a ViewportProvider');
 
-    spy.mockRestore();
+    window.removeEventListener('error', suppressJsdomErrors);
+    consoleSpy.mockRestore();
   });
 
   it('provides activeViewport and setActiveViewport through the provider', () => {

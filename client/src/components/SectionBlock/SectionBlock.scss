@@ -1,3 +1,4 @@
+@use '../../styles/variables' as vars;
 @use '../../styles/mixins';
 
 $section-block-bg: #f0f4f8;
@@ -35,6 +36,15 @@ $section-block-border: #c0c8d0;
 
   &--collapsed &__body {
     display: none;
+  }
+
+  &--drop-target {
+    border-color: vars.$color-drop-indicator;
+    background: vars.$color-drop-zone-highlight;
+
+    .empty-state {
+      border-color: vars.$color-drop-indicator;
+    }
   }
 
   // Ensure smooth transitions during drag reorder

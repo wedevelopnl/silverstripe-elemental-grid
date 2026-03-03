@@ -17,14 +17,17 @@ function GoodChild() {
 
 describe('GridEditorErrorBoundary', () => {
   let errorSpy: ReturnType<typeof vi.spyOn>;
+  const suppressJsdomErrors = (event: ErrorEvent) => event.preventDefault();
 
   beforeEach(async () => {
     errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    window.addEventListener('error', suppressJsdomErrors);
     const mod = await import('@/utils/toast');
     vi.mocked(mod.showToast).mockClear();
   });
 
   afterEach(() => {
+    window.removeEventListener('error', suppressJsdomErrors);
     errorSpy.mockRestore();
   });
 

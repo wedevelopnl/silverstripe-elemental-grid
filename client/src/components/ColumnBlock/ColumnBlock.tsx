@@ -36,7 +36,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   const { isCollapsed, toggle } = column;
 
   const sortableId = buildDraggableId('column', column.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
 
   const elementIds = (column.children ?? []).map((c) => buildDraggableId('element', c.id));
 
@@ -51,6 +51,9 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   }
   if (isCollapsed) {
     innerClasses.push('column-block--collapsed');
+  }
+  if (isOver) {
+    innerClasses.push('column-block--drop-target');
   }
 
   const sortableStyle: React.CSSProperties = {

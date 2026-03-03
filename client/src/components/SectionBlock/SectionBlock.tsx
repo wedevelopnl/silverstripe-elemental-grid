@@ -18,7 +18,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
   const { isCollapsed, toggle } = section;
 
   const sortableId = buildDraggableId('section', section.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
 
   const rowIds = (section.children ?? []).map((c) => buildDraggableId('row', c.id));
 
@@ -26,6 +26,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
     'section-block',
     `section-block--${status}`,
     ...(isCollapsed ? ['section-block--collapsed'] : []),
+    ...(isOver ? ['section-block--drop-target'] : []),
   ].join(' ');
 
   const style: React.CSSProperties = {

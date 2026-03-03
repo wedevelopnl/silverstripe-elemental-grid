@@ -10,6 +10,30 @@ import {
   getOffsetClass,
 } from '@/utils/gridAdapter';
 
+const { getIsOver, setIsOver } = vi.hoisted(() => {
+  let value = false;
+  return {
+    getIsOver: () => value,
+    setIsOver: (v: boolean) => { value = v; },
+  };
+});
+
+vi.mock('@dnd-kit/sortable', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@dnd-kit/sortable')>();
+  return {
+    ...actual,
+    useSortable: () => ({
+      attributes: {},
+      listeners: undefined,
+      setNodeRef: () => {},
+      transform: null,
+      transition: null,
+      isDragging: false,
+      isOver: getIsOver(),
+    }),
+  };
+});
+
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
   getRowClasses: vi.fn(() => 'row'),
@@ -75,6 +99,7 @@ function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSect
 describe('SectionBlock', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setIsOver(false);
     vi.mocked(getRowClasses).mockReturnValue('row');
     vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
     vi.mocked(getOffsetClass).mockImplementation((offset: number) => `offset-${offset}`);
@@ -277,6 +302,31 @@ describe('SectionBlock', () => {
 
     const rowsInsideBody = body?.querySelectorAll('.row-block');
     expect(rowsInsideBody?.length).toBe(1);
+  });
+
+  it('applies --drop-target modifier when isOver is true', () => {
+    setIsOver(true);
+    const section = makeSection();
+
+    const { container } = render(
+      <SectionBlock section={section} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const outer = container.querySelector('.section-block');
+    expect(outer?.classList.contains('section-block--drop-target')).toBe(true);
+  });
+
+  it('does not apply --drop-target modifier when isOver is false', () => {
+    const section = makeSection();
+
+    const { container } = render(
+      <SectionBlock section={section} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const outer = container.querySelector('.section-block');
+    expect(outer?.classList.contains('section-block--drop-target')).toBe(false);
   });
 
   describe('collapse', () => {

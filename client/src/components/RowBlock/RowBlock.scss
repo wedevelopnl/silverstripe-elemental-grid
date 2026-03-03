@@ -27,6 +27,15 @@
     display: none;
   }
 
+  &--drop-target {
+    border-color: vars.$color-drop-indicator;
+    background: vars.$color-drop-zone-highlight;
+
+    .empty-state {
+      border-color: vars.$color-drop-indicator;
+    }
+  }
+
   &[style*="transform"] {
     z-index: 1;
   }

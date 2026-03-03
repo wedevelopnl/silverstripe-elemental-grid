@@ -6,6 +6,30 @@ import type { EnrichedColumnNode } from '@/types/enriched';
 import { createDndWrapper } from '@/tests/helpers/dndTestUtils';
 import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
 
+const { getIsOver, setIsOver } = vi.hoisted(() => {
+  let value = false;
+  return {
+    getIsOver: () => value,
+    setIsOver: (v: boolean) => { value = v; },
+  };
+});
+
+vi.mock('@dnd-kit/sortable', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@dnd-kit/sortable')>();
+  return {
+    ...actual,
+    useSortable: () => ({
+      attributes: {},
+      listeners: undefined,
+      setNodeRef: () => {},
+      transform: null,
+      transition: null,
+      isDragging: false,
+      isOver: getIsOver(),
+    }),
+  };
+});
+
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
   getWidthClass: vi.fn((width: number) => `col-${width}`),
@@ -46,6 +70,7 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
 describe('ColumnBlock', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setIsOver(false);
     vi.mocked(getColumnCount).mockReturnValue(12);
     vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
     vi.mocked(getOffsetClass).mockImplementation((offset: number) => `offset-${offset}`);
@@ -352,6 +377,31 @@ describe('ColumnBlock', () => {
     );
 
     expect(getOffsetClass).not.toHaveBeenCalled();
+  });
+
+  it('applies --drop-target modifier when isOver is true', () => {
+    setIsOver(true);
+    const column = makeColumn();
+
+    const { container } = render(
+      <ColumnBlock column={column} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const inner = container.querySelector('.column-block');
+    expect(inner?.classList.contains('column-block--drop-target')).toBe(true);
+  });
+
+  it('does not apply --drop-target modifier when isOver is false', () => {
+    const column = makeColumn();
+
+    const { container } = render(
+      <ColumnBlock column={column} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const inner = container.querySelector('.column-block');
+    expect(inner?.classList.contains('column-block--drop-target')).toBe(false);
   });
 
   describe('collapse', () => {

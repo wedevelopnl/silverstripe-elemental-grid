@@ -20,7 +20,7 @@ export default function RowBlock({ row }: RowBlockProps) {
   const { isCollapsed, toggle } = row;
 
   const sortableId = buildDraggableId('row', row.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
 
   const columnIds = (row.children ?? []).map((c) => buildDraggableId('column', c.id));
 
@@ -28,6 +28,7 @@ export default function RowBlock({ row }: RowBlockProps) {
     'row-block',
     `row-block--${status}`,
     ...(isCollapsed ? ['row-block--collapsed'] : []),
+    ...(isOver ? ['row-block--drop-target'] : []),
   ].join(' ');
 
   const style: React.CSSProperties = {
