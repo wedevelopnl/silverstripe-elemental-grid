@@ -9,6 +9,7 @@ use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
 
 /**
  * Top-level container in the Section > Row > Column hierarchy.
@@ -27,6 +28,15 @@ class ElementSection extends BaseElement implements ElementContainerInterface
     private static string $icon = 'font-icon-block-layout';
 
     private static string $class_description = 'Top-level layout container that holds rows';
+
+    private static bool $fluid_container = false;
+
+    /** @var array<string, string> */
+    private static array $dependencies = [
+        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+    ];
+
+    public GridConfigServiceInterface $gridConfigService;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -89,6 +99,18 @@ class ElementSection extends BaseElement implements ElementContainerInterface
     public function getContainerType(): ContainerType
     {
         return ContainerType::Section;
+    }
+
+    /** CSS classes for the grid container wrapper. */
+    public function getContainerClasses(): string
+    {
+        /** @var bool $fluid */
+        $fluid = static::config()->get('fluid_container');
+        $classes = $this->gridConfigService->getContainerClass($fluid);
+
+        $this->extend('updateContainerClasses', $classes);
+
+        return $classes;
     }
 
     #[\Override]

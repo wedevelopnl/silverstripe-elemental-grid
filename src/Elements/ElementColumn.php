@@ -8,6 +8,7 @@ use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
 
 /**
  * Leaf container in the Section > Row > Column hierarchy.
@@ -24,6 +25,13 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
     private static string $icon = 'font-icon-block-content';
 
     private static string $class_description = 'Responsive grid column that holds content blocks';
+
+    /** @var array<string, string> */
+    private static array $dependencies = [
+        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+    ];
+
+    public GridConfigServiceInterface $gridConfigService;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -152,6 +160,35 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
         $this->setField('GridSettings', json_encode($settings));
 
         return $this;
+    }
+
+    /** CSS classes for the grid column wrapper. */
+    public function getColumnClasses(): string
+    {
+        $parts = [];
+        $settings = $this->getGridSettingsData();
+
+        foreach ($settings as $viewport => $config) {
+            if (!$config['visible']) {
+                $parts = [
+                    ...$parts,
+                    ...$this->gridConfigService->getVisibilityClasses($viewport),
+                ];
+                continue;
+            }
+
+            $parts[] = $this->gridConfigService->getWidthClass($viewport, $config['width']);
+
+            if ($config['offset'] > 0) {
+                $parts[] = $this->gridConfigService->getOffsetClass($viewport, $config['offset']);
+            }
+        }
+
+        $classes = implode(' ', $parts);
+
+        $this->extend('updateColumnClasses', $classes);
+
+        return $classes;
     }
 
     #[\Override]
