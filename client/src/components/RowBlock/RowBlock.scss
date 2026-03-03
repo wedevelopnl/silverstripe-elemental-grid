@@ -9,11 +9,21 @@
 
   @include mixins.status-indicator;
 
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
   &__title {
     margin: 0;
     font-size: 0.75em;
     font-weight: 600;
     color: vars.$color-text-muted;
-    margin-bottom: 8px;
+  }
+
+  &--collapsed > :not(&__header) {
+    display: none;
   }
 }

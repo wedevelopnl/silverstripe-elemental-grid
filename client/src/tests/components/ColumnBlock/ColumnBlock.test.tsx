@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
-import type { ColumnNode } from '@/types/elements';
+import type { EnrichedColumnNode } from '@/types/enriched';
 import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
 import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
 
@@ -12,7 +13,7 @@ vi.mock('@/utils/gridAdapter', () => ({
   getDefaultViewport: vi.fn(() => 'md'),
 }));
 
-function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
+function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumnNode {
   return {
     id: 10,
     title: 'Column',
@@ -35,6 +36,8 @@ function makeColumn(overrides: Partial<ColumnNode> = {}): ColumnNode {
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
+    isCollapsed: false,
+    toggle: vi.fn(),
     ...overrides,
   };
 }
@@ -348,5 +351,56 @@ describe('ColumnBlock', () => {
     );
 
     expect(getOffsetClass).not.toHaveBeenCalled();
+  });
+
+  describe('collapse', () => {
+    it('renders a collapse toggle button', () => {
+      const column = makeColumn();
+
+      render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      expect(screen.getByTestId('collapse-toggle')).toBeDefined();
+    });
+
+    it('wires toggle to CollapseToggle onToggle', async () => {
+      const toggle = vi.fn();
+      const column = makeColumn({ id: 55, toggle });
+      const user = userEvent.setup();
+
+      render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      await user.click(screen.getByTestId('collapse-toggle'));
+      expect(toggle).toHaveBeenCalledOnce();
+    });
+
+    it('applies --collapsed modifier when collapsed', () => {
+      const column = makeColumn({ isCollapsed: true });
+
+      const { container } = render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const inner = container.querySelector('.column-block');
+      expect(inner?.classList.contains('column-block--collapsed')).toBe(true);
+    });
+
+    it('does not apply --collapsed modifier when expanded', () => {
+      const column = makeColumn({ isCollapsed: false });
+
+      const { container } = render(
+        <ColumnBlock column={column} />,
+        { wrapper: createViewportWrapper() },
+      );
+
+      const inner = container.querySelector('.column-block');
+      expect(inner?.classList.contains('column-block--collapsed')).toBe(false);
+    });
   });
 });
