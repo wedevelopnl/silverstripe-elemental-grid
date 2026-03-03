@@ -25,3 +25,7 @@ tests/E2E/.auth/
 test-results/
 playwright-report/
 blob-report/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
