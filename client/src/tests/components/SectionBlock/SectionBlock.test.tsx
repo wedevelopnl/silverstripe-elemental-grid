@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
 import type { EnrichedSectionNode, EnrichedRowNode } from '@/types/enriched';
-import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import { createDndWrapper } from '@/tests/helpers/dndTestUtils';
 import {
   getRowClasses,
   getWidthClass,
@@ -85,7 +85,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(container.querySelector('section.section-block')).not.toBeNull();
@@ -96,7 +96,7 @@ describe('SectionBlock', () => {
 
     render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const heading = screen.getByRole('heading', { level: 2 });
@@ -113,7 +113,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const rowBlocks = container.querySelectorAll('.row-block');
@@ -125,7 +125,7 @@ describe('SectionBlock', () => {
 
     render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No rows')).toBeDefined();
@@ -136,7 +136,7 @@ describe('SectionBlock', () => {
 
     render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No rows')).toBeDefined();
@@ -149,7 +149,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
@@ -163,7 +163,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
@@ -177,7 +177,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outer = container.querySelector('.section-block');
@@ -191,7 +191,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper('lg') },
+      { wrapper: createDndWrapper('lg') },
     );
 
     const rowBlocks = container.querySelectorAll('.row-block');
@@ -207,7 +207,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const columnContainer = container.querySelector('.columns.is-multiline');
@@ -255,7 +255,7 @@ describe('SectionBlock', () => {
 
     render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(getWidthClass).toHaveBeenCalledWith(8);
@@ -269,7 +269,7 @@ describe('SectionBlock', () => {
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const body = container.querySelector('.section-block__body');
@@ -285,7 +285,7 @@ describe('SectionBlock', () => {
 
       render(
         <SectionBlock section={section} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
@@ -298,7 +298,7 @@ describe('SectionBlock', () => {
 
       render(
         <SectionBlock section={section} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       await user.click(screen.getByTestId('collapse-toggle'));
@@ -313,7 +313,7 @@ describe('SectionBlock', () => {
 
       const { container } = render(
         <SectionBlock section={section} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const outer = container.querySelector('.section-block');
@@ -328,11 +328,24 @@ describe('SectionBlock', () => {
 
       const { container } = render(
         <SectionBlock section={section} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const outer = container.querySelector('.section-block');
       expect(outer?.classList.contains('section-block--collapsed')).toBe(false);
     });
+  });
+
+  it('renders a drag handle', () => {
+    const section = makeSection({ title: 'Hero Section' });
+
+    render(
+      <SectionBlock section={section} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const handle = screen.getByTestId('drag-handle');
+    expect(handle).toBeDefined();
+    expect(handle.getAttribute('aria-label')).toBe('Move Hero Section');
   });
 });

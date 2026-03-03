@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 
 import ColumnBlock from '@/components/ColumnBlock/ColumnBlock';
 import type { EnrichedColumnNode } from '@/types/enriched';
-import { createViewportWrapper } from '@/tests/helpers/viewportTestUtils';
+import { createDndWrapper } from '@/tests/helpers/dndTestUtils';
 import { getWidthClass, getOffsetClass, getColumnCount } from '@/utils/gridAdapter';
 
 vi.mock('@/utils/gridAdapter', () => ({
@@ -58,7 +58,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('6/12')).toBeDefined();
@@ -71,7 +71,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -85,7 +85,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -99,7 +99,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const outerDiv = container.firstElementChild;
@@ -150,7 +150,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('Hero Banner')).toBeDefined();
@@ -162,7 +162,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No content blocks')).toBeDefined();
@@ -173,7 +173,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('No content blocks')).toBeDefined();
@@ -186,7 +186,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -200,7 +200,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -214,7 +214,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(screen.getByText('hidden')).toBeDefined();
@@ -228,7 +228,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -242,7 +242,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -256,7 +256,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     const inner = container.querySelector('.column-block');
@@ -270,7 +270,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper('lg') },
+      { wrapper: createDndWrapper('lg') },
     );
 
     // Falls back to full width (columnCount = 12)
@@ -286,7 +286,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper('lg') },
+      { wrapper: createDndWrapper('lg') },
     );
 
     const outerDiv = container.firstElementChild;
@@ -301,7 +301,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper('lg') },
+      { wrapper: createDndWrapper('lg') },
     );
 
     const inner = container.querySelector('.column-block');
@@ -317,7 +317,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(getWidthClass).toHaveBeenCalledWith(8);
@@ -333,7 +333,7 @@ describe('ColumnBlock', () => {
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(getOffsetClass).toHaveBeenCalledWith(3);
@@ -348,7 +348,7 @@ describe('ColumnBlock', () => {
 
     render(
       <ColumnBlock column={column} />,
-      { wrapper: createViewportWrapper() },
+      { wrapper: createDndWrapper() },
     );
 
     expect(getOffsetClass).not.toHaveBeenCalled();
@@ -360,7 +360,7 @@ describe('ColumnBlock', () => {
 
       render(
         <ColumnBlock column={column} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       expect(screen.getByTestId('collapse-toggle')).toBeDefined();
@@ -373,7 +373,7 @@ describe('ColumnBlock', () => {
 
       render(
         <ColumnBlock column={column} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       await user.click(screen.getByTestId('collapse-toggle'));
@@ -385,7 +385,7 @@ describe('ColumnBlock', () => {
 
       const { container } = render(
         <ColumnBlock column={column} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const inner = container.querySelector('.column-block');
@@ -397,11 +397,24 @@ describe('ColumnBlock', () => {
 
       const { container } = render(
         <ColumnBlock column={column} />,
-        { wrapper: createViewportWrapper() },
+        { wrapper: createDndWrapper() },
       );
 
       const inner = container.querySelector('.column-block');
       expect(inner?.classList.contains('column-block--collapsed')).toBe(false);
     });
+  });
+
+  it('renders a drag handle', () => {
+    const column = makeColumn({ title: 'Left Column' });
+
+    render(
+      <ColumnBlock column={column} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const handle = screen.getByTestId('drag-handle');
+    expect(handle).toBeDefined();
+    expect(handle.getAttribute('aria-label')).toBe('Move Left Column');
   });
 });

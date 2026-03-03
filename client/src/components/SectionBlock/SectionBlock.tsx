@@ -1,5 +1,10 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedSectionNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
+import { buildDraggableId } from '@/types/dnd';
+import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import RowBlock from '@/components/RowBlock/RowBlock';
 import EmptyState from '@/components/EmptyState/EmptyState';
@@ -12,27 +17,41 @@ export default function SectionBlock({ section }: SectionBlockProps) {
   const status = getElementStatus(section.statusFlags);
   const { isCollapsed, toggle } = section;
 
+  const sortableId = buildDraggableId('section', section.id);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+
+  const rowIds = (section.children ?? []).map((c) => buildDraggableId('row', c.id));
+
   const rootClasses = [
     'section-block',
     `section-block--${status}`,
     ...(isCollapsed ? ['section-block--collapsed'] : []),
   ].join(' ');
 
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? undefined,
+    opacity: isDragging ? 0.3 : undefined,
+  };
+
   return (
-    <section className={rootClasses} data-testid="section-block">
+    <section ref={setNodeRef} style={style} className={rootClasses} data-testid="section-block">
       <div className="section-block__header">
+        <DragHandle listeners={listeners} attributes={attributes} label={`Move ${section.title}`} />
         <CollapseToggle isCollapsed={isCollapsed} onToggle={toggle} label={section.title} />
         <h2 className="section-block__title">{section.title}</h2>
       </div>
       <div className="section-block__body">
-        {section.children !== null && section.children.length > 0
-          ? section.children.map((row) => (
-            <RowBlock
-              key={row.id}
-              row={row}
-            />
-          ))
-          : <EmptyState message="No rows" />}
+        <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
+          {section.children !== null && section.children.length > 0
+            ? section.children.map((row) => (
+              <RowBlock
+                key={row.id}
+                row={row}
+              />
+            ))
+            : <EmptyState message="No rows" />}
+        </SortableContext>
       </div>
     </section>
   );
