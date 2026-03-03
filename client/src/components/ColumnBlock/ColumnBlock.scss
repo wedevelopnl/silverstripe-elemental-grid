@@ -54,4 +54,13 @@
   &--collapsed &__body {
     display: none;
   }
+
+  &--drop-target {
+    outline: 2px solid vars.$color-drop-indicator;
+    background: vars.$color-drop-zone-highlight;
+
+    .empty-state {
+      border-color: vars.$color-drop-indicator;
+    }
+  }
 }

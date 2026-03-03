@@ -64,6 +64,7 @@ function makeColumn(
 // --- Mocks ---
 
 const mockReorderElement = vi.fn();
+const mockShowToast = vi.fn();
 
 vi.mock('@/api/endpoints', () => ({
   createElement: vi.fn(),
@@ -72,6 +73,10 @@ vi.mock('@/api/endpoints', () => ({
   deleteElement: vi.fn(),
   duplicateElement: vi.fn(),
   reorderElement: (...args: unknown[]) => mockReorderElement(...args),
+}));
+
+vi.mock('@/utils/toast', () => ({
+  showToast: (...args: unknown[]) => mockShowToast(...args),
 }));
 
 let queryClient: QueryClient;
@@ -99,6 +104,7 @@ describe('useReorderElement', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     mockReorderElement.mockReset();
+    mockShowToast.mockReset();
   });
 
   it('calls reorderElement endpoint with the provided params', async () => {
@@ -284,5 +290,32 @@ describe('useReorderElement', () => {
     });
 
     await waitFor(() => expect(result.current.error).toBe(error));
+  });
+
+  it('shows error toast when mutation fails', async () => {
+    const error = new Error('Reorder failed');
+    mockReorderElement.mockRejectedValue(error);
+
+    const wrapper = createWrapper();
+    const tree: ElementTreeResponse = {
+      '100': [makeColumn(1, [makeElement(10)], 200)],
+    };
+
+    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+
+    await act(async () => {
+      try {
+        await result.current.mutateAsync({
+          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          tree,
+        });
+      } catch {
+        // Expected
+      }
+    });
+
+    await waitFor(() => {
+      expect(mockShowToast).toHaveBeenCalledWith('Reorder failed');
+    });
   });
 });

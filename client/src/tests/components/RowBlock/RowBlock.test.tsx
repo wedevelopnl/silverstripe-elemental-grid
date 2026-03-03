@@ -11,6 +11,30 @@ import {
   getOffsetClass,
 } from '@/utils/gridAdapter';
 
+const { getIsOver, setIsOver } = vi.hoisted(() => {
+  let value = false;
+  return {
+    getIsOver: () => value,
+    setIsOver: (v: boolean) => { value = v; },
+  };
+});
+
+vi.mock('@dnd-kit/sortable', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@dnd-kit/sortable')>();
+  return {
+    ...actual,
+    useSortable: () => ({
+      attributes: {},
+      listeners: undefined,
+      setNodeRef: () => {},
+      transform: null,
+      transition: null,
+      isDragging: false,
+      isOver: getIsOver(),
+    }),
+  };
+});
+
 vi.mock('@/utils/gridAdapter', () => ({
   getColumnCount: vi.fn(() => 12),
   getRowClasses: vi.fn(() => 'row'),
@@ -79,6 +103,7 @@ function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
 describe('RowBlock', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setIsOver(false);
     vi.mocked(getRowClasses).mockReturnValue('row');
     vi.mocked(getColumnCount).mockReturnValue(12);
     vi.mocked(getWidthClass).mockImplementation((width: number) => `col-${width}`);
@@ -269,6 +294,31 @@ describe('RowBlock', () => {
     // ColumnBlock shows width/columnCount, so with columnCount=16 and width=6
     const badge = container.querySelector('.column-block__badge');
     expect(badge?.textContent).toBe('6/16');
+  });
+
+  it('applies --drop-target modifier when isOver is true', () => {
+    setIsOver(true);
+    const row = makeRow();
+
+    const { container } = render(
+      <RowBlock row={row} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const outer = container.querySelector('.row-block');
+    expect(outer?.classList.contains('row-block--drop-target')).toBe(true);
+  });
+
+  it('does not apply --drop-target modifier when isOver is false', () => {
+    const row = makeRow();
+
+    const { container } = render(
+      <RowBlock row={row} />,
+      { wrapper: createDndWrapper() },
+    );
+
+    const outer = container.querySelector('.row-block');
+    expect(outer?.classList.contains('row-block--drop-target')).toBe(false);
   });
 
   describe('collapse', () => {

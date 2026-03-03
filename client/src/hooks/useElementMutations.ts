@@ -11,6 +11,7 @@ import type { CreateElementParams, ReorderElementParams } from '@/api/endpoints'
 import type { ApiError } from '@/api/errors';
 import type { ElementTreeResponse } from '@/types/elements';
 import { applyReorder } from '@/utils/applyReorder';
+import { showToast } from '@/utils/toast';
 import { queryKeys } from './queryKeys';
 
 function useInvalidateOnSuccess(pageId: number) {
@@ -90,10 +91,11 @@ export function useReorderElement(pageId: number) {
 
       return snapshot;
     },
-    onError: (_error, _variables, snapshot) => {
+    onError: (error, _variables, snapshot) => {
       if (snapshot !== undefined) {
         queryClient.setQueryData(queryKey, snapshot);
       }
+      showToast(error.message);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey });
