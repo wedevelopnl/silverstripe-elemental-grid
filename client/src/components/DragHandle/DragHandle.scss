@@ -1,0 +1,30 @@
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &__icon {
+    display: block;
+    width: 10px;
+    height: 14px;
+    background-image: radial-gradient(circle, currentColor 1.5px, transparent 1.5px);
+    background-size: 5px 5px;
+    background-position: 0 0, 5px 0;
+    opacity: 0.5;
+  }
+
+  &:hover &__icon {
+    opacity: 0.8;
+  }
+}
