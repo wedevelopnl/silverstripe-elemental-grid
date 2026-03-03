@@ -50,6 +50,7 @@ function makeColumnNode(
     containerType: 'column',
     allowedTypes: { 'App\\Model\\ElementContent': 'Content' },
     children,
+    childAreaId: 100,
     gridSettings: {
       xs: { width: 12, offset: 0, visible: true },
       sm: { width: 12, offset: 0, visible: true },
@@ -72,6 +73,7 @@ function makeRowNode(
     containerType: 'row',
     allowedTypes: null,
     children,
+    childAreaId: 200,
     ...overrides,
   };
 }
@@ -87,6 +89,7 @@ function makeSectionNode(
     containerType: 'section',
     allowedTypes: null,
     children,
+    childAreaId: 300,
     ...overrides,
   };
 }
@@ -165,6 +168,7 @@ describe('columnNodeSchema', () => {
       containerType: 'column',
       allowedTypes: null,
       children: [],
+      childAreaId: 50,
       gridSettings: {
         xs: { width: 12, offset: 0, visible: true },
         md: { width: 6, offset: 0, visible: true },

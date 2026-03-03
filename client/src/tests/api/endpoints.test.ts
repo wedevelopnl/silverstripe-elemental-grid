@@ -43,6 +43,7 @@ describe('endpoints', () => {
             containerType: 'section',
             allowedTypes: null,
             children: null,
+            childAreaId: null,
             blockSchema: { typeName: 'Section', label: 'Section', actions: { edit: '/edit/1' }, content: '' },
             obsoleteClassName: null,
             version: 1,

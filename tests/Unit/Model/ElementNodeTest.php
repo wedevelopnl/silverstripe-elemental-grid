@@ -339,4 +339,60 @@ final class ElementNodeTest extends TestCase
         $serialized = $node->jsonSerialize();
         self::assertArrayNotHasKey('gridSettings', $serialized);
     }
+
+    public function testContainerNodeSerializesChildAreaId(): void
+    {
+        $node = new ElementNode(
+            id: 10,
+            title: 'Container',
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Section,
+            allowedTypes: ['App\\Elements\\Row' => 'Row'],
+            children: [],
+            childAreaId: 42,
+        );
+
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayHasKey('childAreaId', $data);
+        $this->assertSame(42, $data['childAreaId']);
+    }
+
+    public function testContainerNodeOmitsChildAreaIdWhenNull(): void
+    {
+        $node = new ElementNode(
+            id: 10,
+            title: 'Container',
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Section,
+            allowedTypes: ['App\\Elements\\Row' => 'Row'],
+            children: [],
+        );
+
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayNotHasKey('childAreaId', $data);
+    }
+
+    public function testLeafNodeOmitsChildAreaId(): void
+    {
+        $node = $this->createLeafNode();
+        $data = $node->jsonSerialize();
+
+        $this->assertArrayNotHasKey('childAreaId', $data);
+    }
 }

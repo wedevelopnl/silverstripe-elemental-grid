@@ -64,6 +64,7 @@ export const columnNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('column'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(simpleElementNodeSchema).nullable(),
+  childAreaId: z.number().int().nullable(),
   gridSettings: gridSettingsSchema,
 });
 
@@ -71,12 +72,14 @@ export const rowNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('row'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(columnNodeSchema).nullable(),
+  childAreaId: z.number().int().nullable(),
 });
 
 export const sectionNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('section'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(rowNodeSchema).nullable(),
+  childAreaId: z.number().int().nullable(),
 });
 
 // --- Union schema ---

@@ -39,6 +39,7 @@ function makeColumn(id: number, title: string, overrides: Partial<EnrichedColumn
     containerType: 'column' as const,
     allowedTypes: null,
     children: null,
+    childAreaId: 100,
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
@@ -68,6 +69,7 @@ function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
     containerType: 'row',
     allowedTypes: null,
     children: null,
+    childAreaId: 200,
     isCollapsed: false,
     toggle: vi.fn(),
     ...overrides,

@@ -148,15 +148,17 @@ class ElementTreeBuilder
         $allowedTypes = null;
         $children = null;
         $gridSettings = null;
+        $childAreaId = null;
 
         if ($element instanceof ElementContainerInterface) {
             $containerType = $element->getContainerType();
             $allowedTypes = $this->getAllowedTypes($element);
 
-            $childAreaId = (int) $element->ChildAreaID; // @phpstan-ignore cast.int (ORM dynamic property)
-            $children = $childAreaId !== 0
-                ? $this->assembleSubTree($elementsByParent, $childAreaId)
+            $rawChildAreaId = (int) $element->ChildAreaID; // @phpstan-ignore cast.int (ORM dynamic property)
+            $children = $rawChildAreaId !== 0
+                ? $this->assembleSubTree($elementsByParent, $rawChildAreaId)
                 : [];
+            $childAreaId = $rawChildAreaId > 0 ? $rawChildAreaId : null;
         }
 
         if ($element instanceof ElementColumn) {
@@ -200,6 +202,7 @@ class ElementTreeBuilder
             allowedTypes: $allowedTypes,
             children: $children,
             gridSettings: $gridSettings,
+            childAreaId: $childAreaId,
             extensions: $extensions,
         );
     }

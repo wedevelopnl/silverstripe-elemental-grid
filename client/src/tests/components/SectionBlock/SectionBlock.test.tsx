@@ -38,6 +38,7 @@ function makeRow(id: number, title: string, overrides: Partial<EnrichedRowNode> 
     containerType: 'row',
     allowedTypes: null,
     children: null,
+    childAreaId: 200,
     isCollapsed: false,
     toggle: vi.fn(),
     ...overrides,
@@ -64,6 +65,7 @@ function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSect
     containerType: 'section',
     allowedTypes: null,
     children: null,
+    childAreaId: 300,
     isCollapsed: false,
     toggle: vi.fn(),
     ...overrides,
@@ -239,6 +241,7 @@ describe('SectionBlock', () => {
               containerType: 'column' as const,
               allowedTypes: null,
               children: null,
+              childAreaId: 100,
               gridSettings: {
                 md: { width: 8, offset: 2, visible: true },
               },

@@ -33,6 +33,7 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
     containerType: 'column',
     allowedTypes: null,
     children: null,
+    childAreaId: 100,
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
