@@ -313,7 +313,7 @@ class ElementalGridController extends AdminController
 
         if ($isCrossArea) {
             $sourceArea = $this->areaRepository->findById($sourceParentId);
-            if (!$sourceArea->canEdit()) {
+            if ($sourceArea === null || !$sourceArea->canEdit()) {
                 $this->jsonError(403);
             }
         }

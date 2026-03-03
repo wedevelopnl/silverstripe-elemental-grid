@@ -32,14 +32,14 @@ class ReorderService
 
         $executeResult = $this->executor->execute($element, $targetArea, $afterElementId);
         if ($executeResult->isErr()) {
-            return $executeResult;
+            return Result::fail(...$executeResult->errors());
         }
 
         $dirtyElements = $executeResult->unwrap();
 
         $persistResult = $this->persistenceService->persistBatch($dirtyElements);
         if ($persistResult->isErr()) {
-            return $persistResult;
+            return Result::fail(...$persistResult->errors());
         }
 
         return Result::ok($element);
