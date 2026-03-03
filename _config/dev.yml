@@ -20,6 +20,7 @@ WeDevelop\ElementalGrid\Dev\FixtureLoader:
     element-tree: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'
     empty-page: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/EmptyPage.yml'
     collapse-test: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/CollapseTest.yml'
+    drag-and-drop: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/DragAndDrop.yml'
     complex-page:
       path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ComplexPage.yml'
       post_actions:
