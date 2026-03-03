@@ -10,3 +10,4 @@ export {
   useDeleteElement,
   useDuplicateElement,
 } from './useElementMutations';
+export { useCollapseEnrichment, buildStorageKey } from './useCollapseEnrichment';
