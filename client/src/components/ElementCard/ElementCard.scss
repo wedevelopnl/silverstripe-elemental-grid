@@ -36,4 +36,8 @@
   &__content--empty {
     font-style: italic;
   }
+
+  &[style*="transform"] {
+    z-index: 1;
+  }
 }
