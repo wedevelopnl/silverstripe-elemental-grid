@@ -39,6 +39,7 @@ final readonly class ElementNode implements \JsonSerializable
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children
      * @param array<string, array{width: int, offset: int, visible: bool}>|null $gridSettings
+     * @param positive-int|null $childAreaId
      * @param array<string, mixed> $extensions
      */
     public function __construct(
@@ -95,7 +96,10 @@ final readonly class ElementNode implements \JsonSerializable
         if ($this->containerType !== null) {
             $data['containerType'] = $this->containerType->value;
             $data['allowedTypes'] = $this->allowedTypes;
-            $data['children'] = $this->children;
+            // Widen list<self> to list<mixed> for the serialized return type
+            /** @var list<mixed>|null $children */
+            $children = $this->children;
+            $data['children'] = $children;
 
             $data['childAreaId'] = $this->childAreaId;
         }
