@@ -36,4 +36,9 @@ $section-block-border: #c0c8d0;
   &--collapsed &__body {
     display: none;
   }
+
+  // Ensure smooth transitions during drag reorder
+  &[style*="transform"] {
+    z-index: 1;
+  }
 }

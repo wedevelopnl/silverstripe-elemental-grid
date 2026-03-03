@@ -1,3 +1,5 @@
+@use '../../styles/variables' as vars;
+
 .drag-overlay-content {
   display: flex;
   flex-direction: column;
@@ -18,7 +20,7 @@
 
   &__meta {
     font-size: 12px;
-    color: #666;
+    color: vars.$color-text-muted;
   }
 
   &__type {

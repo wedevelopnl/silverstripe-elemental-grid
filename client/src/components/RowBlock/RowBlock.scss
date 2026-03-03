@@ -26,4 +26,8 @@
   &--collapsed > :not(&__header) {
     display: none;
   }
+
+  &[style*="transform"] {
+    z-index: 1;
+  }
 }

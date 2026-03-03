@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 24px;
   height: 24px;
   padding: 0;
@@ -18,7 +19,9 @@
     display: block;
     width: 10px;
     height: 14px;
-    background-image: radial-gradient(circle, currentColor 1.5px, transparent 1.5px);
+    background-image:
+      radial-gradient(circle, currentColor 1.5px, transparent 1.5px),
+      radial-gradient(circle, currentColor 1.5px, transparent 1.5px);
     background-size: 5px 5px;
     background-position: 0 0, 5px 0;
     opacity: 0.5;
