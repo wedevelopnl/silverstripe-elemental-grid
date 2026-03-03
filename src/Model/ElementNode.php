@@ -26,6 +26,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
+ *     childAreaId?: positive-int,
  *     gridSettings?: array<string, array{width: int, offset: int, visible: bool}>,
  *     extensions?: array<string, mixed>,
  * }
@@ -55,6 +56,7 @@ final readonly class ElementNode implements \JsonSerializable
         public ?array $allowedTypes = null,
         public ?array $children = null,
         public ?array $gridSettings = null,
+        public ?int $childAreaId = null,
         public array $extensions = [],
     ) {
         if ($gridSettings !== null && $containerType !== ContainerType::Column) {
@@ -88,6 +90,10 @@ final readonly class ElementNode implements \JsonSerializable
             $data['containerType'] = $this->containerType->value;
             $data['allowedTypes'] = $this->allowedTypes;
             $data['children'] = $this->children;
+
+            if ($this->childAreaId !== null) {
+                $data['childAreaId'] = $this->childAreaId;
+            }
         }
 
         if ($this->containerType === ContainerType::Column && $this->gridSettings !== null) {

@@ -56,6 +56,7 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode
     containerType: 'column',
     allowedTypes: null,
     children: null,
+    childAreaId: 100,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
     ...overrides,
   };
@@ -81,6 +82,7 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
     containerType: 'row',
     allowedTypes: null,
     children: null,
+    childAreaId: 200,
     ...overrides,
   };
 }
@@ -105,6 +107,7 @@ function makeSection(id: number, overrides: Partial<SectionNode> = {}): SectionN
     containerType: 'section',
     allowedTypes: null,
     children: null,
+    childAreaId: 300,
     ...overrides,
   };
 }
