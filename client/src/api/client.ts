@@ -20,14 +20,17 @@ export async function apiGet<T>(url: string): Promise<T> {
 }
 
 /**
- * Perform a POST request to a CMS API endpoint with JSON body.
- * Automatically includes the X-SecurityID CSRF header.
+ * Shared mutation request logic: sends a JSON body with CSRF header.
  *
  * @throws ApiError on non-OK HTTP status
  */
-export async function apiPost(url: string, body: object): Promise<void> {
+async function apiMutate(
+  method: 'POST' | 'PATCH' | 'DELETE',
+  url: string,
+  body: object,
+): Promise<void> {
   const response = await fetch(url, {
-    method: 'POST',
+    method,
     credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
@@ -40,4 +43,31 @@ export async function apiPost(url: string, body: object): Promise<void> {
   if (!response.ok) {
     throw new ApiError(response.status, response.statusText);
   }
+}
+
+/**
+ * Perform a POST request to a CMS API endpoint with JSON body.
+ *
+ * @throws ApiError on non-OK HTTP status
+ */
+export async function apiPost(url: string, body: object): Promise<void> {
+  return apiMutate('POST', url, body);
+}
+
+/**
+ * Perform a PATCH request to a CMS API endpoint with JSON body.
+ *
+ * @throws ApiError on non-OK HTTP status
+ */
+export async function apiPatch(url: string, body: object): Promise<void> {
+  return apiMutate('PATCH', url, body);
+}
+
+/**
+ * Perform a DELETE request to a CMS API endpoint with JSON body.
+ *
+ * @throws ApiError on non-OK HTTP status
+ */
+export async function apiDelete(url: string, body: object): Promise<void> {
+  return apiMutate('DELETE', url, body);
 }

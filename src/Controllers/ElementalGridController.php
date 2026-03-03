@@ -88,11 +88,11 @@ class ElementalGridController extends AdminController
     private static array $url_handlers = [
         'GET api/readTree/$PageID!' => 'apiReadTree',
         'POST api/create' => 'apiCreate',
-        'POST api/publish' => 'apiPublish',
-        'POST api/unpublish' => 'apiUnpublish',
-        'POST api/delete' => 'apiDelete',
+        'PATCH api/publish' => 'apiPublish',
+        'PATCH api/unpublish' => 'apiUnpublish',
+        'DELETE api/delete' => 'apiDelete',
         'POST api/duplicate' => 'apiDuplicate',
-        'POST api/reorder' => 'apiReorder',
+        'PATCH api/reorder' => 'apiReorder',
     ];
 
     /** @var list<string> */

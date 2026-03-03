@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from '@/api/client';
+import { apiDelete, apiGet, apiPatch, apiPost } from '@/api/client';
 import { ApiError } from '@/api/errors';
 
 vi.mock('@/api/config', () => ({
@@ -44,21 +44,25 @@ describe('apiGet', () => {
   });
 });
 
-describe('apiPost', () => {
+describe.each([
+  { name: 'apiPost', fn: apiPost, method: 'POST' },
+  { name: 'apiPatch', fn: apiPatch, method: 'PATCH' },
+  { name: 'apiDelete', fn: apiDelete, method: 'DELETE' },
+])('$name', ({ fn, method }) => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('sends POST with JSON body and security header', async () => {
+  it(`sends ${method} with JSON body and security header`, async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: true }),
     );
 
-    await apiPost('/action', { id: 42 });
+    await fn('/action', { id: 42 });
 
     expect(fetch).toHaveBeenCalledWith('/action', {
-      method: 'POST',
+      method,
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
@@ -79,8 +83,8 @@ describe('apiPost', () => {
       }),
     );
 
-    await expect(apiPost('/action', {})).rejects.toThrow(ApiError);
-    await expect(apiPost('/action', {})).rejects.toThrow('403');
+    await expect(fn('/action', {})).rejects.toThrow(ApiError);
+    await expect(fn('/action', {})).rejects.toThrow('403');
   });
 
   it('resolves to void on success', async () => {
@@ -89,7 +93,7 @@ describe('apiPost', () => {
       vi.fn().mockResolvedValue({ ok: true }),
     );
 
-    const result = await apiPost('/action', { id: 1 });
+    const result = await fn('/action', { id: 1 });
 
     expect(result).toBeUndefined();
   });

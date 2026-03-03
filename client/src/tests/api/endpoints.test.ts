@@ -10,10 +10,14 @@ import {
 
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
+const mockApiPatch = vi.fn();
+const mockApiDelete = vi.fn();
 
 vi.mock('@/api/client', () => ({
   apiGet: (...args: unknown[]) => mockApiGet(...args),
   apiPost: (...args: unknown[]) => mockApiPost(...args),
+  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
+  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
 }));
 
 vi.mock('@/api/config', () => ({
@@ -25,6 +29,8 @@ describe('endpoints', () => {
     vi.restoreAllMocks();
     mockApiGet.mockReset();
     mockApiPost.mockReset();
+    mockApiPatch.mockReset();
+    mockApiDelete.mockReset();
   });
 
   describe('fetchElementTree', () => {
@@ -87,12 +93,12 @@ describe('endpoints', () => {
   });
 
   describe('publishElement', () => {
-    it('sends correct POST body', async () => {
-      mockApiPost.mockResolvedValue(undefined);
+    it('sends correct PATCH body', async () => {
+      mockApiPatch.mockResolvedValue(undefined);
 
       await publishElement(7);
 
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockApiPatch).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/publish',
         { id: 7 },
       );
@@ -100,12 +106,12 @@ describe('endpoints', () => {
   });
 
   describe('unpublishElement', () => {
-    it('sends correct POST body', async () => {
-      mockApiPost.mockResolvedValue(undefined);
+    it('sends correct PATCH body', async () => {
+      mockApiPatch.mockResolvedValue(undefined);
 
       await unpublishElement(7);
 
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockApiPatch).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/unpublish',
         { id: 7 },
       );
@@ -113,12 +119,12 @@ describe('endpoints', () => {
   });
 
   describe('deleteElement', () => {
-    it('sends correct POST body', async () => {
-      mockApiPost.mockResolvedValue(undefined);
+    it('sends correct DELETE body', async () => {
+      mockApiDelete.mockResolvedValue(undefined);
 
       await deleteElement(3);
 
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockApiDelete).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/delete',
         { id: 3 },
       );
@@ -139,8 +145,8 @@ describe('endpoints', () => {
   });
 
   describe('reorderElement', () => {
-    it('sends correct POST body with afterElementID', async () => {
-      mockApiPost.mockResolvedValue(undefined);
+    it('sends correct PATCH body with afterElementID', async () => {
+      mockApiPatch.mockResolvedValue(undefined);
 
       await reorderElement({
         elementID: 5,
@@ -148,7 +154,7 @@ describe('endpoints', () => {
         afterElementID: 3,
       });
 
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockApiPatch).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/reorder',
         {
           elementID: 5,
@@ -159,7 +165,7 @@ describe('endpoints', () => {
     });
 
     it('sends null afterElementID for first position', async () => {
-      mockApiPost.mockResolvedValue(undefined);
+      mockApiPatch.mockResolvedValue(undefined);
 
       await reorderElement({
         elementID: 5,
@@ -167,7 +173,7 @@ describe('endpoints', () => {
         afterElementID: null,
       });
 
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockApiPatch).toHaveBeenCalledWith(
         '/admin/elemental-grid/api/reorder',
         {
           elementID: 5,

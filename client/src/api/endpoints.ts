@@ -2,7 +2,7 @@ import {
   type ElementTreeResponse,
   elementTreeResponseSchema,
 } from '@/types/elements';
-import { apiGet, apiPost } from './client';
+import { apiDelete, apiGet, apiPatch, apiPost } from './client';
 import { getControllerLink } from './config';
 
 /**
@@ -33,17 +33,17 @@ export async function createElement(
 
 export async function publishElement(id: number): Promise<void> {
   const base = getControllerLink();
-  await apiPost(`${base}/api/publish`, { id });
+  await apiPatch(`${base}/api/publish`, { id });
 }
 
 export async function unpublishElement(id: number): Promise<void> {
   const base = getControllerLink();
-  await apiPost(`${base}/api/unpublish`, { id });
+  await apiPatch(`${base}/api/unpublish`, { id });
 }
 
 export async function deleteElement(id: number): Promise<void> {
   const base = getControllerLink();
-  await apiPost(`${base}/api/delete`, { id });
+  await apiDelete(`${base}/api/delete`, { id });
 }
 
 export async function duplicateElement(id: number): Promise<void> {
@@ -61,5 +61,5 @@ export async function reorderElement(
   params: ReorderElementParams,
 ): Promise<void> {
   const base = getControllerLink();
-  await apiPost(`${base}/api/reorder`, params);
+  await apiPatch(`${base}/api/reorder`, params);
 }
