@@ -218,7 +218,7 @@ describe('GridEditor', () => {
   it('renders section blocks when data loads', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor areaId={42} pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -226,7 +226,7 @@ describe('GridEditor', () => {
       expect(screen.getByText('Main Section')).toBeDefined();
     });
 
-    const sectionBlocks = container.querySelectorAll('.section-block');
+    const sectionBlocks = screen.getAllByTestId('section-block');
     expect(sectionBlocks.length).toBe(1);
   });
 
@@ -257,32 +257,32 @@ describe('GridEditor', () => {
   it('sets data-area-id attribute', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor areaId={42} pageId={7} />, {
       wrapper: createWrapper(),
     });
 
-    const editorDiv = container.querySelector<HTMLElement>('.grid-editor');
-    expect(editorDiv?.dataset.areaId).toBe('42');
+    const editorDiv = screen.getByTestId('grid-editor');
+    expect(editorDiv.dataset.areaId).toBe('42');
   });
 
   it('sets data-page-id attribute when pageId is provided', () => {
     mockFetchElementTree.mockReturnValue(new Promise(() => {}));
 
-    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor areaId={42} pageId={7} />, {
       wrapper: createWrapper(),
     });
 
-    const editorDiv = container.querySelector<HTMLElement>('.grid-editor');
-    expect(editorDiv?.dataset.pageId).toBe('7');
+    const editorDiv = screen.getByTestId('grid-editor');
+    expect(editorDiv.dataset.pageId).toBe('7');
   });
 
   it('omits data-page-id attribute when pageId is null', () => {
-    const { container } = render(<GridEditor areaId={42} pageId={null} />, {
+    render(<GridEditor areaId={42} pageId={null} />, {
       wrapper: createWrapper(),
     });
 
-    const editorDiv = container.querySelector<HTMLElement>('.grid-editor');
-    expect(editorDiv?.dataset.pageId).toBeUndefined();
+    const editorDiv = screen.getByTestId('grid-editor');
+    expect(editorDiv.dataset.pageId).toBeUndefined();
   });
 
   it('updates column fraction badges when viewport is switched', async () => {
@@ -328,19 +328,19 @@ describe('GridEditor', () => {
   it('does not render content area when still loading', () => {
     mockFetchElementTree.mockReturnValue(new Promise(() => {}));
 
-    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor areaId={42} pageId={7} />, {
       wrapper: createWrapper(),
     });
 
-    expect(container.querySelector('.section-block')).toBeNull();
-    expect(container.querySelector('.viewport-switcher')).toBeNull();
+    expect(screen.queryByTestId('section-block')).toBeNull();
+    expect(screen.queryByTestId('viewport-switcher')).toBeNull();
     expect(screen.queryByText('No sections yet')).toBeNull();
   });
 
   it('does not render DragOverlayContent when no drag is active', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    const { container } = render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor areaId={42} pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -348,6 +348,9 @@ describe('GridEditor', () => {
       expect(screen.getByText('Main Section')).toBeDefined();
     });
 
-    expect(container.querySelector('.drag-overlay-content')).toBeNull();
+    expect(screen.queryByTestId('drag-overlay-section')).toBeNull();
+    expect(screen.queryByTestId('drag-overlay-row')).toBeNull();
+    expect(screen.queryByTestId('drag-overlay-column')).toBeNull();
+    expect(screen.queryByTestId('drag-overlay-element')).toBeNull();
   });
 });

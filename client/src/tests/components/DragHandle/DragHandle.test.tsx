@@ -81,13 +81,13 @@ describe('DragHandle', () => {
   });
 
   it('renders the grip icon span', () => {
-    const { container } = render(
+    render(
       <DragHandle listeners={defaultListeners} attributes={defaultAttributes} />,
     );
 
-    const icon = container.querySelector('.drag-handle__icon');
-    expect(icon).not.toBeNull();
-    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+    const icon = screen.getByTestId('drag-handle-icon');
+    expect(icon).toBeDefined();
+    expect(icon.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('handles undefined listeners gracefully', () => {
