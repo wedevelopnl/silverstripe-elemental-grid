@@ -15,7 +15,7 @@ test.describe('Page lifecycle', () => {
 
     await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
     await expect(
-      page.locator('#Form_EditForm_Title'),
+      page.getByRole('textbox', { name: 'Page name' }),
     ).toHaveValue('E2E Grid Test Page');
     await expect(
       page.getByTestId('grid-editor-loading'),
@@ -40,7 +40,7 @@ test.describe('Page lifecycle', () => {
 
     await expect(page.locator('h1')).toContainText('E2E Grid Test Page');
     await expect(
-      page.locator('section.element h2.element__title'),
+      page.getByRole('heading', { level: 2 }),
     ).toHaveText('Main Section');
   });
 });
