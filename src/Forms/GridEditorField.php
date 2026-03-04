@@ -7,6 +7,7 @@ namespace WeDevelop\ElementalGrid\Forms;
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Forms\FormField;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\ORM\DataObjectInterface;
 
 /**
  * Lightweight form field that serves as the React mount point for the
@@ -62,6 +63,17 @@ class GridEditorField extends FormField
         $schemaData['grid-page-id'] = $page !== null ? (int) $page->ID : null;
 
         return $schemaData;
+    }
+
+    /**
+     * No-op: element mutations are handled by the API controller, not
+     * the CMS form. The base FormField::saveInto() would call
+     * setCastedField('ElementalArea', null) — nullifying the has_one —
+     * because the grid editor submits no POST data for this field.
+     */
+    public function saveInto(DataObjectInterface $record): void
+    {
+        // Intentionally empty
     }
 
     public function performReadonlyTransformation(): LiteralField
