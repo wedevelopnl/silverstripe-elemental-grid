@@ -230,6 +230,30 @@ describe('sectionNodeSchema', () => {
   });
 });
 
+// --- childAreaId rejection ---
+
+describe('childAreaId non-nullable on containers', () => {
+  it('rejects columnNode with childAreaId: null', () => {
+    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: null }))).toThrow();
+  });
+
+  it('rejects rowNode with childAreaId: null', () => {
+    expect(() => rowNodeSchema.parse(makeRowNode([], { childAreaId: null }))).toThrow();
+  });
+
+  it('rejects sectionNode with childAreaId: null', () => {
+    expect(() => sectionNodeSchema.parse(makeSectionNode([], { childAreaId: null }))).toThrow();
+  });
+
+  it('rejects columnNode with childAreaId: 0', () => {
+    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: 0 }))).toThrow();
+  });
+
+  it('rejects columnNode with childAreaId: -1', () => {
+    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: -1 }))).toThrow();
+  });
+});
+
 // --- Extensions field ---
 
 describe('extensions field', () => {

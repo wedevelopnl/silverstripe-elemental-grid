@@ -12,6 +12,7 @@ use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Model\ElementNode;
+use Psr\Log\LoggerInterface;
 use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
 
 /**
@@ -45,6 +46,7 @@ class ElementTreeBuilder
 
     public function __construct(
         private readonly ElementRepositoryInterface $elementRepository,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -134,15 +136,17 @@ class ElementTreeBuilder
             $nodes[] = $this->buildElementNode($element, $elementsByParent);
         }
 
-        return $nodes;
+        return array_values(array_filter($nodes));
     }
 
     /**
      * Build a single element node with base fields and optional container fields.
      *
+     * Returns null for containers with missing ChildArea (data corruption).
+     *
      * @param array<int, list<BaseElement>> $elementsByParent
      */
-    private function buildElementNode(BaseElement $element, array $elementsByParent): ElementNode
+    private function buildElementNode(BaseElement $element, array $elementsByParent): ?ElementNode
     {
         $containerType = null;
         $allowedTypes = null;
@@ -151,14 +155,25 @@ class ElementTreeBuilder
         $childAreaId = null;
 
         if ($element instanceof ElementContainerInterface) {
+            $rawChildAreaId = (int) $element->ChildAreaID; // @phpstan-ignore cast.int (ORM dynamic property)
+
+            if ($rawChildAreaId <= 0) {
+                $this->logger->warning(
+                    'Skipping container element {id} ({class}): ChildAreaID is {value}',
+                    [
+                        'id' => $element->ID,
+                        'class' => $element::class,
+                        'value' => $rawChildAreaId,
+                    ],
+                );
+
+                return null;
+            }
+
             $containerType = $element->getContainerType();
             $allowedTypes = $this->getAllowedTypes($element);
-
-            $rawChildAreaId = (int) $element->ChildAreaID; // @phpstan-ignore cast.int (ORM dynamic property)
-            $children = $rawChildAreaId !== 0
-                ? $this->assembleSubTree($elementsByParent, $rawChildAreaId)
-                : [];
-            $childAreaId = $rawChildAreaId > 0 ? $rawChildAreaId : null;
+            $childAreaId = $rawChildAreaId;
+            $children = $this->assembleSubTree($elementsByParent, $childAreaId);
         }
 
         if ($element instanceof ElementColumn) {
