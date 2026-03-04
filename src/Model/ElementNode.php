@@ -26,7 +26,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
- *     childAreaId?: positive-int|null,
+ *     childAreaId?: positive-int,
  *     gridSettings?: array<string, array{width: int, offset: int, visible: bool}>,
  *     extensions?: array<string, mixed>,
  * }
@@ -71,6 +71,12 @@ final readonly class ElementNode implements \JsonSerializable
                 'childAreaId may only be provided for container types',
             );
         }
+
+        if ($containerType !== null && ($childAreaId === null || $childAreaId <= 0)) { // @phpstan-ignore smallerOrEqual.alwaysFalse (runtime guard: native type is ?int)
+            throw new \InvalidArgumentException(
+                'Container nodes must have a positive childAreaId',
+            );
+        }
     }
 
     /** @return SerializedNode */
@@ -101,7 +107,9 @@ final readonly class ElementNode implements \JsonSerializable
             $children = $this->children;
             $data['children'] = $children;
 
-            $data['childAreaId'] = $this->childAreaId;
+            /** @var positive-int $childAreaId Constructor guard ensures positive for containers */
+            $childAreaId = $this->childAreaId;
+            $data['childAreaId'] = $childAreaId;
         }
 
         if ($this->containerType === ContainerType::Column && $this->gridSettings !== null) {

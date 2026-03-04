@@ -143,7 +143,7 @@ function findInContainerChildren(
   container: ContainerNode,
   nodeId: number,
 ): ContainerInfo | null {
-  if (container.childAreaId === null || !container.children) return null;
+  if (!container.children) return null;
 
   const index = container.children.findIndex((n) => n.id === nodeId);
   if (index !== -1) {
@@ -227,11 +227,7 @@ export function useDragAndDrop({
       } else {
         // Over a container — drop into it
         const containerNode = findNodeById(tree, overParsed.id);
-        if (
-          !containerNode ||
-          !isContainerNode(containerNode) ||
-          containerNode.childAreaId === null
-        ) {
+        if (!containerNode || !isContainerNode(containerNode)) {
           return;
         }
 

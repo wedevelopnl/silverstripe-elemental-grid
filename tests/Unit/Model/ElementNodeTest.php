@@ -31,6 +31,7 @@ final class ElementNodeTest extends TestCase
     private function createContainerNode(
         ContainerType $containerType = ContainerType::Section,
         ?array $children = [],
+        int $childAreaId = 10,
     ): ElementNode {
         return new ElementNode(
             id: 10,
@@ -46,6 +47,7 @@ final class ElementNodeTest extends TestCase
             containerType: $containerType,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: $children,
+            childAreaId: $childAreaId,
         );
     }
 
@@ -191,6 +193,7 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Section,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: [],
+            childAreaId: 10,
             extensions: ['layout' => 'fluid'],
         );
 
@@ -224,6 +227,7 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Row,
             allowedTypes: ['App\\Elements\\Column' => 'Column'],
             children: [$innerContainer],
+            childAreaId: 50,
         );
 
         $json = json_encode($outerContainer, JSON_THROW_ON_ERROR);
@@ -265,6 +269,7 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: $gridSettings,
+            childAreaId: 1,
         );
 
         $serialized = $node->jsonSerialize();
@@ -292,6 +297,7 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: ['xs' => ['width' => 12, 'offset' => 0, 'visible' => true]],
+            childAreaId: 99,
         );
     }
 
@@ -312,6 +318,7 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: null,
+            childAreaId: 1,
         );
 
         $serialized = $node->jsonSerialize();
@@ -334,6 +341,7 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Row,
             allowedTypes: null,
             children: [],
+            childAreaId: 2,
         );
 
         $serialized = $node->jsonSerialize();
@@ -365,9 +373,12 @@ final class ElementNodeTest extends TestCase
         $this->assertSame(42, $data['childAreaId']);
     }
 
-    public function testContainerNodeSerializesChildAreaIdAsNullWhenNotSet(): void
+    public function testContainerWithNullChildAreaIdThrows(): void
     {
-        $node = new ElementNode(
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Container nodes must have a positive childAreaId');
+
+        new ElementNode(
             id: 10,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
@@ -382,11 +393,29 @@ final class ElementNodeTest extends TestCase
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: [],
         );
+    }
 
-        $data = $node->jsonSerialize();
+    public function testContainerWithZeroChildAreaIdThrows(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Container nodes must have a positive childAreaId');
 
-        $this->assertArrayHasKey('childAreaId', $data);
-        $this->assertNull($data['childAreaId']);
+        new ElementNode(
+            id: 10,
+            title: 'Container',
+            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Section,
+            allowedTypes: ['App\\Elements\\Row' => 'Row'],
+            children: [],
+            childAreaId: 0,
+        );
     }
 
     public function testLeafNodeOmitsChildAreaId(): void
