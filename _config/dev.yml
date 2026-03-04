@@ -17,10 +17,20 @@ SilverStripe\Dev\DevelopmentAdmin:
 
 WeDevelop\ElementalGrid\Dev\FixtureLoader:
   fixtures:
-    element-tree: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'
+    element-tree:
+      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'
+      post_actions:
+        - action: publish_recursive
+          class: Page
+          identifier: e2e_page
     empty-page: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/EmptyPage.yml'
     collapse-test: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/CollapseTest.yml'
-    drag-and-drop: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/DragAndDrop.yml'
+    drag-and-drop:
+      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/DragAndDrop.yml'
+      post_actions:
+        - action: publish_recursive
+          class: Page
+          identifier: e2e_page
     complex-page:
       path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ComplexPage.yml'
       post_actions:
