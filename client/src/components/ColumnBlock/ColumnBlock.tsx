@@ -65,7 +65,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   return (
     <div ref={setNodeRef} style={sortableStyle} className={outerClasses.join(' ')}>
       <div className={innerClasses.join(' ')} data-testid="column-block">
-        <div className="column-block__header">
+        <div className="column-block__header" data-testid="column-header">
           <DragHandle listeners={listeners} attributes={attributes} label={`Move ${column.title}`} />
           <CollapseToggle isCollapsed={isCollapsed} onToggle={toggle} label={column.title} />
           <span className="column-block__badge" data-testid="column-badge">

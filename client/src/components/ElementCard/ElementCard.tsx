@@ -27,11 +27,11 @@ export default function ElementCard({ element }: ElementCardProps) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`element-card element-card--${status}`}>
+    <div ref={setNodeRef} style={style} className={`element-card element-card--${status}`} data-testid="element-card">
       <div className="element-card__header">
         <DragHandle listeners={listeners} attributes={attributes} label={`Move ${element.title}`} />
         <span className="element-card__type">{label}</span>
-        <h4 className="element-card__title">{element.title}</h4>
+        <h4 className="element-card__title" data-testid="element-card-title">{element.title}</h4>
       </div>
       <div className={`element-card__content${content === '' ? ' element-card__content--empty' : ''}`}>
         {content || 'No preview available'}

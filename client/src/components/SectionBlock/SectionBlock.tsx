@@ -40,7 +40,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
       <div className="section-block__header">
         <DragHandle listeners={listeners} attributes={attributes} label={`Move ${section.title}`} />
         <CollapseToggle isCollapsed={isCollapsed} onToggle={toggle} label={section.title} />
-        <h2 className="section-block__title">{section.title}</h2>
+        <h2 className="section-block__title" data-testid="section-title">{section.title}</h2>
       </div>
       <div className="section-block__body">
         <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
