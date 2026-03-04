@@ -136,6 +136,115 @@ describe('filterDroppablesByType — parent container matching', () => {
   });
 });
 
+describe('filterDroppablesByType — cross-type exclusion contract', () => {
+  const containers = [
+    makeContainer('section-1'),
+    makeContainer('section-2'),
+    makeContainer('row-10'),
+    makeContainer('row-20'),
+    makeContainer('column-5'),
+    makeContainer('column-6'),
+    makeContainer('element-100'),
+    makeContainer('element-200'),
+    makeContainer('root'),
+  ];
+
+  it('section drag excludes all row, column, and element containers', () => {
+    const ids = filterDroppablesByType('section-1', containers).map((c) => String(c.id));
+
+    expect(ids.every((id) => !id.startsWith('row-'))).toBe(true);
+    expect(ids.every((id) => !id.startsWith('column-'))).toBe(true);
+    expect(ids.every((id) => !id.startsWith('element-'))).toBe(true);
+  });
+
+  it('row drag excludes all column and element containers', () => {
+    const ids = filterDroppablesByType('row-10', containers).map((c) => String(c.id));
+
+    expect(ids.every((id) => !id.startsWith('column-'))).toBe(true);
+    expect(ids.every((id) => !id.startsWith('element-'))).toBe(true);
+  });
+
+  it('column drag excludes all section and element containers', () => {
+    const ids = filterDroppablesByType('column-5', containers).map((c) => String(c.id));
+
+    expect(ids.every((id) => !id.startsWith('section-'))).toBe(true);
+    expect(ids.every((id) => !id.startsWith('element-'))).toBe(true);
+  });
+
+  it('element drag excludes all section and row containers', () => {
+    const ids = filterDroppablesByType('element-100', containers).map((c) => String(c.id));
+
+    expect(ids.every((id) => !id.startsWith('section-'))).toBe(true);
+    expect(ids.every((id) => !id.startsWith('row-'))).toBe(true);
+  });
+});
+
+describe('typedCollisionDetection — geometric invalid-drop scenarios', () => {
+  const rect = { width: 100, height: 50, top: 0, left: 0, right: 100, bottom: 50 };
+
+  function makeCollisionArgs(activeId: string, containers: ReturnType<typeof makeContainer>[]) {
+    const droppableRects = new Map<string, typeof rect>();
+    for (const c of containers) {
+      droppableRects.set(String(c.id), rect);
+    }
+
+    return {
+      active: {
+        id: activeId,
+        data: { current: undefined },
+        rect: { current: { initial: rect, translated: rect } },
+      },
+      collisionRect: rect,
+      droppableRects,
+      droppableContainers: containers,
+      pointerCoordinates: null,
+    };
+  }
+
+  it('returns no collisions when dragging element near only a section container', () => {
+    const result = typedCollisionDetection(
+      makeCollisionArgs('element-100', [makeContainer('section-1')]),
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns no collisions when dragging row near only column containers', () => {
+    const result = typedCollisionDetection(
+      makeCollisionArgs('row-10', [makeContainer('column-5'), makeContainer('column-6')]),
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns only valid sibling when invalid container is closer', () => {
+    // Invalid section at distance 0, valid element sibling further away
+    const invalidContainer = makeContainer('section-1');
+    const validContainer = makeContainer('element-200');
+
+    const droppableRects = new Map<string, typeof rect>();
+    // Both at same rect — but section should be filtered out before proximity calc
+    droppableRects.set('section-1', rect);
+    droppableRects.set('element-200', { ...rect, top: 500, bottom: 550 });
+
+    const result = typedCollisionDetection({
+      active: {
+        id: 'element-100',
+        data: { current: undefined },
+        rect: { current: { initial: rect, translated: rect } },
+      },
+      collisionRect: rect,
+      droppableRects,
+      droppableContainers: [invalidContainer, validContainer],
+      pointerCoordinates: null,
+    });
+
+    const ids = result.map((c) => c.id);
+    expect(ids).not.toContain('section-1');
+    expect(ids).toContain('element-200');
+  });
+});
+
 describe('typedCollisionDetection', () => {
   it('returns empty collisions for an invalid active ID', () => {
     const result = typedCollisionDetection({
