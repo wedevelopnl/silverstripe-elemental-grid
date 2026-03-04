@@ -4,7 +4,7 @@
 .column-block {
   @include mixins.status-indicator;
 
-  background: #f8f9fa;
+  background: vars.$color-bg-column;
   padding: 8px;
   min-height: 60px;
 
@@ -22,8 +22,8 @@
         -45deg,
         transparent,
         transparent 4px,
-        rgba(0, 0, 0, 0.06) 4px,
-        rgba(0, 0, 0, 0.06) 8px
+        vars.$color-overlay-stripe 4px,
+        vars.$color-overlay-stripe 8px
       );
     }
   }

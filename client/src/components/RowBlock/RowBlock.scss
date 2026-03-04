@@ -2,7 +2,7 @@
 @use '../../styles/mixins';
 
 .row-block {
-  background: #ffffff;
+  background: vars.$color-bg-white;
   border: 1px solid vars.$color-border-light;
   border-radius: 4px;
   padding: 12px;

@@ -1,12 +1,9 @@
 @use '../../styles/variables' as vars;
 @use '../../styles/mixins';
 
-$section-block-bg: #f0f4f8;
-$section-block-border: #c0c8d0;
-
 .section-block {
-  background: $section-block-bg;
-  border: 2px solid $section-block-border;
+  background: vars.$color-bg-section;
+  border: 2px solid vars.$color-border-section;
   border-radius: 4px;
   padding: 16px;
   width: 100%;
@@ -25,7 +22,7 @@ $section-block-border: #c0c8d0;
     font-weight: 700;
     font-variant: small-caps;
     font-size: 0.85em;
-    color: #3a4a5c;
+    color: vars.$color-text-section-title;
   }
 
   &__body {
