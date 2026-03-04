@@ -138,6 +138,23 @@ final class GridEditorFieldTest extends SapphireTest
         $this->assertSame([], $field->getBlockTypes());
     }
 
+    public function testSaveIntoDoesNotModifyElementalAreaId(): void
+    {
+        $page = TestPage::create();
+        $page->Title = 'SaveInto Test';
+        $page->write();
+
+        /** @var ElementalArea $area */
+        $area = $page->ElementalArea();
+        $originalAreaId = (int) $area->ID;
+        $this->assertGreaterThan(0, $originalAreaId);
+
+        $field = GridEditorField::create('ElementalArea', $area);
+        $field->saveInto($page);
+
+        $this->assertSame($originalAreaId, (int) $page->ElementalAreaID);
+    }
+
     public function testPerformReadonlyTransformationReturnsLiteralField(): void
     {
         $area = ElementalArea::create();
