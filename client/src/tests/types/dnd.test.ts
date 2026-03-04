@@ -2,9 +2,11 @@ import {
   buildDraggableId,
   parseDraggableId,
   getDraggableType,
+  getDraggableTypeForNode,
   PARENT_CONTAINER_TYPE,
   DRAGGABLE_TYPES,
 } from '@/types/dnd';
+import type { SectionNode, RowNode, ColumnNode, SimpleElementNode } from '@/types/elements';
 
 describe('buildDraggableId', () => {
   it('builds a composite ID from type and numeric ID', () => {
@@ -57,5 +59,64 @@ describe('PARENT_CONTAINER_TYPE', () => {
 describe('DRAGGABLE_TYPES', () => {
   it('contains all four hierarchy levels', () => {
     expect(DRAGGABLE_TYPES).toEqual(['section', 'row', 'column', 'element']);
+  });
+});
+
+describe('getDraggableTypeForNode', () => {
+  const baseFields = {
+    title: 'Test',
+    blockSchema: { typeName: 'Test', label: 'Test', actions: { edit: '/edit/1' }, content: '' },
+    obsoleteClassName: null,
+    version: 1,
+    canDelete: true,
+    canPublish: true,
+    canUnpublish: false,
+    canCreate: true,
+    statusFlags: {},
+  };
+
+  it('returns "section" for a section node', () => {
+    const node: SectionNode = {
+      ...baseFields,
+      id: 1,
+      containerType: 'section',
+      allowedTypes: null,
+      children: null,
+      childAreaId: 100,
+    };
+    expect(getDraggableTypeForNode(node)).toBe('section');
+  });
+
+  it('returns "row" for a row node', () => {
+    const node: RowNode = {
+      ...baseFields,
+      id: 2,
+      containerType: 'row',
+      allowedTypes: null,
+      children: null,
+      childAreaId: 200,
+    };
+    expect(getDraggableTypeForNode(node)).toBe('row');
+  });
+
+  it('returns "column" for a column node', () => {
+    const node: ColumnNode = {
+      ...baseFields,
+      id: 3,
+      containerType: 'column',
+      allowedTypes: null,
+      children: null,
+      childAreaId: 300,
+      gridSettings: {},
+    };
+    expect(getDraggableTypeForNode(node)).toBe('column');
+  });
+
+  it('returns "element" for a leaf node', () => {
+    const node: SimpleElementNode = {
+      ...baseFields,
+      id: 4,
+    };
+    expect(getDraggableTypeForNode(node)).toBe('element');
   });
 });

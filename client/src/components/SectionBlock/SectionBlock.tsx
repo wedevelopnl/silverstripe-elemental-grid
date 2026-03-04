@@ -3,7 +3,6 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedSectionNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { buildDraggableId } from '@/types/dnd';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import RowBlock from '@/components/RowBlock/RowBlock';
@@ -17,10 +16,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
   const status = getElementStatus(section.statusFlags);
   const { isCollapsed, toggle } = section;
 
-  const sortableId = buildDraggableId('section', section.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
-
-  const rowIds = (section.children ?? []).map((c) => buildDraggableId('row', c.id));
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: section.sortableId });
 
   const rootClasses = [
     'section-block',
@@ -43,7 +39,7 @@ export default function SectionBlock({ section }: SectionBlockProps) {
         <h2 className="section-block__title" data-testid="section-title">{section.title}</h2>
       </div>
       <div className="section-block__body">
-        <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
+        <SortableContext items={section.childSortableIds} strategy={verticalListSortingStrategy}>
           {section.children !== null && section.children.length > 0
             ? section.children.map((row) => (
               <RowBlock

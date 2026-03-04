@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { SectionNode, RowNode, ColumnNode } from '@/types/elements';
+import type { SectionNode, RowNode, ColumnNode, SimpleElementNode } from '@/types/elements';
 import type {
   EnrichedSectionNode,
   EnrichedRowNode,
   EnrichedColumnNode,
+  EnrichedSimpleElementNode,
 } from '@/types/enriched';
+import { buildDraggableId, getDraggableTypeForNode } from '@/types/dnd';
 
 export function buildStorageKey(areaId: number): string {
   return `elemental-grid:collapsed:${String(areaId)}`;
@@ -36,15 +38,26 @@ function writeCollapsedIds(key: string, ids: ReadonlySet<number>): void {
   }
 }
 
+function enrichElement(element: SimpleElementNode): EnrichedSimpleElementNode {
+  return {
+    ...element,
+    sortableId: buildDraggableId(getDraggableTypeForNode(element), element.id),
+  };
+}
+
 function enrichColumn(
   column: ColumnNode,
   collapsedIds: ReadonlySet<number>,
   toggle: (elementId: number) => void,
 ): EnrichedColumnNode {
+  const enrichedChildren = column.children?.map(enrichElement) ?? null;
   return {
     ...column,
+    sortableId: buildDraggableId(getDraggableTypeForNode(column), column.id),
+    childSortableIds: enrichedChildren?.map((c) => c.sortableId) ?? [],
     isCollapsed: collapsedIds.has(column.id),
     toggle: () => { toggle(column.id); },
+    children: enrichedChildren,
   };
 }
 
@@ -53,11 +66,14 @@ function enrichRow(
   collapsedIds: ReadonlySet<number>,
   toggle: (elementId: number) => void,
 ): EnrichedRowNode {
+  const enrichedChildren = row.children?.map((col) => enrichColumn(col, collapsedIds, toggle)) ?? null;
   return {
     ...row,
+    sortableId: buildDraggableId(getDraggableTypeForNode(row), row.id),
+    childSortableIds: enrichedChildren?.map((c) => c.sortableId) ?? [],
     isCollapsed: collapsedIds.has(row.id),
     toggle: () => { toggle(row.id); },
-    children: row.children?.map((col) => enrichColumn(col, collapsedIds, toggle)) ?? null,
+    children: enrichedChildren,
   };
 }
 
@@ -66,15 +82,18 @@ function enrichSection(
   collapsedIds: ReadonlySet<number>,
   toggle: (elementId: number) => void,
 ): EnrichedSectionNode {
+  const enrichedChildren = section.children?.map((row) => enrichRow(row, collapsedIds, toggle)) ?? null;
   return {
     ...section,
+    sortableId: buildDraggableId(getDraggableTypeForNode(section), section.id),
+    childSortableIds: enrichedChildren?.map((c) => c.sortableId) ?? [],
     isCollapsed: collapsedIds.has(section.id),
     toggle: () => { toggle(section.id); },
-    children: section.children?.map((row) => enrichRow(row, collapsedIds, toggle)) ?? null,
+    children: enrichedChildren,
   };
 }
 
-export function useCollapseEnrichment(
+export function useTreeEnrichment(
   sections: readonly SectionNode[],
   areaId: number,
 ): readonly EnrichedSectionNode[] {

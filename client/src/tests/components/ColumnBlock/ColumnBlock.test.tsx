@@ -38,8 +38,10 @@ vi.mock('@/utils/gridAdapter', () => ({
 }));
 
 function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumnNode {
+  const id = overrides.id ?? 10;
+  const children = overrides.children ?? null;
   return {
-    id: 10,
+    id,
     title: 'Column',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Column',
@@ -56,13 +58,15 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
     statusFlags: {},
     containerType: 'column',
     allowedTypes: null,
-    children: null,
     childAreaId: 100,
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
     isCollapsed: false,
     toggle: vi.fn(),
+    sortableId: `column-${id}`,
+    children,
+    childSortableIds: children?.map((c) => c.sortableId) ?? [],
     ...overrides,
   };
 }
@@ -152,6 +156,7 @@ describe('ColumnBlock', () => {
           canUnpublish: false,
           canCreate: true,
           statusFlags: {},
+          sortableId: 'element-100',
         },
         {
           id: 101,
@@ -169,6 +174,7 @@ describe('ColumnBlock', () => {
           canUnpublish: false,
           canCreate: true,
           statusFlags: {},
+          sortableId: 'element-101',
         },
       ],
     });

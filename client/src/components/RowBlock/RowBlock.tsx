@@ -3,7 +3,6 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedRowNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { buildDraggableId } from '@/types/dnd';
 import { getRowClasses } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
@@ -19,10 +18,7 @@ export default function RowBlock({ row }: RowBlockProps) {
   const status = getElementStatus(row.statusFlags);
   const { isCollapsed, toggle } = row;
 
-  const sortableId = buildDraggableId('row', row.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
-
-  const columnIds = (row.children ?? []).map((c) => buildDraggableId('column', c.id));
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: row.sortableId });
 
   const rootClasses = [
     'row-block',
@@ -45,7 +41,7 @@ export default function RowBlock({ row }: RowBlockProps) {
         <h3 className="row-block__title" data-testid="row-title">{row.title}</h3>
       </div>
       <div className={rowClasses}>
-        <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+        <SortableContext items={row.childSortableIds} strategy={horizontalListSortingStrategy}>
           {row.children !== null && row.children.length > 0
             ? row.children.map((column) => (
               <ColumnBlock

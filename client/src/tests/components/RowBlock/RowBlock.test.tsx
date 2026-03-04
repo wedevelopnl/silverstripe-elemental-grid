@@ -69,13 +69,17 @@ function makeColumn(id: number, title: string, overrides: Partial<EnrichedColumn
     },
     isCollapsed: false,
     toggle: vi.fn(),
+    sortableId: `column-${id}`,
+    childSortableIds: [],
     ...overrides,
   };
 }
 
 function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
+  const id = overrides.id ?? 20;
+  const children = overrides.children ?? null;
   return {
-    id: 20,
+    id,
     title: 'Row',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Row',
@@ -92,10 +96,12 @@ function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
     statusFlags: {},
     containerType: 'row',
     allowedTypes: null,
-    children: null,
+    children,
     childAreaId: 200,
     isCollapsed: false,
     toggle: vi.fn(),
+    sortableId: `row-${id}`,
+    childSortableIds: children?.map((c) => c.sortableId) ?? [],
     ...overrides,
   };
 }

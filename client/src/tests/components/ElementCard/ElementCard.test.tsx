@@ -1,12 +1,13 @@
 import { render, screen } from '@testing-library/react';
 
 import ElementCard from '@/components/ElementCard/ElementCard';
-import type { SimpleElementNode } from '@/types/elements';
+import type { EnrichedSimpleElementNode } from '@/types/enriched';
 import { createDndWrapper } from '@/tests/helpers/dndTestUtils';
 
-function makeElement(overrides: Partial<SimpleElementNode> = {}): SimpleElementNode {
+function makeElement(overrides: Partial<EnrichedSimpleElementNode> = {}): EnrichedSimpleElementNode {
+  const id = overrides.id ?? 1;
   return {
-    id: 1,
+    id,
     title: 'My Element',
     blockSchema: {
       typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,
@@ -21,6 +22,7 @@ function makeElement(overrides: Partial<SimpleElementNode> = {}): SimpleElementN
     canUnpublish: false,
     canCreate: true,
     statusFlags: {},
+    sortableId: `element-${id}`,
     ...overrides,
   };
 }

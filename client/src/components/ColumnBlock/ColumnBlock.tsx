@@ -4,7 +4,6 @@ import { CSS } from '@dnd-kit/utilities';
 import type { ViewportSettings } from '@/types/elements';
 import type { EnrichedColumnNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { buildDraggableId } from '@/types/dnd';
 import { useViewportContext } from '@/hooks/ViewportContext';
 import { getColumnCount, getWidthClass, getOffsetClass } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
@@ -35,10 +34,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   const status = getElementStatus(column.statusFlags);
   const { isCollapsed, toggle } = column;
 
-  const sortableId = buildDraggableId('column', column.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: sortableId });
-
-  const elementIds = (column.children ?? []).map((c) => buildDraggableId('element', c.id));
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: column.sortableId });
 
   const outerClasses = [getWidthClass(settings.width)];
   if (settings.offset > 0) {
@@ -73,7 +69,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
           </span>
         </div>
         <div className="column-block__body">
-          <SortableContext items={elementIds} strategy={verticalListSortingStrategy}>
+          <SortableContext items={column.childSortableIds} strategy={verticalListSortingStrategy}>
             {column.children !== null && column.children.length > 0
               ? column.children.map((child) => (
                 <ElementCard key={child.id} element={child} />

@@ -65,13 +65,17 @@ function makeRow(id: number, title: string, overrides: Partial<EnrichedRowNode> 
     childAreaId: 200,
     isCollapsed: false,
     toggle: vi.fn(),
+    sortableId: `row-${id}`,
+    childSortableIds: [],
     ...overrides,
   };
 }
 
 function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSectionNode {
+  const id = overrides.id ?? 1;
+  const children = overrides.children ?? null;
   return {
-    id: 1,
+    id,
     title: 'Section',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Section',
@@ -88,10 +92,12 @@ function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSect
     statusFlags: {},
     containerType: 'section',
     allowedTypes: null,
-    children: null,
+    children,
     childAreaId: 300,
     isCollapsed: false,
     toggle: vi.fn(),
+    sortableId: `section-${id}`,
+    childSortableIds: children?.map((c) => c.sortableId) ?? [],
     ...overrides,
   };
 }
@@ -272,6 +278,8 @@ describe('SectionBlock', () => {
               },
               isCollapsed: false,
               toggle: vi.fn(),
+              sortableId: 'column-30',
+              childSortableIds: [],
             },
           ],
         }),

@@ -1,12 +1,11 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useElementTree } from '@/hooks/useElementTree';
-import { useCollapseEnrichment } from '@/hooks/useCollapseEnrichment';
+import { useTreeEnrichment } from '@/hooks/useTreeEnrichment';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 import { useReorderElement } from '@/hooks/useElementMutations';
 import { ViewportProvider } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
-import { buildDraggableId } from '@/types/dnd';
 import { typedCollisionDetection } from '@/utils/collisionDetection';
 import ViewportSwitcher from '@/components/ViewportSwitcher/ViewportSwitcher';
 import SectionBlock from '@/components/SectionBlock/SectionBlock';
@@ -33,7 +32,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
     ? []
     : (data[String(areaId)] ?? []).filter(isSectionNode);
 
-  const enrichedSections = useCollapseEnrichment(sections, areaId);
+  const enrichedSections = useTreeEnrichment(sections, areaId);
 
   const reorderMutation = useReorderElement(pageId ?? 0);
 
@@ -48,7 +47,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
     },
   });
 
-  const sectionIds = enrichedSections.map((s) => buildDraggableId('section', s.id));
+  const sectionIds = enrichedSections.map((s) => s.sortableId);
 
   return (
     <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
