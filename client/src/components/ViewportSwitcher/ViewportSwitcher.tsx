@@ -6,7 +6,7 @@ export default function ViewportSwitcher() {
   const { activeViewport, setActiveViewport } = useViewportContext();
 
   return (
-    <div className="viewport-switcher" role="group" aria-label="Viewport size">
+    <div className="viewport-switcher" role="group" aria-label="Viewport size" data-testid="viewport-switcher">
       {viewports.map((viewport) => {
         const isActive = viewport.key === activeViewport;
 
