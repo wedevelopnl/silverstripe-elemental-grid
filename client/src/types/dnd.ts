@@ -1,3 +1,6 @@
+import type { ElementNode } from './elements';
+import { isContainerNode } from './elements';
+
 export const DRAGGABLE_TYPES = ['section', 'row', 'column', 'element'] as const;
 
 export type DraggableType = (typeof DRAGGABLE_TYPES)[number];
@@ -32,6 +35,15 @@ export function parseDraggableId(compositeId: string): ParsedDraggableId | null 
 
 export function getDraggableType(compositeId: string): DraggableType | null {
   return parseDraggableId(compositeId)?.type ?? null;
+}
+
+/**
+ * Derives the draggable type from a node's shape: container nodes use their
+ * containerType, leaf nodes are always 'element'.
+ */
+export function getDraggableTypeForNode(node: ElementNode): DraggableType {
+  if (!isContainerNode(node)) return 'element';
+  return node.containerType;
 }
 
 /**

@@ -1,12 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { SimpleElementNode } from '@/types/elements';
+import type { EnrichedSimpleElementNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
-import { buildDraggableId } from '@/types/dnd';
 import DragHandle from '@/components/DragHandle/DragHandle';
 
 interface ElementCardProps {
-  readonly element: SimpleElementNode;
+  readonly element: EnrichedSimpleElementNode;
 }
 
 /**
@@ -14,8 +13,7 @@ interface ElementCardProps {
  * and publication state via a colored left border.
  */
 export default function ElementCard({ element }: ElementCardProps) {
-  const sortableId = buildDraggableId('element', element.id);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: element.sortableId });
   const status = getElementStatus(element.statusFlags);
   const label = element.blockSchema.label;
   const content = element.blockSchema.content;

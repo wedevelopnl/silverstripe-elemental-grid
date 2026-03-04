@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 
 import {
-  useCollapseEnrichment,
+  useTreeEnrichment,
   buildStorageKey,
-} from '@/hooks/useCollapseEnrichment';
-import type { SectionNode, RowNode, ColumnNode } from '@/types/elements';
+} from '@/hooks/useTreeEnrichment';
+import type { SectionNode, RowNode, ColumnNode, SimpleElementNode } from '@/types/elements';
 
 function createMockStorage(): Storage {
   const store = new Map<string, string>();
@@ -34,6 +34,26 @@ const AREA_ID = 42;
 
 function storageKey(): string {
   return `elemental-grid:collapsed:${String(AREA_ID)}`;
+}
+
+function makeElement(id: number): SimpleElementNode {
+  return {
+    id,
+    title: `Element ${id}`,
+    blockSchema: {
+      typeName: 'Content',
+      label: 'Content',
+      actions: { edit: `/edit/${id}` },
+      content: '',
+    },
+    obsoleteClassName: null,
+    version: 1,
+    canDelete: true,
+    canPublish: true,
+    canUnpublish: false,
+    canCreate: true,
+    statusFlags: {},
+  };
 }
 
 function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode {
@@ -123,11 +143,11 @@ describe('buildStorageKey', () => {
   });
 });
 
-describe('useCollapseEnrichment', () => {
+describe('useTreeEnrichment', () => {
   it('defaults all nodes to expanded when no localStorage data', () => {
     const sections = [makeSection(1)];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(false);
   });
@@ -141,7 +161,7 @@ describe('useCollapseEnrichment', () => {
       makeSection(3),
     ];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(true);
     expect(result.current[1].isCollapsed).toBe(true);
@@ -151,7 +171,7 @@ describe('useCollapseEnrichment', () => {
   it('toggle collapses an expanded node and persists to localStorage', () => {
     const sections = [makeSection(5)];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
     expect(result.current[0].isCollapsed).toBe(false);
 
     act(() => { result.current[0].toggle(); });
@@ -165,7 +185,7 @@ describe('useCollapseEnrichment', () => {
     mockStorage.setItem(storageKey(), JSON.stringify([5]));
     const sections = [makeSection(5)];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
     expect(result.current[0].isCollapsed).toBe(true);
 
     act(() => { result.current[0].toggle(); });
@@ -179,7 +199,7 @@ describe('useCollapseEnrichment', () => {
     mockStorage.setItem(storageKey(), JSON.stringify([10, 20, 30]));
     const sections = [makeSection(20)];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     act(() => { result.current[0].toggle(); });
 
@@ -202,7 +222,7 @@ describe('useCollapseEnrichment', () => {
       }),
     ];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     const section = result.current[0];
     expect(section.isCollapsed).toBe(false);
@@ -222,7 +242,7 @@ describe('useCollapseEnrichment', () => {
       makeSection(1, { children: null }),
     ];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].children).toBeNull();
   });
@@ -231,7 +251,7 @@ describe('useCollapseEnrichment', () => {
     mockStorage.setItem(storageKey(), 'not-json');
 
     const sections = [makeSection(1)];
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(false);
   });
@@ -240,7 +260,7 @@ describe('useCollapseEnrichment', () => {
     mockStorage.setItem(storageKey(), JSON.stringify({ foo: 'bar' }));
 
     const sections = [makeSection(1)];
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(false);
   });
@@ -249,7 +269,7 @@ describe('useCollapseEnrichment', () => {
     mockStorage.setItem(storageKey(), JSON.stringify([1, 'two', null, 3]));
 
     const sections = [makeSection(1), makeSection(3)];
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(true);
     expect(result.current[1].isCollapsed).toBe(true);
@@ -261,7 +281,7 @@ describe('useCollapseEnrichment', () => {
     });
 
     const sections = [makeSection(1)];
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     expect(result.current[0].isCollapsed).toBe(false);
   });
@@ -272,7 +292,7 @@ describe('useCollapseEnrichment', () => {
     });
 
     const sections = [makeSection(1)];
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     act(() => { result.current[0].toggle(); });
 
@@ -285,8 +305,8 @@ describe('useCollapseEnrichment', () => {
 
     const sections = [makeSection(1), makeSection(2)];
 
-    const area10 = renderHook(() => useCollapseEnrichment(sections, 10));
-    const area20 = renderHook(() => useCollapseEnrichment(sections, 20));
+    const area10 = renderHook(() => useTreeEnrichment(sections, 10));
+    const area20 = renderHook(() => useTreeEnrichment(sections, 20));
 
     expect(area10.result.current[0].isCollapsed).toBe(true);
     expect(area10.result.current[1].isCollapsed).toBe(false);
@@ -296,7 +316,7 @@ describe('useCollapseEnrichment', () => {
   });
 
   it('returns empty array for empty sections input', () => {
-    const { result } = renderHook(() => useCollapseEnrichment([], AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment([], AREA_ID));
 
     expect(result.current).toEqual([]);
   });
@@ -312,7 +332,7 @@ describe('useCollapseEnrichment', () => {
       }),
     ];
 
-    const { result } = renderHook(() => useCollapseEnrichment(sections, AREA_ID));
+    const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
     act(() => { result.current[0].children![0].children![0].toggle(); });
 
@@ -324,5 +344,120 @@ describe('useCollapseEnrichment', () => {
     expect(stored).toContain(30);
     expect(stored).not.toContain(1);
     expect(stored).not.toContain(10);
+  });
+
+  describe('sortable ID enrichment', () => {
+    it('computes sortableId for sections', () => {
+      const sections = [makeSection(7)];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].sortableId).toBe('section-7');
+    });
+
+    it('computes sortableId for rows', () => {
+      const sections = [
+        makeSection(1, {
+          children: [makeRow(15)],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].sortableId).toBe('row-15');
+    });
+
+    it('computes sortableId for columns', () => {
+      const sections = [
+        makeSection(1, {
+          children: [
+            makeRow(10, {
+              children: [makeColumn(25)],
+            }),
+          ],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].children![0].sortableId).toBe('column-25');
+    });
+
+    it('computes sortableId for leaf elements', () => {
+      const sections = [
+        makeSection(1, {
+          children: [
+            makeRow(10, {
+              children: [
+                makeColumn(20, {
+                  children: [makeElement(99)],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      const element = result.current[0].children![0].children![0].children![0];
+      expect(element.sortableId).toBe('element-99');
+    });
+
+    it('computes childSortableIds for sections from row children', () => {
+      const sections = [
+        makeSection(1, {
+          children: [makeRow(10), makeRow(20)],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].childSortableIds).toEqual(['row-10', 'row-20']);
+    });
+
+    it('computes childSortableIds for rows from column children', () => {
+      const sections = [
+        makeSection(1, {
+          children: [
+            makeRow(10, {
+              children: [makeColumn(30), makeColumn(31)],
+            }),
+          ],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].childSortableIds).toEqual(['column-30', 'column-31']);
+    });
+
+    it('computes childSortableIds for columns from element children', () => {
+      const sections = [
+        makeSection(1, {
+          children: [
+            makeRow(10, {
+              children: [
+                makeColumn(20, {
+                  children: [makeElement(50), makeElement(51)],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].children![0].childSortableIds).toEqual(['element-50', 'element-51']);
+    });
+
+    it('returns empty childSortableIds when children is null', () => {
+      const sections = [makeSection(1, { children: null })];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].childSortableIds).toEqual([]);
+    });
   });
 });
