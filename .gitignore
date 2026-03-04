@@ -26,6 +26,9 @@ test-results/
 playwright-report/
 blob-report/
 
+# APM
+apm_modules/
+
 # Dolt database files (added by bd init)
 .dolt/
 *.db

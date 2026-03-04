@@ -1,0 +1,10 @@
+name: silverstripe-elemental-grid
+version: 1.0.0
+description: "SilverStripe Elemental Grid \u2014 grid-based content block system for\
+  \ SilverStripe 6"
+author: "Erik Fr\xE8rejean"
+dependencies:
+  apm:
+  - anthropics/skills/skills/frontend-design
+  mcp: []
+scripts: {}

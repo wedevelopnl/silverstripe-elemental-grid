@@ -1,0 +1,9 @@
+lockfile_version: '1'
+generated_at: '2026-03-04T08:34:01.785694+00:00'
+apm_version: 0.7.4
+dependencies:
+- repo_url: anthropics/skills
+  host: github.com
+  resolved_commit: 3d59511518591fa82e6cfcf0438d68dd5dad3e76
+  virtual_path: skills/frontend-design
+  is_virtual: true
