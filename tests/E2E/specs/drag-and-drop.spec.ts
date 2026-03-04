@@ -159,8 +159,10 @@ test.describe('Drag and drop', () => {
     await expect(sectionAlpha.getByTestId('row-block')).toHaveCount(1);
     await expect(sectionBeta.getByTestId('row-block')).toHaveCount(3);
 
-    // --- SECTION REORDER (last drag — no settlement needed) ---
+    // --- SECTION REORDER ---
+    const settle6 = waitForMutationSettlement(page);
     await performDrag(page, dragHandle(page, 'Section Beta'), dragHandle(page, 'Section Alpha'));
+    await settle6();
 
     // Beta should now be first
     const sections = page.getByTestId('section-block');
