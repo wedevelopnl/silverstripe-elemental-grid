@@ -94,7 +94,7 @@ test.describe('Drag and drop', () => {
     // Drag overlay should appear with element type modifier and correct title
     const elementOverlay = page.getByTestId('drag-overlay-element');
     await expect(elementOverlay).toBeVisible();
-    await expect(elementOverlay.getByTestId('drag-overlay-title')).toHaveText('Block 1');
+    await expect(elementOverlay.getByTestId('drag-overlay-element-title')).toHaveText('Block 1');
 
     // Source element should be dimmed
     const sourceCard = colA1A.getByTestId('element-card').first();

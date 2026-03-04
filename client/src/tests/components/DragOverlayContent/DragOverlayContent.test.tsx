@@ -201,25 +201,23 @@ describe('DragOverlayContent', () => {
     expect(screen.getByText('0 columns')).toBeDefined();
   });
 
-  it('applies the drag-overlay-content class', () => {
+  it('renders the drag-overlay container with type-specific testid', () => {
     const section = makeSection(1);
 
-    const { container } = render(
+    render(
       <DragOverlayContent node={section} type="section" />,
     );
 
-    expect(container.querySelector('.drag-overlay-content')).not.toBeNull();
+    expect(screen.getByTestId('drag-overlay-section')).toBeDefined();
   });
 
-  it('applies the type-specific modifier class', () => {
+  it('renders type-specific title testid', () => {
     const section = makeSection(1);
 
-    const { container } = render(
+    render(
       <DragOverlayContent node={section} type="section" />,
     );
 
-    expect(
-      container.querySelector('.drag-overlay-content--section'),
-    ).not.toBeNull();
+    expect(screen.getByTestId('drag-overlay-section-title')).toBeDefined();
   });
 });
