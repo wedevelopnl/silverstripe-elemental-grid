@@ -50,48 +50,28 @@ final class TailwindAdapterTest extends TestCase
         }
     }
 
-    public function testGetViewportsAreOrderedSmallestToLargest(): void
-    {
-        $viewports = $this->adapter->getViewports();
-        $widths = array_map(
-            static fn (Viewport $viewport): ?int => $viewport->minWidth,
-            $viewports,
-        );
-
-        // All Tailwind viewports have a minWidth (no null/mobile-first default)
-        foreach ($widths as $width) {
-            $this->assertNotNull($width);
-        }
-
-        $sorted = $widths;
-        sort($sorted);
-        $this->assertSame($sorted, $widths);
-    }
-
     #[DataProvider('viewportDefinitionProvider')]
     public function testViewportHasExpectedDefinition(
         int $index,
         string $expectedKey,
         string $expectedLabel,
-        int $expectedMinWidth,
     ): void {
         $viewport = $this->adapter->getViewports()[$index];
 
         $this->assertSame($expectedKey, $viewport->key);
         $this->assertSame($expectedLabel, $viewport->label);
-        $this->assertSame($expectedMinWidth, $viewport->minWidth);
     }
 
     /**
-     * @return iterable<string, array{int, string, string, int}>
+     * @return iterable<string, array{int, string, string}>
      */
     public static function viewportDefinitionProvider(): iterable
     {
-        yield 'sm — 640px' => [0, 'sm', 'Small', 640];
-        yield 'md — 768px' => [1, 'md', 'Medium', 768];
-        yield 'lg — 1024px' => [2, 'lg', 'Large', 1024];
-        yield 'xl — 1280px' => [3, 'xl', 'Extra Large', 1280];
-        yield '2xl — 1536px' => [4, '2xl', '2X Large', 1536];
+        yield 'sm' => [0, 'sm', 'Small'];
+        yield 'md' => [1, 'md', 'Medium'];
+        yield 'lg' => [2, 'lg', 'Large'];
+        yield 'xl' => [3, 'xl', 'Extra Large'];
+        yield '2xl' => [4, '2xl', '2X Large'];
     }
 
     // ── Column count ───────────────────────────────────────────
@@ -109,7 +89,6 @@ final class TailwindAdapterTest extends TestCase
 
         $this->assertSame('sm', $viewport->key);
         $this->assertSame('Small', $viewport->label);
-        $this->assertSame(640, $viewport->minWidth);
     }
 
     public function testGetDefaultViewportIsFirstInViewportList(): void
@@ -118,7 +97,6 @@ final class TailwindAdapterTest extends TestCase
         $first = $this->adapter->getViewports()[0];
 
         $this->assertSame($first->key, $default->key);
-        $this->assertSame($first->minWidth, $default->minWidth);
     }
 
     // ── Width classes ──────────────────────────────────────────
@@ -188,6 +166,42 @@ final class TailwindAdapterTest extends TestCase
         yield 'lg — hide + restore at xl' => ['lg', ['lg:hidden', 'xl:block']];
         yield 'xl — hide + restore at 2xl' => ['xl', ['xl:hidden', '2xl:block']];
         yield '2xl — last viewport, hide only' => ['2xl', ['2xl:hidden']];
+    }
+
+    // ── Base width classes ─────────────────────────────────────
+
+    #[DataProvider('baseWidthClassProvider')]
+    public function testGetBaseWidthClass(int $width, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseWidthClass($width));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseWidthClassProvider(): iterable
+    {
+        yield 'single column' => [1, 'col-span-1'];
+        yield 'half width' => [6, 'col-span-6'];
+        yield 'full width' => [12, 'col-span-12'];
+    }
+
+    // ── Base offset classes ────────────────────────────────────
+
+    #[DataProvider('baseOffsetClassProvider')]
+    public function testGetBaseOffsetClass(int $offset, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseOffsetClass($offset));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseOffsetClassProvider(): iterable
+    {
+        yield 'no offset' => [0, 'col-start-1'];
+        yield 'offset 3' => [3, 'col-start-4'];
+        yield 'offset 11' => [11, 'col-start-12'];
     }
 
     // ── Row classes ────────────────────────────────────────────

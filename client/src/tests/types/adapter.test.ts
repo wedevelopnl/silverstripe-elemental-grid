@@ -4,8 +4,8 @@ describe('adapterConfigSchema', () => {
   it('parses valid adapter config', () => {
     const input = {
       viewports: [
-        { key: 'xs', label: 'Extra Small', minWidth: null },
-        { key: 'md', label: 'Medium', minWidth: 768 },
+        { key: 'xs', label: 'Extra Small' },
+        { key: 'md', label: 'Medium' },
       ],
       defaultViewport: 'md',
       columnCount: 12,
@@ -42,37 +42,6 @@ describe('adapterConfigSchema', () => {
       viewports: [],
       defaultViewport: 'md',
       columnCount: 0,
-      rowClasses: 'row',
-      baseWidthClasses: {},
-      baseOffsetClasses: {},
-    };
-
-    expect(() => adapterConfigSchema.parse(input)).toThrow();
-  });
-
-  it('accepts viewport with null minWidth (mobile-first breakpoint)', () => {
-    const input = {
-      viewports: [
-        { key: 'xs', label: 'Extra Small', minWidth: null },
-      ],
-      defaultViewport: 'xs',
-      columnCount: 12,
-      rowClasses: 'row',
-      baseWidthClasses: {},
-      baseOffsetClasses: {},
-    };
-
-    const result = adapterConfigSchema.parse(input);
-    expect(result.viewports[0].minWidth).toBeNull();
-  });
-
-  it('rejects viewport with non-integer minWidth', () => {
-    const input = {
-      viewports: [
-        { key: 'md', label: 'Medium', minWidth: 768.5 },
-      ],
-      defaultViewport: 'md',
-      columnCount: 12,
       rowClasses: 'row',
       baseWidthClasses: {},
       baseOffsetClasses: {},

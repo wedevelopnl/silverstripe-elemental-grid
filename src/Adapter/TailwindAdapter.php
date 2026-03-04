@@ -15,21 +15,17 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  */
 final readonly class TailwindAdapter implements GridAdapterInterface
 {
-    private const string DEFAULT_VIEWPORT_KEY = 'sm';
-
-    private const int COLUMN_COUNT = 12;
-
     /** @var array<string, Viewport> */
     private array $viewports;
 
     public function __construct()
     {
         $this->viewports = [
-            'sm' => new Viewport('sm', 'Small', 640),
-            'md' => new Viewport('md', 'Medium', 768),
-            'lg' => new Viewport('lg', 'Large', 1024),
-            'xl' => new Viewport('xl', 'Extra Large', 1280),
-            '2xl' => new Viewport('2xl', '2X Large', 1536),
+            'sm' => new Viewport('sm', 'Small'),
+            'md' => new Viewport('md', 'Medium'),
+            'lg' => new Viewport('lg', 'Large'),
+            'xl' => new Viewport('xl', 'Extra Large'),
+            '2xl' => new Viewport('2xl', '2X Large'),
         ];
     }
 
@@ -42,12 +38,12 @@ final readonly class TailwindAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return self::COLUMN_COUNT;
+        return 12;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports[self::DEFAULT_VIEWPORT_KEY];
+        return $this->viewports['sm'];
     }
 
     public function getWidthClass(string $viewport, int $width): string
@@ -84,7 +80,7 @@ final readonly class TailwindAdapter implements GridAdapterInterface
 
     public function getRowClasses(): string
     {
-        return sprintf('grid grid-cols-%d', self::COLUMN_COUNT);
+        return sprintf('grid grid-cols-%d', 12);
     }
 
     public function getContainerClass(bool $fluid): string
@@ -103,6 +99,19 @@ final readonly class TailwindAdapter implements GridAdapterInterface
             'text-lg' => 'Heading 5',
             'text-base' => 'Heading 6',
         ];
+    }
+
+    public function getBaseWidthClass(int $width): string
+    {
+        return sprintf('col-span-%d', $width);
+    }
+
+    /**
+     * Tailwind's col-start is 1-based, so an offset of N columns means col-start-(N+1).
+     */
+    public function getBaseOffsetClass(int $offset): string
+    {
+        return sprintf('col-start-%d', $offset + 1);
     }
 
     public function getCssPath(): ?string

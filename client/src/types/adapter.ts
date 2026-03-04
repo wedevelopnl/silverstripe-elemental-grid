@@ -3,7 +3,6 @@ import { z } from 'zod';
 const viewportConfigSchema = z.object({
   key: z.string(),
   label: z.string(),
-  minWidth: z.number().int().nullable(),
 });
 
 export const adapterConfigSchema = z.object({

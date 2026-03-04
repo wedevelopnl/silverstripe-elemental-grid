@@ -16,13 +16,11 @@ namespace WeDevelop\ElementalGrid\Contract;
 final readonly class Viewport
 {
     /**
-     * @param string $key      Adapter-defined key, e.g. 'md', 'desktop', '2xl'
-     * @param string $label    Human-readable label, e.g. 'Medium', 'Desktop'
-     * @param int|null $minWidth Breakpoint in px; null for mobile-first default
+     * @param string $key   Adapter-defined key, e.g. 'md', 'desktop', '2xl'
+     * @param string $label Human-readable label, e.g. 'Medium', 'Desktop'
      */
     public function __construct(
         public string $key,
         public string $label,
-        public ?int $minWidth,
     ) {}
 }

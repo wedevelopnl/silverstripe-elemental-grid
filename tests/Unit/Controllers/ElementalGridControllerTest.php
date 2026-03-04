@@ -44,12 +44,11 @@ final class ElementalGridControllerTest extends TestCase
         self::assertCount(6, $this->config['viewports']);
     }
 
-    public function testEachViewportHasKeyLabelAndMinWidth(): void
+    public function testEachViewportHasKeyAndLabel(): void
     {
         foreach ($this->config['viewports'] as $viewport) {
             self::assertArrayHasKey('key', $viewport);
             self::assertArrayHasKey('label', $viewport);
-            self::assertArrayHasKey('minWidth', $viewport);
             self::assertIsString($viewport['key']);
             self::assertIsString($viewport['label']);
         }
@@ -60,21 +59,6 @@ final class ElementalGridControllerTest extends TestCase
         $keys = array_column($this->config['viewports'], 'key');
 
         self::assertSame(['xs', 'sm', 'md', 'lg', 'xl', 'xxl'], $keys);
-    }
-
-    public function testFirstViewportHasNullMinWidth(): void
-    {
-        self::assertNull($this->config['viewports'][0]['minWidth']);
-    }
-
-    public function testNonFirstViewportsHaveIntegerMinWidth(): void
-    {
-        $viewports = array_slice($this->config['viewports'], 1);
-
-        foreach ($viewports as $viewport) {
-            self::assertIsInt($viewport['minWidth']);
-            self::assertGreaterThan(0, $viewport['minWidth']);
-        }
     }
 
     // --- defaultViewport -----------------------------------------------------
@@ -200,16 +184,16 @@ final class ElementalGridControllerTest extends TestCase
         );
     }
 
-    // --- Base viewport resolution (fallback) ---------------------------------
+    // --- Base classes use adapter methods directly ----------------------------
 
-    public function testBaseClassesUseNullMinWidthViewportWhenNotFirst(): void
+    public function testBaseClassesUseAdapterBaseClassMethods(): void
     {
         $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {
             public function getViewports(): array
             {
                 return [
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('sm', 'Small', 576),
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('xs', 'Extra Small', null),
+                    new \WeDevelop\ElementalGrid\Contract\Viewport('sm', 'Small'),
+                    new \WeDevelop\ElementalGrid\Contract\Viewport('md', 'Medium'),
                 ];
             }
 
@@ -231,6 +215,16 @@ final class ElementalGridControllerTest extends TestCase
             public function getOffsetClass(string $viewport, int $offset): string
             {
                 return sprintf('offset-%s-%d', $viewport, $offset);
+            }
+
+            public function getBaseWidthClass(int $width): string
+            {
+                return sprintf('base-w-%d', $width);
+            }
+
+            public function getBaseOffsetClass(int $offset): string
+            {
+                return sprintf('base-o-%d', $offset);
             }
 
             public function getVisibilityClasses(string $viewport): array
@@ -261,9 +255,10 @@ final class ElementalGridControllerTest extends TestCase
 
         $config = ElementalGridController::buildAdapterConfig($adapter);
 
-        // null-minWidth viewport is 'xs' at index 1 — base classes must use 'xs', not 'sm'
-        self::assertSame('col-xs-1', $config['baseWidthClasses']->{'1'});
-        self::assertSame('offset-xs-0', $config['baseOffsetClasses']->{'0'});
+        self::assertSame('base-w-1', $config['baseWidthClasses']->{'1'});
+        self::assertSame('base-w-2', $config['baseWidthClasses']->{'2'});
+        self::assertSame('base-o-0', $config['baseOffsetClasses']->{'0'});
+        self::assertSame('base-o-1', $config['baseOffsetClasses']->{'1'});
     }
 
     public function testThrowsOnEmptyViewportList(): void
@@ -281,7 +276,7 @@ final class ElementalGridControllerTest extends TestCase
 
             public function getDefaultViewport(): \WeDevelop\ElementalGrid\Contract\Viewport
             {
-                return new \WeDevelop\ElementalGrid\Contract\Viewport('xs', 'XS', null);
+                return new \WeDevelop\ElementalGrid\Contract\Viewport('xs', 'XS');
             }
 
             public function getWidthClass(string $viewport, int $width): string
@@ -290,6 +285,16 @@ final class ElementalGridControllerTest extends TestCase
             }
 
             public function getOffsetClass(string $viewport, int $offset): string
+            {
+                return '';
+            }
+
+            public function getBaseWidthClass(int $width): string
+            {
+                return '';
+            }
+
+            public function getBaseOffsetClass(int $offset): string
             {
                 return '';
             }
@@ -325,69 +330,4 @@ final class ElementalGridControllerTest extends TestCase
 
         ElementalGridController::buildAdapterConfig($adapter);
     }
-
-    public function testFallsBackToFirstViewportWhenNoneHasNullMinWidth(): void
-    {
-        $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {
-            public function getViewports(): array
-            {
-                return [
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('sm', 'Small', 576),
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('md', 'Medium', 768),
-                ];
-            }
-
-            public function getColumnCount(): int
-            {
-                return 2;
-            }
-
-            public function getDefaultViewport(): \WeDevelop\ElementalGrid\Contract\Viewport
-            {
-                return $this->getViewports()[0];
-            }
-
-            public function getWidthClass(string $viewport, int $width): string
-            {
-                return sprintf('col-%s-%d', $viewport, $width);
-            }
-
-            public function getOffsetClass(string $viewport, int $offset): string
-            {
-                return sprintf('offset-%s-%d', $viewport, $offset);
-            }
-
-            public function getVisibilityClasses(string $viewport): array
-            {
-                return [];
-            }
-
-            public function getRowClasses(): string
-            {
-                return 'row';
-            }
-
-            public function getContainerClass(bool $fluid): string
-            {
-                return 'container';
-            }
-
-            public function getTitleClassOptions(): array
-            {
-                return [];
-            }
-
-            public function getCssPath(): ?string
-            {
-                return null;
-            }
-        };
-
-        $config = ElementalGridController::buildAdapterConfig($adapter);
-
-        // Falls back to first viewport ('sm'), so classes use 'sm' infix
-        self::assertSame('col-sm-1', $config['baseWidthClasses']->{'1'});
-        self::assertSame('offset-sm-0', $config['baseOffsetClasses']->{'0'});
-    }
-
 }

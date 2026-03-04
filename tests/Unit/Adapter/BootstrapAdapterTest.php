@@ -61,26 +61,25 @@ final class BootstrapAdapterTest extends TestCase
     }
 
     #[DataProvider('viewportDefinitionProvider')]
-    public function testViewportDefinition(int $index, string $expectedKey, string $expectedLabel, ?int $expectedMinWidth): void
+    public function testViewportDefinition(int $index, string $expectedKey, string $expectedLabel): void
     {
         $viewport = $this->adapter->getViewports()[$index];
 
         $this->assertSame($expectedKey, $viewport->key);
         $this->assertSame($expectedLabel, $viewport->label);
-        $this->assertSame($expectedMinWidth, $viewport->minWidth);
     }
 
     /**
-     * @return iterable<string, array{int, string, string, int|null}>
+     * @return iterable<string, array{int, string, string}>
      */
     public static function viewportDefinitionProvider(): iterable
     {
-        yield 'xs — Extra Small, no breakpoint' => [0, 'xs', 'Extra Small', null];
-        yield 'sm — Small, 576px' => [1, 'sm', 'Small', 576];
-        yield 'md — Medium, 768px' => [2, 'md', 'Medium', 768];
-        yield 'lg — Large, 992px' => [3, 'lg', 'Large', 992];
-        yield 'xl — Extra Large, 1200px' => [4, 'xl', 'Extra Large', 1200];
-        yield 'xxl — Extra Extra Large, 1400px' => [5, 'xxl', 'Extra Extra Large', 1400];
+        yield 'xs — Extra Small' => [0, 'xs', 'Extra Small'];
+        yield 'sm — Small' => [1, 'sm', 'Small'];
+        yield 'md — Medium' => [2, 'md', 'Medium'];
+        yield 'lg — Large' => [3, 'lg', 'Large'];
+        yield 'xl — Extra Large' => [4, 'xl', 'Extra Large'];
+        yield 'xxl — Extra Extra Large' => [5, 'xxl', 'Extra Extra Large'];
     }
 
     public function testGetViewportsReturnsSameInstanceOnRepeatedCalls(): void
@@ -106,7 +105,6 @@ final class BootstrapAdapterTest extends TestCase
 
         $this->assertSame('md', $default->key);
         $this->assertSame('Medium', $default->label);
-        $this->assertSame(768, $default->minWidth);
     }
 
     public function testGetDefaultViewportExistsInViewportList(): void
@@ -208,6 +206,42 @@ final class BootstrapAdapterTest extends TestCase
         $classes = $this->adapter->getVisibilityClasses('xxl');
 
         $this->assertCount(1, $classes);
+    }
+
+    // ─── getBaseWidthClass ──────────────────────────────────────────
+
+    #[DataProvider('baseWidthClassProvider')]
+    public function testGetBaseWidthClass(int $width, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseWidthClass($width));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseWidthClassProvider(): iterable
+    {
+        yield 'single column' => [1, 'col-1'];
+        yield 'half width' => [6, 'col-6'];
+        yield 'full width' => [12, 'col-12'];
+    }
+
+    // ─── getBaseOffsetClass ─────────────────────────────────────────
+
+    #[DataProvider('baseOffsetClassProvider')]
+    public function testGetBaseOffsetClass(int $offset, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseOffsetClass($offset));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseOffsetClassProvider(): iterable
+    {
+        yield 'no offset' => [0, 'offset-0'];
+        yield 'offset 3' => [3, 'offset-3'];
+        yield 'offset 11' => [11, 'offset-11'];
     }
 
     // ─── getRowClasses ───────────────────────────────────────────────

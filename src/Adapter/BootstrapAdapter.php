@@ -21,12 +21,6 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  */
 final readonly class BootstrapAdapter implements GridAdapterInterface
 {
-    private const string XS_KEY = 'xs';
-
-    private const string DEFAULT_VIEWPORT_KEY = 'md';
-
-    private const int COLUMN_COUNT = 12;
-
     /** @var array<string, Viewport> */
     private array $viewports;
 
@@ -49,12 +43,12 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
     public function __construct()
     {
         $this->viewports = [
-            'xs' => new Viewport('xs', 'Extra Small', null),
-            'sm' => new Viewport('sm', 'Small', 576),
-            'md' => new Viewport('md', 'Medium', 768),
-            'lg' => new Viewport('lg', 'Large', 992),
-            'xl' => new Viewport('xl', 'Extra Large', 1200),
-            'xxl' => new Viewport('xxl', 'Extra Extra Large', 1400),
+            'xs' => new Viewport('xs', 'Extra Small'),
+            'sm' => new Viewport('sm', 'Small'),
+            'md' => new Viewport('md', 'Medium'),
+            'lg' => new Viewport('lg', 'Large'),
+            'xl' => new Viewport('xl', 'Extra Large'),
+            'xxl' => new Viewport('xxl', 'Extra Extra Large'),
         ];
 
         $this->visibilityMap = $this->buildVisibilityMap();
@@ -69,17 +63,17 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return self::COLUMN_COUNT;
+        return 12;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports[self::DEFAULT_VIEWPORT_KEY];
+        return $this->viewports['md'];
     }
 
     public function getWidthClass(string $viewport, int $width): string
     {
-        if ($viewport === self::XS_KEY) {
+        if ($viewport === 'xs') {
             return sprintf('col-%d', $width);
         }
 
@@ -88,7 +82,7 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
 
     public function getOffsetClass(string $viewport, int $offset): string
     {
-        if ($viewport === self::XS_KEY) {
+        if ($viewport === 'xs') {
             return sprintf('offset-%d', $offset);
         }
 
@@ -132,6 +126,16 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
             'h5' => 'Heading 5',
             'h6' => 'Heading 6',
         ];
+    }
+
+    public function getBaseWidthClass(int $width): string
+    {
+        return $this->getWidthClass('xs', $width);
+    }
+
+    public function getBaseOffsetClass(int $offset): string
+    {
+        return $this->getOffsetClass('xs', $offset);
     }
 
     public function getCssPath(): string

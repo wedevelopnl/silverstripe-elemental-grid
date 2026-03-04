@@ -37,7 +37,7 @@ use WeDevelop\ElementalGrid\Service\ReorderService;
  *   afterElementID: positive-int|null,
  * }
  * @phpstan-type AdapterConfig array{
- *   viewports: list<array{key: string, label: string, minWidth: int|null}>,
+ *   viewports: list<array{key: string, label: string}>,
  *   defaultViewport: string,
  *   columnCount: positive-int,
  *   rowClasses: string,
@@ -352,25 +352,39 @@ class ElementalGridController extends AdminController
     public static function buildAdapterConfig(GridAdapterInterface $adapter): array
     {
         $viewports = $adapter->getViewports();
-        $baseViewportKey = self::resolveBaseViewportKey($viewports);
+
+        if ($viewports === []) {
+            throw new \InvalidArgumentException('Adapter must define at least one viewport.');
+        }
+
+        $columnCount = $adapter->getColumnCount();
+
+        $widthClasses = [];
+        for ($width = 1; $width <= $columnCount; $width++) {
+            $widthClasses[$width] = $adapter->getBaseWidthClass($width);
+        }
+
+        $offsetClasses = [];
+        for ($offset = 0; $offset < $columnCount; $offset++) {
+            $offsetClasses[$offset] = $adapter->getBaseOffsetClass($offset);
+        }
 
         /** @var AdapterConfig['baseWidthClasses'] $baseWidthClasses */
-        $baseWidthClasses = (object) self::buildBaseWidthClasses($adapter, $baseViewportKey);
+        $baseWidthClasses = (object) $widthClasses;
 
         /** @var AdapterConfig['baseOffsetClasses'] $baseOffsetClasses */
-        $baseOffsetClasses = (object) self::buildBaseOffsetClasses($adapter, $baseViewportKey);
+        $baseOffsetClasses = (object) $offsetClasses;
 
         return [
             'viewports' => array_map(
                 static fn (Viewport $vp): array => [
                     'key' => $vp->key,
                     'label' => $vp->label,
-                    'minWidth' => $vp->minWidth,
                 ],
                 $viewports,
             ),
             'defaultViewport' => $adapter->getDefaultViewport()->key,
-            'columnCount' => $adapter->getColumnCount(),
+            'columnCount' => $columnCount,
             'rowClasses' => $adapter->getRowClasses(),
             'baseWidthClasses' => $baseWidthClasses,
             'baseOffsetClasses' => $baseOffsetClasses,
@@ -515,65 +529,4 @@ class ElementalGridController extends AdminController
         return $title . ' copy';
     }
 
-    /**
-     * Find the base viewport key — the one with null minWidth (mobile-first default).
-     *
-     * Falls back to the first viewport if none has null minWidth.
-     *
-     * @param list<Viewport> $viewports
-     */
-    private static function resolveBaseViewportKey(array $viewports): string
-    {
-        if ($viewports === []) {
-            throw new \InvalidArgumentException('Adapter must define at least one viewport.');
-        }
-
-        foreach ($viewports as $viewport) {
-            if ($viewport->minWidth === null) {
-                return $viewport->key;
-            }
-        }
-
-        return $viewports[0]->key;
-    }
-
-    /**
-     * Build a map of column widths (1..columnCount) to their base CSS classes.
-     *
-     * Uses the base viewport (the one with null minWidth) to produce unprefixed
-     * classes. For Bootstrap, this yields 'col-1' through 'col-12'.
-     *
-     * @return array<int, string>
-     */
-    private static function buildBaseWidthClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
-    {
-        $classes = [];
-        $columnCount = $adapter->getColumnCount();
-
-        for ($width = 1; $width <= $columnCount; $width++) {
-            $classes[$width] = $adapter->getWidthClass($baseViewportKey, $width);
-        }
-
-        return $classes;
-    }
-
-    /**
-     * Build a map of column offsets (0..columnCount-1) to their base CSS classes.
-     *
-     * Uses the base viewport (the one with null minWidth) to produce unprefixed
-     * classes. For Bootstrap, this yields 'offset-0' through 'offset-11'.
-     *
-     * @return array<int, string>
-     */
-    private static function buildBaseOffsetClasses(GridAdapterInterface $adapter, string $baseViewportKey): array
-    {
-        $classes = [];
-        $columnCount = $adapter->getColumnCount();
-
-        for ($offset = 0; $offset < $columnCount; $offset++) {
-            $classes[$offset] = $adapter->getOffsetClass($baseViewportKey, $offset);
-        }
-
-        return $classes;
-    }
 }

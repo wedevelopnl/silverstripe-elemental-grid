@@ -20,12 +20,6 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  */
 final readonly class BulmaAdapter implements GridAdapterInterface
 {
-    private const string MOBILE_KEY = 'mobile';
-
-    private const string DEFAULT_VIEWPORT_KEY = 'desktop';
-
-    private const int COLUMN_COUNT = 12;
-
     /** @var array<string, Viewport> */
     private array $viewports;
 
@@ -48,11 +42,11 @@ final readonly class BulmaAdapter implements GridAdapterInterface
     public function __construct()
     {
         $this->viewports = [
-            'mobile' => new Viewport('mobile', 'Mobile', null),
-            'tablet' => new Viewport('tablet', 'Tablet', 769),
-            'desktop' => new Viewport('desktop', 'Desktop', 1024),
-            'widescreen' => new Viewport('widescreen', 'Widescreen', 1216),
-            'fullhd' => new Viewport('fullhd', 'Full HD', 1408),
+            'mobile' => new Viewport('mobile', 'Mobile'),
+            'tablet' => new Viewport('tablet', 'Tablet'),
+            'desktop' => new Viewport('desktop', 'Desktop'),
+            'widescreen' => new Viewport('widescreen', 'Widescreen'),
+            'fullhd' => new Viewport('fullhd', 'Full HD'),
         ];
 
         $this->visibilityMap = $this->buildVisibilityMap();
@@ -67,17 +61,17 @@ final readonly class BulmaAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return self::COLUMN_COUNT;
+        return 12;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports[self::DEFAULT_VIEWPORT_KEY];
+        return $this->viewports['desktop'];
     }
 
     public function getWidthClass(string $viewport, int $width): string
     {
-        if ($viewport === self::MOBILE_KEY) {
+        if ($viewport === 'mobile') {
             return sprintf('is-%d', $width);
         }
 
@@ -86,7 +80,7 @@ final readonly class BulmaAdapter implements GridAdapterInterface
 
     public function getOffsetClass(string $viewport, int $offset): string
     {
-        if ($viewport === self::MOBILE_KEY) {
+        if ($viewport === 'mobile') {
             return sprintf('is-offset-%d', $offset);
         }
 
@@ -124,6 +118,16 @@ final readonly class BulmaAdapter implements GridAdapterInterface
             'is-5' => 'Title 5',
             'is-6' => 'Title 6',
         ];
+    }
+
+    public function getBaseWidthClass(int $width): string
+    {
+        return $this->getWidthClass('mobile', $width);
+    }
+
+    public function getBaseOffsetClass(int $offset): string
+    {
+        return $this->getOffsetClass('mobile', $offset);
     }
 
     public function getCssPath(): string

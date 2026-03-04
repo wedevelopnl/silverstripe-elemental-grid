@@ -14,12 +14,12 @@ vi.mock('@/api/endpoints', () => ({
 
 vi.mock('@/utils/gridAdapter', () => ({
   getViewports: vi.fn(() => [
-    { key: 'xs', label: 'XS', minWidth: null },
-    { key: 'sm', label: 'SM', minWidth: 576 },
-    { key: 'md', label: 'MD', minWidth: 768 },
-    { key: 'lg', label: 'LG', minWidth: 992 },
-    { key: 'xl', label: 'XL', minWidth: 1200 },
-    { key: 'xxl', label: 'XXL', minWidth: 1400 },
+    { key: 'xs', label: 'XS' },
+    { key: 'sm', label: 'SM' },
+    { key: 'md', label: 'MD' },
+    { key: 'lg', label: 'LG' },
+    { key: 'xl', label: 'XL' },
+    { key: 'xxl', label: 'XXL' },
   ]),
   getDefaultViewport: vi.fn(() => 'md'),
   getColumnCount: vi.fn(() => 12),

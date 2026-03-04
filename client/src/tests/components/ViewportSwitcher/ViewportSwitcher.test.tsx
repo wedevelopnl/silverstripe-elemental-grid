@@ -7,10 +7,10 @@ import { ViewportProvider } from '@/hooks/ViewportContext';
 
 vi.mock('@/utils/gridAdapter', () => ({
   getViewports: vi.fn(() => [
-    { key: 'xs', label: 'Extra Small', minWidth: null },
-    { key: 'sm', label: 'Small', minWidth: 576 },
-    { key: 'md', label: 'Medium', minWidth: 768 },
-    { key: 'lg', label: 'Large', minWidth: 992 },
+    { key: 'xs', label: 'Extra Small' },
+    { key: 'sm', label: 'Small' },
+    { key: 'md', label: 'Medium' },
+    { key: 'lg', label: 'Large' },
   ]),
   getDefaultViewport: vi.fn(() => 'md'),
 }));

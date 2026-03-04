@@ -12,8 +12,8 @@ const CONTROLLER_FQCN =
 
 const validAdapterConfig = {
   viewports: [
-    { key: 'xs', label: 'Extra Small', minWidth: null },
-    { key: 'md', label: 'Medium', minWidth: 768 },
+    { key: 'xs', label: 'Extra Small' },
+    { key: 'md', label: 'Medium' },
   ],
   defaultViewport: 'md',
   columnCount: 12,

@@ -66,25 +66,23 @@ final class BulmaAdapterTest extends TestCase
         int $index,
         string $expectedKey,
         string $expectedLabel,
-        ?int $expectedMinWidth,
     ): void {
         $viewport = $this->adapter->getViewports()[$index];
 
         $this->assertSame($expectedKey, $viewport->key);
         $this->assertSame($expectedLabel, $viewport->label);
-        $this->assertSame($expectedMinWidth, $viewport->minWidth);
     }
 
     /**
-     * @return iterable<string, array{int, string, string, int|null}>
+     * @return iterable<string, array{int, string, string}>
      */
     public static function viewportDefinitionProvider(): iterable
     {
-        yield 'mobile — no min-width (default)' => [0, 'mobile', 'Mobile', null];
-        yield 'tablet — 769px' => [1, 'tablet', 'Tablet', 769];
-        yield 'desktop — 1024px' => [2, 'desktop', 'Desktop', 1024];
-        yield 'widescreen — 1216px' => [3, 'widescreen', 'Widescreen', 1216];
-        yield 'fullhd — 1408px' => [4, 'fullhd', 'Full HD', 1408];
+        yield 'mobile' => [0, 'mobile', 'Mobile'];
+        yield 'tablet' => [1, 'tablet', 'Tablet'];
+        yield 'desktop' => [2, 'desktop', 'Desktop'];
+        yield 'widescreen' => [3, 'widescreen', 'Widescreen'];
+        yield 'fullhd' => [4, 'fullhd', 'Full HD'];
     }
 
     public function testGetColumnCountReturnsTwelve(): void
@@ -98,7 +96,6 @@ final class BulmaAdapterTest extends TestCase
 
         $this->assertSame('desktop', $viewport->key);
         $this->assertSame('Desktop', $viewport->label);
-        $this->assertSame(1024, $viewport->minWidth);
     }
 
     #[DataProvider('widthClassProvider')]
@@ -167,6 +164,42 @@ final class BulmaAdapterTest extends TestCase
 
         // Last viewport: just hide, nothing above it
         yield 'fullhd — hide only' => ['fullhd', ['is-hidden-fullhd']];
+    }
+
+    // ─── getBaseWidthClass ──────────────────────────────────────────
+
+    #[DataProvider('baseWidthClassProvider')]
+    public function testGetBaseWidthClass(int $width, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseWidthClass($width));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseWidthClassProvider(): iterable
+    {
+        yield 'single column' => [1, 'is-1'];
+        yield 'half width' => [6, 'is-6'];
+        yield 'full width' => [12, 'is-12'];
+    }
+
+    // ─── getBaseOffsetClass ─────────────────────────────────────────
+
+    #[DataProvider('baseOffsetClassProvider')]
+    public function testGetBaseOffsetClass(int $offset, string $expected): void
+    {
+        $this->assertSame($expected, $this->adapter->getBaseOffsetClass($offset));
+    }
+
+    /**
+     * @return iterable<string, array{int, string}>
+     */
+    public static function baseOffsetClassProvider(): iterable
+    {
+        yield 'offset 1' => [1, 'is-offset-1'];
+        yield 'offset 6' => [6, 'is-offset-6'];
+        yield 'offset 11' => [11, 'is-offset-11'];
     }
 
     public function testGetRowClasses(): void

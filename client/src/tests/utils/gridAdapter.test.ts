@@ -10,12 +10,12 @@ import {
 vi.mock('@/api/config', () => ({
   getAdapterConfig: () => ({
     viewports: [
-      { key: 'xs', label: 'Extra Small', minWidth: null },
-      { key: 'sm', label: 'Small', minWidth: 576 },
-      { key: 'md', label: 'Medium', minWidth: 768 },
-      { key: 'lg', label: 'Large', minWidth: 992 },
-      { key: 'xl', label: 'Extra Large', minWidth: 1200 },
-      { key: 'xxl', label: 'Extra Extra Large', minWidth: 1400 },
+      { key: 'xs', label: 'Extra Small' },
+      { key: 'sm', label: 'Small' },
+      { key: 'md', label: 'Medium' },
+      { key: 'lg', label: 'Large' },
+      { key: 'xl', label: 'Extra Large' },
+      { key: 'xxl', label: 'Extra Extra Large' },
     ],
     defaultViewport: 'md',
     columnCount: 12,

@@ -97,6 +97,28 @@ interface GridAdapterInterface
     public function getTitleClassOptions(): array;
 
     /**
+     * Base width class that applies regardless of viewport (for CMS editor preview).
+     *
+     * The CMS grid editor's viewport is uncontrolled — it renders at whatever
+     * size the panel happens to be. Base classes ensure columns always apply
+     * without requiring a specific screen width.
+     *
+     * @example Bootstrap: getBaseWidthClass(6) → 'col-6'
+     * @example Tailwind:  getBaseWidthClass(6) → 'col-span-6'
+     * @example Bulma:     getBaseWidthClass(6) → 'is-6'
+     */
+    public function getBaseWidthClass(int $width): string;
+
+    /**
+     * Base offset class that applies regardless of viewport (for CMS editor preview).
+     *
+     * @example Bootstrap: getBaseOffsetClass(3) → 'offset-3'
+     * @example Tailwind:  getBaseOffsetClass(3) → 'col-start-4'
+     * @example Bulma:     getBaseOffsetClass(3) → 'is-offset-3'
+     */
+    public function getBaseOffsetClass(int $offset): string;
+
+    /**
      * Filesystem path to a fallback CSS file for CMS preview rendering.
      *
      * Returns null if the framework does not require a bundled fallback
