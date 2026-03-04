@@ -18,40 +18,45 @@ function getChildCount(node: ElementNode): number {
   return node.children?.length ?? 0;
 }
 
-function SectionPreview({ node }: { readonly node: ElementNode }): React.JSX.Element {
+interface PreviewProps {
+  readonly node: ElementNode;
+  readonly type: DraggableType;
+}
+
+function SectionPreview({ node, type }: PreviewProps): React.JSX.Element {
   return (
     <>
-      <span className="drag-overlay-content__title" data-testid="drag-overlay-title">{node.title}</span>
+      <span className="drag-overlay-content__title" data-testid={`drag-overlay-${type}-title`}>{node.title}</span>
       <span className="drag-overlay-content__meta">{pluralize(getChildCount(node), 'row')}</span>
     </>
   );
 }
 
-function RowPreview({ node }: { readonly node: ElementNode }): React.JSX.Element {
+function RowPreview({ node, type }: PreviewProps): React.JSX.Element {
   return (
     <>
-      <span className="drag-overlay-content__title" data-testid="drag-overlay-title">{node.title}</span>
+      <span className="drag-overlay-content__title" data-testid={`drag-overlay-${type}-title`}>{node.title}</span>
       <span className="drag-overlay-content__meta">{pluralize(getChildCount(node), 'column')}</span>
     </>
   );
 }
 
-function ColumnPreview({ node }: { readonly node: ElementNode }): React.JSX.Element {
+function ColumnPreview({ node, type }: PreviewProps): React.JSX.Element {
   return (
-    <span className="drag-overlay-content__title" data-testid="drag-overlay-title">{node.title}</span>
+    <span className="drag-overlay-content__title" data-testid={`drag-overlay-${type}-title`}>{node.title}</span>
   );
 }
 
-function ElementPreview({ node }: { readonly node: ElementNode }): React.JSX.Element {
+function ElementPreview({ node, type }: PreviewProps): React.JSX.Element {
   return (
     <>
       <span className="drag-overlay-content__type">{node.blockSchema.label}</span>
-      <span className="drag-overlay-content__title" data-testid="drag-overlay-title">{node.title}</span>
+      <span className="drag-overlay-content__title" data-testid={`drag-overlay-${type}-title`}>{node.title}</span>
     </>
   );
 }
 
-const PREVIEW_BY_TYPE: Record<DraggableType, React.ComponentType<{ readonly node: ElementNode }>> = {
+const PREVIEW_BY_TYPE: Record<DraggableType, React.ComponentType<PreviewProps>> = {
   section: SectionPreview,
   row: RowPreview,
   column: ColumnPreview,
@@ -66,7 +71,7 @@ export default function DragOverlayContent({
 
   return (
     <div className={`drag-overlay-content drag-overlay-content--${type}`} data-testid={`drag-overlay-${type}`}>
-      <Preview node={node} />
+      <Preview node={node} type={type} />
     </div>
   );
 }
