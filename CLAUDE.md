@@ -3,9 +3,6 @@
 <!-- Build ID: __BUILD_ID__ -->
 <!-- APM Version: 0.7.4 -->
 
-# Dependencies
-@apm_modules/anthropics/skills/CLAUDE.md
-
 # Project Standards
 
 ## Files matching `**/*`
