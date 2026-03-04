@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { ViewportSettings } from '@/types/elements';
 import type { EnrichedColumnNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
+import { useDragContext } from '@/hooks/useDragAndDrop';
 import { useViewportContext } from '@/hooks/ViewportContext';
 import { getColumnCount, getWidthClass, getOffsetClass } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
@@ -33,6 +34,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   const settings = resolveViewportSettings(column, activeViewport, columnCount);
   const status = getElementStatus(column.statusFlags);
   const { isCollapsed, toggle } = column;
+  const { activeType } = useDragContext();
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: column.sortableId });
 
@@ -41,6 +43,8 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
     outerClasses.push(getOffsetClass(settings.offset));
   }
 
+  const showDropTarget = isOver && activeType === 'column';
+
   const innerClasses = ['column-block', `column-block--${status}`];
   if (!settings.visible) {
     innerClasses.push('column-block--hidden');
@@ -48,7 +52,7 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
   if (isCollapsed) {
     innerClasses.push('column-block--collapsed');
   }
-  if (isOver) {
+  if (showDropTarget) {
     innerClasses.push('column-block--drop-target');
   }
 

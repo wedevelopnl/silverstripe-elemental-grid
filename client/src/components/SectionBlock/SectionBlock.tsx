@@ -3,6 +3,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedSectionNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
+import { useDragContext } from '@/hooks/useDragAndDrop';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import RowBlock from '@/components/RowBlock/RowBlock';
@@ -15,14 +16,17 @@ interface SectionBlockProps {
 export default function SectionBlock({ section }: SectionBlockProps) {
   const status = getElementStatus(section.statusFlags);
   const { isCollapsed, toggle } = section;
+  const { activeType } = useDragContext();
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: section.sortableId });
+
+  const showDropTarget = isOver && activeType === 'section';
 
   const rootClasses = [
     'section-block',
     `section-block--${status}`,
     ...(isCollapsed ? ['section-block--collapsed'] : []),
-    ...(isOver ? ['section-block--drop-target'] : []),
+    ...(showDropTarget ? ['section-block--drop-target'] : []),
   ].join(' ');
 
   const style: React.CSSProperties = {

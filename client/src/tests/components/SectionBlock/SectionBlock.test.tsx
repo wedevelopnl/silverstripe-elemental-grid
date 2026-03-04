@@ -312,17 +312,30 @@ describe('SectionBlock', () => {
     expect(rowsInsideBody?.length).toBe(1);
   });
 
-  it('applies --drop-target modifier when isOver is true', () => {
+  it('applies --drop-target modifier when isOver is true and activeType is section', () => {
     setIsOver(true);
     const section = makeSection();
 
     const { container } = render(
       <SectionBlock section={section} />,
-      { wrapper: createDndWrapper() },
+      { wrapper: createDndWrapper('md', [], 'section') },
     );
 
     const outer = container.querySelector('.section-block');
     expect(outer?.classList.contains('section-block--drop-target')).toBe(true);
+  });
+
+  it('does not apply --drop-target when isOver is true but activeType is not section', () => {
+    setIsOver(true);
+    const section = makeSection();
+
+    const { container } = render(
+      <SectionBlock section={section} />,
+      { wrapper: createDndWrapper('md', [], 'row') },
+    );
+
+    const outer = container.querySelector('.section-block');
+    expect(outer?.classList.contains('section-block--drop-target')).toBe(false);
   });
 
   it('does not apply --drop-target modifier when isOver is false', () => {
