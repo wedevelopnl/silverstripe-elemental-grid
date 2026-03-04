@@ -10,10 +10,10 @@ export interface ReorderContext {
   overIndex: number;
   /** Ordered composite IDs of items in the target container (reflects final order) */
   containerItems: string[];
-  /** Area ID of the source container (if known) */
-  sourceContainerAreaId?: number;
-  /** Original index in the source container (if known) */
-  sourceIndex?: number;
+  /** Area ID of the source container */
+  sourceContainerAreaId: number;
+  /** Original index in the source container */
+  sourceIndex: number;
 }
 
 /**
@@ -30,9 +30,7 @@ export function resolveReorderParams(
 
   // No-op: same container, same index
   if (
-    context.sourceContainerAreaId !== undefined &&
     context.sourceContainerAreaId === context.overContainerAreaId &&
-    context.sourceIndex !== undefined &&
     context.sourceIndex === context.overIndex
   ) {
     return null;
@@ -55,8 +53,6 @@ function resolveAfterElementId(
   context: ReorderContext,
   activeElementId: number,
 ): number | null {
-  if (context.overIndex <= 0) return null;
-
   // Walk backwards from overIndex - 1 to find the first valid, non-active item
   for (let i = context.overIndex - 1; i >= 0; i--) {
     const item = context.containerItems[i];

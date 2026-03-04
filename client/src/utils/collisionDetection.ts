@@ -29,7 +29,7 @@ export function filterDroppablesByType(
 
     if (containerType === activeType) return true;
 
-    if (parentType !== 'root' && containerType === parentType) return true;
+    if (containerType === parentType) return true;
 
     // Sections live under the root-level sortable context, whose droppable
     // ID won't parse as a valid draggable type (e.g. the string 'root').
@@ -47,9 +47,6 @@ export function filterDroppablesByType(
  * from being dropped at invalid hierarchy levels (e.g. a row into a column).
  */
 export const typedCollisionDetection: CollisionDetection = (args) => {
-  const activeType = getDraggableType(String(args.active.id));
-  if (activeType === null) return [];
-
   const filteredContainers = filterDroppablesByType(
     String(args.active.id),
     args.droppableContainers,
