@@ -198,7 +198,7 @@ test.describe('Drag and drop', () => {
     const livePath = fixture.pageUrl.split('?')[0];
     await page.goto(livePath);
 
-    const frontendSectionTitles = page.locator('section.element h2.element__title');
+    const frontendSectionTitles = page.getByRole('heading', { level: 2 });
     await expect(frontendSectionTitles).toHaveText(sectionTitles);
   });
 });
