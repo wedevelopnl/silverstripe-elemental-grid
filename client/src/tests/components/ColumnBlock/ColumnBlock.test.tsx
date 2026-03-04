@@ -385,17 +385,30 @@ describe('ColumnBlock', () => {
     expect(getOffsetClass).not.toHaveBeenCalled();
   });
 
-  it('applies --drop-target modifier when isOver is true', () => {
+  it('applies --drop-target modifier when isOver is true and activeType is column', () => {
     setIsOver(true);
     const column = makeColumn();
 
     const { container } = render(
       <ColumnBlock column={column} />,
-      { wrapper: createDndWrapper() },
+      { wrapper: createDndWrapper('md', [], 'column') },
     );
 
     const inner = container.querySelector('.column-block');
     expect(inner?.classList.contains('column-block--drop-target')).toBe(true);
+  });
+
+  it('does not apply --drop-target when isOver is true but activeType is not column', () => {
+    setIsOver(true);
+    const column = makeColumn();
+
+    const { container } = render(
+      <ColumnBlock column={column} />,
+      { wrapper: createDndWrapper('md', [], 'section') },
+    );
+
+    const inner = container.querySelector('.column-block');
+    expect(inner?.classList.contains('column-block--drop-target')).toBe(false);
   });
 
   it('does not apply --drop-target modifier when isOver is false', () => {

@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useElementTree } from '@/hooks/useElementTree';
 import { useTreeEnrichment } from '@/hooks/useTreeEnrichment';
-import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { useDragAndDrop, DragContext } from '@/hooks/useDragAndDrop';
 import { useReorderElement } from '@/hooks/useElementMutations';
 import { ViewportProvider } from '@/hooks/ViewportContext';
 import { isSectionNode } from '@/types/elements';
@@ -49,8 +50,13 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
 
   const sectionIds = enrichedSections.map((s) => s.sortableId);
 
+  const dragContextValue = useMemo(
+    () => ({ activeType: dragState?.activeType ?? null }),
+    [dragState?.activeType],
+  );
+
   return (
-    <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined}>
+    <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined} data-testid="grid-editor">
       {isLoading && <p className="grid-editor__loading" data-testid="grid-editor-loading">Loading elements...</p>}
       {error !== null && (
         <p className="grid-editor__error">
@@ -65,21 +71,23 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <ViewportProvider>
-            <ViewportSwitcher />
-            <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-              {enrichedSections.length > 0
-                ? enrichedSections.map((section) => (
-                  <SectionBlock key={section.id} section={section} />
-                ))
-                : <EmptyState message="No sections yet" variant="centered" />}
-            </SortableContext>
-          </ViewportProvider>
-          <DragOverlay>
-            {dragState !== null && (
-              <DragOverlayContent node={dragState.activeNode} type={dragState.activeType} />
-            )}
-          </DragOverlay>
+          <DragContext.Provider value={dragContextValue}>
+            <ViewportProvider>
+              <ViewportSwitcher />
+              <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+                {enrichedSections.length > 0
+                  ? enrichedSections.map((section) => (
+                    <SectionBlock key={section.id} section={section} />
+                  ))
+                  : <EmptyState message="No sections yet" variant="centered" />}
+              </SortableContext>
+            </ViewportProvider>
+            <DragOverlay>
+              {dragState !== null && (
+                <DragOverlayContent node={dragState.activeNode} type={dragState.activeType} />
+              )}
+            </DragOverlay>
+          </DragContext.Provider>
         </DndContext>
       )}
     </div>

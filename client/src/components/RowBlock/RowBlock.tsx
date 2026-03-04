@@ -3,6 +3,7 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedRowNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
+import { useDragContext } from '@/hooks/useDragAndDrop';
 import { getRowClasses } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
@@ -17,14 +18,17 @@ export default function RowBlock({ row }: RowBlockProps) {
   const rowClasses = getRowClasses();
   const status = getElementStatus(row.statusFlags);
   const { isCollapsed, toggle } = row;
+  const { activeType } = useDragContext();
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id: row.sortableId });
+
+  const showDropTarget = isOver && activeType === 'row';
 
   const rootClasses = [
     'row-block',
     `row-block--${status}`,
     ...(isCollapsed ? ['row-block--collapsed'] : []),
-    ...(isOver ? ['row-block--drop-target'] : []),
+    ...(showDropTarget ? ['row-block--drop-target'] : []),
   ].join(' ');
 
   const style: React.CSSProperties = {

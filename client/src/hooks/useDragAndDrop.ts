@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import {
   PointerSensor,
   useSensor,
@@ -48,6 +48,18 @@ export interface UseDragAndDropReturn {
   handleDragStart: (event: DragStartEvent) => void;
   handleDragEnd: (event: DragEndEvent) => void;
   handleDragCancel: (event: DragCancelEvent) => void;
+}
+
+// --- Drag context ---
+
+export interface DragContextValue {
+  activeType: DraggableType | null;
+}
+
+export const DragContext = createContext<DragContextValue>({ activeType: null });
+
+export function useDragContext(): DragContextValue {
+  return useContext(DragContext);
 }
 
 // --- Tree search helpers ---
