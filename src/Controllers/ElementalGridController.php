@@ -13,7 +13,6 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 use WeDevelop\ElementalGrid\Contract\Viewport;
 use WeDevelop\ElementalGrid\Model\Result;
@@ -72,6 +71,7 @@ class ElementalGridController extends AdminController
         'treeBuilder' => '%$' . ElementTreeBuilder::class,
         'persistenceService' => '%$' . ElementPersistenceService::class,
         'reorderService' => '%$' . ReorderService::class,
+        'gridAdapter' => '%$' . GridAdapterInterface::class,
     ];
 
     public ElementRepositoryInterface $elementRepository;
@@ -83,6 +83,8 @@ class ElementalGridController extends AdminController
     public ElementPersistenceService $persistenceService;
 
     public ReorderService $reorderService;
+
+    public GridAdapterInterface $gridAdapter;
 
     /** @var array<string, string> */
     private static array $url_handlers = [
@@ -335,7 +337,7 @@ class ElementalGridController extends AdminController
         /** @var array<string, mixed> $clientConfig */
         $clientConfig = parent::getClientConfig();
         $clientConfig['controllerLink'] = $this->Link();
-        $clientConfig['gridAdapter'] = self::buildAdapterConfig(new BootstrapAdapter());
+        $clientConfig['gridAdapter'] = self::buildAdapterConfig($this->gridAdapter);
 
         return $clientConfig;
     }

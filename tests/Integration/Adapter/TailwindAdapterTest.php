@@ -2,36 +2,34 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Adapter;
+namespace WeDevelop\ElementalGrid\Tests\Integration\Adapter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\SapphireTest;
 use WeDevelop\ElementalGrid\Adapter\TailwindAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
 
 #[CoversClass(TailwindAdapter::class)]
-final class TailwindAdapterTest extends TestCase
+final class TailwindAdapterTest extends SapphireTest
 {
+    protected $usesDatabase = false;
+
     private TailwindAdapter $adapter;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->adapter = new TailwindAdapter();
     }
 
     public function testImplementsGridAdapterInterface(): void
     {
         $this->assertInstanceOf(GridAdapterInterface::class, $this->adapter);
-    }
-
-    public function testIsFinalReadonlyClass(): void
-    {
-        $reflection = new \ReflectionClass(TailwindAdapter::class);
-
-        $this->assertTrue($reflection->isFinal());
-        $this->assertTrue($reflection->isReadOnly());
     }
 
     // ── Viewports ──────────────────────────────────────────────
@@ -146,26 +144,43 @@ final class TailwindAdapterTest extends TestCase
 
     // ── Visibility classes ─────────────────────────────────────
 
+    /**
+     * @param list<string>|null $enabledViewports
+     * @param list<string> $expectedClasses
+     */
     #[DataProvider('visibilityClassProvider')]
-    public function testGetVisibilityClasses(string $viewport, array $expected): void
+    public function testGetVisibilityClasses(?array $enabledViewports, string $viewport, array $expectedClasses): void
     {
-        $this->assertSame($expected, $this->adapter->getVisibilityClasses($viewport));
+        if ($enabledViewports !== null) {
+            Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', $enabledViewports);
+            Config::modify()->set(TailwindAdapter::class, 'default_viewport', $enabledViewports[0]);
+        }
+
+        $adapter = $enabledViewports !== null ? new TailwindAdapter() : $this->adapter;
+
+        $this->assertSame($expectedClasses, $adapter->getVisibilityClasses($viewport));
     }
 
     /**
-     * Hiding at a viewport requires a hide class at that breakpoint plus a show
-     * class at the next breakpoint to restore visibility. The last viewport has
-     * no "next" so only needs the hide class.
-     *
-     * @return iterable<string, array{string, list<string>}>
+     * @return iterable<string, array{list<string>|null, string, list<string>}>
      */
     public static function visibilityClassProvider(): iterable
     {
-        yield 'sm — hide + restore at md' => ['sm', ['sm:hidden', 'md:block']];
-        yield 'md — hide + restore at lg' => ['md', ['md:hidden', 'lg:block']];
-        yield 'lg — hide + restore at xl' => ['lg', ['lg:hidden', 'xl:block']];
-        yield 'xl — hide + restore at 2xl' => ['xl', ['xl:hidden', '2xl:block']];
-        yield '2xl — last viewport, hide only' => ['2xl', ['2xl:hidden']];
+        // Full set (default)
+        yield 'all — sm' => [null, 'sm', ['sm:hidden', 'md:block']];
+        yield 'all — md' => [null, 'md', ['md:hidden', 'lg:block']];
+        yield 'all — lg' => [null, 'lg', ['lg:hidden', 'xl:block']];
+        yield 'all — xl' => [null, 'xl', ['xl:hidden', '2xl:block']];
+        yield 'all — 2xl' => [null, '2xl', ['2xl:hidden']];
+
+        // [md, lg, xl] — sm removed
+        yield '[md,lg,xl] — md' => [['md', 'lg', 'xl'], 'md', ['md:hidden', 'lg:block']];
+        yield '[md,lg,xl] — xl' => [['md', 'lg', 'xl'], 'xl', ['xl:hidden']];
+
+        // [sm, lg, 2xl] — gaps
+        yield '[sm,lg,2xl] — sm' => [['sm', 'lg', '2xl'], 'sm', ['sm:hidden', 'lg:block']];
+        yield '[sm,lg,2xl] — lg' => [['sm', 'lg', '2xl'], 'lg', ['lg:hidden', '2xl:block']];
+        yield '[sm,lg,2xl] — 2xl' => [['sm', 'lg', '2xl'], '2xl', ['2xl:hidden']];
     }
 
     // ── Base width classes ─────────────────────────────────────
@@ -279,5 +294,99 @@ final class TailwindAdapterTest extends TestCase
     public function testGetCssPathReturnsNull(): void
     {
         $this->assertNull($this->adapter->getCssPath());
+    }
+
+    // ── Viewport filtering ─────────────────────────────────────
+
+    public function testEnabledViewportsSubsetFiltersCorrectly(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', ['md', 'lg', 'xl']);
+        Config::modify()->set(TailwindAdapter::class, 'default_viewport', 'md');
+        $adapter = new TailwindAdapter();
+
+        $keys = array_map(static fn (Viewport $v): string => $v->key, $adapter->getViewports());
+
+        $this->assertSame(['md', 'lg', 'xl'], $keys);
+    }
+
+    public function testEnabledViewportsEmptyArrayThrows(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', []);
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    public function testEnabledViewportsUnknownKeyThrows(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', ['sm', 'unknown']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    // ── Column count override ──────────────────────────────────
+
+    public function testColumnCountOverrideReturnsConfiguredValue(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'total_columns', 16);
+        $adapter = new TailwindAdapter();
+
+        $this->assertSame(16, $adapter->getColumnCount());
+    }
+
+    public function testColumnCountOverrideZeroThrows(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'total_columns', 0);
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    public function testColumnCountOverrideNegativeThrows(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'total_columns', -4);
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    // ── Default viewport override ──────────────────────────────
+
+    public function testDefaultViewportOverrideResolvesValidKey(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'default_viewport', 'lg');
+        $adapter = new TailwindAdapter();
+
+        $viewport = $adapter->getDefaultViewport();
+
+        $this->assertInstanceOf(Viewport::class, $viewport);
+        $this->assertSame('lg', $viewport->key);
+    }
+
+    public function testDefaultViewportOverrideUnknownKeyThrows(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'default_viewport', 'nonexistent');
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithoutOverrideThrows(): void
+    {
+        // Default is 'sm', which is not in the enabled set
+        Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', ['md', 'lg', '2xl']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new TailwindAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithValidOverrideSucceeds(): void
+    {
+        Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', ['md', 'lg', '2xl']);
+        Config::modify()->set(TailwindAdapter::class, 'default_viewport', 'lg');
+        $adapter = new TailwindAdapter();
+
+        $this->assertSame('lg', $adapter->getDefaultViewport()->key);
     }
 }

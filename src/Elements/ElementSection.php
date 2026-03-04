@@ -9,7 +9,7 @@ use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 
 /**
  * Top-level container in the Section > Row > Column hierarchy.
@@ -33,10 +33,10 @@ class ElementSection extends BaseElement implements ElementContainerInterface
 
     /** @var array<string, string> */
     private static array $dependencies = [
-        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+        'gridAdapter' => '%$' . GridAdapterInterface::class,
     ];
 
-    public GridConfigServiceInterface $gridConfigService;
+    public GridAdapterInterface $gridAdapter;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -106,7 +106,7 @@ class ElementSection extends BaseElement implements ElementContainerInterface
     {
         /** @var bool $fluid */
         $fluid = static::config()->get('fluid_container');
-        $classes = $this->gridConfigService->getContainerClass($fluid);
+        $classes = $this->gridAdapter->getContainerClass($fluid);
 
         $this->extend('updateContainerClasses', $classes);
 

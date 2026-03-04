@@ -2,21 +2,31 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Controllers;
+namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use SilverStripe\Dev\SapphireTest;
 use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
 use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
 
+/**
+ * Tests {@see ElementalGridController::buildAdapterConfig()} in isolation.
+ *
+ * Requires the SilverStripe config system because adapters now use
+ * the Configurable trait (instantiation reads from config).
+ */
 #[CoversClass(ElementalGridController::class)]
-final class ElementalGridControllerTest extends TestCase
+final class BuildAdapterConfigTest extends SapphireTest
 {
+    protected $usesDatabase = false;
+
     /** @var array<string, mixed> */
     private array $config;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->config = ElementalGridController::buildAdapterConfig(new BootstrapAdapter());
     }
 
@@ -114,7 +124,6 @@ final class ElementalGridControllerTest extends TestCase
     {
         $classes = $this->config['baseWidthClasses'];
 
-        // Bootstrap xs viewport produces 'col-N' (no viewport infix)
         self::assertSame('col-1', $classes->{'1'});
         self::assertSame('col-6', $classes->{'6'});
         self::assertSame('col-12', $classes->{'12'});
@@ -152,7 +161,6 @@ final class ElementalGridControllerTest extends TestCase
     {
         $classes = $this->config['baseOffsetClasses'];
 
-        // Bootstrap xs viewport produces 'offset-N' (no viewport infix)
         self::assertSame('offset-0', $classes->{'0'});
         self::assertSame('offset-3', $classes->{'3'});
         self::assertSame('offset-11', $classes->{'11'});
@@ -172,8 +180,6 @@ final class ElementalGridControllerTest extends TestCase
         /** @var array<string, mixed> $decoded */
         $decoded = json_decode(json_encode($this->config), true);
 
-        // After JSON round-trip, keys must remain strings (associative object),
-        // not become sequential integers (JSON array).
         self::assertSame(
             array_keys(get_object_vars($this->config['baseWidthClasses'])),
             array_keys($decoded['baseWidthClasses']),

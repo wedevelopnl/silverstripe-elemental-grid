@@ -19,30 +19,38 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  * instead of `offset-xs-{n}`, and visibility uses `d-none` instead of
  * `d-xs-none`. All other viewports include the viewport infix.
  */
-final readonly class BootstrapAdapter implements GridAdapterInterface
+final class BootstrapAdapter implements GridAdapterInterface
 {
+    use GridAdapterConfiguration;
+
+    private const int DEFAULT_COLUMNS = 12;
+    private const string DEFAULT_VIEWPORT_KEY = 'md';
+
     /** @var array<string, Viewport> */
     private array $viewports;
 
     /**
      * Visibility class pairs keyed by viewport.
      *
-     * Bootstrap's responsive display utilities differ by viewport position:
-     * - First viewport (xs): `d-none` + `d-sm-block` — no viewport infix for the
-     *   mobile-first default, restore at the next breakpoint.
-     * - Middle viewports: `d-{vp}-none` + `d-{next}-block` — the infix scopes
-     *   hiding from that breakpoint upward, the restore class re-enables
-     *   visibility at the next one.
-     * - Last viewport (xxl): `d-xxl-none` — no restore needed since there is
-     *   no larger breakpoint.
+     * Bootstrap's responsive display utilities:
+     * - xs viewport: `d-none` + `d-{next}-block` — no viewport infix for the
+     *   mobile-first default, restore at the next enabled breakpoint.
+     * - Other non-last viewports: `d-{vp}-none` + `d-{next}-block` — the infix
+     *   scopes hiding from that breakpoint upward, restore at next enabled.
+     * - Last enabled viewport: `d-{vp}-none` — no restore needed.
      *
      * @var array<string, list<string>>
      */
     private array $visibilityMap;
 
+    /** @var positive-int */
+    private int $columnCount;
+
+    private Viewport $defaultViewport;
+
     public function __construct()
     {
-        $this->viewports = [
+        $allViewports = [
             'xs' => new Viewport('xs', 'Extra Small'),
             'sm' => new Viewport('sm', 'Small'),
             'md' => new Viewport('md', 'Medium'),
@@ -51,7 +59,10 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
             'xxl' => new Viewport('xxl', 'Extra Extra Large'),
         ];
 
+        $this->viewports = $this->applyViewportFilter($allViewports);
         $this->visibilityMap = $this->buildVisibilityMap();
+        $this->columnCount = $this->resolveColumnCount(self::DEFAULT_COLUMNS);
+        $this->defaultViewport = $this->resolveDefaultViewport(self::DEFAULT_VIEWPORT_KEY, $this->viewports);
     }
 
     /** @return list<Viewport> */
@@ -63,12 +74,12 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return 12;
+        return $this->columnCount;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports['md'];
+        return $this->defaultViewport;
     }
 
     public function getWidthClass(string $viewport, int $width): string
@@ -144,11 +155,11 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
     }
 
     /**
-     * Builds the visibility class map based on viewport ordering.
+     * Builds the visibility class map from the active (possibly filtered) viewport set.
      *
-     * Derives hide/restore pairs programmatically from the viewport list
-     * rather than hardcoding them, so the logic stays consistent if the
-     * viewport set ever changes.
+     * Bootstrap's xs viewport is special: it uses the no-infix `d-none` form.
+     * All other viewports use `d-{vp}-none`. Restore always targets the next
+     * *enabled* viewport. The last enabled viewport has no restore class.
      *
      * @return array<string, list<string>>
      */
@@ -156,28 +167,22 @@ final readonly class BootstrapAdapter implements GridAdapterInterface
     {
         $map = [];
         $keys = array_keys($this->viewports);
-        $lastIndex = count($keys) - 1;
+        $count = count($keys);
 
         foreach ($keys as $index => $key) {
-            $isFirst = $index === 0;
-            $isLast = $index === $lastIndex;
-            $nextKey = $keys[$index + 1] ?? null;
+            $isLast = $index === $count - 1;
 
-            if ($isFirst && $nextKey !== null) {
-                // xs: no viewport infix for hide, restore at next viewport
+            // Bootstrap: xs uses no-infix `d-none`, all others use `d-{vp}-none`
+            $hideClass = $key === 'xs'
+                ? 'd-none'
+                : sprintf('d-%s-none', $key);
+
+            if ($isLast) {
+                $map[$key] = [$hideClass];
+            } else {
+                $nextKey = $keys[$index + 1];
                 $map[$key] = [
-                    'd-none',
-                    sprintf('d-%s-block', $nextKey),
-                ];
-            } elseif ($isLast) {
-                // Last viewport: just hide, nothing above to restore
-                $map[$key] = [
-                    sprintf('d-%s-none', $key),
-                ];
-            } elseif ($nextKey !== null) {
-                // Middle viewports: hide with infix, restore at next
-                $map[$key] = [
-                    sprintf('d-%s-none', $key),
+                    $hideClass,
                     sprintf('d-%s-block', $nextKey),
                 ];
             }

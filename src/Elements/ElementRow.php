@@ -9,7 +9,7 @@ use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 
 /**
  * Mid-level container in the Section > Row > Column hierarchy.
@@ -30,10 +30,10 @@ class ElementRow extends BaseElement implements ElementContainerInterface
 
     /** @var array<string, string> */
     private static array $dependencies = [
-        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+        'gridAdapter' => '%$' . GridAdapterInterface::class,
     ];
 
-    public GridConfigServiceInterface $gridConfigService;
+    public GridAdapterInterface $gridAdapter;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -101,7 +101,7 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     /** CSS classes for the grid row wrapper. */
     public function getRowClasses(): string
     {
-        $classes = $this->gridConfigService->getRowClasses();
+        $classes = $this->gridAdapter->getRowClasses();
 
         $this->extend('updateRowClasses', $classes);
 

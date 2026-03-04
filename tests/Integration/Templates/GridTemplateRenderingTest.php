@@ -14,11 +14,9 @@ use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
 use WeDevelop\ElementalGrid\Adapter\BulmaAdapter;
 use WeDevelop\ElementalGrid\Adapter\TailwindAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
 use WeDevelop\ElementalGrid\Elements\ElementColumn;
 use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Elements\ElementSection;
-use WeDevelop\ElementalGrid\Service\GridConfigService;
 
 /**
  * Tests the full template rendering pipeline (element -> holder -> HTML output)
@@ -46,8 +44,8 @@ final class GridTemplateRenderingTest extends SapphireTest
     private function useAdapter(string $adapterClass): void
     {
         Injector::inst()->registerService(
-            new GridConfigService(new $adapterClass()),
-            GridConfigServiceInterface::class,
+            new $adapterClass(),
+            GridAdapterInterface::class,
         );
     }
 

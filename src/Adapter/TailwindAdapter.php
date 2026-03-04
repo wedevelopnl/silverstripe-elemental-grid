@@ -13,20 +13,34 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  * Viewport breakpoints match Tailwind v3/v4 defaults (sm through 2xl).
  * All class generation is stateless — no DOM, no config file needed.
  */
-final readonly class TailwindAdapter implements GridAdapterInterface
+final class TailwindAdapter implements GridAdapterInterface
 {
+    use GridAdapterConfiguration;
+
+    private const int DEFAULT_COLUMNS = 12;
+    private const string DEFAULT_VIEWPORT_KEY = 'sm';
+
     /** @var array<string, Viewport> */
     private array $viewports;
 
+    /** @var positive-int */
+    private int $columnCount;
+
+    private Viewport $defaultViewport;
+
     public function __construct()
     {
-        $this->viewports = [
+        $allViewports = [
             'sm' => new Viewport('sm', 'Small'),
             'md' => new Viewport('md', 'Medium'),
             'lg' => new Viewport('lg', 'Large'),
             'xl' => new Viewport('xl', 'Extra Large'),
             '2xl' => new Viewport('2xl', '2X Large'),
         ];
+
+        $this->viewports = $this->applyViewportFilter($allViewports);
+        $this->columnCount = $this->resolveColumnCount(self::DEFAULT_COLUMNS);
+        $this->defaultViewport = $this->resolveDefaultViewport(self::DEFAULT_VIEWPORT_KEY, $this->viewports);
     }
 
     /** @return list<Viewport> */
@@ -38,12 +52,12 @@ final readonly class TailwindAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return 12;
+        return $this->columnCount;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports['sm'];
+        return $this->defaultViewport;
     }
 
     public function getWidthClass(string $viewport, int $width): string
@@ -59,7 +73,14 @@ final readonly class TailwindAdapter implements GridAdapterInterface
         return sprintf('%s:col-start-%d', $viewport, $offset + 1);
     }
 
-    /** @return list<string> */
+    /**
+     * Visibility classes that hide an element at the given viewport.
+     *
+     * Tailwind uses `{vp}:hidden` to hide and `{next}:block` to restore.
+     * "Next" means the next enabled viewport. Last has no restore.
+     *
+     * @return list<string>
+     */
     public function getVisibilityClasses(string $viewport): array
     {
         $keys = array_keys($this->viewports);

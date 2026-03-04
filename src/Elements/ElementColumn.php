@@ -8,7 +8,7 @@ use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use WeDevelop\ElementalGrid\Contract\ContainerType;
 use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Contract\GridConfigServiceInterface;
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 
 /**
  * Leaf container in the Section > Row > Column hierarchy.
@@ -28,10 +28,10 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
 
     /** @var array<string, string> */
     private static array $dependencies = [
-        'gridConfigService' => '%$' . GridConfigServiceInterface::class,
+        'gridAdapter' => '%$' . GridAdapterInterface::class,
     ];
 
-    public GridConfigServiceInterface $gridConfigService;
+    public GridAdapterInterface $gridAdapter;
 
     /** @var array<string, string> */
     private static array $summary_fields = [
@@ -172,15 +172,15 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
             if (!$config['visible']) {
                 $parts = [
                     ...$parts,
-                    ...$this->gridConfigService->getVisibilityClasses($viewport),
+                    ...$this->gridAdapter->getVisibilityClasses($viewport),
                 ];
                 continue;
             }
 
-            $parts[] = $this->gridConfigService->getWidthClass($viewport, $config['width']);
+            $parts[] = $this->gridAdapter->getWidthClass($viewport, $config['width']);
 
             if ($config['offset'] > 0) {
-                $parts[] = $this->gridConfigService->getOffsetClass($viewport, $config['offset']);
+                $parts[] = $this->gridAdapter->getOffsetClass($viewport, $config['offset']);
             }
         }
 

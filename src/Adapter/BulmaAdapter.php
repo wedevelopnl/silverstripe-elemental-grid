@@ -18,30 +18,35 @@ use WeDevelop\ElementalGrid\Contract\Viewport;
  * `is-{n}` instead of `is-{n}-mobile`, and offset classes follow the
  * same pattern. All other viewports append `-{viewport}` as a suffix.
  */
-final readonly class BulmaAdapter implements GridAdapterInterface
+final class BulmaAdapter implements GridAdapterInterface
 {
+    use GridAdapterConfiguration;
+
+    private const int DEFAULT_COLUMNS = 12;
+    private const string DEFAULT_VIEWPORT_KEY = 'desktop';
+
     /** @var array<string, Viewport> */
     private array $viewports;
 
     /**
      * Visibility class pairs keyed by viewport.
      *
-     * Bulma's responsive helpers differ by viewport position:
-     * - First viewport (mobile): `is-hidden-mobile` — no "-only" suffix because
-     *   content is naturally visible from tablet upward.
-     * - Middle viewports: `is-hidden-{vp}-only` + `is-block-{next}` — the "-only"
-     *   suffix scopes hiding to exactly that breakpoint, the restore class re-enables
-     *   visibility at the next one.
-     * - Last viewport (fullhd): `is-hidden-fullhd` — no "-only" suffix needed since
-     *   there is no larger breakpoint.
+     * All non-last viewports use upward-scoped `is-hidden-{vp}` plus a restore
+     * class `is-block-{next}` at the next enabled viewport. The last enabled
+     * viewport uses `is-hidden-{vp}` alone.
      *
      * @var array<string, list<string>>
      */
     private array $visibilityMap;
 
+    /** @var positive-int */
+    private int $columnCount;
+
+    private Viewport $defaultViewport;
+
     public function __construct()
     {
-        $this->viewports = [
+        $allViewports = [
             'mobile' => new Viewport('mobile', 'Mobile'),
             'tablet' => new Viewport('tablet', 'Tablet'),
             'desktop' => new Viewport('desktop', 'Desktop'),
@@ -49,7 +54,10 @@ final readonly class BulmaAdapter implements GridAdapterInterface
             'fullhd' => new Viewport('fullhd', 'Full HD'),
         ];
 
+        $this->viewports = $this->applyViewportFilter($allViewports);
         $this->visibilityMap = $this->buildVisibilityMap();
+        $this->columnCount = $this->resolveColumnCount(self::DEFAULT_COLUMNS);
+        $this->defaultViewport = $this->resolveDefaultViewport(self::DEFAULT_VIEWPORT_KEY, $this->viewports);
     }
 
     /** @return list<Viewport> */
@@ -61,12 +69,12 @@ final readonly class BulmaAdapter implements GridAdapterInterface
     /** @return positive-int */
     public function getColumnCount(): int
     {
-        return 12;
+        return $this->columnCount;
     }
 
     public function getDefaultViewport(): Viewport
     {
-        return $this->viewports['desktop'];
+        return $this->defaultViewport;
     }
 
     public function getWidthClass(string $viewport, int $width): string
@@ -136,11 +144,11 @@ final readonly class BulmaAdapter implements GridAdapterInterface
     }
 
     /**
-     * Builds the visibility class map based on viewport ordering.
+     * Builds the visibility class map from the active (possibly filtered) viewport set.
      *
-     * Derives hide/restore pairs programmatically from the viewport list
-     * rather than hardcoding them, so the logic stays consistent if the
-     * viewport set ever changes.
+     * Uses upward-scoped `is-hidden-{vp}` for all viewports (no `-only` suffix).
+     * Non-last viewports restore visibility at the next enabled viewport with
+     * `is-block-{next}`. The last enabled viewport has no restore class.
      *
      * @return array<string, list<string>>
      */
@@ -148,28 +156,17 @@ final readonly class BulmaAdapter implements GridAdapterInterface
     {
         $map = [];
         $keys = array_keys($this->viewports);
-        $lastIndex = count($keys) - 1;
+        $count = count($keys);
 
         foreach ($keys as $index => $key) {
-            $isFirst = $index === 0;
-            $isLast = $index === $lastIndex;
-            $nextKey = $keys[$index + 1] ?? null;
+            $isLast = $index === $count - 1;
 
-            if ($isFirst && $nextKey !== null) {
-                // Mobile: hide at this viewport, restore at next
+            if ($isLast) {
+                $map[$key] = [sprintf('is-hidden-%s', $key)];
+            } else {
+                $nextKey = $keys[$index + 1];
                 $map[$key] = [
                     sprintf('is-hidden-%s', $key),
-                    sprintf('is-block-%s', $nextKey),
-                ];
-            } elseif ($isLast) {
-                // Last viewport: just hide, nothing above to restore
-                $map[$key] = [
-                    sprintf('is-hidden-%s', $key),
-                ];
-            } elseif ($nextKey !== null) {
-                // Middle viewports: hide with -only suffix, restore at next
-                $map[$key] = [
-                    sprintf('is-hidden-%s-only', $key),
                     sprintf('is-block-%s', $nextKey),
                 ];
             }

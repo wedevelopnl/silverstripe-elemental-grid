@@ -35,6 +35,15 @@ final class InvalidGridValueException extends GridDomainException
         );
     }
 
+    public static function forEmptyViewports(): self
+    {
+        return new self(
+            userMessage: 'At least one viewport must be enabled.',
+            detailedMessage: 'The enabled_viewports configuration cannot be an empty array.',
+            statusCode: self::STATUS_CODE,
+        );
+    }
+
     public static function forColumnCount(mixed $value): self
     {
         return new self(

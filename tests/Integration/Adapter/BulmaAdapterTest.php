@@ -2,36 +2,34 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Adapter;
+namespace WeDevelop\ElementalGrid\Tests\Integration\Adapter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\SapphireTest;
 use WeDevelop\ElementalGrid\Adapter\BulmaAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
 
 #[CoversClass(BulmaAdapter::class)]
-final class BulmaAdapterTest extends TestCase
+final class BulmaAdapterTest extends SapphireTest
 {
+    protected $usesDatabase = false;
+
     private BulmaAdapter $adapter;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->adapter = new BulmaAdapter();
     }
 
     public function testImplementsGridAdapterInterface(): void
     {
         $this->assertInstanceOf(GridAdapterInterface::class, $this->adapter);
-    }
-
-    public function testIsFinalReadonlyClass(): void
-    {
-        $reflection = new \ReflectionClass(BulmaAdapter::class);
-
-        $this->assertTrue($reflection->isFinal());
-        $this->assertTrue($reflection->isReadOnly());
     }
 
     public function testGetViewportsReturnsFiveViewports(): void
@@ -143,27 +141,52 @@ final class BulmaAdapterTest extends TestCase
         yield 'fullhd offset 11' => ['fullhd', 11, 'is-offset-11-fullhd'];
     }
 
+    // ─── getVisibilityClasses ────────────────────────────────────────
+
+    /**
+     * @param list<string>|null $enabledViewports
+     * @param list<string> $expectedClasses
+     */
     #[DataProvider('visibilityClassProvider')]
-    public function testGetVisibilityClasses(string $viewport, array $expectedClasses): void
+    public function testGetVisibilityClasses(?array $enabledViewports, string $viewport, array $expectedClasses): void
     {
-        $this->assertSame($expectedClasses, $this->adapter->getVisibilityClasses($viewport));
+        if ($enabledViewports !== null) {
+            Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', $enabledViewports);
+            Config::modify()->set(BulmaAdapter::class, 'default_viewport', $enabledViewports[0]);
+        }
+
+        $adapter = $enabledViewports !== null ? new BulmaAdapter() : $this->adapter;
+
+        $this->assertSame($expectedClasses, $adapter->getVisibilityClasses($viewport));
     }
 
     /**
-     * @return iterable<string, array{string, list<string>}>
+     * @return iterable<string, array{list<string>|null, string, list<string>}>
      */
     public static function visibilityClassProvider(): iterable
     {
-        // First viewport: hide at mobile, restore at tablet
-        yield 'mobile — hide + restore at tablet' => ['mobile', ['is-hidden-mobile', 'is-block-tablet']];
+        // Full set (default) — upward-scoped hiding, no -only suffix
+        yield 'all — mobile' => [null, 'mobile', ['is-hidden-mobile', 'is-block-tablet']];
+        yield 'all — tablet' => [null, 'tablet', ['is-hidden-tablet', 'is-block-desktop']];
+        yield 'all — desktop' => [null, 'desktop', ['is-hidden-desktop', 'is-block-widescreen']];
+        yield 'all — widescreen' => [null, 'widescreen', ['is-hidden-widescreen', 'is-block-fullhd']];
+        yield 'all — fullhd' => [null, 'fullhd', ['is-hidden-fullhd']];
 
-        // Middle viewports: hide with -only suffix, restore at next viewport
-        yield 'tablet — hide only + restore at desktop' => ['tablet', ['is-hidden-tablet-only', 'is-block-desktop']];
-        yield 'desktop — hide only + restore at widescreen' => ['desktop', ['is-hidden-desktop-only', 'is-block-widescreen']];
-        yield 'widescreen — hide only + restore at fullhd' => ['widescreen', ['is-hidden-widescreen-only', 'is-block-fullhd']];
+        // [tablet, desktop, widescreen] — mobile removed
+        yield '[tablet,desktop,widescreen] — tablet' => [['tablet', 'desktop', 'widescreen'], 'tablet', ['is-hidden-tablet', 'is-block-desktop']];
+        yield '[tablet,desktop,widescreen] — widescreen' => [['tablet', 'desktop', 'widescreen'], 'widescreen', ['is-hidden-widescreen']];
 
-        // Last viewport: just hide, nothing above it
-        yield 'fullhd — hide only' => ['fullhd', ['is-hidden-fullhd']];
+        // [desktop, widescreen, fullhd] — mobile+tablet removed
+        yield '[desktop,widescreen,fullhd] — desktop' => [['desktop', 'widescreen', 'fullhd'], 'desktop', ['is-hidden-desktop', 'is-block-widescreen']];
+
+        // [mobile, desktop, fullhd] — gaps
+        yield '[mobile,desktop,fullhd] — mobile' => [['mobile', 'desktop', 'fullhd'], 'mobile', ['is-hidden-mobile', 'is-block-desktop']];
+        yield '[mobile,desktop,fullhd] — desktop' => [['mobile', 'desktop', 'fullhd'], 'desktop', ['is-hidden-desktop', 'is-block-fullhd']];
+        yield '[mobile,desktop,fullhd] — fullhd' => [['mobile', 'desktop', 'fullhd'], 'fullhd', ['is-hidden-fullhd']];
+
+        // [mobile, fullhd] — only 2
+        yield '[mobile,fullhd] — mobile' => [['mobile', 'fullhd'], 'mobile', ['is-hidden-mobile', 'is-block-fullhd']];
+        yield '[mobile,fullhd] — fullhd' => [['mobile', 'fullhd'], 'fullhd', ['is-hidden-fullhd']];
     }
 
     // ─── getBaseWidthClass ──────────────────────────────────────────
@@ -279,5 +302,98 @@ final class BulmaAdapterTest extends TestCase
         $second = $this->adapter->getViewports();
 
         $this->assertSame($first, $second);
+    }
+
+    // ─── Viewport filtering ─────────────────────────────────────────
+
+    public function testEnabledViewportsSubsetFiltersCorrectly(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', ['tablet', 'desktop', 'widescreen']);
+        $adapter = new BulmaAdapter();
+
+        $keys = array_map(static fn (Viewport $v): string => $v->key, $adapter->getViewports());
+
+        $this->assertSame(['tablet', 'desktop', 'widescreen'], $keys);
+    }
+
+    public function testEnabledViewportsEmptyArrayThrows(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', []);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    public function testEnabledViewportsUnknownKeyThrows(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', ['mobile', 'unknown']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    // ─── Column count override ──────────────────────────────────────
+
+    public function testColumnCountOverrideReturnsConfiguredValue(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'total_columns', 16);
+        $adapter = new BulmaAdapter();
+
+        $this->assertSame(16, $adapter->getColumnCount());
+    }
+
+    public function testColumnCountOverrideZeroThrows(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'total_columns', 0);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    public function testColumnCountOverrideNegativeThrows(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'total_columns', -4);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    // ─── Default viewport override ──────────────────────────────────
+
+    public function testDefaultViewportOverrideResolvesValidKey(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'default_viewport', 'widescreen');
+        $adapter = new BulmaAdapter();
+
+        $viewport = $adapter->getDefaultViewport();
+
+        $this->assertInstanceOf(Viewport::class, $viewport);
+        $this->assertSame('widescreen', $viewport->key);
+    }
+
+    public function testDefaultViewportOverrideUnknownKeyThrows(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'default_viewport', 'nonexistent');
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithoutOverrideThrows(): void
+    {
+        // Default is 'desktop', which is not in the enabled set
+        Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', ['mobile', 'tablet', 'fullhd']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BulmaAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithValidOverrideSucceeds(): void
+    {
+        Config::modify()->set(BulmaAdapter::class, 'enabled_viewports', ['mobile', 'tablet', 'fullhd']);
+        Config::modify()->set(BulmaAdapter::class, 'default_viewport', 'tablet');
+        $adapter = new BulmaAdapter();
+
+        $this->assertSame('tablet', $adapter->getDefaultViewport()->key);
     }
 }

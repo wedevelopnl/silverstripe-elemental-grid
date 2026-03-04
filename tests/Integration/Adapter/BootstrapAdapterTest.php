@@ -2,36 +2,34 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Adapter;
+namespace WeDevelop\ElementalGrid\Tests\Integration\Adapter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Dev\SapphireTest;
 use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
 use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
 use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
 
 #[CoversClass(BootstrapAdapter::class)]
-final class BootstrapAdapterTest extends TestCase
+final class BootstrapAdapterTest extends SapphireTest
 {
+    protected $usesDatabase = false;
+
     private BootstrapAdapter $adapter;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->adapter = new BootstrapAdapter();
     }
 
     public function testImplementsGridAdapterInterface(): void
     {
         $this->assertInstanceOf(GridAdapterInterface::class, $this->adapter);
-    }
-
-    public function testIsFinalReadonlyClass(): void
-    {
-        $reflection = new \ReflectionClass(BootstrapAdapter::class);
-
-        $this->assertTrue($reflection->isFinal());
-        $this->assertTrue($reflection->isReadOnly());
     }
 
     // ─── getViewports ────────────────────────────────────────────────
@@ -169,29 +167,52 @@ final class BootstrapAdapterTest extends TestCase
 
     // ─── getVisibilityClasses ────────────────────────────────────────
 
+    /**
+     * @param list<string>|null $enabledViewports
+     * @param list<string> $expectedClasses
+     */
     #[DataProvider('visibilityClassProvider')]
-    public function testGetVisibilityClasses(string $viewport, array $expected): void
+    public function testGetVisibilityClasses(?array $enabledViewports, string $viewport, array $expectedClasses): void
     {
-        $this->assertSame($expected, $this->adapter->getVisibilityClasses($viewport));
+        if ($enabledViewports !== null) {
+            Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', $enabledViewports);
+            Config::modify()->set(BootstrapAdapter::class, 'default_viewport', $enabledViewports[0]);
+        }
+
+        $adapter = $enabledViewports !== null ? new BootstrapAdapter() : $this->adapter;
+
+        $this->assertSame($expectedClasses, $adapter->getVisibilityClasses($viewport));
     }
 
     /**
-     * @return iterable<string, array{string, list<string>}>
+     * @return iterable<string, array{list<string>|null, string, list<string>}>
      */
     public static function visibilityClassProvider(): iterable
     {
-        // xs: hide at xs, restore at sm
-        yield 'xs — hide default, restore at sm' => ['xs', ['d-none', 'd-sm-block']];
-        // sm: hide at sm, restore at md
-        yield 'sm — hide at sm, restore at md' => ['sm', ['d-sm-none', 'd-md-block']];
-        // md: hide at md, restore at lg
-        yield 'md — hide at md, restore at lg' => ['md', ['d-md-none', 'd-lg-block']];
-        // lg: hide at lg, restore at xl
-        yield 'lg — hide at lg, restore at xl' => ['lg', ['d-lg-none', 'd-xl-block']];
-        // xl: hide at xl, restore at xxl
-        yield 'xl — hide at xl, restore at xxl' => ['xl', ['d-xl-none', 'd-xxl-block']];
-        // xxl: last viewport, hide only (no next breakpoint to restore)
-        yield 'xxl — hide at xxl, no restore' => ['xxl', ['d-xxl-none']];
+        // Full set (default)
+        yield 'all — xs' => [null, 'xs', ['d-none', 'd-sm-block']];
+        yield 'all — sm' => [null, 'sm', ['d-sm-none', 'd-md-block']];
+        yield 'all — md' => [null, 'md', ['d-md-none', 'd-lg-block']];
+        yield 'all — lg' => [null, 'lg', ['d-lg-none', 'd-xl-block']];
+        yield 'all — xl' => [null, 'xl', ['d-xl-none', 'd-xxl-block']];
+        yield 'all — xxl' => [null, 'xxl', ['d-xxl-none']];
+
+        // [sm, md, lg] — xs removed; sm uses infix, NOT d-none
+        yield '[sm,md,lg] — sm' => [['sm', 'md', 'lg'], 'sm', ['d-sm-none', 'd-md-block']];
+        yield '[sm,md,lg] — md' => [['sm', 'md', 'lg'], 'md', ['d-md-none', 'd-lg-block']];
+        yield '[sm,md,lg] — lg' => [['sm', 'md', 'lg'], 'lg', ['d-lg-none']];
+
+        // [md, lg, xl, xxl] — xs+sm gone
+        yield '[md,lg,xl,xxl] — md' => [['md', 'lg', 'xl', 'xxl'], 'md', ['d-md-none', 'd-lg-block']];
+
+        // [xs, md, xl] — gaps: restore skips to next enabled
+        yield '[xs,md,xl] — xs' => [['xs', 'md', 'xl'], 'xs', ['d-none', 'd-md-block']];
+        yield '[xs,md,xl] — md' => [['xs', 'md', 'xl'], 'md', ['d-md-none', 'd-xl-block']];
+        yield '[xs,md,xl] — xl' => [['xs', 'md', 'xl'], 'xl', ['d-xl-none']];
+
+        // [xs, xxl] — only 2
+        yield '[xs,xxl] — xs' => [['xs', 'xxl'], 'xs', ['d-none', 'd-xxl-block']];
+        yield '[xs,xxl] — xxl' => [['xs', 'xxl'], 'xxl', ['d-xxl-none']];
     }
 
     public function testGetVisibilityClassesReturnsTwoClassesForNonLastViewport(): void
@@ -359,5 +380,109 @@ final class BootstrapAdapterTest extends TestCase
 
         $this->assertNotNull($path);
         $this->assertStringContainsString('bootstrap', strtolower($path));
+    }
+
+    // ─── Viewport filtering ─────────────────────────────────────────
+
+    public function testEnabledViewportsSubsetFiltersCorrectly(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', ['sm', 'md', 'lg']);
+        $adapter = new BootstrapAdapter();
+
+        $keys = array_map(static fn (Viewport $v): string => $v->key, $adapter->getViewports());
+
+        $this->assertSame(['sm', 'md', 'lg'], $keys);
+    }
+
+    public function testEnabledViewportsPreservesDefinitionOrder(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', ['lg', 'xs', 'xxl']);
+        Config::modify()->set(BootstrapAdapter::class, 'default_viewport', 'lg');
+        $adapter = new BootstrapAdapter();
+
+        $keys = array_map(static fn (Viewport $v): string => $v->key, $adapter->getViewports());
+
+        $this->assertSame(['lg', 'xs', 'xxl'], $keys);
+    }
+
+    public function testEnabledViewportsEmptyArrayThrows(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', []);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    public function testEnabledViewportsUnknownKeyThrows(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', ['xs', 'unknown']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    // ─── Column count override ──────────────────────────────────────
+
+    public function testColumnCountOverrideReturnsConfiguredValue(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'total_columns', 16);
+        $adapter = new BootstrapAdapter();
+
+        $this->assertSame(16, $adapter->getColumnCount());
+    }
+
+    public function testColumnCountOverrideZeroThrows(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'total_columns', 0);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    public function testColumnCountOverrideNegativeThrows(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'total_columns', -4);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    // ─── Default viewport override ──────────────────────────────────
+
+    public function testDefaultViewportOverrideResolvesValidKey(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'default_viewport', 'lg');
+        $adapter = new BootstrapAdapter();
+
+        $viewport = $adapter->getDefaultViewport();
+
+        $this->assertInstanceOf(Viewport::class, $viewport);
+        $this->assertSame('lg', $viewport->key);
+    }
+
+    public function testDefaultViewportOverrideUnknownKeyThrows(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'default_viewport', 'nonexistent');
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithoutOverrideThrows(): void
+    {
+        // Default is 'md', which is not in the enabled set
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', ['xs', 'lg', 'xxl']);
+
+        $this->expectException(InvalidGridValueException::class);
+        new BootstrapAdapter();
+    }
+
+    public function testDefaultViewportFilteredOutWithValidOverrideSucceeds(): void
+    {
+        Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', ['xs', 'lg', 'xxl']);
+        Config::modify()->set(BootstrapAdapter::class, 'default_viewport', 'lg');
+        $adapter = new BootstrapAdapter();
+
+        $this->assertSame('lg', $adapter->getDefaultViewport()->key);
     }
 }
