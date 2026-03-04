@@ -23,8 +23,8 @@ test.describe('Collapsible containers', () => {
     const sectionAToggle = sectionA.getByTestId('collapse-toggle').first();
 
     // Locate rows within Section A by heading text
-    const rowA1 = sectionA.locator('.row-block').filter({ hasText: 'Row A1' });
-    const rowA2 = sectionA.locator('.row-block').filter({ hasText: 'Row A2' });
+    const rowA1 = sectionA.getByTestId('row-block').filter({ hasText: 'Row A1' });
+    const rowA2 = sectionA.getByTestId('row-block').filter({ hasText: 'Row A2' });
     const rowA1Toggle = rowA1.getByTestId('collapse-toggle').first();
     const rowA2Toggle = rowA2.getByTestId('collapse-toggle').first();
 
@@ -116,8 +116,8 @@ test.describe('Collapsible containers', () => {
     await expect(sectionANav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
     await expect(sectionBNav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
 
-    const rowA1Nav = sectionANav.locator('.row-block').filter({ hasText: 'Row A1' });
-    const rowA2Nav = sectionANav.locator('.row-block').filter({ hasText: 'Row A2' });
+    const rowA1Nav = sectionANav.getByTestId('row-block').filter({ hasText: 'Row A1' });
+    const rowA2Nav = sectionANav.getByTestId('row-block').filter({ hasText: 'Row A2' });
 
     await expect(rowA1Nav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'true');
     await expect(rowA2Nav.getByTestId('collapse-toggle').first()).toHaveAttribute('aria-expanded', 'false');
@@ -151,8 +151,8 @@ test.describe('Collapsible containers', () => {
     await sectionAToggleReload.click();
     await expect(sectionAToggleReload).toHaveAttribute('aria-expanded', 'true');
 
-    const rowA1Reload = sectionAReload.locator('.row-block').filter({ hasText: 'Row A1' });
-    const rowA2Reload = sectionAReload.locator('.row-block').filter({ hasText: 'Row A2' });
+    const rowA1Reload = sectionAReload.getByTestId('row-block').filter({ hasText: 'Row A1' });
+    const rowA2Reload = sectionAReload.getByTestId('row-block').filter({ hasText: 'Row A2' });
     const colA1LReload = rowA1Reload.getByTestId('column-block').filter({ hasText: 'Block A1-Left' });
     const colA1RReload = rowA1Reload.getByTestId('column-block').filter({ hasText: 'Block A1-Right' });
 

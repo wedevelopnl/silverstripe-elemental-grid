@@ -141,11 +141,13 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
 WeDevelop\ElementalGrid\Elements\ElementSection:
   section_alpha:
     Title: 'Section Alpha'
+    ShowTitle: 1
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_alpha_area
   section_beta:
     Title: 'Section Beta'
+    ShowTitle: 1
     Sort: 2
     Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_beta_area

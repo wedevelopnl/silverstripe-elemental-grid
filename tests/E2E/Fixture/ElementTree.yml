@@ -64,6 +64,7 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
 WeDevelop\ElementalGrid\Elements\ElementSection:
   section1:
     Title: 'Main Section'
+    ShowTitle: 1
     Sort: 1
     Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section1_area
