@@ -29,6 +29,7 @@ RUN mkdir -p /app/src /app/_config \
     && printf '<?php\n\nuse SilverStripe\\CMS\\Controllers\\ContentController;\n\nclass PageController extends ContentController\n{\n}\n' > /app/src/PageController.php
 
 COPY app/_config/ /app/_config/
+COPY app/templates/ /app/templates/
 COPY app/infection.json5 /app/infection.json5
 COPY app/phpunit.xml.dist /app/phpunit.xml.dist
 COPY app/phpstan.neon.dist /app/phpstan.neon.dist
