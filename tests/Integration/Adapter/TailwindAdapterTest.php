@@ -314,6 +314,7 @@ final class TailwindAdapterTest extends SapphireTest
         Config::modify()->set(TailwindAdapter::class, 'enabled_viewports', []);
 
         $this->expectException(InvalidGridValueException::class);
+        $this->expectExceptionMessage('The enabled_viewports configuration cannot be an empty array.');
         new TailwindAdapter();
     }
 

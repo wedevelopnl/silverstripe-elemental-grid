@@ -410,6 +410,7 @@ final class BootstrapAdapterTest extends SapphireTest
         Config::modify()->set(BootstrapAdapter::class, 'enabled_viewports', []);
 
         $this->expectException(InvalidGridValueException::class);
+        $this->expectExceptionMessage('The enabled_viewports configuration cannot be an empty array.');
         new BootstrapAdapter();
     }
 

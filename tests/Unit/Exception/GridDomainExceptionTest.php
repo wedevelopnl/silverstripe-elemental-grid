@@ -42,6 +42,7 @@ final class GridDomainExceptionTest extends TestCase
         );
 
         $this->assertSame('Internal error at line 42', $exception->getMessage());
+        $this->assertSame(0, $exception->getCode());
     }
 
     public function testGetStatusCodeReturnsProvidedCode(): void

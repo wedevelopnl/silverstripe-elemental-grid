@@ -76,6 +76,28 @@ final class FixturePostActionTest extends TestCase
         ];
     }
 
+    public function testFromConfigThrowsWhenClassMissing(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('requires "action", "class", and "identifier" keys');
+
+        FixturePostAction::fromConfig([
+            'action' => 'publish_recursive',
+            'identifier' => 'x',
+        ]);
+    }
+
+    public function testFromConfigThrowsWhenIdentifierMissing(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('requires "action", "class", and "identifier" keys');
+
+        FixturePostAction::fromConfig([
+            'action' => 'publish_recursive',
+            'class' => 'SomeClass',
+        ]);
+    }
+
     #[DataProvider('versionedActionsProvider')]
     public function testApplyErrorMessageIncludesRecordClass(string $actionName): void
     {

@@ -16,6 +16,7 @@ use WeDevelop\ElementalGrid\Elements\ElementRow;
 use WeDevelop\ElementalGrid\Elements\ElementSection;
 use WeDevelop\ElementalGrid\Model\ElementNode;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
+use WeDevelop\ElementalGrid\Tests\Integration\Fixture\MultiAreaTestPage;
 use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(ElementTreeBuilder::class)]
@@ -26,11 +27,15 @@ final class ElementTreeBuilderTest extends SapphireTest
     /** @var list<class-string> */
     protected static $extra_dataobjects = [
         TestPage::class,
+        MultiAreaTestPage::class,
     ];
 
     /** @var array<class-string, list<class-string>> */
     protected static $required_extensions = [
         TestPage::class => [
+            ElementalPageExtension::class,
+        ],
+        MultiAreaTestPage::class => [
             ElementalPageExtension::class,
         ],
     ];
@@ -279,6 +284,58 @@ final class ElementTreeBuilderTest extends SapphireTest
         }
     }
 
+    // ---- canView: continue vs break ----
+
+    public function testNonViewableElementDoesNotBlockSiblings(): void
+    {
+        $leaf1Id = $this->idFromFixture(BaseElement::class, 'leaf1');
+        DenySpecificViewExtension::$denyId = $leaf1Id;
+        BaseElement::add_extension(DenySpecificViewExtension::class);
+
+        try {
+            $tree = $this->buildTree();
+            $areaId = $this->getAreaId();
+
+            // leaf1 is hidden but leaf2 (sibling) should still appear
+            $col1Children = $tree[$areaId][0]->children[0]->children[0]->children;
+            $titles = array_map(static fn (ElementNode $n): string => $n->title, $col1Children);
+
+            $this->assertNotContains('Text Block', $titles, 'Denied element should be excluded');
+            $this->assertContains('Image Block', $titles, 'Sibling element should still appear');
+        } finally {
+            BaseElement::remove_extension(DenySpecificViewExtension::class);
+            DenySpecificViewExtension::$denyId = 0;
+        }
+    }
+
+    // ---- Multi-area pages ----
+
+    public function testBuildForPageReturnsMultipleAreaKeys(): void
+    {
+        $page = MultiAreaTestPage::create();
+        $page->Title = 'Multi Area Test';
+        $page->write();
+
+        // Create sections in both areas
+        $primarySection = ElementSection::create();
+        $primarySection->Title = 'Primary Section';
+        $primarySection->ParentID = $page->ElementalAreaID;
+        $primarySection->write();
+
+        $secondarySection = ElementSection::create();
+        $secondarySection->Title = 'Secondary Section';
+        $secondarySection->ParentID = $page->SecondaryAreaID;
+        $secondarySection->write();
+
+        /** @var ElementTreeBuilder $builder */
+        $builder = Injector::inst()->get(ElementTreeBuilder::class);
+        $tree = $builder->buildForPage($page);
+
+        $this->assertCount(2, $tree, 'Tree should have entries for both elemental areas');
+        $this->assertArrayHasKey((int) $page->ElementalAreaID, $tree);
+        $this->assertArrayHasKey((int) $page->SecondaryAreaID, $tree);
+    }
+
     // ---- Empty title fallback ----
 
     public function testEmptyTitleReturnsFallbackForLeafElement(): void
@@ -364,6 +421,25 @@ class DenyViewExtension extends Extension
     public function canView($member): false
     {
         return false;
+    }
+}
+
+/**
+ * Test extension that denies canView for a single element by ID.
+ *
+ * Unlike {@see DenyViewExtension} which denies ALL elements, this allows
+ * testing that continue (not break) is used in the tree builder loop.
+ */
+class DenySpecificViewExtension extends Extension
+{
+    public static int $denyId = 0;
+
+    /**
+     * @param mixed $member
+     */
+    public function canView($member): ?bool
+    {
+        return $this->owner->ID === self::$denyId ? false : null;
     }
 }
 

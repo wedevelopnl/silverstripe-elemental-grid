@@ -145,6 +145,29 @@ final class GridClassesTest extends SapphireTest
         $this->assertStringNotContainsString('col-12 ', $classes);
     }
 
+    public function testColumnClassesPreserveEarlierClassesAfterHiddenViewport(): void
+    {
+        $column = ElementColumn::create();
+        $column->setGridSettingsData([
+            'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
+            'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],
+            'md' => ['width' => 8, 'offset' => 0, 'visible' => false],
+            'lg' => ['width' => 6, 'offset' => 0, 'visible' => true],
+            'xl' => ['width' => 6, 'offset' => 0, 'visible' => true],
+        ]);
+        $column->write();
+
+        $classes = $column->getColumnClasses();
+
+        // Pre-hidden viewports produce width classes
+        $this->assertStringContainsString('col-sm-12', $classes);
+        // Post-hidden viewports are still processed (not broken by continue)
+        $this->assertStringContainsString('col-lg-6', $classes);
+        // Hidden viewport produces visibility classes
+        $this->assertStringContainsString('d-md-none', $classes);
+        $this->assertStringContainsString('d-lg-block', $classes);
+    }
+
     public function testColumnClassesZeroOffsetExcluded(): void
     {
         $column = ElementColumn::create();

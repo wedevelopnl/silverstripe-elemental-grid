@@ -1,0 +1,19 @@
+DNADesign\Elemental\Models\ElementalArea:
+  primary_area: {}
+  secondary_area: {}
+
+WeDevelop\ElementalGrid\Tests\Integration\Fixture\MultiAreaTestPage:
+  multipage:
+    Title: 'Multi Area Page'
+    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.primary_area
+    SecondaryArea: =>DNADesign\Elemental\Models\ElementalArea.secondary_area
+
+WeDevelop\ElementalGrid\Elements\ElementSection:
+  primary_section:
+    Title: 'Primary Section'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.primary_area
+  secondary_section:
+    Title: 'Secondary Section'
+    Sort: 1
+    Parent: =>DNADesign\Elemental\Models\ElementalArea.secondary_area

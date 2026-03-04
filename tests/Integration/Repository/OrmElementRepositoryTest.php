@@ -87,6 +87,27 @@ final class OrmElementRepositoryTest extends SapphireTest
         $this->assertContains('Video Block', $titles);
     }
 
+    public function testFindByAreaIdsSortsBySortFieldNotId(): void
+    {
+        $leaf1 = $this->objFromFixture(BaseElement::class, 'leaf1');
+        $leaf2 = $this->objFromFixture(BaseElement::class, 'leaf2');
+
+        // Swap sort values so lower-ID element has higher Sort
+        $leaf1->Sort = 2;
+        $leaf1->write();
+        $leaf2->Sort = 1;
+        $leaf2->write();
+
+        $col1AreaId = $this->idFromFixture(\DNADesign\Elemental\Models\ElementalArea::class, 'col1_area');
+
+        $elements = $this->repository->findByAreaIds([$col1AreaId]);
+
+        $this->assertCount(2, $elements);
+        // leaf2 (Sort=1) should come first despite having a higher ID than leaf1
+        $this->assertSame('Image Block', $elements[0]->Title);
+        $this->assertSame('Text Block', $elements[1]->Title);
+    }
+
     public function testFindByAreaIdsReturnsEmptyArrayForEmptyInput(): void
     {
         $elements = $this->repository->findByAreaIds([]);

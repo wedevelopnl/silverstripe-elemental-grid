@@ -12,6 +12,7 @@ use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
 use WeDevelop\ElementalGrid\Elements\ElementRow;
+use WeDevelop\ElementalGrid\Elements\ElementSection;
 use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
 use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
 
@@ -183,7 +184,89 @@ final class ElementalGridControllerTest extends FunctionalTest
         }
     }
 
-    // --- apiCreate -----------------------------------------------------------
+    // --- apiCreate: validation ------------------------------------------------
+
+    public function testCreateRejects400ForNonSubclassElementClass(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => \stdClass::class,
+            'elementalAreaID' => $page->ElementalArea()->ID,
+            'insertAfterElementID' => null,
+        ]);
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testCreateRejects400ForFloatAreaId(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => ElementSection::class,
+            'elementalAreaID' => 5.5,
+            'insertAfterElementID' => null,
+        ]);
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testCreateRejects400ForZeroAfterElementId(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => ElementSection::class,
+            'elementalAreaID' => $page->ElementalArea()->ID,
+            'insertAfterElementID' => 0,
+        ]);
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testCreateRejects400ForFloatAfterElementId(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => ElementSection::class,
+            'elementalAreaID' => $page->ElementalArea()->ID,
+            'insertAfterElementID' => 5.5,
+        ]);
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testCreateAcceptsAfterElementIdOne(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+        $section = $this->objFromFixture(ElementSection::class, 'section1');
+
+        $response = $this->postJson('/admin/elemental-grid/api/create', [
+            'elementClass' => ElementSection::class,
+            'elementalAreaID' => $page->ElementalArea()->ID,
+            'insertAfterElementID' => $section->ID,
+        ]);
+
+        // Passes body validation and creates successfully
+        $this->assertSame(204, $response->getStatusCode());
+    }
+
+    // --- apiCreate: validation fails -----------------------------------------
 
     public function testCreateReturns422WhenValidationFails(): void
     {
@@ -203,6 +286,58 @@ final class ElementalGridControllerTest extends FunctionalTest
     }
 
     // --- apiDuplicate --------------------------------------------------------
+
+    public function testDuplicateRejects400ForFloatId(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+            'id' => 5.5,
+        ]);
+
+        $this->assertSame(400, $response->getStatusCode());
+    }
+
+    public function testDuplicateAssignsCorrectCopyTitle(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $section = $this->objFromFixture(ElementSection::class, 'section1');
+
+        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+            'id' => $section->ID,
+        ]);
+
+        $this->assertSame(204, $response->getStatusCode());
+
+        // Find the cloned element — highest ID section
+        $clone = ElementSection::get()->sort('ID', 'DESC')->first();
+        $this->assertSame('First Section copy', $clone->Title);
+    }
+
+    public function testDuplicateIncrementsCopyNumber(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        // Create a section titled "Block copy" to trigger the copy-number path
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+        $section = ElementSection::create();
+        $section->Title = 'Block copy';
+        $section->ParentID = $page->ElementalArea()->ID;
+        $section->write();
+
+        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+            'id' => $section->ID,
+        ]);
+
+        $this->assertSame(204, $response->getStatusCode());
+
+        $clone = ElementSection::get()->sort('ID', 'DESC')->first();
+        $this->assertSame('Block copy 2', $clone->Title);
+    }
 
     public function testDuplicateReturns422WhenValidationFails(): void
     {

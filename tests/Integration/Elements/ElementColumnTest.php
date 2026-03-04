@@ -154,6 +154,38 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         $this->assertSame('6/12', $column->getGridWidthSummary());
     }
 
+    public function testGetChildCountSummaryIsPubliclyCallable(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $this->assertSame('0 elements', $column->getChildCountSummary());
+    }
+
+    public function testGetChildCountSummarySingularWithOneChild(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $leaf = \DNADesign\Elemental\Models\BaseElement::create();
+        $leaf->Title = 'Test Leaf';
+        $leaf->ParentID = $column->getChildArea()->ID;
+        $leaf->write();
+
+        $this->assertSame('1 element', $column->getChildCountSummary());
+    }
+
+    public function testGetGridWidthSummaryReturnsEmptyForEmptyGridSettings(): void
+    {
+        $column = $this->createContainer();
+        /** @var ElementColumn $column */
+
+        $column->setField('GridSettings', '[]');
+        $column->write();
+
+        $this->assertSame('', $column->getGridWidthSummary());
+    }
+
     public function testSummaryFieldsIncludesContentsAndWidthColumns(): void
     {
         $fields = ElementColumn::config()->get('summary_fields');

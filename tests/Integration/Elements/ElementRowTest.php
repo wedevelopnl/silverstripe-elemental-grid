@@ -202,6 +202,14 @@ final class ElementRowTest extends ElementContainerContractTestCase
         $this->assertSame('2 columns', $row->getSummary());
     }
 
+    public function testGetChildCountSummaryIsPubliclyCallable(): void
+    {
+        $row = $this->createContainer();
+        /** @var ElementRow $row */
+
+        $this->assertSame('1 column', $row->getChildCountSummary());
+    }
+
     public function testSummaryFieldsIncludesContentsColumn(): void
     {
         $fields = ElementRow::config()->get('summary_fields');

@@ -295,6 +295,29 @@ final class ElementNodeTest extends TestCase
         );
     }
 
+    public function testColumnWithNullGridSettingsOmitsGridSettingsKey(): void
+    {
+        $node = new ElementNode(
+            id: 1,
+            title: 'Column No Grid',
+            blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+            containerType: ContainerType::Column,
+            allowedTypes: null,
+            children: [],
+            gridSettings: null,
+        );
+
+        $serialized = $node->jsonSerialize();
+        self::assertArrayNotHasKey('gridSettings', $serialized);
+    }
+
     public function testNonColumnNodeOmitsGridSettings(): void
     {
         $node = new ElementNode(

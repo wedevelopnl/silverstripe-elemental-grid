@@ -236,6 +236,58 @@ final class FixtureLoaderTest extends SapphireTest
         });
     }
 
+    public function testResetActuallyDeletesFixtureData(): void
+    {
+        $loader = FixtureLoader::create();
+        $loader->load('element-tree');
+
+        // Verify data exists
+        Versioned::withVersionedMode(static function (): void {
+            Versioned::set_stage(Versioned::DRAFT);
+            self::assertGreaterThan(
+                0,
+                SiteTree::get()->filter('URLSegment:StartsWith', 'e2e-')->count(),
+            );
+        });
+
+        $loader->reset();
+
+        // Verify pages removed after reset
+        Versioned::withVersionedMode(static function (): void {
+            Versioned::set_stage(Versioned::DRAFT);
+            self::assertCount(
+                0,
+                SiteTree::get()->filter('URLSegment:StartsWith', 'e2e-'),
+                'reset() should remove all E2E pages',
+            );
+        });
+    }
+
+    public function testLoadThrowsForFixtureWithNullPath(): void
+    {
+        FixtureLoader::config()->merge('fixtures', [
+            'null-path' => ['path' => null],
+        ]);
+
+        $loader = FixtureLoader::create();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('has no path configured');
+
+        $loader->load('null-path');
+    }
+
+    public function testStringConfigFixtureHasNoPostActions(): void
+    {
+        // 'empty-page' is configured as a plain string path (no array config)
+        $loader = FixtureLoader::create();
+        $result = $loader->load('empty-page');
+
+        // If resolvePostActions broke (|| → &&), it would try to access
+        // string config as array and fail. Success means no post-actions applied.
+        $this->assertSame('empty-page', $result->fixtureName);
+    }
+
     public function testLoadThrowsForUnknownFixture(): void
     {
         $loader = FixtureLoader::create();
