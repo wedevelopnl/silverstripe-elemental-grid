@@ -371,5 +371,199 @@ describe('applyReorder', () => {
 
       expect(result).toBe(tree);
     });
+
+    it('appends to end when afterElementId is not found in target area', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(2, [makeElement(20)], 300),
+        ],
+      };
+
+      // Move element 10 to area 300 after a nonexistent element (999)
+      const result = applyReorder(tree, 10, 300, 999);
+
+      const col2 = result['100'][1] as ColumnNode;
+      // Should fall back to appending at end
+      expect(col2.children!.map((c) => c.id)).toEqual([20, 10]);
+    });
+
+    it('handles target area that only exists as a container childAreaId', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeSection(1, [makeRow(10, [], 500)], 200),
+          makeElement(50),
+        ],
+      };
+
+      // Area 500 is not a root key, it's row 10's childAreaId
+      // areaExists must find it via findChildrenForArea
+      const result = applyReorder(tree, 50, 500, null);
+
+      const section = result['100'][0] as SectionNode;
+      const row = section.children![0] as RowNode;
+      // Element 50 should have been inserted into row 10's child area
+      expect(row.children!.map((c) => c.id)).toContain(50);
+      // Element 50 should no longer be in the root area
+      expect(result['100'].map((n) => n.id)).not.toContain(50);
+    });
+  });
+
+  describe('isAreaAffected — reference preservation', () => {
+    it('marks root area as affected when source element is at root level', () => {
+      const tree: ElementTreeResponse = {
+        '100': [makeSection(1, [], 200), makeSection(2, [], 300)],
+        '999': [makeSection(99, [], 9000)],
+      };
+
+      // Move section 1 after section 2 within root area 100
+      const result = applyReorder(tree, 1, 100, 2);
+
+      // Root area 100 is affected (source is root-level, areaKey matches)
+      expect(result['100']).not.toBe(tree['100']);
+      // Root area 999 is unaffected
+      expect(result['999']).toBe(tree['999']);
+    });
+
+    it('marks root area as affected when target area is a nested container', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeSection(
+            1,
+            [makeRow(10, [makeColumn(100, [makeElement(50)], 5000)], 2000)],
+            1000,
+          ),
+        ],
+        '200': [makeElement(60)],
+      };
+
+      // Move element 60 from root area 200 into nested container area 5000
+      const result = applyReorder(tree, 60, 5000, null);
+
+      // Root area 100 is affected (contains the target area 5000)
+      expect(result['100']).not.toBe(tree['100']);
+      // Root area 200 is affected (source is root-level in area 200)
+      expect(result['200']).not.toBe(tree['200']);
+    });
+
+    it('marks root area as affected when source is in nested container', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeSection(
+            1,
+            [makeRow(10, [makeColumn(100, [makeElement(50), makeElement(51)], 5000)], 2000)],
+            1000,
+          ),
+        ],
+        '200': [makeElement(60)],
+      };
+
+      // Move element 50 from nested area 5000 to root area 200
+      const result = applyReorder(tree, 50, 200, 60);
+
+      // Root area 100 is affected (contains the source area 5000)
+      expect(result['100']).not.toBe(tree['100']);
+      // Root area 200 is affected (direct target)
+      expect(result['200']).not.toBe(tree['200']);
+    });
+
+    it('does not affect root areas unrelated to source or target', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(2, [makeElement(20)], 300),
+        ],
+        '400': [makeSection(40, [], 4000)],
+        '500': [makeElement(50)],
+      };
+
+      // Move within root area 100's containers
+      const result = applyReorder(tree, 10, 300, 20);
+
+      expect(result['100']).not.toBe(tree['100']);
+      expect(result['400']).toBe(tree['400']);
+      expect(result['500']).toBe(tree['500']);
+    });
+  });
+
+  describe('no-op detection — additional cases', () => {
+    it('is not a no-op when afterElementId does not exist in target area', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+        ],
+      };
+
+      // afterElementId 999 doesn't exist — isNoOp should return false
+      const result = applyReorder(tree, 10, 200, 999);
+
+      // Not a no-op, so tree should be modified (element appended at end as fallback)
+      expect(result).not.toBe(tree);
+    });
+
+    it('detects no-op for element at the end of its container', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+        ],
+      };
+
+      // Element 12 is already after element 11 in area 200
+      const result = applyReorder(tree, 12, 200, 11);
+
+      expect(result).toBe(tree);
+    });
+
+    it('is not a no-op when element is in a different area', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10)], 200),
+          makeColumn(2, [makeElement(20)], 300),
+        ],
+      };
+
+      // Move element 10 from area 200 to area 300, even though it would be first
+      const result = applyReorder(tree, 10, 300, null);
+
+      expect(result).not.toBe(tree);
+    });
+  });
+
+  describe('removal from nested containers', () => {
+    it('removes element from a deeply nested container during cross-area move', () => {
+      const tree: ElementTreeResponse = {
+        '1': [
+          makeSection(
+            10,
+            [
+              makeRow(
+                100,
+                [
+                  makeColumn(1000, [makeElement(50), makeElement(51)], 5000),
+                ],
+                4000,
+              ),
+            ],
+            3000,
+          ),
+          makeSection(20, [makeRow(200, [makeColumn(2000, [], 6000)], 4500)], 3500),
+        ],
+      };
+
+      // Move element 50 from area 5000 to area 6000
+      const result = applyReorder(tree, 50, 6000, null);
+
+      const sec1 = result['1'][0] as SectionNode;
+      const row1 = sec1.children![0] as RowNode;
+      const col1 = row1.children![0] as ColumnNode;
+      // Element 50 removed from source
+      expect(col1.children!.map((e) => e.id)).toEqual([51]);
+
+      const sec2 = result['1'][1] as SectionNode;
+      const row2 = sec2.children![0] as RowNode;
+      const col2 = row2.children![0] as ColumnNode;
+      // Element 50 inserted into target
+      expect(col2.children!.map((e) => e.id)).toEqual([50]);
+    });
   });
 });

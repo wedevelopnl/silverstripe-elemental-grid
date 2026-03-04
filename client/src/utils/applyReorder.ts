@@ -35,23 +35,6 @@ function findChildrenForArea(
 }
 
 /**
- * Checks whether a target area exists either as a root key or as a
- * container's childAreaId anywhere in the tree.
- */
-function areaExists(
-  tree: ElementTreeResponse,
-  targetAreaId: number,
-): boolean {
-  const areaKey = String(targetAreaId);
-  if (areaKey in tree) return true;
-
-  for (const nodes of Object.values(tree)) {
-    if (findChildrenForArea(nodes, targetAreaId) !== null) return true;
-  }
-  return false;
-}
-
-/**
  * Finds the location of an element by ID anywhere in the tree.
  * Returns the area key and index, or null if not found.
  */
@@ -162,8 +145,6 @@ export function applyReorder(
   const location = findElement(tree, elementId);
   if (!location) return tree;
 
-  if (!areaExists(tree, targetAreaId)) return tree;
-
   if (isNoOp(tree, elementId, targetAreaId, afterElementId, location)) {
     return tree;
   }
@@ -211,7 +192,6 @@ function isAreaAffected(
 
   // Check if any container in this root area contains the source or target area
   const nodes = tree[areaKey];
-  if (!nodes) return false;
 
   const sourceAreaId = Number(sourceLocation.areaKey);
   if (containsArea(nodes, sourceAreaId)) return true;
@@ -240,7 +220,6 @@ function removeElement(
 ): ElementNode | null {
   if (location.kind === 'root') {
     const arr = cloned[location.areaKey];
-    if (!arr) return null;
     const [element] = arr.splice(location.index, 1);
     return element ?? null;
   }

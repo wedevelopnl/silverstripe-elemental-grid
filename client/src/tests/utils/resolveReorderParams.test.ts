@@ -9,6 +9,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 200,
         overIndex: 0,
         containerItems: ['element-10', 'element-11', 'element-12'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 1,
       };
 
       const result = resolveReorderParams(context);
@@ -26,6 +28,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 200,
         overIndex: 2,
         containerItems: ['element-11', 'element-12', 'element-10'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 0,
       };
 
       const result = resolveReorderParams(context);
@@ -43,6 +47,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 100,
         overIndex: 3,
         containerItems: ['row-1', 'row-2', 'row-3', 'row-5'],
+        sourceContainerAreaId: 100,
+        sourceIndex: 0,
       };
 
       const result = resolveReorderParams(context);
@@ -126,6 +132,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 200,
         overIndex: 0,
         containerItems: [],
+        sourceContainerAreaId: 100,
+        sourceIndex: 0,
       };
 
       expect(resolveReorderParams(context)).toBeNull();
@@ -137,6 +145,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 200,
         overIndex: 0,
         containerItems: [],
+        sourceContainerAreaId: 100,
+        sourceIndex: 0,
       };
 
       expect(resolveReorderParams(context)).toBeNull();
@@ -178,6 +188,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 100,
         overIndex: 1,
         containerItems: ['section-3', 'section-5'],
+        sourceContainerAreaId: 100,
+        sourceIndex: 0,
       };
 
       const result = resolveReorderParams(context);
@@ -195,6 +207,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 400,
         overIndex: 0,
         containerItems: ['column-7', 'column-8'],
+        sourceContainerAreaId: 400,
+        sourceIndex: 1,
       };
 
       const result = resolveReorderParams(context);
@@ -234,6 +248,8 @@ describe('resolveReorderParams', () => {
         overContainerAreaId: 200,
         overIndex: 1,
         containerItems: ['bad-id', 'element-10'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 0,
       };
 
       const result = resolveReorderParams(context);
@@ -244,6 +260,80 @@ describe('resolveReorderParams', () => {
         targetAreaID: 200,
         afterElementID: null,
       });
+    });
+  });
+
+  describe('no-op guard boundary conditions', () => {
+    it('does not treat as no-op when indices differ in same container', () => {
+      const context: ReorderContext = {
+        activeId: 'element-10',
+        overContainerAreaId: 200,
+        overIndex: 2,
+        containerItems: ['element-11', 'element-12', 'element-10'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 0,
+      };
+
+      expect(resolveReorderParams(context)).not.toBeNull();
+    });
+  });
+
+  describe('afterElementId resolution boundary', () => {
+    it('returns afterElementID=null for overIndex exactly 0', () => {
+      const context: ReorderContext = {
+        activeId: 'row-5',
+        overContainerAreaId: 100,
+        overIndex: 0,
+        containerItems: ['row-5', 'row-3', 'row-7'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 0,
+      };
+
+      const result = resolveReorderParams(context);
+
+      expect(result).toEqual({
+        elementID: 5,
+        targetAreaID: 100,
+        afterElementID: null,
+      });
+    });
+
+    it('skips the active item when walking backwards for afterElementId', () => {
+      // containerItems: ['element-10', 'element-11', 'element-12']
+      // Active is element-10, overIndex is 1
+      // Walking backwards from index 0: element-10 is the active item, must skip
+      const context: ReorderContext = {
+        activeId: 'element-10',
+        overContainerAreaId: 200,
+        overIndex: 1,
+        containerItems: ['element-10', 'element-11', 'element-12'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 0,
+      };
+
+      const result = resolveReorderParams(context);
+
+      // element-10 is at index 0 which is the only item before overIndex 1
+      // Since it's the active element, it must be skipped → afterElementID = null
+      expect(result!.afterElementID).toBeNull();
+    });
+
+    it('finds non-active item when active is sandwiched', () => {
+      // containerItems: ['element-11', 'element-10', 'element-12']
+      // Active is element-10, overIndex is 2
+      // Walking backwards: index 1 = element-10 (skip), index 0 = element-11 (use)
+      const context: ReorderContext = {
+        activeId: 'element-10',
+        overContainerAreaId: 200,
+        overIndex: 2,
+        containerItems: ['element-11', 'element-10', 'element-12'],
+        sourceContainerAreaId: 200,
+        sourceIndex: 1,
+      };
+
+      const result = resolveReorderParams(context);
+
+      expect(result!.afterElementID).toBe(11);
     });
   });
 });
