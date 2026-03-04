@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useReorderElement } from '@/hooks/useElementMutations';
 import { queryKeys } from '@/hooks/queryKeys';
+import { ApiError } from '@/api/errors';
 import type {
   SimpleElementNode,
   ColumnNode,
@@ -316,6 +317,61 @@ describe('useReorderElement', () => {
 
     await waitFor(() => {
       expect(mockShowToast).toHaveBeenCalledWith('Reorder failed');
+    });
+  });
+
+  it('shows ApiError message in toast for 422 responses', async () => {
+    const error = new ApiError(422, 'Unprocessable Entity');
+    mockReorderElement.mockRejectedValue(error);
+
+    const wrapper = createWrapper();
+    const tree: ElementTreeResponse = {
+      '100': [makeColumn(1, [makeElement(10)], 200)],
+    };
+
+    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+
+    await act(async () => {
+      try {
+        await result.current.mutateAsync({
+          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          tree,
+        });
+      } catch {
+        // Expected
+      }
+    });
+
+    await waitFor(() => {
+      expect(mockShowToast).toHaveBeenCalledWith('API error 422: Unprocessable Entity');
+    });
+  });
+
+  it('exposes ApiError with status on mutation failure', async () => {
+    const error = new ApiError(422, 'Unprocessable Entity');
+    mockReorderElement.mockRejectedValue(error);
+
+    const wrapper = createWrapper();
+    const tree: ElementTreeResponse = {
+      '100': [makeColumn(1, [makeElement(10)], 200)],
+    };
+
+    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+
+    await act(async () => {
+      try {
+        await result.current.mutateAsync({
+          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          tree,
+        });
+      } catch {
+        // Expected
+      }
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(ApiError);
+      expect((result.current.error as ApiError).status).toBe(422);
     });
   });
 });
