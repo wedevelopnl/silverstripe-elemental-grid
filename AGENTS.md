@@ -134,6 +134,232 @@ phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 - 100% type coverage enforced: return, param, property, constant, declare
 - Runs inside Docker via `make analyse`
 
+<!-- Source: local .apm/instructions/element-hierarchy.instructions.md -->
+# Element Hierarchy
+
+## Structure
+
+The grid enforces a strict three-level hierarchy:
+
+```
+Page (ElementalArea)
+  └── ElementSection   [ContainerType::Section]    — can_be_root: true (default)
+        └── ElementRow   [ContainerType::Row]       — can_be_root: false
+              └── ElementColumn  [ContainerType::Column]  — can_be_root: false
+                    └── (any non-container content element)
+```
+
+All three container elements implement `ElementContainerInterface`:
+- `getChildArea(): ElementalArea`
+- `hasChildren(): bool`
+- `getContainerType(): ContainerType`
+
+## Hierarchy Rules (YAML Config)
+
+- **ElementSection**: `allowed_elements: [ElementRow]` — only Rows as children
+- **ElementRow**: `allowed_elements: [ElementColumn]`, `can_be_root: false` — only Columns as children, cannot be placed at page level
+- **ElementColumn**: `disallowed_elements: [ElementSection, ElementRow, ElementColumn]`, `can_be_root: false` — blacklist approach, allows any non-container content element
+
+## Auto-Scaffolding
+
+Writing a container element automatically creates its required child structure on DRAFT stage.
+
+### Cascade Chain
+
+1. `ElementSection::onAfterWrite()` → creates an `ElementRow` if `ChildArea` is empty
+2. `ElementRow::onAfterWrite()` → creates an `ElementColumn` if `ChildArea` is empty
+3. `ElementColumn` does NOT auto-scaffold (only initializes `GridSettings` JSON on first write)
+
+**Result**: A single `ElementSection::create()->write()` produces the full `Section → Row → Column` tree.
+
+### Guard Conditions (Idempotency)
+
+Both Section and Row check before scaffolding:
+1. `Versioned::get_stage() === Versioned::DRAFT` — no scaffolding on LIVE
+2. `$childArea->Elements()->count() > 0` — no scaffolding if children already exist
+
+Subsequent writes to the same element do NOT create duplicate children.
+
+### Configurable Default Titles
+
+- `ElementSection::$default_row_title` (default: `''`)
+- `ElementRow::$default_column_title` (default: `''`)
+
+## Hierarchy Validation
+
+Validation happens in two contexts with partially duplicated logic.
+
+### At Write Time: `HierarchyValidationExtension`
+
+Applied globally to all `BaseElement` subclasses via YAML. Hooks into `updateValidate()`:
+
+1. No parent → pass (root-level orphan)
+2. Parent area has no owner → pass (orphaned area)
+3. Owner is a SiteTree page → check `can_be_root` on the element
+4. Otherwise → check `isElementAllowed()` against `allowed_elements`/`disallowed_elements`
+
+Violation throws `ValidationException`, preventing the database write.
+
+### At Reorder Time: `ReorderValidator`
+
+Called by `ReorderService` before executing a cross-area move:
+
+1. Same-area move → always `Result::ok()` (no hierarchy change)
+2. Cross-area move → applies the same `can_be_root` and `isElementAllowed()` checks
+3. Returns `Result::fail()` for violations (uses Result pattern, not exceptions)
+
+**Known tech debt**: `isElementAllowed()` is duplicated identically in both `HierarchyValidationService` and `ReorderValidator` (not shared via trait or base class).
+
+## Integration Test Implications
+
+### Auto-Scaffolding Awareness
+
+Tests creating container elements **must** account for auto-scaffolded children:
+
+```php
+// Creating a Section produces Section + Row + Column (3 elements total)
+$section = ElementSection::create();
+$section->ParentID = $area->ID;
+$section->write();
+
+// The child area now has 1 Row
+$this->assertCount(1, $section->getChildArea()->Elements());
+
+// That Row's child area has 1 Column
+$row = $section->getChildArea()->Elements()->first();
+$this->assertCount(1, $row->getChildArea()->Elements());
+```
+
+### Stage Setup Required
+
+All container integration tests must call `Versioned::set_stage(Versioned::DRAFT)` in `setUp()` because `FlushableTestState::setUp()` clears the reading mode, which would break scaffolding hooks.
+
+## E2E Fixture Ordering
+
+YAML fixtures must list elements **bottom-up** (leaf → column → row → section → page) to prevent auto-scaffolding from creating duplicate children. See `e2e-conventions` instructions for details.
+
+<!-- Source: local .apm/instructions/e2e-conventions.instructions.md -->
+# E2E Test Conventions
+
+## Test Philosophy
+
+E2E tests validate **complete user flows**, not individual operations. Each spec describes a realistic user journey that exercises multiple units working together in a real browser+Docker environment.
+
+- **E2E tests answer**: "Does this user story actually work end-to-end?"
+- **E2E tests do NOT answer**: "Does this button click produce this API call?" — that's a functional test disguised as E2E, carrying all the cost (browser, Docker, fixtures) with none of the integration coverage benefit.
+
+**Coverage boundaries**: Unit tests cover individual operations. Integration tests cover service coordination. E2E tests prove the assembled system delivers the user story.
+
+### Anti-Pattern: One-Operation-Per-Spec
+
+Do NOT write specs like:
+- "should add element" → assert element appears
+- "should delete row" → assert element gone
+- "should reorder" → assert new order
+
+These are expensive functional tests. Instead, write multi-step user journeys:
+- "Content editor builds a page section with rows and columns, reorders elements, and publishes" — one spec covering the full authoring flow.
+
+Aim for **3-5 meaningful user journey specs** per feature area, not 15-20 narrow operation tests.
+
+## Fixture System
+
+The project uses a custom HTTP-based fixture system, not Playwright's built-in fixtures.
+
+### Architecture
+
+- `FixtureController` — HTTP endpoints at `/dev/elemental-grid-fixtures/{load,reset}`, gated to dev environment only
+- `FixtureLoader` — Loads YAML fixture files via SilverStripe's `FixtureFactory`, applies post-actions
+- `FixturePostAction` — Post-write operations: `publish_recursive`, `unpublish`, `modify` (field updates)
+- `FixtureResult` — JSON response with `pageId`, `pageUrl`, `fixtureMap`
+
+### Loading Fixtures in Specs
+
+```typescript
+import { loadFixture, resetFixtures } from '../helpers/fixtures';
+
+test.describe('Feature area', () => {
+  test.afterAll(async ({ request }) => {
+    await resetFixtures(request);
+  });
+
+  test('user journey description', async ({ page }) => {
+    const fixture = await loadFixture(page.request, 'fixture-name');
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(page.getByTestId('grid-editor-loading')).toBeHidden({ timeout: 15_000 });
+    // ... multi-step user journey assertions
+  });
+});
+```
+
+**Important**: Use `page.request` (not the standalone `request` fixture) when a `page` object is available — this shares browser cookies and avoids `strict_user_agent_check` session invalidation.
+
+### Fixture YAML Conventions
+
+- All pages must use `e2e-` as the URLSegment prefix (this is how `reset()` identifies E2E data)
+- Order elements **bottom-up**: leaf elements before columns, columns before rows, rows before sections, sections before the page. This prevents `onAfterWrite` auto-scaffolding from creating duplicate children
+- `GridSettings` is stored as a JSON string on `ElementColumn`
+- Register fixtures in `_config/dev.yml` under `FixtureLoader.fixtures`
+
+### Post-Actions
+
+Post-actions run after YAML write, still in DRAFT stage:
+- `publish_recursive` — calls `publishRecursive()` on the record
+- `unpublish` — calls `doUnpublish()` on the record
+- `modify` — sets specific fields and writes (creates draft-modified state)
+
+### Available Fixtures
+
+Registered in `_config/dev.yml`: `element-tree`, `empty-page`, `collapse-test`, `complex-page`
+
+## Locator Strategy
+
+E2E specs test **what is rendered**, not implementation details. Locators must be resilient to theme and markup changes.
+
+### Preferred: `getByTestId`
+
+Use `data-testid` attributes as the primary locator strategy. These are stable, intentional contracts between the component and the test:
+
+```typescript
+page.getByTestId('section-block')
+page.getByTestId('column-badge')
+page.getByTestId('viewport-button')
+```
+
+### Acceptable: Accessible Roles and Labels
+
+Use `getByRole`, `getByLabel`, `getByText` when testing from the user's perspective:
+
+```typescript
+page.getByRole('button', { name: 'Medium', exact: true })
+page.getByRole('group', { name: 'Viewport size' })
+```
+
+### Anti-Pattern: CSS Class and ID Selectors
+
+**Do NOT use CSS class selectors** (`.row-block`, `.col-md-6`) or DOM IDs (`#Form_EditForm_Title`) unless absolutely necessary. These tie the test to the theme/CSS layer, making specs extremely brittle — a CSS refactor or theme change breaks every test that uses class selectors.
+
+```typescript
+// Wrong — brittle, tied to CSS implementation
+page.locator('.row-block')
+page.locator('#Form_EditForm_Title')
+
+// Correct — stable, tests what is rendered
+page.getByTestId('row-block')
+page.getByRole('textbox', { name: 'Title' })
+```
+
+If a `data-testid` doesn't exist for an element you need to locate, **add one to the component** rather than reaching for a class selector.
+
+## Playwright Patterns
+
+- **Serial execution**: `fullyParallel: false`, `workers: 1` — tests share database state
+- **Auth**: Global setup authenticates as `admin`/`admin`, stores state in `tests/E2E/.auth/admin.json`
+- **Base URL**: Resolved from `E2E_BASE_URL` env var or `WEB_PORT` in `.docker/.env`
+- **Wait for grid**: Always wait for `getByTestId('grid-editor-loading')` to be hidden (15s timeout) before asserting grid content
+- **Navigate to editor**: `page.goto(\`/admin/pages/edit/show/${fixture.pageId}\`)`
+- **Fixture map**: Access secondary page/element IDs via `fixture.fixtureMap['ClassName']['identifier']`
+
 <!-- Source: local .apm/instructions/project-overview.instructions.md -->
 # Project Overview
 
@@ -166,6 +392,133 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 - 4 spaces: PHP, `composer.json`
 - 2 spaces: YML, JS, TS, TSX, JSON, CSS, SCSS (enforced via `.editorconfig`)
 - LF line endings, UTF-8, trailing newline
+
+<!-- Source: local .apm/instructions/grid-adapter.instructions.md -->
+# Grid Adapter System
+
+## Architecture
+
+Grid adapters translate the abstract grid model (viewports, column widths, offsets, visibility) into CSS framework-specific class names. All consumers depend on `GridAdapterInterface`, never on a concrete adapter.
+
+### Key Files
+
+- `src/Contract/GridAdapterInterface.php` — 12 methods defining the adapter contract
+- `src/Adapter/GridAdapterConfiguration.php` — Trait providing YAML-configurable overrides
+- `src/Contract/Viewport.php` — Value object (`final readonly class`, not an enum)
+- `src/Contract/ContainerType.php` — Enum: `Section`, `Row`, `Column`
+- `_config/grid.yml` — DI binding (default: `BootstrapAdapter`)
+
+### Existing Adapters
+
+| Adapter | Default Columns | Default Viewport | Viewports |
+|---------|----------------|------------------|-----------|
+| `BootstrapAdapter` | 12 | `md` | xs, sm, md, lg, xl, xxl |
+| `TailwindAdapter` | 12 | `sm` | sm, md, lg, xl, 2xl |
+| `BulmaAdapter` | 12 | `desktop` | mobile, tablet, desktop, widescreen, fullhd |
+
+## Implementing a New Adapter
+
+### 1. Create the Adapter Class
+
+```php
+namespace WeDevelop\ElementalGrid\Adapter;
+
+use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
+use WeDevelop\ElementalGrid\Contract\Viewport;
+
+final class YourAdapter implements GridAdapterInterface
+{
+    use GridAdapterConfiguration;
+
+    private const int DEFAULT_COLUMNS = 12;
+    private const string DEFAULT_VIEWPORT_KEY = 'md';
+
+    /** @var array<string, Viewport> */
+    private readonly array $viewports;
+    private readonly int $columnCount;
+    private readonly Viewport $defaultViewport;
+
+    public function __construct()
+    {
+        $allViewports = [
+            'sm' => new Viewport('sm', 'Small'),
+            'md' => new Viewport('md', 'Medium'),
+            'lg' => new Viewport('lg', 'Large'),
+        ];
+
+        $this->viewports       = $this->applyViewportFilter($allViewports);
+        $this->columnCount     = $this->resolveColumnCount(self::DEFAULT_COLUMNS);
+        $this->defaultViewport = $this->resolveDefaultViewport(self::DEFAULT_VIEWPORT_KEY, $this->viewports);
+    }
+
+    // Implement all 12 interface methods...
+}
+```
+
+### 2. `GridAdapterConfiguration` Trait
+
+The trait provides three YAML-configurable properties (set on the concrete adapter class in project YAML):
+
+| Property | Type | Default | Purpose |
+|----------|------|---------|---------|
+| `$enabled_viewports` | `list<string>\|null` | `null` (all active) | Restrict which viewports are available |
+| `$total_columns` | `int\|null` | `null` (adapter default) | Override total column count |
+| `$default_viewport` | `string\|null` | `null` (adapter default) | Override default viewport key |
+
+The trait provides three helper methods to call in `__construct()`:
+
+- `applyViewportFilter(array $allViewports): array` — Filters the full viewport map to only enabled viewports. Throws `InvalidGridValueException` if empty array or unknown key.
+- `resolveColumnCount(int $adapterDefault): int` — Returns YAML override if set, else adapter default. Throws if override is `<= 0`.
+- `resolveDefaultViewport(string $adapterDefaultKey, array $viewports): Viewport` — Resolves the effective default viewport. Throws if key not found in active viewports.
+
+### 3. Interface Methods to Implement
+
+| Method | Returns | Notes |
+|--------|---------|-------|
+| `getViewports()` | `list<Viewport>` | Return `array_values($this->viewports)` |
+| `getColumnCount()` | `positive-int` | Return `$this->columnCount` |
+| `getDefaultViewport()` | `Viewport` | Return `$this->defaultViewport` |
+| `getWidthClass($viewport, $width)` | `string` | Framework-specific width class |
+| `getOffsetClass($viewport, $offset)` | `string` | Framework-specific offset class |
+| `getBaseWidthClass($width)` | `string` | Width class for base/default viewport |
+| `getBaseOffsetClass($offset)` | `string` | Offset class for base/default viewport |
+| `getVisibilityClasses($viewport)` | `list<string>` | Hide/restore pair for the viewport |
+| `getRowClasses()` | `string` | Row container classes |
+| `getContainerClass($fluid)` | `string` | Container wrapper classes |
+| `getTitleClassOptions()` | `array<string, string>` | CSS class → human label mapping |
+| `getCssPath()` | `?string` | Path to bundled CSS, or `null` if framework handles it |
+
+### 4. Visibility Classes Pattern
+
+All adapters generate hide+restore pairs. For a viewport that is NOT the last active viewport:
+- First class: hides from this viewport upward
+- Second class: restores at the next active viewport
+
+For the last active viewport, only the hide class is needed.
+
+Some frameworks have a "base" viewport with no prefix (Bootstrap's `xs`, Bulma's `mobile`) — handle these as special cases in class generation.
+
+### 5. Register the Adapter
+
+In `_config/grid.yml` (or project-level YAML):
+
+```yaml
+SilverStripe\Core\Injector\Injector:
+  WeDevelop\ElementalGrid\Contract\GridAdapterInterface:
+    class: WeDevelop\ElementalGrid\Adapter\YourAdapter
+```
+
+### 6. Optional: YAML Configuration
+
+```yaml
+WeDevelop\ElementalGrid\Adapter\YourAdapter:
+  enabled_viewports:
+    - sm
+    - md
+    - lg
+  total_columns: 16
+  default_viewport: md
+```
 
 ## Files matching `**/*.php`
 
