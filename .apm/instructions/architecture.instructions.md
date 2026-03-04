@@ -6,17 +6,19 @@ applyTo: "**/*"
 # Architecture
 
 ```
+_config/              # YAML config (DI bindings, element hierarchy, grid adapter)
+templates/            # SilverStripe .ss templates (element holders + form fields)
 src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
-src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma)
-src/Contract/         # Interfaces and enums (GridAdapterInterface, ContainerType, Viewport)
+src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma) + GridAdapterConfiguration trait
+src/Contract/         # Interfaces, enums, and value objects (GridAdapterInterface, ContainerType, Viewport)
 src/Controllers/      # API controllers (ElementalGridController)
-src/Dev/              # Development tools (FixtureController, FixtureLoader)
+src/Dev/              # Fixture loading for E2E tests (controller, loader, post-actions, result)
 src/Elements/         # Element models (ElementSection, ElementRow, ElementColumn)
 src/Extensions/       # SilverStripe extensions
 src/Forms/            # Form field implementations
-src/Model/            # DTOs and value objects (ElementNode)
-src/Service/          # Domain services (ElementTreeBuilder)
-src/Validation/       # Hierarchy validation service
+src/Model/            # DTOs and value objects (ElementNode, Result, ValidationError)
+src/Service/          # Domain services (tree building, persistence, reorder, grid config)
+src/Validation/       # Hierarchy validation and reorder validation
 src/Exception/        # Domain exceptions
 src/Repository/       # Repository interfaces + ORM implementations
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
@@ -26,12 +28,12 @@ tests/E2E/Fixture/    # YAML fixtures for E2E test data
 tests/E2E/specs/      # E2E test specs
 tests/E2E/helpers/    # Shared E2E test utilities
 client/src/           # Frontend source (React/TS/SCSS)
-client/src/api/       # API endpoint definitions
+client/src/api/       # API client layers (client, endpoints, config, errors)
 client/src/boot/      # Component registration
 client/src/bridge/    # SilverStripe CMS integration (entwine, Injector)
 client/src/bundles/   # Entry points
 client/src/components/ # React components
-client/src/hooks/     # React hooks (TanStack Query, mutations)
+client/src/hooks/     # React hooks, query keys, TanStack Query, mutations
 client/src/styles/    # SCSS styles
 client/src/types/     # Zod schemas, TypeScript types
 client/src/utils/     # Frontend utility functions

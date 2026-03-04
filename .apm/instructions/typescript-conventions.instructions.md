@@ -24,3 +24,10 @@ applyTo: "**/*.{ts,tsx}"
 - Vitest + React Testing Library with jsdom environment
 - Test files in `client/src/tests/`
 - Stryker for mutation testing
+
+## Key Patterns
+
+- **Zod-first types**: Schemas defined first in `client/src/types/`, TS types inferred via `z.infer<>`. Discriminated unions for element nodes. Type guards for narrowing.
+- **Query key factory**: `client/src/hooks/queryKeys.ts` provides factories for TanStack Query cache keys. Required for correct cache invalidation across mutations.
+- **API client layers**: 4-file architecture in `client/src/api/` — `client.ts` (HTTP primitives), `endpoints.ts` (business operations), `config.ts` (CMS globals like security token, base URL), `errors.ts` (typed error classes).
+- **Bridge pattern**: entwine in `client/src/bridge/` mounts React components into jQuery DOM. Injector wraps SilverStripe DI. New components registered via `client/src/boot/registerComponents.ts`.

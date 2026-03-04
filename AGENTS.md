@@ -66,17 +66,19 @@
 # Architecture
 
 ```
+_config/              # YAML config (DI bindings, element hierarchy, grid adapter)
+templates/            # SilverStripe .ss templates (element holders + form fields)
 src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
-src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma)
-src/Contract/         # Interfaces and enums (GridAdapterInterface, ContainerType, Viewport)
+src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma) + GridAdapterConfiguration trait
+src/Contract/         # Interfaces, enums, and value objects (GridAdapterInterface, ContainerType, Viewport)
 src/Controllers/      # API controllers (ElementalGridController)
-src/Dev/              # Development tools (FixtureController, FixtureLoader)
+src/Dev/              # Fixture loading for E2E tests (controller, loader, post-actions, result)
 src/Elements/         # Element models (ElementSection, ElementRow, ElementColumn)
 src/Extensions/       # SilverStripe extensions
 src/Forms/            # Form field implementations
-src/Model/            # DTOs and value objects (ElementNode)
-src/Service/          # Domain services (ElementTreeBuilder)
-src/Validation/       # Hierarchy validation service
+src/Model/            # DTOs and value objects (ElementNode, Result, ValidationError)
+src/Service/          # Domain services (tree building, persistence, reorder, grid config)
+src/Validation/       # Hierarchy validation and reorder validation
 src/Exception/        # Domain exceptions
 src/Repository/       # Repository interfaces + ORM implementations
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
@@ -86,12 +88,12 @@ tests/E2E/Fixture/    # YAML fixtures for E2E test data
 tests/E2E/specs/      # E2E test specs
 tests/E2E/helpers/    # Shared E2E test utilities
 client/src/           # Frontend source (React/TS/SCSS)
-client/src/api/       # API endpoint definitions
+client/src/api/       # API client layers (client, endpoints, config, errors)
 client/src/boot/      # Component registration
 client/src/bridge/    # SilverStripe CMS integration (entwine, Injector)
 client/src/bundles/   # Entry points
 client/src/components/ # React components
-client/src/hooks/     # React hooks (TanStack Query, mutations)
+client/src/hooks/     # React hooks, query keys, TanStack Query, mutations
 client/src/styles/    # SCSS styles
 client/src/types/     # Zod schemas, TypeScript types
 client/src/utils/     # Frontend utility functions
@@ -172,8 +174,20 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 
 ## SilverStripe Dependency Injection
 
-- **Controller DI**: `AdminController` subclasses cannot use constructor injection (framework calls `new $class()` with no args). Use `private static array $dependencies` for property injection instead.
-- **Injector constructor wiring**: Injector does NOT auto-wire constructor params from YAML interface bindings. Services with constructor injection need explicit `constructor:` config in YAML.
+- **Property injection via `$dependencies`**: Controllers (`AdminController` subclasses) and Elements (`DataObject` subclasses) cannot use constructor injection — the framework instantiates them without DI args. Use `private static array $dependencies` for property injection instead. See `ElementalGridController` and `ElementSection`/`ElementRow`/`ElementColumn` for examples.
+- **Injector constructor wiring**: Injector does NOT auto-wire constructor params from YAML interface bindings. Services with constructor injection need explicit `constructor:` config in YAML (see `_config/elements.yml`).
+
+## Result Pattern
+
+- Service-layer validation returns `Result` objects via `Result::ok($value)` / `Result::fail($errors)` — never throws for expected validation failures.
+- Used in `ReorderService`, `ElementPersistenceService`, `ReorderExecutor`, and controller response flows.
+- Check with `$result->isOk()` / `$result->isFail()`, access value via `$result->getValue()`, errors via `$result->getErrors()`.
+
+## Container Auto-Scaffolding
+
+- `ElementSection::onAfterWrite()` auto-creates a child `ElementRow` on draft stage if none exists.
+- `ElementRow::onAfterWrite()` auto-creates a child `ElementColumn` on draft stage if none exists.
+- This ensures the Section→Row→Column hierarchy is always complete. Integration tests creating elements must account for these auto-created children.
 
 ## PHPStan
 
@@ -203,6 +217,13 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 - Vitest + React Testing Library with jsdom environment
 - Test files in `client/src/tests/`
 - Stryker for mutation testing
+
+## Key Patterns
+
+- **Zod-first types**: Schemas defined first in `client/src/types/`, TS types inferred via `z.infer<>`. Discriminated unions for element nodes. Type guards for narrowing.
+- **Query key factory**: `client/src/hooks/queryKeys.ts` provides factories for TanStack Query cache keys. Required for correct cache invalidation across mutations.
+- **API client layers**: 4-file architecture in `client/src/api/` — `client.ts` (HTTP primitives), `endpoints.ts` (business operations), `config.ts` (CMS globals like security token, base URL), `errors.ts` (typed error classes).
+- **Bridge pattern**: entwine in `client/src/bridge/` mounts React components into jQuery DOM. Injector wraps SilverStripe DI. New components registered via `client/src/boot/registerComponents.ts`.
 
 ---
 *This file was generated by APM CLI. Do not edit manually.*
