@@ -64,16 +64,16 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
         </p>
       )}
       {data !== undefined && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={typedCollisionDetection}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <DragContext.Provider value={dragContextValue}>
-            <ViewportProvider>
-              <ViewportSwitcher />
+        <ViewportProvider>
+          <ViewportSwitcher />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={typedCollisionDetection}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <DragContext.Provider value={dragContextValue}>
               <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
                 {enrichedSections.length > 0
                   ? enrichedSections.map((section) => (
@@ -81,14 +81,14 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
                   ))
                   : <EmptyState message="No sections yet" variant="centered" />}
               </SortableContext>
-            </ViewportProvider>
+            </DragContext.Provider>
             <DragOverlay>
               {dragState !== null && (
                 <DragOverlayContent node={dragState.activeNode} type={dragState.activeType} />
               )}
             </DragOverlay>
-          </DragContext.Provider>
-        </DndContext>
+          </DndContext>
+        </ViewportProvider>
       )}
     </div>
   );
