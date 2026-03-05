@@ -22,7 +22,7 @@ use WeDevelop\Grid\Forms\GridEditorField;
  */
 class GridPageExtension extends Extension
 {
-    /** @var array<string, class-string> */
+    /** @var array<string, string> */
     private static array $has_many = [
         'Sections' => Section::class . '.Parent',
     ];

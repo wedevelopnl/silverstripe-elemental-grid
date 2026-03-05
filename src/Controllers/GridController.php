@@ -178,11 +178,11 @@ class GridController extends AdminController
             $this->jsonError(400);
         }
 
-        if (!$element->canPublish()) { // @phpstan-ignore method.notFound (from Versioned)
+        if (!$element->canPublish()) {
             $this->jsonError(403);
         }
 
-        $element->publishRecursive(); // @phpstan-ignore method.notFound (from Versioned)
+        $element->publishRecursive();
 
         return $this->jsonSuccess(204);
     }
@@ -200,11 +200,11 @@ class GridController extends AdminController
             $this->jsonError(400);
         }
 
-        if (!$element->canUnpublish()) { // @phpstan-ignore method.notFound (from Versioned)
+        if (!$element->canUnpublish()) {
             $this->jsonError(403);
         }
 
-        $element->doUnpublish(); // @phpstan-ignore method.notFound (from Versioned)
+        $element->doUnpublish();
 
         return $this->jsonSuccess(204);
     }
@@ -226,7 +226,7 @@ class GridController extends AdminController
             $this->jsonError(403);
         }
 
-        $element->doArchive(); // @phpstan-ignore method.notFound (from Versioned)
+        $element->doArchive();
 
         return $this->jsonSuccess(204);
     }

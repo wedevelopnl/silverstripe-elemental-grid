@@ -59,7 +59,7 @@ abstract class GridElement extends DataObject
     /** @var string */
     private static string $default_sort = '"Sort" ASC';
 
-    /** @var array<string, array<string, string>> */
+    /** @var array<string, array<string, string|list<string>>> */
     private static array $indexes = [
         'Sort' => [
             'type' => 'index',
@@ -148,7 +148,7 @@ abstract class GridElement extends DataObject
      * @param Member|null $member
      * @return bool|null
      */
-    public function canView($member = null): bool|null
+    public function canView(mixed $member = null): bool|null
     {
         $page = $this->getPage();
 
@@ -159,7 +159,7 @@ abstract class GridElement extends DataObject
      * @param Member|null $member
      * @return bool|null
      */
-    public function canEdit($member = null): bool|null
+    public function canEdit(mixed $member = null): bool|null
     {
         $page = $this->getPage();
 
@@ -170,7 +170,7 @@ abstract class GridElement extends DataObject
      * @param Member|null $member
      * @return bool|null
      */
-    public function canDelete($member = null): bool|null
+    public function canDelete(mixed $member = null): bool|null
     {
         $page = $this->getPage();
 
@@ -182,7 +182,7 @@ abstract class GridElement extends DataObject
      * @param array<string, mixed> $context
      * @return bool|null
      */
-    public function canCreate($member = null, $context = []): bool|null
+    public function canCreate(mixed $member = null, mixed $context = []): bool|null
     {
         return (bool) Permission::check('CMS_ACCESS', 'any', $member);
     }
@@ -191,7 +191,7 @@ abstract class GridElement extends DataObject
      * Sets Sort to one past the current maximum for this parent + zone
      * combination when no explicit Sort has been assigned.
      */
-    protected function ensureSortSet(): void
+    public function ensureSortSet(): void
     {
         if ($this->Sort > 0) {
             return;

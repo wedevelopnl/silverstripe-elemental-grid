@@ -42,7 +42,7 @@ class Column extends ContainerElement
         'getGridWidthSummary' => 'Width',
     ];
 
-    /** @var array<string, class-string> */
+    /** @var array<string, string> */
     private static array $has_many = [
         'Elements' => GridElement::class . '.Parent',
     ];

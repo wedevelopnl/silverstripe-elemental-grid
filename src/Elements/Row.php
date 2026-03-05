@@ -42,7 +42,7 @@ class Row extends ContainerElement
         'getChildCountSummary' => 'Contents',
     ];
 
-    /** @var array<string, class-string> */
+    /** @var array<string, string> */
     private static array $has_many = [
         'Columns' => Column::class . '.Parent',
     ];
@@ -70,7 +70,7 @@ class Row extends ContainerElement
     }
 
     /** @return HasManyList<Column> */
-    #[\Override]
+    #[\Override] // @phpstan-ignore method.childReturnType, method.childReturnType (covariant narrowing: Column extends GridElement)
     public function getChildren(): HasManyList
     {
         return $this->Columns();
