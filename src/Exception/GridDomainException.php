@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Exception;
+namespace WeDevelop\Grid\Exception;
 
 /**
  * Base exception for all elemental grid domain errors.

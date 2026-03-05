@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Adapter;
+namespace WeDevelop\Grid\Tests\Integration\Adapter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
-use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\Viewport;
-use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
+use WeDevelop\Grid\Adapter\BootstrapAdapter;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Exception\InvalidGridValueException;
 
 #[CoversClass(BootstrapAdapter::class)]
 final class BootstrapAdapterTest extends SapphireTest

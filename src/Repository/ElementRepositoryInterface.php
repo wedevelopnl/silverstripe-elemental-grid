@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Repository;
+namespace WeDevelop\Grid\Repository;
 
 use DNADesign\Elemental\Models\BaseElement;
 

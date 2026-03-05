@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Dev;
+namespace WeDevelop\Grid\Tests\Integration\Dev;
 
 use DNADesign\Elemental\Models\BaseElement;
 use Page;
@@ -10,12 +10,12 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Dev\FixtureLoader;
-use WeDevelop\ElementalGrid\Dev\FixturePostAction;
-use WeDevelop\ElementalGrid\Dev\FixtureResult;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\Grid\Dev\FixtureLoader;
+use WeDevelop\Grid\Dev\FixturePostAction;
+use WeDevelop\Grid\Dev\FixtureResult;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
 
 #[CoversClass(FixtureLoader::class)]
 #[CoversClass(FixturePostAction::class)]

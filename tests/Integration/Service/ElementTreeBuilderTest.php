@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Service;
+namespace WeDevelop\Grid\Tests\Integration\Service;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use DNADesign\Elemental\Models\BaseElement;
@@ -11,13 +11,13 @@ use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
-use WeDevelop\ElementalGrid\Model\ElementNode;
-use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
-use WeDevelop\ElementalGrid\Tests\Integration\Fixture\MultiAreaTestPage;
-use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Model\ElementNode;
+use WeDevelop\Grid\Service\ElementTreeBuilder;
+use WeDevelop\Grid\Tests\Integration\Fixture\MultiAreaTestPage;
+use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(ElementTreeBuilder::class)]
 final class ElementTreeBuilderTest extends SapphireTest

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Dev;
+namespace WeDevelop\Grid\Tests\Unit\Dev;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Dev\FixturePostAction;
+use WeDevelop\Grid\Dev\FixturePostAction;
 
 #[CoversClass(FixturePostAction::class)]
 final class FixturePostActionTest extends TestCase

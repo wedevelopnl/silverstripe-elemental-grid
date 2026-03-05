@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Dev;
+namespace WeDevelop\Grid\Dev;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;

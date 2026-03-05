@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Repository;
+namespace WeDevelop\Grid\Tests\Integration\Repository;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Repository\OrmElementalAreaRepository;
-use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
+use WeDevelop\Grid\Repository\OrmElementalAreaRepository;
+use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(OrmElementalAreaRepository::class)]
 final class OrmElementalAreaRepositoryTest extends SapphireTest

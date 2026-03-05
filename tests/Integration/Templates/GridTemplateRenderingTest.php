@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Templates;
+namespace WeDevelop\Grid\Tests\Integration\Templates;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -10,13 +10,13 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
-use WeDevelop\ElementalGrid\Adapter\BulmaAdapter;
-use WeDevelop\ElementalGrid\Adapter\TailwindAdapter;
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\Grid\Adapter\BootstrapAdapter;
+use WeDevelop\Grid\Adapter\BulmaAdapter;
+use WeDevelop\Grid\Adapter\TailwindAdapter;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
 
 /**
  * Tests the full template rendering pipeline (element -> holder -> HTML output)

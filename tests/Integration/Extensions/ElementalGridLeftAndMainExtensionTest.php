@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Extensions;
+namespace WeDevelop\Grid\Tests\Integration\Extensions;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\View\Requirements;
-use WeDevelop\ElementalGrid\Extensions\ElementalGridLeftAndMainExtension;
+use WeDevelop\Grid\Extensions\ElementalGridLeftAndMainExtension;
 
 #[CoversClass(ElementalGridLeftAndMainExtension::class)]
 final class ElementalGridLeftAndMainExtensionTest extends SapphireTest

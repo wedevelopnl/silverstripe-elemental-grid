@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
+namespace WeDevelop\Grid\Tests\Integration\Elements;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
-use WeDevelop\ElementalGrid\Contract\ContainerType;
-use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
 
 #[CoversClass(ElementColumn::class)]
 final class ElementColumnTest extends ElementContainerContractTestCase

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Exception;
+namespace WeDevelop\Grid\Exception;
 
 final class InvalidGridValueException extends GridDomainException
 {

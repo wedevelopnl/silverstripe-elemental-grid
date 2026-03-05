@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Service;
+namespace WeDevelop\Grid\Tests\Unit\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface;
-use WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
-use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
-use WeDevelop\ElementalGrid\Service\ReorderService;
+use WeDevelop\Grid\Contract\ReorderExecutorInterface;
+use WeDevelop\Grid\Contract\ReorderValidatorInterface;
+use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Service\ElementPersistenceService;
+use WeDevelop\Grid\Service\ReorderService;
 
 #[CoversClass(ReorderService::class)]
 final class ReorderServiceTest extends TestCase

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Adapter;
+namespace WeDevelop\Grid\Adapter;
 
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Contract\Viewport;
 
 /**
  * Tailwind CSS grid adapter using utility classes for a 12-column CSS Grid layout.

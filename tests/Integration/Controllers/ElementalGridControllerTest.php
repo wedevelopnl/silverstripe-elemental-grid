@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
+namespace WeDevelop\Grid\Tests\Integration\Controllers;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -10,11 +10,11 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
-use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
-use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
+use WeDevelop\Grid\Controllers\ElementalGridController;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Service\ElementTreeBuilder;
+use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(ElementalGridController::class)]
 final class ElementalGridControllerTest extends FunctionalTest

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Controllers;
+namespace WeDevelop\Grid\Tests\Integration\Controllers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
-use WeDevelop\ElementalGrid\Adapter\BootstrapAdapter;
-use WeDevelop\ElementalGrid\Controllers\ElementalGridController;
+use WeDevelop\Grid\Adapter\BootstrapAdapter;
+use WeDevelop\Grid\Controllers\ElementalGridController;
 
 /**
  * Tests {@see ElementalGridController::buildAdapterConfig()} in isolation.
@@ -194,12 +194,12 @@ final class BuildAdapterConfigTest extends SapphireTest
 
     public function testBaseClassesUseAdapterBaseClassMethods(): void
     {
-        $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {
+        $adapter = new class () implements \WeDevelop\Grid\Contract\GridAdapterInterface {
             public function getViewports(): array
             {
                 return [
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('sm', 'Small'),
-                    new \WeDevelop\ElementalGrid\Contract\Viewport('md', 'Medium'),
+                    new \WeDevelop\Grid\Contract\Viewport('sm', 'Small'),
+                    new \WeDevelop\Grid\Contract\Viewport('md', 'Medium'),
                 ];
             }
 
@@ -208,7 +208,7 @@ final class BuildAdapterConfigTest extends SapphireTest
                 return 2;
             }
 
-            public function getDefaultViewport(): \WeDevelop\ElementalGrid\Contract\Viewport
+            public function getDefaultViewport(): \WeDevelop\Grid\Contract\Viewport
             {
                 return $this->getViewports()[0];
             }
@@ -269,7 +269,7 @@ final class BuildAdapterConfigTest extends SapphireTest
 
     public function testThrowsOnEmptyViewportList(): void
     {
-        $adapter = new class () implements \WeDevelop\ElementalGrid\Contract\GridAdapterInterface {
+        $adapter = new class () implements \WeDevelop\Grid\Contract\GridAdapterInterface {
             public function getViewports(): array
             {
                 return [];
@@ -280,9 +280,9 @@ final class BuildAdapterConfigTest extends SapphireTest
                 return 12;
             }
 
-            public function getDefaultViewport(): \WeDevelop\ElementalGrid\Contract\Viewport
+            public function getDefaultViewport(): \WeDevelop\Grid\Contract\Viewport
             {
-                return new \WeDevelop\ElementalGrid\Contract\Viewport('xs', 'XS');
+                return new \WeDevelop\Grid\Contract\Viewport('xs', 'XS');
             }
 
             public function getWidthClass(string $viewport, int $width): string

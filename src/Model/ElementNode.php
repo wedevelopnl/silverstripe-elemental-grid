@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Model;
+namespace WeDevelop\Grid\Model;
 
-use WeDevelop\ElementalGrid\Contract\ContainerType;
+use WeDevelop\Grid\Contract\ContainerType;
 
 /**
  * Readonly DTO representing a single element in the tree.

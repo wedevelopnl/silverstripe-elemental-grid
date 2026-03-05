@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Service;
+namespace WeDevelop\Grid\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
-use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Model\ElementNode;
+use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Model\ElementNode;
 use Psr\Log\LoggerInterface;
-use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
+use WeDevelop\Grid\Repository\ElementRepositoryInterface;
 
 /**
  * Builds a recursive element tree for a page using batch-loading to avoid N+1 queries.

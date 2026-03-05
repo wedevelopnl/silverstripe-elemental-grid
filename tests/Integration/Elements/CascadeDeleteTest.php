@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
+namespace WeDevelop\Grid\Tests\Integration\Elements;
 
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Elements\ElementColumn;
-use WeDevelop\ElementalGrid\Elements\ElementRow;
-use WeDevelop\ElementalGrid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\ElementRow;
+use WeDevelop\Grid\Elements\ElementSection;
 
 /**
  * Guards cascade_deletes configuration on container elements.

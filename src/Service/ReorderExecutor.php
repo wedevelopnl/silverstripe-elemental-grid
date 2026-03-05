@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Service;
+namespace WeDevelop\Grid\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
-use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
+use WeDevelop\Grid\Contract\ReorderExecutorInterface;
+use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Repository\ElementRepositoryInterface;
 
 class ReorderExecutor implements ReorderExecutorInterface
 {

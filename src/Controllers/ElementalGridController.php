@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Controllers;
+namespace WeDevelop\Grid\Controllers;
 
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Admin\AdminController;
@@ -13,15 +13,15 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\Viewport;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
-use WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface;
-use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
-use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
-use WeDevelop\ElementalGrid\Service\ElementTreeBuilder;
-use WeDevelop\ElementalGrid\Service\ReorderService;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Repository\ElementalAreaRepositoryInterface;
+use WeDevelop\Grid\Repository\ElementRepositoryInterface;
+use WeDevelop\Grid\Service\ElementPersistenceService;
+use WeDevelop\Grid\Service\ElementTreeBuilder;
+use WeDevelop\Grid\Service\ReorderService;
 
 /**
  * @phpstan-type CreateElementBody array{

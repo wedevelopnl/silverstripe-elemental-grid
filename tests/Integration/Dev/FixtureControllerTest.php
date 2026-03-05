@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Dev;
+namespace WeDevelop\Grid\Tests\Integration\Dev;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\FunctionalTest;
-use WeDevelop\ElementalGrid\Dev\FixtureController;
-use WeDevelop\ElementalGrid\Dev\FixtureLoader;
+use WeDevelop\Grid\Dev\FixtureController;
+use WeDevelop\Grid\Dev\FixtureLoader;
 
 #[CoversClass(FixtureController::class)]
 final class FixtureControllerTest extends FunctionalTest

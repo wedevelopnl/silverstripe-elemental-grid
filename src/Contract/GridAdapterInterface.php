@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Contract;
+namespace WeDevelop\Grid\Contract;
 
 /**
  * Stateless adapter that translates grid layout intent into framework-specific CSS classes.

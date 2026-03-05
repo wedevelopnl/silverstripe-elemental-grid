@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Service;
+namespace WeDevelop\Grid\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Services\ReorderElements;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Validation\ValidationException;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
+use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Model\ValidationError;
 
 /**
  * Wraps SilverStripe write/reorder operations, translating

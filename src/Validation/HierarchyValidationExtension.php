@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Validation;
+namespace WeDevelop\Grid\Validation;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;

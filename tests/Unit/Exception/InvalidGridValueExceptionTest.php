@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Exception;
+namespace WeDevelop\Grid\Tests\Unit\Exception;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\Exception\GridDomainException;
-use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
+use WeDevelop\Grid\Exception\GridDomainException;
+use WeDevelop\Grid\Exception\InvalidGridValueException;
 
 #[CoversClass(InvalidGridValueException::class)]
 final class InvalidGridValueExceptionTest extends TestCase

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Service;
+namespace WeDevelop\Grid\Tests\Unit\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Core\Validation\ValidationResult;
-use WeDevelop\ElementalGrid\Service\ElementPersistenceService;
+use WeDevelop\Grid\Service\ElementPersistenceService;
 
 #[CoversClass(ElementPersistenceService::class)]
 final class ElementPersistenceServiceTest extends TestCase

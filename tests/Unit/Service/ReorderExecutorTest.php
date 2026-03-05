@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Service;
+namespace WeDevelop\Grid\Tests\Unit\Service;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface;
-use WeDevelop\ElementalGrid\Service\ReorderExecutor;
+use WeDevelop\Grid\Repository\ElementRepositoryInterface;
+use WeDevelop\Grid\Service\ReorderExecutor;
 
 #[CoversClass(ReorderExecutor::class)]
 final class ReorderExecutorTest extends TestCase

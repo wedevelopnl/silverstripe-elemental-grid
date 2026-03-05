@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Fixture;
+namespace WeDevelop\Grid\Tests\Integration\Fixture;
 
 use SilverStripe\Dev\TestOnly;
 

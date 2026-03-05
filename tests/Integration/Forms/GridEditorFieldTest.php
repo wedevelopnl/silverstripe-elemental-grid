@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Forms;
+namespace WeDevelop\Grid\Tests\Integration\Forms;
 
 use DNADesign\Elemental\Extensions\ElementalAreasExtension;
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Forms\GridEditorField;
-use WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage;
+use WeDevelop\Grid\Forms\GridEditorField;
+use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(GridEditorField::class)]
 final class GridEditorFieldTest extends SapphireTest

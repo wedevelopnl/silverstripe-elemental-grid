@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Contract;
+namespace WeDevelop\Grid\Contract;
 
 enum ValidationSeverity: string
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Contract;
+namespace WeDevelop\Grid\Contract;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use WeDevelop\ElementalGrid\Model\Result;
+use WeDevelop\Grid\Model\Result;
 
 interface ReorderValidatorInterface
 {

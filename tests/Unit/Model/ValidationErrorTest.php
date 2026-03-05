@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Model;
+namespace WeDevelop\Grid\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\Contract\ValidationSeverity;
-use WeDevelop\ElementalGrid\Model\ValidationError;
+use WeDevelop\Grid\Contract\ValidationSeverity;
+use WeDevelop\Grid\Model\ValidationError;
 
 #[CoversClass(ValidationError::class)]
 final class ValidationErrorTest extends TestCase

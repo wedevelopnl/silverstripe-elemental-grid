@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Extensions;
+namespace WeDevelop\Grid\Extensions;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\View\Requirements;

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Validation;
+namespace WeDevelop\Grid\Validation;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
-use WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface;
-use WeDevelop\ElementalGrid\Model\Result;
-use WeDevelop\ElementalGrid\Model\ValidationError;
+use WeDevelop\Grid\Contract\ReorderValidatorInterface;
+use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Model\ValidationError;
 
 class ReorderValidator implements ReorderValidatorInterface
 {

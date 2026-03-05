@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Dev;
+namespace WeDevelop\Grid\Dev;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Model;
+namespace WeDevelop\Grid\Model;
 
 /**
  * Generic success/failure container for validation flows.

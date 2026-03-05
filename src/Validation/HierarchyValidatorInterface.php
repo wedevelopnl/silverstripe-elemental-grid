@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Validation;
+namespace WeDevelop\Grid\Validation;
 
 use DNADesign\Elemental\Models\BaseElement;
-use WeDevelop\ElementalGrid\Model\Result;
+use WeDevelop\Grid\Model\Result;
 
 interface HierarchyValidatorInterface
 {

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Elements;
+namespace WeDevelop\Grid\Elements;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
-use WeDevelop\ElementalGrid\Contract\ContainerType;
-use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
 
 /**
  * Leaf container in the Section > Row > Column hierarchy.

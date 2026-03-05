@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Unit\Validation;
+namespace WeDevelop\Grid\Tests\Unit\Validation;
 
 use DNADesign\Elemental\Models\BaseElement;
 use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\ElementalGrid\Validation\ReorderValidator;
+use WeDevelop\Grid\Validation\ReorderValidator;
 
 /**
  * Unit tests for ReorderValidator — covers same-area short-circuit

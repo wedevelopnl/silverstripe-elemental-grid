@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Adapter;
+namespace WeDevelop\Grid\Adapter;
 
 use SilverStripe\Core\Config\Configurable;
-use WeDevelop\ElementalGrid\Contract\Viewport;
-use WeDevelop\ElementalGrid\Exception\InvalidGridValueException;
+use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Exception\InvalidGridValueException;
 
 /**
  * Shared configuration support for grid adapters.

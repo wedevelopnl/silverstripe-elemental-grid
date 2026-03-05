@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Tests\Integration\Elements;
+namespace WeDevelop\Grid\Tests\Integration\Elements;
 
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\ElementalGrid\Contract\ContainerType;
-use WeDevelop\ElementalGrid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Contract\ElementContainerInterface;
 
 /**
  * Abstract contract test for ElementContainerInterface implementations.

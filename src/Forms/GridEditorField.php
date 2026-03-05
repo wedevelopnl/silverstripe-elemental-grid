@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\ElementalGrid\Forms;
+namespace WeDevelop\Grid\Forms;
 
 use DNADesign\Elemental\Models\ElementalArea;
 use SilverStripe\Forms\FormField;
