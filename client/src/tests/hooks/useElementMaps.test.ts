@@ -9,10 +9,10 @@ import type {
 
 // --- Test factories ---
 
-function makeElement(id: number, parentAreaId: number): SimpleElementNode {
+function makeElement(id: number, parentId: number): SimpleElementNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -33,12 +33,11 @@ function makeElement(id: number, parentAreaId: number): SimpleElementNode {
 function makeColumn(
   id: number,
   children: SimpleElementNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): ColumnNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -56,7 +55,6 @@ function makeColumn(
     containerType: 'column',
     allowedTypes: null,
     children,
-    childAreaId,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
   };
 }
@@ -64,12 +62,11 @@ function makeColumn(
 function makeRow(
   id: number,
   children: ColumnNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): RowNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -87,19 +84,17 @@ function makeRow(
     containerType: 'row',
     allowedTypes: null,
     children,
-    childAreaId,
   };
 }
 
 function makeSection(
   id: number,
   children: RowNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): SectionNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -117,7 +112,6 @@ function makeSection(
     containerType: 'section',
     allowedTypes: null,
     children,
-    childAreaId,
   };
 }
 
@@ -126,10 +120,10 @@ describe('buildMaps', () => {
     '42': [
       makeSection(1, [
         makeRow(10, [
-          makeColumn(20, [makeElement(30, 300), makeElement(31, 300)], 300, 200),
-          makeColumn(21, [makeElement(32, 301)], 301, 200),
-        ], 200, 100),
-      ], 100, 42),
+          makeColumn(20, [makeElement(30, 20), makeElement(31, 20)], 10),
+          makeColumn(21, [makeElement(32, 21)], 10),
+        ], 1),
+      ], 42),
     ],
   };
 
@@ -146,38 +140,38 @@ describe('buildMaps', () => {
     expect(nodeMap.get(32)?.id).toBe(32);
   });
 
-  it('includes root area arrays in childrenByAreaId', () => {
-    const { childrenByAreaId } = buildMaps(tree);
+  it('includes root area arrays in childrenByParentId', () => {
+    const { childrenByParentId } = buildMaps(tree);
 
-    expect(childrenByAreaId.has(42)).toBe(true);
-    expect(childrenByAreaId.get(42)).toBe(tree['42']);
+    expect(childrenByParentId.has(42)).toBe(true);
+    expect(childrenByParentId.get(42)).toBe(tree['42']);
   });
 
-  it('includes container childAreaId entries in childrenByAreaId', () => {
-    const { childrenByAreaId } = buildMaps(tree);
+  it('includes container id entries in childrenByParentId', () => {
+    const { childrenByParentId } = buildMaps(tree);
 
-    // Section's childAreaId=100 → [row]
-    expect(childrenByAreaId.has(100)).toBe(true);
-    expect(childrenByAreaId.get(100)!.map((n) => n.id)).toEqual([10]);
+    // Section id=1 → [row]
+    expect(childrenByParentId.has(1)).toBe(true);
+    expect(childrenByParentId.get(1)!.map((n) => n.id)).toEqual([10]);
 
-    // Row's childAreaId=200 → [column 20, column 21]
-    expect(childrenByAreaId.has(200)).toBe(true);
-    expect(childrenByAreaId.get(200)!.map((n) => n.id)).toEqual([20, 21]);
+    // Row id=10 → [column 20, column 21]
+    expect(childrenByParentId.has(10)).toBe(true);
+    expect(childrenByParentId.get(10)!.map((n) => n.id)).toEqual([20, 21]);
 
-    // Column 20's childAreaId=300 → [element 30, element 31]
-    expect(childrenByAreaId.has(300)).toBe(true);
-    expect(childrenByAreaId.get(300)!.map((n) => n.id)).toEqual([30, 31]);
+    // Column 20 id=20 → [element 30, element 31]
+    expect(childrenByParentId.has(20)).toBe(true);
+    expect(childrenByParentId.get(20)!.map((n) => n.id)).toEqual([30, 31]);
 
-    // Column 21's childAreaId=301 → [element 32]
-    expect(childrenByAreaId.has(301)).toBe(true);
-    expect(childrenByAreaId.get(301)!.map((n) => n.id)).toEqual([32]);
+    // Column 21 id=21 → [element 32]
+    expect(childrenByParentId.has(21)).toBe(true);
+    expect(childrenByParentId.get(21)!.map((n) => n.id)).toEqual([32]);
   });
 
   it('returns empty maps for an empty tree', () => {
-    const { nodeMap, childrenByAreaId } = buildMaps({});
+    const { nodeMap, childrenByParentId } = buildMaps({});
 
     expect(nodeMap.size).toBe(0);
-    expect(childrenByAreaId.size).toBe(0);
+    expect(childrenByParentId.size).toBe(0);
   });
 
   it('returns null for non-existent node IDs', () => {
@@ -188,16 +182,16 @@ describe('buildMaps', () => {
 
   it('handles multiple root areas', () => {
     const multiAreaTree: ElementTreeResponse = {
-      '42': [makeSection(1, [], 100, 42)],
-      '99': [makeSection(2, [], 200, 99)],
+      '42': [makeSection(1, [], 42)],
+      '99': [makeSection(2, [], 99)],
     };
 
-    const { nodeMap, childrenByAreaId } = buildMaps(multiAreaTree);
+    const { nodeMap, childrenByParentId } = buildMaps(multiAreaTree);
 
     expect(nodeMap.size).toBe(2);
-    expect(childrenByAreaId.has(42)).toBe(true);
-    expect(childrenByAreaId.has(99)).toBe(true);
-    expect(childrenByAreaId.has(100)).toBe(true);
-    expect(childrenByAreaId.has(200)).toBe(true);
+    expect(childrenByParentId.has(42)).toBe(true);
+    expect(childrenByParentId.has(99)).toBe(true);
+    expect(childrenByParentId.has(1)).toBe(true);
+    expect(childrenByParentId.has(2)).toBe(true);
   });
 });

@@ -49,31 +49,28 @@ const mockTree: ElementTreeResponse = {
   '42': [
     {
       id: 1,
-      parentAreaId: 42,
+      parentId: 42,
       title: 'Main Section',
       containerType: 'section',
       allowedTypes: null,
-      childAreaId: 100,
       children: [
         {
           id: 2,
-          parentAreaId: 100,
+          parentId: 1,
           title: 'First Row',
           containerType: 'row',
           allowedTypes: null,
-          childAreaId: 200,
           children: [
             {
               id: 3,
-              parentAreaId: 200,
+              parentId: 2,
               title: 'Left Column',
               containerType: 'column',
               allowedTypes: null,
-              childAreaId: 300,
               children: [
                 {
                   id: 4,
-                  parentAreaId: 300,
+                  parentId: 3,
                   title: 'Text Block',
                   blockSchema: { typeName: 'Content', label: 'Content', actions: { edit: '/edit/4' }, content: '' },
                   obsoleteClassName: null,
@@ -103,11 +100,10 @@ const mockTree: ElementTreeResponse = {
             },
             {
               id: 5,
-              parentAreaId: 200,
+              parentId: 2,
               title: 'Right Column',
               containerType: 'column',
               allowedTypes: null,
-              childAreaId: 301,
               children: null,
               gridSettings: {
                 xs: { width: 12, offset: 0, visible: true },
@@ -160,7 +156,7 @@ const noSectionsTree: ElementTreeResponse = {
   '42': [
     {
       id: 99,
-      parentAreaId: 42,
+      parentId: 42,
       title: 'Standalone Block',
       blockSchema: { typeName: 'Content', label: 'Content', actions: { edit: '/edit/99' }, content: '' },
       obsoleteClassName: null,

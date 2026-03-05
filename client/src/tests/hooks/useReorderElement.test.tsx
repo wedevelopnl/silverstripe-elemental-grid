@@ -13,10 +13,10 @@ import type { ReorderElementParams } from '@/api/endpoints';
 
 // --- Test factories ---
 
-function makeElement(id: number, parentAreaId: number): SimpleElementNode {
+function makeElement(id: number, parentId: number): SimpleElementNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -37,12 +37,11 @@ function makeElement(id: number, parentAreaId: number): SimpleElementNode {
 function makeColumn(
   id: number,
   children: SimpleElementNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): ColumnNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -60,7 +59,6 @@ function makeColumn(
     containerType: 'column',
     allowedTypes: null,
     children,
-    childAreaId,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
   };
 }
@@ -119,12 +117,12 @@ describe('useReorderElement', () => {
 
     const params: ReorderElementParams = {
       elementID: 10,
-      targetAreaID: 200,
+      targetParentId: 1,
       afterElementID: null,
     };
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     await act(() => result.current.mutateAsync({ params, tree }));
@@ -139,7 +137,7 @@ describe('useReorderElement', () => {
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
       '100': [
-        makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
+        makeColumn(1, [makeElement(10, 1), makeElement(11, 1)], 100),
       ],
     };
 
@@ -150,7 +148,7 @@ describe('useReorderElement', () => {
 
     const params: ReorderElementParams = {
       elementID: 11,
-      targetAreaID: 200,
+      targetParentId: 1,
       afterElementID: null,
     };
 
@@ -178,7 +176,7 @@ describe('useReorderElement', () => {
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
       '100': [
-        makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
+        makeColumn(1, [makeElement(10, 1), makeElement(11, 1)], 100),
       ],
     };
 
@@ -189,7 +187,7 @@ describe('useReorderElement', () => {
 
     const params: ReorderElementParams = {
       elementID: 11,
-      targetAreaID: 200,
+      targetParentId: 1,
       afterElementID: null,
     };
 
@@ -219,7 +217,7 @@ describe('useReorderElement', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
@@ -228,7 +226,7 @@ describe('useReorderElement', () => {
 
     await act(() =>
       result.current.mutateAsync({
-        params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+        params: { elementID: 10, targetParentId: 1, afterElementID: null },
         tree,
       }),
     );
@@ -246,7 +244,7 @@ describe('useReorderElement', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
@@ -256,7 +254,7 @@ describe('useReorderElement', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          params: { elementID: 10, targetParentId: 1, afterElementID: null },
           tree,
         });
       } catch {
@@ -277,7 +275,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -285,7 +283,7 @@ describe('useReorderElement', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          params: { elementID: 10, targetParentId: 1, afterElementID: null },
           tree,
         });
       } catch {
@@ -302,7 +300,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -310,7 +308,7 @@ describe('useReorderElement', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          params: { elementID: 10, targetParentId: 1, afterElementID: null },
           tree,
         });
       } catch {
@@ -329,7 +327,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -337,7 +335,7 @@ describe('useReorderElement', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          params: { elementID: 10, targetParentId: 1, afterElementID: null },
           tree,
         });
       } catch {
@@ -356,7 +354,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
+      '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -364,7 +362,7 @@ describe('useReorderElement', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          params: { elementID: 10, targetAreaID: 200, afterElementID: null },
+          params: { elementID: 10, targetParentId: 1, afterElementID: null },
           tree,
         });
       } catch {

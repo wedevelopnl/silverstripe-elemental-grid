@@ -36,10 +36,10 @@ function storageKey(): string {
   return `elemental-grid:collapsed:${String(AREA_ID)}`;
 }
 
-function makeElement(id: number, parentAreaId: number): SimpleElementNode {
+function makeElement(id: number, parentId: number): SimpleElementNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Content',
@@ -57,10 +57,10 @@ function makeElement(id: number, parentAreaId: number): SimpleElementNode {
   };
 }
 
-function makeColumn(id: number, overrides: Partial<ColumnNode> = {}, parentAreaId: number = 200): ColumnNode {
+function makeColumn(id: number, overrides: Partial<ColumnNode> = {}, parentId: number = 200): ColumnNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -78,16 +78,15 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}, parentAreaI
     containerType: 'column',
     allowedTypes: null,
     children: null,
-    childAreaId: 100,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
     ...overrides,
   };
 }
 
-function makeRow(id: number, overrides: Partial<RowNode> = {}, parentAreaId: number = 300): RowNode {
+function makeRow(id: number, overrides: Partial<RowNode> = {}, parentId: number = 300): RowNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -105,15 +104,14 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}, parentAreaId: num
     containerType: 'row',
     allowedTypes: null,
     children: null,
-    childAreaId: 200,
     ...overrides,
   };
 }
 
-function makeSection(id: number, overrides: Partial<SectionNode> = {}, parentAreaId: number = 42): SectionNode {
+function makeSection(id: number, overrides: Partial<SectionNode> = {}, parentId: number = 42): SectionNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -131,7 +129,6 @@ function makeSection(id: number, overrides: Partial<SectionNode> = {}, parentAre
     containerType: 'section',
     allowedTypes: null,
     children: null,
-    childAreaId: 300,
     ...overrides,
   };
 }

@@ -26,7 +26,7 @@ const validBlockSchema = {
 function makeSimpleNode(overrides: Record<string, unknown> = {}) {
   return {
     id: 1,
-    parentAreaId: 42,
+    parentId: 42,
     title: 'Text block',
     blockSchema: validBlockSchema,
     obsoleteClassName: null,
@@ -47,12 +47,11 @@ function makeColumnNode(
   return {
     ...makeSimpleNode(),
     id: 10,
-    parentAreaId: 200,
+    parentId: 200,
     title: 'Column',
     containerType: 'column',
     allowedTypes: { 'App\\Model\\ElementContent': 'Content' },
     children,
-    childAreaId: 100,
     gridSettings: {
       xs: { width: 12, offset: 0, visible: true },
       sm: { width: 12, offset: 0, visible: true },
@@ -71,12 +70,11 @@ function makeRowNode(
   return {
     ...makeSimpleNode(),
     id: 20,
-    parentAreaId: 300,
+    parentId: 300,
     title: 'Row',
     containerType: 'row',
     allowedTypes: null,
     children,
-    childAreaId: 200,
     ...overrides,
   };
 }
@@ -88,12 +86,11 @@ function makeSectionNode(
   return {
     ...makeSimpleNode(),
     id: 30,
-    parentAreaId: 42,
+    parentId: 42,
     title: 'Section',
     containerType: 'section',
     allowedTypes: null,
     children,
-    childAreaId: 300,
     ...overrides,
   };
 }
@@ -168,12 +165,11 @@ describe('columnNodeSchema', () => {
   it('parses column node with gridSettings', () => {
     const input = {
       id: 3,
-      parentAreaId: 200,
+      parentId: 200,
       title: 'Left Column',
       containerType: 'column',
       allowedTypes: null,
       children: [],
-      childAreaId: 50,
       gridSettings: {
         xs: { width: 12, offset: 0, visible: true },
         md: { width: 6, offset: 0, visible: true },
@@ -232,30 +228,6 @@ describe('sectionNodeSchema', () => {
   it('rejects a section with column children', () => {
     const section = makeSectionNode([makeColumnNode()]);
     expect(() => sectionNodeSchema.parse(section)).toThrow();
-  });
-});
-
-// --- childAreaId rejection ---
-
-describe('childAreaId non-nullable on containers', () => {
-  it('rejects columnNode with childAreaId: null', () => {
-    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: null }))).toThrow();
-  });
-
-  it('rejects rowNode with childAreaId: null', () => {
-    expect(() => rowNodeSchema.parse(makeRowNode([], { childAreaId: null }))).toThrow();
-  });
-
-  it('rejects sectionNode with childAreaId: null', () => {
-    expect(() => sectionNodeSchema.parse(makeSectionNode([], { childAreaId: null }))).toThrow();
-  });
-
-  it('rejects columnNode with childAreaId: 0', () => {
-    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: 0 }))).toThrow();
-  });
-
-  it('rejects columnNode with childAreaId: -1', () => {
-    expect(() => columnNodeSchema.parse(makeColumnNode([], { childAreaId: -1 }))).toThrow();
   });
 });
 

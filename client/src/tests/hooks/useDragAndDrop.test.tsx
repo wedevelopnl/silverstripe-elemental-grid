@@ -19,10 +19,10 @@ import type { DragState } from '@/hooks/useDragAndDrop';
 
 // --- Test factories ---
 
-function makeElement(id: number, parentAreaId: number): SimpleElementNode {
+function makeElement(id: number, parentId: number): SimpleElementNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -43,12 +43,11 @@ function makeElement(id: number, parentAreaId: number): SimpleElementNode {
 function makeColumn(
   id: number,
   children: SimpleElementNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): ColumnNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -66,7 +65,6 @@ function makeColumn(
     containerType: 'column',
     allowedTypes: null,
     children,
-    childAreaId,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
   };
 }
@@ -74,12 +72,11 @@ function makeColumn(
 function makeRow(
   id: number,
   children: ColumnNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): RowNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -97,19 +94,17 @@ function makeRow(
     containerType: 'row',
     allowedTypes: null,
     children,
-    childAreaId,
   };
 }
 
 function makeSection(
   id: number,
   children: RowNode[],
-  childAreaId: number,
-  parentAreaId: number,
+  parentId: number,
 ): SectionNode {
   return {
     id,
-    parentAreaId,
+    parentId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -127,7 +122,6 @@ function makeSection(
     containerType: 'section',
     allowedTypes: null,
     children,
-    childAreaId,
   };
 }
 
@@ -188,19 +182,19 @@ function makeDragCancelEvent(activeId: string): DragCancelEvent {
 //
 // Structure:
 //   area 42:
-//     Section 1 (id=1, childAreaId=100, parentAreaId=42)
-//       Row 10 (id=10, childAreaId=200, parentAreaId=100)
-//         Column 20 (id=20, childAreaId=300, parentAreaId=200, children: [Element 30, Element 31])
-//         Column 21 (id=21, childAreaId=301, parentAreaId=200, children: [Element 32])
+//     Section 1 (id=1, parentId=42)
+//       Row 10 (id=10, parentId=1)
+//         Column 20 (id=20, parentId=10, children: [Element 30, Element 31])
+//         Column 21 (id=21, parentId=10, children: [Element 32])
 
 const testTree: ElementTreeResponse = {
   '42': [
     makeSection(1, [
       makeRow(10, [
-        makeColumn(20, [makeElement(30, 300), makeElement(31, 300)], 300, 200),
-        makeColumn(21, [makeElement(32, 301)], 301, 200),
-      ], 200, 100),
-    ], 100, 42),
+        makeColumn(20, [makeElement(30, 20), makeElement(31, 20)], 10),
+        makeColumn(21, [makeElement(32, 21)], 10),
+      ], 1),
+    ], 42),
   ],
 };
 
@@ -329,7 +323,7 @@ describe('useDragAndDrop', () => {
         useDragAndDrop({ ...defaultOptions, onReorder }),
       );
 
-      // Move element-30 after element-31 within column 20 (area 300)
+      // Move element-30 after element-31 within column 20
       act(() => {
         result.current.handleDragEnd(makeDragEndEvent('element-30', 'element-31'));
       });
@@ -337,7 +331,7 @@ describe('useDragAndDrop', () => {
       expect(onReorder).toHaveBeenCalledTimes(1);
       expect(onReorder).toHaveBeenCalledWith(
         30,   // elementID
-        300,  // targetAreaID (column 20's childAreaId)
+        20,   // targetParentId (column 20's id)
         31,   // afterElementID (placed after element 31)
       );
     });
@@ -348,7 +342,7 @@ describe('useDragAndDrop', () => {
         useDragAndDrop({ ...defaultOptions, onReorder }),
       );
 
-      // Move element-30 (in column 20, area 300) to where element-32 is (in column 21, area 301)
+      // Move element-30 (in column 20) to where element-32 is (in column 21)
       act(() => {
         result.current.handleDragEnd(makeDragEndEvent('element-30', 'element-32'));
       });
@@ -356,7 +350,7 @@ describe('useDragAndDrop', () => {
       expect(onReorder).toHaveBeenCalledTimes(1);
       expect(onReorder).toHaveBeenCalledWith(
         30,   // elementID
-        301,  // targetAreaID (column 21's childAreaId)
+        21,   // targetParentId (column 21's id)
         null, // afterElementID (takes position of element-32, which is index 0)
       );
     });
@@ -368,10 +362,10 @@ describe('useDragAndDrop', () => {
         '42': [
           makeSection(1, [
             makeRow(10, [
-              makeColumn(20, [makeElement(30, 300)], 300, 200),
-              makeColumn(21, [], 301, 200),
-            ], 200, 100),
-          ], 100, 42),
+              makeColumn(20, [makeElement(30, 20)], 10),
+              makeColumn(21, [], 10),
+            ], 1),
+          ], 42),
         ],
       };
 
@@ -383,7 +377,7 @@ describe('useDragAndDrop', () => {
         }),
       );
 
-      // Drop element-30 into column-21 (empty container, area 301)
+      // Drop element-30 into column-21 (empty container)
       act(() => {
         result.current.handleDragEnd(makeDragEndEvent('element-30', 'column-21'));
       });
@@ -391,7 +385,7 @@ describe('useDragAndDrop', () => {
       expect(onReorder).toHaveBeenCalledTimes(1);
       expect(onReorder).toHaveBeenCalledWith(
         30,   // elementID
-        301,  // targetAreaID (column 21's childAreaId)
+        21,   // targetParentId (column 21's id)
         null, // afterElementID (appended to empty container = first position)
       );
     });
@@ -431,7 +425,7 @@ describe('useDragAndDrop', () => {
       );
 
       // element-30 is type 'element', row-10 is type 'row' — different types
-      // row-10 is a container with childAreaId=200, so it should try to drop into it
+      // row-10 is a container, so it should try to drop into it
       // The row's children are columns, not elements, so the compositeIds won't match.
       // resolveReorderParams will still produce a result since the active is placed at end.
       act(() => {

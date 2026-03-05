@@ -11,7 +11,7 @@ import type {
 function makeElement(id: number, overrides: Partial<SimpleElementNode> = {}): SimpleElementNode {
   return {
     id,
-    parentAreaId: 100,
+    parentId: 100,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'TextBlock',
@@ -33,7 +33,7 @@ function makeElement(id: number, overrides: Partial<SimpleElementNode> = {}): Si
 function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode {
   return {
     id,
-    parentAreaId: 200,
+    parentId: 200,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -51,7 +51,6 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode
     containerType: 'column',
     allowedTypes: null,
     children: null,
-    childAreaId: 100,
     gridSettings: { md: { width: 6, offset: 0, visible: true } },
     ...overrides,
   };
@@ -60,7 +59,7 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode
 function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
   return {
     id,
-    parentAreaId: 300,
+    parentId: 300,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -78,7 +77,6 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
     containerType: 'row',
     allowedTypes: null,
     children: null,
-    childAreaId: 200,
     ...overrides,
   };
 }
@@ -86,7 +84,7 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
 function makeSection(id: number, overrides: Partial<SectionNode> = {}): SectionNode {
   return {
     id,
-    parentAreaId: 42,
+    parentId: 42,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -104,7 +102,6 @@ function makeSection(id: number, overrides: Partial<SectionNode> = {}): SectionN
     containerType: 'section',
     allowedTypes: null,
     children: null,
-    childAreaId: 300,
     ...overrides,
   };
 }

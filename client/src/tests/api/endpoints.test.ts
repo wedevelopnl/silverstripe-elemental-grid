@@ -39,12 +39,11 @@ describe('endpoints', () => {
         ElementalArea: [
           {
             id: 1,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Section',
             containerType: 'section',
             allowedTypes: null,
             children: null,
-            childAreaId: 100,
             blockSchema: { typeName: 'Section', label: 'Section', actions: { edit: '/edit/1' }, content: '' },
             obsoleteClassName: null,
             version: 1,
@@ -79,7 +78,7 @@ describe('endpoints', () => {
 
       await createElement({
         elementClass: 'App\\MyElement',
-        elementalAreaID: 10,
+        parentId: 10,
         insertAfterElementID: 5,
       });
 
@@ -87,7 +86,7 @@ describe('endpoints', () => {
         '/admin/elemental-grid/api/create',
         {
           elementClass: 'App\\MyElement',
-          elementalAreaID: 10,
+          parentId: 10,
           insertAfterElementID: 5,
         },
       );
@@ -152,7 +151,7 @@ describe('endpoints', () => {
 
       await reorderElement({
         elementID: 5,
-        targetAreaID: 10,
+        targetParentId: 10,
         afterElementID: 3,
       });
 
@@ -160,7 +159,7 @@ describe('endpoints', () => {
         '/admin/elemental-grid/api/reorder',
         {
           elementID: 5,
-          targetAreaID: 10,
+          targetParentId: 10,
           afterElementID: 3,
         },
       );
@@ -171,7 +170,7 @@ describe('endpoints', () => {
 
       await reorderElement({
         elementID: 5,
-        targetAreaID: 10,
+        targetParentId: 10,
         afterElementID: null,
       });
 
@@ -179,7 +178,7 @@ describe('endpoints', () => {
         '/admin/elemental-grid/api/reorder',
         {
           elementID: 5,
-          targetAreaID: 10,
+          targetParentId: 10,
           afterElementID: null,
         },
       );

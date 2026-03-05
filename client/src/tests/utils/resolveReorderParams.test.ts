@@ -6,10 +6,10 @@ describe('resolveReorderParams', () => {
     it('resolves a move to the start of a container (index 0)', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 0,
         containerItems: ['element-10', 'element-11', 'element-12'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 1,
       };
 
@@ -17,7 +17,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 200,
+        targetParentId: 200,
         afterElementID: null,
       });
     });
@@ -25,10 +25,10 @@ describe('resolveReorderParams', () => {
     it('resolves a move after an element', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 2,
         containerItems: ['element-11', 'element-12', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -36,7 +36,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 200,
+        targetParentId: 200,
         afterElementID: 12,
       });
     });
@@ -44,10 +44,10 @@ describe('resolveReorderParams', () => {
     it('resolves a move to the end of a container', () => {
       const context: ReorderContext = {
         activeId: 'row-5',
-        overContainerAreaId: 100,
+        overContainerParentId: 100,
         overIndex: 3,
         containerItems: ['row-1', 'row-2', 'row-3', 'row-5'],
-        sourceContainerAreaId: 100,
+        sourceContainerParentId: 100,
         sourceIndex: 0,
       };
 
@@ -55,7 +55,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 5,
-        targetAreaID: 100,
+        targetParentId: 100,
         afterElementID: 3,
       });
     });
@@ -65,10 +65,10 @@ describe('resolveReorderParams', () => {
     it('resolves a cross-container move to the start', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 300,
+        overContainerParentId: 300,
         overIndex: 0,
         containerItems: ['element-10', 'element-20'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -76,7 +76,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 300,
+        targetParentId: 300,
         afterElementID: null,
       });
     });
@@ -84,10 +84,10 @@ describe('resolveReorderParams', () => {
     it('resolves a cross-container move to a specific position', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 300,
+        overContainerParentId: 300,
         overIndex: 1,
         containerItems: ['element-20', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -95,7 +95,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 300,
+        targetParentId: 300,
         afterElementID: 20,
       });
     });
@@ -107,10 +107,10 @@ describe('resolveReorderParams', () => {
       // containerItems represents the final order: ['element-11', 'element-12', 'element-10']
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 2,
         containerItems: ['element-11', 'element-12', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -119,7 +119,7 @@ describe('resolveReorderParams', () => {
       // afterElementID should be element-12 (previous item, not the active item)
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 200,
+        targetParentId: 200,
         afterElementID: 12,
       });
     });
@@ -129,10 +129,10 @@ describe('resolveReorderParams', () => {
     it('returns null for an unparseable activeId', () => {
       const context: ReorderContext = {
         activeId: 'invalid',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 0,
         containerItems: [],
-        sourceContainerAreaId: 100,
+        sourceContainerParentId: 100,
         sourceIndex: 0,
       };
 
@@ -142,10 +142,10 @@ describe('resolveReorderParams', () => {
     it('returns null for an empty activeId', () => {
       const context: ReorderContext = {
         activeId: '',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 0,
         containerItems: [],
-        sourceContainerAreaId: 100,
+        sourceContainerParentId: 100,
         sourceIndex: 0,
       };
 
@@ -157,10 +157,10 @@ describe('resolveReorderParams', () => {
     it('returns null when same container and same index', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 1,
         containerItems: ['element-11', 'element-10', 'element-12'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 1,
       };
 
@@ -170,10 +170,10 @@ describe('resolveReorderParams', () => {
     it('does not return null when containers differ even if index matches', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 300,
+        overContainerParentId: 300,
         overIndex: 1,
         containerItems: ['element-20', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 1,
       };
 
@@ -185,10 +185,10 @@ describe('resolveReorderParams', () => {
     it('handles section draggable IDs', () => {
       const context: ReorderContext = {
         activeId: 'section-5',
-        overContainerAreaId: 100,
+        overContainerParentId: 100,
         overIndex: 1,
         containerItems: ['section-3', 'section-5'],
-        sourceContainerAreaId: 100,
+        sourceContainerParentId: 100,
         sourceIndex: 0,
       };
 
@@ -196,7 +196,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 5,
-        targetAreaID: 100,
+        targetParentId: 100,
         afterElementID: 3,
       });
     });
@@ -204,10 +204,10 @@ describe('resolveReorderParams', () => {
     it('handles column draggable IDs', () => {
       const context: ReorderContext = {
         activeId: 'column-7',
-        overContainerAreaId: 400,
+        overContainerParentId: 400,
         overIndex: 0,
         containerItems: ['column-7', 'column-8'],
-        sourceContainerAreaId: 400,
+        sourceContainerParentId: 400,
         sourceIndex: 1,
       };
 
@@ -215,7 +215,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 7,
-        targetAreaID: 400,
+        targetParentId: 400,
         afterElementID: null,
       });
     });
@@ -225,10 +225,10 @@ describe('resolveReorderParams', () => {
     it('handles a container with only the active item', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 300,
+        overContainerParentId: 300,
         overIndex: 0,
         containerItems: ['element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -236,7 +236,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 300,
+        targetParentId: 300,
         afterElementID: null,
       });
     });
@@ -245,10 +245,10 @@ describe('resolveReorderParams', () => {
       // If the item before the target is somehow invalid, fall back to null
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 1,
         containerItems: ['bad-id', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -257,7 +257,7 @@ describe('resolveReorderParams', () => {
       // 'bad-id' is not parseable (bad is not a valid type), so afterElementID should be null
       expect(result).toEqual({
         elementID: 10,
-        targetAreaID: 200,
+        targetParentId: 200,
         afterElementID: null,
       });
     });
@@ -267,10 +267,10 @@ describe('resolveReorderParams', () => {
     it('does not treat as no-op when indices differ in same container', () => {
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 2,
         containerItems: ['element-11', 'element-12', 'element-10'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -282,10 +282,10 @@ describe('resolveReorderParams', () => {
     it('returns afterElementID=null for overIndex exactly 0', () => {
       const context: ReorderContext = {
         activeId: 'row-5',
-        overContainerAreaId: 100,
+        overContainerParentId: 100,
         overIndex: 0,
         containerItems: ['row-5', 'row-3', 'row-7'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -293,7 +293,7 @@ describe('resolveReorderParams', () => {
 
       expect(result).toEqual({
         elementID: 5,
-        targetAreaID: 100,
+        targetParentId: 100,
         afterElementID: null,
       });
     });
@@ -304,10 +304,10 @@ describe('resolveReorderParams', () => {
       // Walking backwards from index 0: element-10 is the active item, must skip
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 1,
         containerItems: ['element-10', 'element-11', 'element-12'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 0,
       };
 
@@ -324,10 +324,10 @@ describe('resolveReorderParams', () => {
       // Walking backwards: index 1 = element-10 (skip), index 0 = element-11 (use)
       const context: ReorderContext = {
         activeId: 'element-10',
-        overContainerAreaId: 200,
+        overContainerParentId: 200,
         overIndex: 2,
         containerItems: ['element-11', 'element-10', 'element-12'],
-        sourceContainerAreaId: 200,
+        sourceContainerParentId: 200,
         sourceIndex: 1,
       };
 

@@ -42,7 +42,7 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
   const children = overrides.children ?? null;
   return {
     id,
-    parentAreaId: 200,
+    parentId: 200,
     title: 'Column',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Column',
@@ -59,7 +59,6 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
     statusFlags: {},
     containerType: 'column',
     allowedTypes: null,
-    childAreaId: 100,
     gridSettings: {
       md: { width: 6, offset: 0, visible: true },
     },
@@ -141,7 +140,7 @@ describe('ColumnBlock', () => {
       children: [
         {
           id: 100,
-          parentAreaId: 100,
+          parentId: 100,
           title: 'Hero Banner',
           blockSchema: {
             typeName: 'Content',
@@ -162,7 +161,7 @@ describe('ColumnBlock', () => {
         },
         {
           id: 101,
-          parentAreaId: 100,
+          parentId: 100,
           title: 'Text Block',
           blockSchema: {
             typeName: 'Content',

@@ -79,11 +79,10 @@ describe('getDraggableTypeForNode', () => {
     const node: SectionNode = {
       ...baseFields,
       id: 1,
-      parentAreaId: 42,
+      parentId: 42,
       containerType: 'section',
       allowedTypes: null,
       children: null,
-      childAreaId: 100,
     };
     expect(getDraggableTypeForNode(node)).toBe('section');
   });
@@ -92,11 +91,10 @@ describe('getDraggableTypeForNode', () => {
     const node: RowNode = {
       ...baseFields,
       id: 2,
-      parentAreaId: 100,
+      parentId: 100,
       containerType: 'row',
       allowedTypes: null,
       children: null,
-      childAreaId: 200,
     };
     expect(getDraggableTypeForNode(node)).toBe('row');
   });
@@ -105,11 +103,10 @@ describe('getDraggableTypeForNode', () => {
     const node: ColumnNode = {
       ...baseFields,
       id: 3,
-      parentAreaId: 200,
+      parentId: 200,
       containerType: 'column',
       allowedTypes: null,
       children: null,
-      childAreaId: 300,
       gridSettings: {},
     };
     expect(getDraggableTypeForNode(node)).toBe('column');
@@ -119,7 +116,7 @@ describe('getDraggableTypeForNode', () => {
     const node: SimpleElementNode = {
       ...baseFields,
       id: 4,
-      parentAreaId: 300,
+      parentId: 300,
     };
     expect(getDraggableTypeForNode(node)).toBe('element');
   });
