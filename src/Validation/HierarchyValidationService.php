@@ -4,37 +4,31 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Validation;
 
-use DNADesign\Elemental\Extensions\ElementalPageExtension;
-use DNADesign\Elemental\Models\BaseElement;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 use WeDevelop\Grid\Model\ValidationError;
 
 class HierarchyValidationService implements HierarchyValidatorInterface
 {
-    /** @return Result<BaseElement> */
+    /** @return Result<GridElement> */
     #[\Override]
-    public function validate(BaseElement $element): Result
+    public function validate(GridElement $element): Result
     {
         $parent = $element->Parent();
-        if (!$parent->exists()) {
+        if (!$parent instanceof DataObject || !$parent->exists()) {
             return Result::ok($element);
         }
 
-        $owner = $parent->getOwnerPage();
-        if ($owner === null) {
-            return Result::ok($element);
-        }
-
-        // Page-level: owner has ElementalPageExtension (applied to any SiteTree subclass)
-        if ($owner->hasExtension(ElementalPageExtension::class)) {
+        // Page-level: parent is a SiteTree — check can_be_root
+        if ($parent instanceof SiteTree) {
             if ($element->config()->get('can_be_root') === false) {
                 return Result::fail(new ValidationError(
                     message: sprintf(
-                        '%s cannot be placed inside %s.',
+                        '%s cannot be placed at page level.',
                         $element->singular_name(),
-                        $owner->singular_name(),
                     ),
                     field: 'placement',
                 ));
@@ -43,7 +37,8 @@ class HierarchyValidationService implements HierarchyValidatorInterface
             return Result::ok($element);
         }
 
-        if ($this->isElementAllowed($element::class, $owner)) {
+        // Container-level: check allowed_elements / disallowed_elements on parent
+        if ($this->isElementAllowed($element::class, $parent)) {
             return Result::ok($element);
         }
 
@@ -51,22 +46,21 @@ class HierarchyValidationService implements HierarchyValidatorInterface
             message: sprintf(
                 '%s cannot be placed inside %s.',
                 $element->singular_name(),
-                $owner->singular_name(),
+                $parent->singular_name(),
             ),
             field: 'placement',
         ));
     }
 
     /**
-     * Check if element class is permitted by the owner's
+     * Check if element class is permitted by the parent's
      * allowed_elements / disallowed_elements config.
-     * Mirrors ElementalAreasExtension::getElementalTypes() logic.
      *
-     * @param class-string<BaseElement> $elementClass
+     * @param class-string<GridElement> $elementClass
      */
-    private function isElementAllowed(string $elementClass, DataObject $owner): bool
+    private function isElementAllowed(string $elementClass, DataObject $parent): bool
     {
-        $config = $owner->config();
+        $config = $parent->config();
         $stopInheritance = (bool) $config->get('stop_element_inheritance');
 
         $allowedElements = $stopInheritance

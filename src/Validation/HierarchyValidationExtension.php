@@ -9,11 +9,11 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Validation\ValidationResult;
 
 /**
- * Applied to BaseElement via YAML. Delegates hierarchy validation
+ * Applied to GridElement via YAML. Delegates hierarchy validation
  * to the centralized HierarchyValidationService, then translates
  * Result errors into the framework's ValidationResult.
  *
- * @extends Extension<\DNADesign\Elemental\Models\BaseElement>
+ * @extends Extension<\WeDevelop\Grid\Model\GridElement>
  */
 class HierarchyValidationExtension extends Extension
 {

@@ -4,44 +4,37 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Validation;
 
-use DNADesign\Elemental\Extensions\ElementalPageExtension;
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 use WeDevelop\Grid\Model\ValidationError;
 
 class ReorderValidator implements ReorderValidatorInterface
 {
-    /** @return Result<BaseElement> */
+    /** @return Result<GridElement> */
     #[\Override]
-    public function validate(BaseElement $element, ElementalArea $targetArea): Result
+    public function validate(GridElement $element, DataObject $targetParent): Result
     {
-        if ($element->ParentID === $targetArea->ID) {
+        if ((int) $element->ParentID === (int) $targetParent->ID) {
             return Result::ok($element);
         }
 
-        return $this->checkHierarchyRules($element, $targetArea);
+        return $this->checkHierarchyRules($element, $targetParent);
     }
 
-    /** @return Result<BaseElement> */
-    private function checkHierarchyRules(BaseElement $element, ElementalArea $targetArea): Result
+    /** @return Result<GridElement> */
+    private function checkHierarchyRules(GridElement $element, DataObject $targetParent): Result
     {
-        $owner = $targetArea->getOwnerPage();
-        if ($owner === null) {
-            return Result::ok($element);
-        }
-
-        // Page-level: owner has ElementalPageExtension
-        if ($owner->hasExtension(ElementalPageExtension::class)) {
+        // Page-level: target parent is a SiteTree — check can_be_root
+        if ($targetParent instanceof SiteTree) {
             if ($element->config()->get('can_be_root') === false) {
                 return Result::fail(new ValidationError(
                     message: sprintf(
-                        '%s cannot be placed inside %s.',
+                        '%s cannot be placed at page level.',
                         $element->singular_name(),
-                        $owner->singular_name(),
                     ),
                     field: 'placement',
                 ));
@@ -50,7 +43,8 @@ class ReorderValidator implements ReorderValidatorInterface
             return Result::ok($element);
         }
 
-        if ($this->isElementAllowed($element::class, $owner)) {
+        // Container-level: check allowed_elements / disallowed_elements on target
+        if ($this->isElementAllowed($element::class, $targetParent)) {
             return Result::ok($element);
         }
 
@@ -58,21 +52,21 @@ class ReorderValidator implements ReorderValidatorInterface
             message: sprintf(
                 '%s cannot be placed inside %s.',
                 $element->singular_name(),
-                $owner->singular_name(),
+                $targetParent->singular_name(),
             ),
             field: 'placement',
         ));
     }
 
     /**
-     * Check if element class is permitted by the owner's
+     * Check if element class is permitted by the parent's
      * allowed_elements / disallowed_elements config.
      *
-     * @param class-string<BaseElement> $elementClass
+     * @param class-string<GridElement> $elementClass
      */
-    private function isElementAllowed(string $elementClass, DataObject $owner): bool
+    private function isElementAllowed(string $elementClass, DataObject $parent): bool
     {
-        $config = $owner->config();
+        $config = $parent->config();
         $stopInheritance = (bool) $config->get('stop_element_inheritance');
 
         $allowedElements = $stopInheritance
