@@ -13,8 +13,9 @@ function makeElement(overrides: Partial<EnrichedSimpleElementNode> = {}): Enrich
     blockSchema: {
       typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
       label: 'Base Element',
-      actions: { edit: '/admin/grid/edit/1' },
-      content: 'Some preview text',
+      type: 'Base Element',
+      title: 'My Element',
+      summary: 'Some preview text',
     },
     obsoleteClassName: null,
     version: 1,
@@ -43,8 +44,9 @@ describe('ElementCard', () => {
       blockSchema: {
         typeName: 'Content',
         label: 'Content',
-        actions: { edit: '/edit/1' },
-        content: 'A detailed paragraph about widgets.',
+        type: 'Content',
+        title: '',
+        summary: 'A detailed paragraph about widgets.',
       },
     });
 
@@ -60,8 +62,9 @@ describe('ElementCard', () => {
       blockSchema: {
         typeName: 'Content',
         label: 'Content',
-        actions: { edit: '/edit/1' },
-        content: '',
+        type: 'Content',
+        title: '',
+        summary: '',
       },
     });
 
@@ -77,8 +80,9 @@ describe('ElementCard', () => {
       blockSchema: {
         typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
         label: 'Content Block',
-        actions: { edit: '/edit/1' },
-        content: 'preview',
+        type: 'Content',
+        title: '',
+        summary: 'preview',
       },
     });
 
@@ -94,8 +98,9 @@ describe('ElementCard', () => {
       blockSchema: {
         typeName: 'Content',
         label: 'Content',
-        actions: { edit: '/edit/1' },
-        content: '',
+        type: 'Content',
+        title: '',
+        summary: '',
       },
     });
 

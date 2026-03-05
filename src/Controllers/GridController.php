@@ -33,7 +33,6 @@ use WeDevelop\Grid\Service\ReorderService;
  * @phpstan-type ReorderBody array{
  *   elementID: positive-int,
  *   targetParentId: positive-int,
- *   targetParentClass: class-string<DataObject>,
  *   afterElementID: positive-int|null,
  * }
  * @phpstan-type AdapterConfig array{
@@ -285,8 +284,7 @@ class GridController extends AdminController
             $this->jsonError(403);
         }
 
-        /** @var DataObject|null $targetParent */
-        $targetParent = $body['targetParentClass']::get()->byID($body['targetParentId']);
+        $targetParent = $this->resolveParentRecord($body['targetParentId']);
         if ($targetParent === null) {
             $this->jsonError(400);
         }
@@ -436,7 +434,6 @@ class GridController extends AdminController
 
         $elementID = $data['elementID'] ?? null;
         $targetParentId = $data['targetParentId'] ?? null;
-        $targetParentClass = $data['targetParentClass'] ?? null;
         $afterElementID = $data['afterElementID'] ?? null;
 
         if (!is_int($elementID) || $elementID < 1) {
@@ -447,10 +444,6 @@ class GridController extends AdminController
             $this->jsonError(400);
         }
 
-        if (!is_string($targetParentClass) || !is_subclass_of($targetParentClass, DataObject::class, true)) {
-            $this->jsonError(400);
-        }
-
         if ($afterElementID !== null && (!is_int($afterElementID) || $afterElementID < 1)) {
             $this->jsonError(400);
         }
@@ -458,7 +451,6 @@ class GridController extends AdminController
         return [
             'elementID' => $elementID,
             'targetParentId' => $targetParentId,
-            'targetParentClass' => $targetParentClass,
             'afterElementID' => $afterElementID,
         ];
     }
@@ -483,6 +475,21 @@ class GridController extends AdminController
         }
 
         return $id;
+    }
+
+    /**
+     * Resolve a parent record by ID, trying GridElement first then SiteTree.
+     *
+     * Parent can be a container element (Section, Row, Column) or a page.
+     */
+    private function resolveParentRecord(int $parentId): ?DataObject
+    {
+        $element = GridElement::get()->byID($parentId);
+        if ($element !== null) {
+            return $element;
+        }
+
+        return SiteTree::get()->byID($parentId);
     }
 
     /**

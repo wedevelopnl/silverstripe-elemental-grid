@@ -176,7 +176,7 @@ class GridTreeBuilder
         $canUnpublish = (bool) $element->canUnpublish();
         $canCreate = (bool) $element->canCreate();
 
-        /** @var array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema */
+        /** @var array{typeName: string, type: string, title: string, summary: string, label: string} $blockSchema */
         $blockSchema = $element->getBlockSchema();
         $blockSchema['label'] = $element->getType();
 

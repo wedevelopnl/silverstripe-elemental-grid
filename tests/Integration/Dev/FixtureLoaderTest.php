@@ -15,6 +15,7 @@ use WeDevelop\Grid\Dev\FixtureResult;
 use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Elements\Row;
 use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\ContentElement;
 use WeDevelop\Grid\Model\GridElement;
 
 #[CoversClass(FixtureLoader::class)]
@@ -42,12 +43,12 @@ final class FixtureLoaderTest extends SapphireTest
                     ],
                     [
                         'action' => 'unpublish',
-                        'class' => GridElement::class,
+                        'class' => ContentElement::class,
                         'identifier' => 'draft_leaf',
                     ],
                     [
                         'action' => 'modify',
-                        'class' => GridElement::class,
+                        'class' => ContentElement::class,
                         'identifier' => 'modified_leaf',
                         'fields' => ['Title' => 'Modified Text Block (draft)'],
                     ],
@@ -80,7 +81,7 @@ final class FixtureLoaderTest extends SapphireTest
         $this->assertArrayHasKey(Section::class, $result->fixtureMap);
         $this->assertArrayHasKey(Row::class, $result->fixtureMap);
         $this->assertArrayHasKey(Column::class, $result->fixtureMap);
-        $this->assertArrayHasKey(GridElement::class, $result->fixtureMap);
+        $this->assertArrayHasKey(ContentElement::class, $result->fixtureMap);
 
         // Verify hierarchy: section → row → columns → leaves
         Versioned::withVersionedMode(function () use ($result): void {
@@ -113,7 +114,7 @@ final class FixtureLoaderTest extends SapphireTest
             );
 
             // Leaves should be parented to column
-            $leaf1Id = $result->fixtureMap[GridElement::class]['leaf1'];
+            $leaf1Id = $result->fixtureMap[ContentElement::class]['leaf1'];
             $leaf1 = GridElement::get()->byID($leaf1Id);
             $this->assertNotNull($leaf1, 'Leaf 1 should exist');
             $this->assertSame(
@@ -129,9 +130,9 @@ final class FixtureLoaderTest extends SapphireTest
         $loader = FixtureLoader::create();
         $result = $loader->load('complex-page');
 
-        $draftLeafId = $result->fixtureMap[GridElement::class]['draft_leaf'];
-        $publishedLeafId = $result->fixtureMap[GridElement::class]['published_leaf'];
-        $modifiedLeafId = $result->fixtureMap[GridElement::class]['modified_leaf'];
+        $draftLeafId = $result->fixtureMap[ContentElement::class]['draft_leaf'];
+        $publishedLeafId = $result->fixtureMap[ContentElement::class]['published_leaf'];
+        $modifiedLeafId = $result->fixtureMap[ContentElement::class]['modified_leaf'];
 
         // draft_leaf should exist in draft but NOT on live
         Versioned::withVersionedMode(function () use ($draftLeafId): void {

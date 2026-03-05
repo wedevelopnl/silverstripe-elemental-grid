@@ -41,7 +41,7 @@ class ContentElement extends GridElement
         $templates = [];
         $class = static::class;
 
-        while ($class !== self::class && $class !== GridElement::class && $class !== false) {
+        while ($class !== GridElement::class && $class !== false) {
             $templates[] = str_replace('\\', '/', $class) . $suffix;
             $class = get_parent_class($class);
         }

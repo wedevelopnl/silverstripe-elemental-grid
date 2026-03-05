@@ -19,8 +19,9 @@ import type { ColumnNode } from '@/types/elements';
 const validBlockSchema = {
   typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
   label: 'Content',
-  actions: { edit: '/admin/grid/api/edit/1' },
-  content: '<p>Hello world</p>',
+  type: 'Content',
+  title: '',
+  summary: '<p>Hello world</p>',
 };
 
 function makeSimpleNode(overrides: Record<string, unknown> = {}) {
@@ -104,7 +105,7 @@ describe('blockSchemaSchema', () => {
 
   it('rejects a block schema missing typeName', () => {
     expect(() =>
-      blockSchemaSchema.parse({ actions: { edit: '/edit' }, content: '' }),
+      blockSchemaSchema.parse({ type: 'Test', title: '', summary: '' }),
     ).toThrow();
   });
 });
@@ -174,7 +175,7 @@ describe('columnNodeSchema', () => {
         xs: { width: 12, offset: 0, visible: true },
         md: { width: 6, offset: 0, visible: true },
       },
-      blockSchema: { typeName: 'Column', label: 'Column', actions: { edit: '/edit/3' }, content: '' },
+      blockSchema: { typeName: 'Column', label: 'Column', type: 'Column', title: '', summary: '' },
       obsoleteClassName: null,
       version: 1,
       canDelete: true,

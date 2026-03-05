@@ -21,8 +21,9 @@ function makeElement(id: number, parentId: number): SimpleElementNode {
     blockSchema: {
       typeName: 'Element',
       label: 'Element',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Element',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -46,8 +47,9 @@ function makeColumn(
     blockSchema: {
       typeName: 'Column',
       label: 'Column',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Column',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,

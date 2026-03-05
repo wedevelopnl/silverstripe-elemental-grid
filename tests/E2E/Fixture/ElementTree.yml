@@ -45,7 +45,7 @@ WeDevelop\Grid\Elements\Column:
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
 
 # --- Leaves (into columns) ---
-WeDevelop\Grid\Model\GridElement:
+WeDevelop\Grid\Model\ContentElement:
   leaf1:
     Title: 'Text Block'
     Sort: 1

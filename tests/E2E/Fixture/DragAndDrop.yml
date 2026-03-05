@@ -94,7 +94,7 @@ WeDevelop\Grid\Elements\Column:
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
 # --- Leaves ---
-WeDevelop\Grid\Model\GridElement:
+WeDevelop\Grid\Model\ContentElement:
   block_1:
     Title: 'Block 1'
     Sort: 1

@@ -16,7 +16,7 @@ export default function ElementCard({ element }: ElementCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: element.sortableId });
   const status = getElementStatus(element.statusFlags);
   const label = element.blockSchema.label;
-  const content = element.blockSchema.content;
+  const content = element.blockSchema.summary;
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),

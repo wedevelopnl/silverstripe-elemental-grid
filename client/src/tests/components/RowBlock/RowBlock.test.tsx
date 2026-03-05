@@ -51,8 +51,9 @@ function makeColumn(id: number, title: string, overrides: Partial<EnrichedColumn
     blockSchema: {
       typeName: 'WeDevelop\\Grid\\Elements\\Column',
       label: 'Column',
-      actions: { edit: `/admin/grid/edit/${id}` },
-      content: '',
+      type: 'Column',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -85,8 +86,9 @@ function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
     blockSchema: {
       typeName: 'WeDevelop\\Grid\\Elements\\Row',
       label: 'Row',
-      actions: { edit: '/admin/grid/edit/20' },
-      content: '',
+      type: 'Row',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,

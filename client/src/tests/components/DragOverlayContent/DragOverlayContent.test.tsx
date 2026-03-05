@@ -16,8 +16,9 @@ function makeElement(id: number, overrides: Partial<SimpleElementNode> = {}): Si
     blockSchema: {
       typeName: 'TextBlock',
       label: 'Text Block',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Text Block',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -38,8 +39,9 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode
     blockSchema: {
       typeName: 'Column',
       label: 'Column',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Column',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -64,8 +66,9 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
     blockSchema: {
       typeName: 'Row',
       label: 'Row',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Row',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -89,8 +92,9 @@ function makeSection(id: number, overrides: Partial<SectionNode> = {}): SectionN
     blockSchema: {
       typeName: 'Section',
       label: 'Section',
-      actions: { edit: `/edit/${id}` },
-      content: '',
+      type: 'Section',
+      title: '',
+      summary: '',
     },
     obsoleteClassName: null,
     version: 1,
@@ -167,8 +171,9 @@ describe('DragOverlayContent', () => {
       blockSchema: {
         typeName: 'TextBlock',
         label: 'Text Block',
-        actions: { edit: '/edit/1' },
-        content: '',
+        type: 'Text Block',
+        title: '',
+        summary: '',
       },
     });
 

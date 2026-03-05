@@ -11,10 +11,9 @@ export type ContainerType = (typeof CONTAINER_TYPES)[number];
 export const blockSchemaSchema = z.object({
   typeName: z.string(),
   label: z.string(),
-  actions: z.object({
-    edit: z.string(),
-  }),
-  content: z.string(),
+  type: z.string(),
+  title: z.string(),
+  summary: z.string(),
 });
 
 const statusFlagValueSchema = z.object({
