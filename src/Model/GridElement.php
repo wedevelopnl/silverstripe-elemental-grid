@@ -14,8 +14,7 @@ use SilverStripe\Versioned\Versioned;
  * Abstract base for all grid elements (containers and content).
  *
  * Uses a polymorphic has_one (ParentID + ParentClass) so elements can
- * live under any DataObject — a page, a container, or a future zone
- * owner — without coupling to ElementalArea.
+ * live under any DataObject — a page, a container, or a future zone owner.
  *
  * @property string $Title
  * @property bool $ShowTitle
