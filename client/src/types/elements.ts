@@ -30,7 +30,7 @@ export const statusFlagsSchema = z.object({
 
 const baseFieldsSchema = z.object({
   id: z.number().int(),
-  parentAreaId: z.number().int().positive(),
+  parentId: z.number().int().positive(),
   title: z.string().min(1),
   blockSchema: blockSchemaSchema,
   obsoleteClassName: z.string().nullable(),
@@ -65,7 +65,6 @@ export const columnNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('column'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(simpleElementNodeSchema).nullable(),
-  childAreaId: z.number().int().positive(),
   gridSettings: gridSettingsSchema,
 });
 
@@ -73,14 +72,12 @@ export const rowNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('row'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(columnNodeSchema).nullable(),
-  childAreaId: z.number().int().positive(),
 });
 
 export const sectionNodeSchema = baseFieldsSchema.extend({
   containerType: z.literal('section'),
   allowedTypes: z.record(z.string(), z.string()).nullable(),
   children: z.array(rowNodeSchema).nullable(),
-  childAreaId: z.number().int().positive(),
 });
 
 // --- Union schema ---

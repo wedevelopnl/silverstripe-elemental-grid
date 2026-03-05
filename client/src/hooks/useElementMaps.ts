@@ -4,7 +4,7 @@ import type { ElementNode, ElementTreeResponse } from '@/types/elements';
 
 export interface ElementMaps {
   nodeMap: Map<number, ElementNode>;
-  childrenByAreaId: Map<number, ElementNode[]>;
+  childrenByParentId: Map<number, ElementNode[]>;
 }
 
 /**
@@ -13,14 +13,14 @@ export interface ElementMaps {
 function walkNodes(
   nodes: ElementNode[],
   nodeMap: Map<number, ElementNode>,
-  childrenByAreaId: Map<number, ElementNode[]>,
+  childrenByParentId: Map<number, ElementNode[]>,
 ): void {
   for (const node of nodes) {
     nodeMap.set(node.id, node);
 
     if (isContainerNode(node) && node.children) {
-      childrenByAreaId.set(node.childAreaId, node.children);
-      walkNodes(node.children, nodeMap, childrenByAreaId);
+      childrenByParentId.set(node.id, node.children);
+      walkNodes(node.children, nodeMap, childrenByParentId);
     }
   }
 }
@@ -29,20 +29,20 @@ function walkNodes(
  * Builds flat lookup maps from a nested element tree.
  *
  * - `nodeMap`: every node by ID for O(1) lookup
- * - `childrenByAreaId`: area ID → children array for O(1) sibling lookup
+ * - `childrenByParentId`: parent ID → children array for O(1) sibling lookup
  *
- * Root-level area arrays are included in `childrenByAreaId`.
+ * Root-level arrays (keyed by page ID) are included in `childrenByParentId`.
  */
 export function buildMaps(tree: ElementTreeResponse): ElementMaps {
   const nodeMap = new Map<number, ElementNode>();
-  const childrenByAreaId = new Map<number, ElementNode[]>();
+  const childrenByParentId = new Map<number, ElementNode[]>();
 
-  for (const [areaKey, nodes] of Object.entries(tree)) {
-    childrenByAreaId.set(Number(areaKey), nodes);
-    walkNodes(nodes, nodeMap, childrenByAreaId);
+  for (const [parentKey, nodes] of Object.entries(tree)) {
+    childrenByParentId.set(Number(parentKey), nodes);
+    walkNodes(nodes, nodeMap, childrenByParentId);
   }
 
-  return { nodeMap, childrenByAreaId };
+  return { nodeMap, childrenByParentId };
 }
 
 /**

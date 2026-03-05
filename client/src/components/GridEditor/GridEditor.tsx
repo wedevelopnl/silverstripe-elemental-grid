@@ -14,7 +14,6 @@ import EmptyState from '@/components/EmptyState/EmptyState';
 import DragOverlayContent from '@/components/DragOverlayContent/DragOverlayContent';
 
 interface GridEditorProps {
-  readonly areaId: number;
   readonly pageId: number | null;
 }
 
@@ -26,23 +25,22 @@ interface GridEditorProps {
  * SectionBlock (section > row > column > element card hierarchy)
  * to render the full grid editing interface.
  */
-export default function GridEditor({ areaId, pageId }: GridEditorProps) {
+export default function GridEditor({ pageId }: GridEditorProps) {
   const { data, isLoading, error } = useElementTree(pageId);
 
   const sections = data === undefined
     ? []
-    : (data[String(areaId)] ?? []).filter(isSectionNode);
+    : (data[String(pageId)] ?? []).filter(isSectionNode);
 
-  const enrichedSections = useTreeEnrichment(sections, areaId);
+  const enrichedSections = useTreeEnrichment(sections, pageId ?? 0);
 
   const reorderMutation = useReorderElement(pageId ?? 0);
 
   const { sensors, dragState, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop({
     tree: data ?? {},
-    areaId,
-    onReorder: (elementID, targetAreaID, afterElementID) => {
+    onReorder: (elementID, targetParentId, afterElementID) => {
       reorderMutation.mutate({
-        params: { elementID, targetAreaID, afterElementID },
+        params: { elementID, targetParentId, afterElementID },
         tree: data ?? {},
       });
     },
@@ -56,7 +54,7 @@ export default function GridEditor({ areaId, pageId }: GridEditorProps) {
   );
 
   return (
-    <div className="grid-editor" data-area-id={areaId} data-page-id={pageId ?? undefined} data-testid="grid-editor">
+    <div className="grid-editor" data-page-id={pageId ?? undefined} data-testid="grid-editor">
       {isLoading && <p className="grid-editor__loading" data-testid="grid-editor-loading">Loading elements...</p>}
       {error !== null && (
         <p className="grid-editor__error">

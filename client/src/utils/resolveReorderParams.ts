@@ -4,14 +4,14 @@ import type { ReorderElementParams } from '@/api/endpoints';
 export interface ReorderContext {
   /** Composite dnd-kit ID, e.g. 'row-17' */
   activeId: string;
-  /** The target area ID where the item is being dropped */
-  overContainerAreaId: number;
+  /** The target parent ID where the item is being dropped */
+  overContainerParentId: number;
   /** Insertion index in the target container */
   overIndex: number;
   /** Ordered composite IDs of items in the target container (reflects final order) */
   containerItems: string[];
-  /** Area ID of the source container */
-  sourceContainerAreaId: number;
+  /** Parent ID of the source container */
+  sourceContainerParentId: number;
   /** Original index in the source container */
   sourceIndex: number;
 }
@@ -30,7 +30,7 @@ export function resolveReorderParams(
 
   // No-op: same container, same index
   if (
-    context.sourceContainerAreaId === context.overContainerAreaId &&
+    context.sourceContainerParentId === context.overContainerParentId &&
     context.sourceIndex === context.overIndex
   ) {
     return null;
@@ -40,7 +40,7 @@ export function resolveReorderParams(
 
   return {
     elementID: parsed.id,
-    targetAreaID: context.overContainerAreaId,
+    targetParentId: context.overContainerParentId,
     afterElementID: afterElementId,
   };
 }

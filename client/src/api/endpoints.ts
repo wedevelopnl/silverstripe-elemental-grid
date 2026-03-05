@@ -20,7 +20,8 @@ export async function fetchElementTree(
 
 export interface CreateElementParams {
   elementClass: string;
-  elementalAreaID: number;
+  parentId: number;
+  parentClass: string;
   insertAfterElementID?: number;
 }
 
@@ -53,7 +54,7 @@ export async function duplicateElement(id: number): Promise<void> {
 
 export interface ReorderElementParams {
   elementID: number;
-  targetAreaID: number;
+  targetParentId: number;
   afterElementID: number | null;
 }
 

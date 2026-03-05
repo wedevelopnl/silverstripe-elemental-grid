@@ -7,7 +7,6 @@ import GridQueryProvider from '@/hooks/QueryProvider';
 import { loadComponent } from './Injector';
 
 const bridgeSchemaSchema = z.object({
-  'grid-area-id': z.number().int(),
   'grid-page-id': z.number().int().nullable(),
 });
 
@@ -24,7 +23,6 @@ window.jQuery.entwine('ss', ($) => {
       try {
         const GridEditor = loadComponent('GridEditor');
         const schema = bridgeSchemaSchema.parse(this.data('schema'));
-        const areaId = schema['grid-area-id'];
         const pageId = schema['grid-page-id'] ?? null;
 
         const root = createRoot(this[0]);
@@ -36,7 +34,7 @@ window.jQuery.entwine('ss', ($) => {
             createElement(
               GridEditorErrorBoundary,
               null,
-              createElement(GridEditor, { areaId, pageId }),
+              createElement(GridEditor, { pageId }),
             ),
           ),
         );

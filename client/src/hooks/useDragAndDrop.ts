@@ -34,10 +34,9 @@ export interface DragState {
 
 export interface UseDragAndDropOptions {
   tree: ElementTreeResponse;
-  areaId: number;
   onReorder: (
     elementID: number,
-    targetAreaID: number,
+    targetParentId: number,
     afterElementID: number | null,
   ) => void;
 }
@@ -110,34 +109,34 @@ export function useDragAndDrop({
       const activeNode = maps.nodeMap.get(activeParsed.id);
       if (!activeNode) return;
 
-      const sourceAreaId = activeNode.parentAreaId;
-      const sourceChildren = maps.childrenByAreaId.get(sourceAreaId);
+      const sourceParentId = activeNode.parentId;
+      const sourceChildren = maps.childrenByParentId.get(sourceParentId);
       if (!sourceChildren) return;
       const sourceIndex = sourceChildren.findIndex((n) => n.id === activeParsed.id);
 
-      let targetAreaId: number;
+      let targetParentId: number;
       let containerChildren: ElementNode[];
       let insertIndex: number;
 
       if (overParsed.type === activeParsed.type) {
-        // Over a sibling item — use the sibling's parentAreaId
+        // Over a sibling item — use the sibling's parentId
         const overNode = maps.nodeMap.get(overParsed.id);
         if (!overNode) return;
 
-        targetAreaId = overNode.parentAreaId;
-        const targetChildren = maps.childrenByAreaId.get(targetAreaId);
+        targetParentId = overNode.parentId;
+        const targetChildren = maps.childrenByParentId.get(targetParentId);
         if (!targetChildren) return;
 
         containerChildren = targetChildren;
         insertIndex = targetChildren.findIndex((n) => n.id === overParsed.id);
       } else {
-        // Over a container — drop into it
+        // Over a container — drop into it (container's own ID is the parent)
         const containerNode = maps.nodeMap.get(overParsed.id);
         if (!containerNode || !isContainerNode(containerNode)) {
           return;
         }
 
-        targetAreaId = containerNode.childAreaId;
+        targetParentId = containerNode.id;
         containerChildren = containerNode.children ?? [];
         insertIndex = containerChildren.length;
       }
@@ -152,15 +151,15 @@ export function useDragAndDrop({
 
       const params = resolveReorderParams({
         activeId: String(active.id),
-        overContainerAreaId: targetAreaId,
+        overContainerParentId: targetParentId,
         overIndex: filtered.indexOf(String(active.id)),
         containerItems: filtered,
-        sourceContainerAreaId: sourceAreaId,
+        sourceContainerParentId: sourceParentId,
         sourceIndex,
       });
 
       if (params) {
-        onReorder(params.elementID, params.targetAreaID, params.afterElementID);
+        onReorder(params.elementID, params.targetParentId, params.afterElementID);
       }
     },
     [maps, onReorder],

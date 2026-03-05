@@ -1,6 +1,7 @@
-import type {
-  ElementTreeResponse,
-  ElementNode,
+import {
+  isContainerNode,
+  type ElementTreeResponse,
+  type ElementNode,
 } from '@/types/elements';
 import { buildMaps } from '@/hooks/useElementMaps';
 
@@ -9,12 +10,12 @@ import { buildMaps } from '@/hooks/useElementMaps';
  * with the element moved to the specified position.
  *
  * Returns the SAME reference if the element is already at the target position (no-op),
- * if the element is not found, or if the target area does not exist.
+ * if the element is not found, or if the target parent does not exist.
  */
 export function applyReorder(
   tree: ElementTreeResponse,
   elementId: number,
-  targetAreaId: number,
+  targetParentId: number,
   afterElementId: number | null,
 ): ElementTreeResponse {
   const maps = buildMaps(tree);
@@ -22,22 +23,22 @@ export function applyReorder(
   const element = maps.nodeMap.get(elementId);
   if (!element) return tree;
 
-  const sourceAreaId = element.parentAreaId;
-  const sourceChildren = maps.childrenByAreaId.get(sourceAreaId);
+  const sourceParentId = element.parentId;
+  const sourceChildren = maps.childrenByParentId.get(sourceParentId);
   if (!sourceChildren) return tree;
 
   const sourceIndex = sourceChildren.findIndex((n) => n.id === elementId);
   if (sourceIndex === -1) return tree;
 
-  // Check target area exists
-  const targetChildren = maps.childrenByAreaId.get(targetAreaId);
-  if (!targetChildren && !Object.prototype.hasOwnProperty.call(tree, String(targetAreaId))) {
-    // Target area must exist either as root key or as a container's childAreaId
+  // Check target parent exists
+  const targetChildren = maps.childrenByParentId.get(targetParentId);
+  if (!targetChildren && !Object.prototype.hasOwnProperty.call(tree, String(targetParentId))) {
+    // Target parent must exist either as root key or as a container's ID
     if (!targetChildren) return tree;
   }
 
   // No-op detection
-  if (isNoOp(sourceAreaId, sourceIndex, sourceChildren, targetAreaId, afterElementId)) {
+  if (isNoOp(sourceParentId, sourceIndex, sourceChildren, targetParentId, afterElementId)) {
     return tree;
   }
 
@@ -46,7 +47,7 @@ export function applyReorder(
   const clonedMaps = buildMaps(cloned);
 
   // Remove element from its current position in the clone
-  const clonedSourceChildren = clonedMaps.childrenByAreaId.get(sourceAreaId);
+  const clonedSourceChildren = clonedMaps.childrenByParentId.get(sourceParentId);
   if (!clonedSourceChildren) return tree;
 
   const clonedSourceIndex = clonedSourceChildren.findIndex((n) => n.id === elementId);
@@ -54,21 +55,21 @@ export function applyReorder(
 
   const [movedElement] = clonedSourceChildren.splice(clonedSourceIndex, 1);
 
-  // Update parentAreaId on the moved element if crossing areas
-  if (sourceAreaId !== targetAreaId) {
-    (movedElement as { parentAreaId: number }).parentAreaId = targetAreaId;
+  // Update parentId on the moved element if crossing parents
+  if (sourceParentId !== targetParentId) {
+    (movedElement as { parentId: number }).parentId = targetParentId;
   }
 
   // Insert at new position
-  const clonedTargetChildren = clonedMaps.childrenByAreaId.get(targetAreaId);
+  const clonedTargetChildren = clonedMaps.childrenByParentId.get(targetParentId);
   if (!clonedTargetChildren) return tree;
 
   insertIntoArray(clonedTargetChildren, movedElement, afterElementId);
 
-  // Preserve references for unaffected root areas
+  // Preserve references for unaffected root trees
   const result: ElementTreeResponse = {};
   for (const key of Object.keys(tree)) {
-    if (isAreaAffected(maps, key, sourceAreaId, targetAreaId)) {
+    if (isTreeAffected(maps, key, sourceParentId, targetParentId)) {
       result[key] = cloned[key];
     } else {
       result[key] = tree[key];
@@ -82,13 +83,13 @@ export function applyReorder(
  * Determines whether the element is already at the desired position.
  */
 function isNoOp(
-  sourceAreaId: number,
+  sourceParentId: number,
   sourceIndex: number,
   sourceChildren: ElementNode[],
-  targetAreaId: number,
+  targetParentId: number,
   afterElementId: number | null,
 ): boolean {
-  if (sourceAreaId !== targetAreaId) return false;
+  if (sourceParentId !== targetParentId) return false;
 
   if (afterElementId === null) {
     return sourceIndex === 0;
@@ -101,45 +102,44 @@ function isNoOp(
 }
 
 /**
- * Checks whether a root area key is affected by the reorder operation.
- * Uses the maps to check containment via parentAreaId chain instead of recursion.
+ * Checks whether a root tree key is affected by the reorder operation.
+ * A root key's subtree is affected if the source or target parent is
+ * the root key itself, or is a container node within its subtree.
  */
-function isAreaAffected(
+function isTreeAffected(
   maps: ReturnType<typeof buildMaps>,
-  areaKey: string,
-  sourceAreaId: number,
-  targetAreaId: number,
+  rootKey: string,
+  sourceParentId: number,
+  targetParentId: number,
 ): boolean {
-  const rootAreaId = Number(areaKey);
+  const rootId = Number(rootKey);
 
-  // Direct match: root area IS the source or target
-  if (rootAreaId === sourceAreaId || rootAreaId === targetAreaId) return true;
+  // Direct match: root IS the source or target parent
+  if (rootId === sourceParentId || rootId === targetParentId) return true;
 
-  // Check if any container in this root area owns the source or target area
-  const rootNodes = maps.childrenByAreaId.get(rootAreaId);
+  // Check if any container in this root tree is the source or target parent
+  const rootNodes = maps.childrenByParentId.get(rootId);
   if (!rootNodes) return false;
 
-  if (containsArea(rootNodes, sourceAreaId, maps)) return true;
-  if (containsArea(rootNodes, targetAreaId, maps)) return true;
+  if (containsParent(rootNodes, sourceParentId)) return true;
+  if (containsParent(rootNodes, targetParentId)) return true;
 
   return false;
 }
 
 /**
- * Checks if any node in the given array (or its descendants) has a childAreaId
- * matching the target area.
+ * Checks if any container node in the given array (or its descendants)
+ * has an ID matching the target parent ID.
  */
-function containsArea(
+function containsParent(
   nodes: ElementNode[],
-  areaId: number,
-  maps: ReturnType<typeof buildMaps>,
+  parentId: number,
 ): boolean {
   for (const node of nodes) {
-    if ('childAreaId' in node) {
-      const containerNode = node as { childAreaId: number; children?: ElementNode[] | null };
-      if (containerNode.childAreaId === areaId) return true;
-      if (containerNode.children) {
-        if (containsArea(containerNode.children, areaId, maps)) return true;
+    if (isContainerNode(node)) {
+      if (node.id === parentId) return true;
+      if (node.children) {
+        if (containsParent(node.children, parentId)) return true;
       }
     }
   }

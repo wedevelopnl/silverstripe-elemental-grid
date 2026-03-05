@@ -83,7 +83,7 @@ export function useReorderElement(pageId: number) {
       const optimistic = applyReorder(
         tree,
         params.elementID,
-        params.targetAreaID,
+        params.targetParentId,
         params.afterElementID,
       );
 
