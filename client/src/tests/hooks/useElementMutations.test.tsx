@@ -59,12 +59,13 @@ describe('useCreateElement', () => {
       result.current.mutateAsync({
         elementClass: 'App\\MyElement',
         parentId: 10,
+        parentClass: 'App\\MyContainer',
       }),
     );
 
     // TanStack Query v5 passes (variables, { client, meta, mutationKey })
     expect(mockCreateElement).toHaveBeenCalledWith(
-      { elementClass: 'App\\MyElement', parentId: 10 },
+      { elementClass: 'App\\MyElement', parentId: 10, parentClass: 'App\\MyContainer' },
       expect.anything(),
     );
   });
@@ -79,6 +80,7 @@ describe('useCreateElement', () => {
       result.current.mutateAsync({
         elementClass: 'App\\MyElement',
         parentId: 10,
+        parentClass: 'App\\MyContainer',
       }),
     );
 

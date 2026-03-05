@@ -79,6 +79,7 @@ describe('endpoints', () => {
       await createElement({
         elementClass: 'App\\MyElement',
         parentId: 10,
+        parentClass: 'App\\MyContainer',
         insertAfterElementID: 5,
       });
 
@@ -87,6 +88,7 @@ describe('endpoints', () => {
         {
           elementClass: 'App\\MyElement',
           parentId: 10,
+          parentClass: 'App\\MyContainer',
           insertAfterElementID: 5,
         },
       );

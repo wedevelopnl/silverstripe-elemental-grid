@@ -205,7 +205,6 @@ const ROOT_AREA_ID = 42;
 describe('useDragAndDrop', () => {
   const defaultOptions = {
     tree: testTree,
-    areaId: ROOT_AREA_ID,
     onReorder: vi.fn(),
   };
 
@@ -372,7 +371,6 @@ describe('useDragAndDrop', () => {
       const { result } = renderHook(() =>
         useDragAndDrop({
           tree: treeWithEmptyCol,
-          areaId: ROOT_AREA_ID,
           onReorder,
         }),
       );

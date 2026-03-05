@@ -81,7 +81,7 @@ describe('entwine bridge', () => {
     const setReactRoot = vi.fn();
 
     const context = {
-      data: vi.fn().mockReturnValue({ 'grid-area-id': 42, 'grid-page-id': 7 }),
+      data: vi.fn().mockReturnValue({ 'grid-page-id': 7 }),
       setReactRoot,
       0: domElement,
     };
@@ -98,7 +98,7 @@ describe('entwine bridge', () => {
         createElement(
           MockGridEditorErrorBoundary,
           null,
-          createElement(MockGridEditor, { areaId: 42, pageId: 7 }),
+          createElement(MockGridEditor, { pageId: 7 }),
         ),
       ),
     );
@@ -135,7 +135,7 @@ describe('entwine bridge', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const context = {
-      data: vi.fn().mockReturnValue({ 'grid-area-id': 'not-a-number', 'grid-page-id': 7 }),
+      data: vi.fn().mockReturnValue({ 'grid-page-id': 'not-a-number' }),
       setReactRoot: vi.fn(),
       0: document.createElement('div'),
     };
@@ -155,7 +155,7 @@ describe('entwine bridge', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const context = {
-      data: vi.fn().mockReturnValue({ 'grid-page-id': 7 }),
+      data: vi.fn().mockReturnValue({}),
       setReactRoot: vi.fn(),
       0: document.createElement('div'),
     };
@@ -176,7 +176,7 @@ describe('entwine bridge', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const context = {
-      data: vi.fn().mockReturnValue({ 'grid-area-id': 42, 'grid-page-id': 7 }),
+      data: vi.fn().mockReturnValue({ 'grid-page-id': 7 }),
       setReactRoot: vi.fn(),
       0: document.createElement('div'),
     };

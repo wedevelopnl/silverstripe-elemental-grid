@@ -46,10 +46,10 @@ function createWrapper() {
 }
 
 const mockTree: ElementTreeResponse = {
-  '42': [
+  '7': [
     {
       id: 1,
-      parentId: 42,
+      parentId: 7,
       title: 'Main Section',
       containerType: 'section',
       allowedTypes: null,
@@ -153,10 +153,10 @@ const emptyTree: ElementTreeResponse = {
 };
 
 const noSectionsTree: ElementTreeResponse = {
-  '42': [
+  '7': [
     {
       id: 99,
-      parentId: 42,
+      parentId: 7,
       title: 'Standalone Block',
       blockSchema: { typeName: 'Content', label: 'Content', actions: { edit: '/edit/99' }, content: '' },
       obsoleteClassName: null,
@@ -178,7 +178,7 @@ describe('GridEditor', () => {
   it('shows loading state when fetching', () => {
     mockFetchElementTree.mockReturnValue(new Promise(() => {}));
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -188,7 +188,7 @@ describe('GridEditor', () => {
   it('shows error message when fetch fails', async () => {
     mockFetchElementTree.mockRejectedValue(new Error('Network error'));
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -200,7 +200,7 @@ describe('GridEditor', () => {
   it('renders viewport switcher when data loads', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -220,7 +220,7 @@ describe('GridEditor', () => {
   it('renders section blocks when data loads', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -235,7 +235,7 @@ describe('GridEditor', () => {
   it('renders empty state when tree has no sections (empty relation)', async () => {
     mockFetchElementTree.mockResolvedValue(emptyTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -247,7 +247,7 @@ describe('GridEditor', () => {
   it('renders empty state when tree has nodes but none are sections', async () => {
     mockFetchElementTree.mockResolvedValue(noSectionsTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -256,21 +256,21 @@ describe('GridEditor', () => {
     });
   });
 
-  it('sets data-area-id attribute', async () => {
+  it('sets data-page-id attribute from pageId prop', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
     const editorDiv = screen.getByTestId('grid-editor');
-    expect(editorDiv.dataset.areaId).toBe('42');
+    expect(editorDiv.dataset.pageId).toBe('7');
   });
 
   it('sets data-page-id attribute when pageId is provided', () => {
     mockFetchElementTree.mockReturnValue(new Promise(() => {}));
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -279,7 +279,7 @@ describe('GridEditor', () => {
   });
 
   it('omits data-page-id attribute when pageId is null', () => {
-    render(<GridEditor areaId={42} pageId={null} />, {
+    render(<GridEditor pageId={null} />, {
       wrapper: createWrapper(),
     });
 
@@ -291,7 +291,7 @@ describe('GridEditor', () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
     const user = userEvent.setup();
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -312,13 +312,13 @@ describe('GridEditor', () => {
     expect(badges.length).toBe(2);
   });
 
-  it('renders empty state when areaId is not present in the response', async () => {
+  it('renders empty state when pageId is not present in the response', async () => {
     const treeForDifferentArea: ElementTreeResponse = {
-      '99': [mockTree['42'][0]],
+      '99': [mockTree['7'][0]],
     };
     mockFetchElementTree.mockResolvedValue(treeForDifferentArea);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -330,7 +330,7 @@ describe('GridEditor', () => {
   it('does not render content area when still loading', () => {
     mockFetchElementTree.mockReturnValue(new Promise(() => {}));
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
@@ -342,7 +342,7 @@ describe('GridEditor', () => {
   it('does not render DragOverlayContent when no drag is active', async () => {
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    render(<GridEditor areaId={42} pageId={7} />, {
+    render(<GridEditor pageId={7} />, {
       wrapper: createWrapper(),
     });
 
