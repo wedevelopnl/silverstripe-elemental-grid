@@ -14,7 +14,7 @@ use WeDevelop\Grid\Contract\ContainerType;
  *
  * @phpstan-type SerializedNode array{
  *     id: int,
- *     parentAreaId: positive-int,
+ *     parentId: positive-int,
  *     title: string,
  *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string, label: string},
  *     obsoleteClassName: string|null,
@@ -27,26 +27,24 @@ use WeDevelop\Grid\Contract\ContainerType;
  *     containerType?: string,
  *     allowedTypes?: array<class-string, string>|null,
  *     children?: list<mixed>|null,
- *     childAreaId?: positive-int,
  *     gridSettings?: array<string, array{width: int, offset: int, visible: bool}>,
  *     extensions?: array<string, mixed>,
  * }
  */
-final readonly class ElementNode implements \JsonSerializable
+final readonly class GridNode implements \JsonSerializable
 {
     /**
-     * @param positive-int $parentAreaId
+     * @param positive-int $parentId
      * @param array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema
      * @param array<string, array{text: string, title: string}> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
      * @param list<self>|null $children
      * @param array<string, array{width: int, offset: int, visible: bool}>|null $gridSettings
-     * @param positive-int|null $childAreaId
      * @param array<string, mixed> $extensions
      */
     public function __construct(
         public int $id,
-        public int $parentAreaId,
+        public int $parentId,
         public string $title,
         public array $blockSchema,
         public ?string $obsoleteClassName,
@@ -60,30 +58,17 @@ final readonly class ElementNode implements \JsonSerializable
         public ?array $allowedTypes = null,
         public ?array $children = null,
         public ?array $gridSettings = null,
-        public ?int $childAreaId = null,
         public array $extensions = [],
     ) {
-        if ($parentAreaId <= 0) { // @phpstan-ignore smallerOrEqual.alwaysFalse (runtime guard: native type is int)
+        if ($parentId <= 0) { // @phpstan-ignore smallerOrEqual.alwaysFalse (runtime guard: native type is int)
             throw new \InvalidArgumentException(
-                'parentAreaId must be a positive integer',
+                'parentId must be a positive integer',
             );
         }
 
         if ($gridSettings !== null && $containerType !== ContainerType::Column) {
             throw new \InvalidArgumentException(
                 'gridSettings may only be provided for Column container type',
-            );
-        }
-
-        if ($childAreaId !== null && $containerType === null) {
-            throw new \InvalidArgumentException(
-                'childAreaId may only be provided for container types',
-            );
-        }
-
-        if ($containerType !== null && ($childAreaId === null || $childAreaId <= 0)) { // @phpstan-ignore smallerOrEqual.alwaysFalse (runtime guard: native type is ?int)
-            throw new \InvalidArgumentException(
-                'Container nodes must have a positive childAreaId',
             );
         }
     }
@@ -97,7 +82,7 @@ final readonly class ElementNode implements \JsonSerializable
 
         $data = [
             'id' => $this->id,
-            'parentAreaId' => $this->parentAreaId,
+            'parentId' => $this->parentId,
             'title' => $this->title,
             'blockSchema' => $this->blockSchema,
             'obsoleteClassName' => $this->obsoleteClassName,
@@ -116,10 +101,6 @@ final readonly class ElementNode implements \JsonSerializable
             /** @var list<mixed>|null $children */
             $children = $this->children;
             $data['children'] = $children;
-
-            /** @var positive-int $childAreaId Constructor guard ensures positive for containers */
-            $childAreaId = $this->childAreaId;
-            $data['childAreaId'] = $childAreaId;
         }
 
         if ($this->containerType === ContainerType::Column && $this->gridSettings !== null) {
