@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Elements;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\ORM\HasManyList;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Model\ContainerElement;
+use WeDevelop\Grid\Model\GridElement;
 
 /**
  * Leaf container in the Section > Row > Column hierarchy.
- * Holds responsive grid settings and simple (non-container) content elements.
+ * Holds responsive grid settings and non-container content elements.
+ *
+ * @method HasManyList<GridElement> Elements()
  */
-class ElementColumn extends BaseElement implements ElementContainerInterface
+class ElementColumn extends ContainerElement
 {
     private static string $table_name = 'ElementColumn';
 
@@ -41,23 +43,23 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
     ];
 
     /** @var array<string, class-string> */
-    private static array $has_one = [
-        'ChildArea' => ElementalArea::class,
+    private static array $has_many = [
+        'Elements' => GridElement::class . '.Parent',
     ];
 
     /** @var list<string> */
     private static array $owns = [
-        'ChildArea',
+        'Elements',
     ];
 
     /** @var list<string> */
     private static array $cascade_deletes = [
-        'ChildArea',
+        'Elements',
     ];
 
     /** @var list<string> */
     private static array $cascade_duplicates = [
-        'ChildArea',
+        'Elements',
     ];
 
     /** @var array<string, string> */
@@ -79,16 +81,17 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
         'xl' => ['width' => 12, 'offset' => 0, 'visible' => true],
     ];
 
+    /** @return HasManyList<GridElement> */
     #[\Override]
-    public function getChildArea(): ElementalArea
+    public function getChildren(): HasManyList
     {
-        return $this->ChildArea();
+        return $this->Elements();
     }
 
     #[\Override]
-    public function hasChildren(): bool
+    public function getChildTypeName(): string
     {
-        return $this->getChildArea()->Elements()->exists();
+        return 'element';
     }
 
     #[\Override]
@@ -100,13 +103,6 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
     public function getType(): string
     {
         return 'Column';
-    }
-
-    public function getChildCountSummary(): string
-    {
-        $count = $this->getChildArea()->Elements()->count();
-
-        return sprintf('%d %s', $count, $count === 1 ? 'element' : 'elements');
     }
 
     /** Returns the first viewport's width as a fraction, e.g. '6/12'. */
@@ -123,11 +119,6 @@ class ElementColumn extends BaseElement implements ElementContainerInterface
         }
 
         return sprintf('%d/%d', $settings[$firstKey]['width'], $defaults[$defaultKey]['width']);
-    }
-
-    public function getSummary(): string
-    {
-        return $this->getChildCountSummary();
     }
 
     /**
