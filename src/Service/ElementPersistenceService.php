@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Services\ReorderElements;
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Validation\ValidationException;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 use WeDevelop\Grid\Model\ValidationError;
 
 /**
- * Wraps SilverStripe write/reorder operations, translating
- * framework ValidationExceptions into Result failures.
+ * Wraps SilverStripe write operations, translating framework
+ * ValidationExceptions into Result failures.
  *
  * This is the single boundary where framework exceptions become domain Results.
  */
@@ -26,15 +24,15 @@ class ElementPersistenceService
      * Persist a new element, optionally inserting after another element.
      *
      * @param positive-int|null $afterElementId
-     * @return Result<BaseElement>
+     * @return Result<GridElement>
      */
-    public function persistNew(BaseElement $element, ?int $afterElementId = null): Result
+    public function persistNew(GridElement $element, ?int $afterElementId = null): Result
     {
         try {
+            $element->write();
+
             if ($afterElementId !== null) {
-                $this->reorderElement($element, $afterElementId);
-            } else {
-                $element->write();
+                $this->insertAfter($element, $afterElementId);
             }
         } catch (ValidationException $e) {
             return Result::fail(...$this->translateValidationException($e));
@@ -47,12 +45,13 @@ class ElementPersistenceService
      * Persist a duplicated element after the original.
      *
      * @param positive-int $afterElementId
-     * @return Result<BaseElement>
+     * @return Result<GridElement>
      */
-    public function persistDuplicate(BaseElement $element, int $afterElementId): Result
+    public function persistDuplicate(GridElement $element, int $afterElementId): Result
     {
         try {
-            $this->reorderElement($element, $afterElementId);
+            $element->write();
+            $this->insertAfter($element, $afterElementId);
         } catch (ValidationException $e) {
             return Result::fail(...$this->translateValidationException($e));
         }
@@ -61,22 +60,41 @@ class ElementPersistenceService
     }
 
     /**
-     * Injector::inst()->create() used because ReorderElements requires
-     * the element instance as a constructor argument — cannot be
-     * statically injected via YAML. Covered by integration tests.
+     * Insert an element after a reference sibling by adjusting Sort values.
+     *
+     * @param positive-int $afterElementId
      */
-    /** @param positive-int $afterElementId */
-    private function reorderElement(BaseElement $element, int $afterElementId): void
+    private function insertAfter(GridElement $element, int $afterElementId): void
     {
-        /** @var ReorderElements $reorderer */
-        $reorderer = Injector::inst()->create(ReorderElements::class, $element);
-        $reorderer->reorder($afterElementId);
+        $afterElement = GridElement::get()->byID($afterElementId);
+        if (!$afterElement instanceof GridElement) {
+            return;
+        }
+
+        $newSort = (int) $afterElement->Sort + 1;
+
+        // Bump sort values of elements after the reference
+        /** @var GridElement $sibling */
+        foreach (GridElement::get()
+            ->filter([
+                'ParentID' => $element->ParentID,
+                'ParentClass' => $element->ParentClass,
+            ])
+            ->where(sprintf('"Sort" >= %d AND "GridElement"."ID" != %d', $newSort, (int) $element->ID))
+            ->sort('Sort', 'ASC') as $sibling
+        ) {
+            $sibling->Sort = (int) $sibling->Sort + 1;
+            $sibling->write();
+        }
+
+        $element->Sort = $newSort;
+        $element->write();
     }
 
     /**
      * Write a batch of elements. Stops on first failure.
      *
-     * @param list<BaseElement> $elements
+     * @param list<GridElement> $elements
      * @return Result<null>
      */
     public function persistBatch(array $elements): Result

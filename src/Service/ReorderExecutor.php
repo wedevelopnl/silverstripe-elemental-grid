@@ -4,61 +4,62 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 use WeDevelop\Grid\Model\ValidationError;
-use WeDevelop\Grid\Repository\ElementRepositoryInterface;
+use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
 
 class ReorderExecutor implements ReorderExecutorInterface
 {
     public function __construct(
-        private readonly ElementRepositoryInterface $elementRepository,
+        private readonly GridElementRepositoryInterface $elementRepository,
     ) {
     }
 
     /**
      * @param positive-int|null $afterElementId
-     * @return Result<list<BaseElement>>
+     * @return Result<list<GridElement>>
      */
     #[\Override]
-    public function execute(BaseElement $element, ElementalArea $targetArea, ?int $afterElementId): Result
+    public function execute(GridElement $element, DataObject $targetParent, ?int $afterElementId): Result
     {
-        /** @var positive-int $targetAreaId */
-        $targetAreaId = $targetArea->ID;
+        /** @var positive-int $targetParentId */
+        $targetParentId = $targetParent->ID;
 
-        /** @var positive-int $sourceAreaId */
-        $sourceAreaId = $element->ParentID;
-        $isCrossArea = $sourceAreaId !== $targetAreaId;
+        /** @var positive-int $sourceParentId */
+        $sourceParentId = $element->ParentID;
+        $isCrossParent = $sourceParentId !== $targetParentId;
 
         // Fetch target siblings, always excluding the moved element
         $targetSiblings = $this->excludeElement(
-            $this->elementRepository->findByAreaIds([$targetAreaId]),
+            $this->elementRepository->findByParentIds([$targetParentId]),
             $element,
         );
 
         $insertionIndex = $this->resolveInsertionIndex($targetSiblings, $afterElementId);
         if ($insertionIndex === null) {
             return Result::fail(new ValidationError(
-                message: 'The reference element no longer exists in the target area.',
+                message: 'The reference element no longer exists in the target parent.',
                 field: 'afterElementID',
             ));
         }
 
         array_splice($targetSiblings, $insertionIndex, 0, [$element]);
 
-        if (!$isCrossArea) {
+        if (!$isCrossParent) {
             return Result::ok($this->reindex($targetSiblings));
         }
 
-        // Cross-area: reassign ParentID, reindex target, then reindex source to close gaps
-        $element->ParentID = $targetAreaId;
+        // Cross-parent: reassign ParentID and ParentClass, reindex target, then reindex source to close gaps
+        $element->ParentID = $targetParentId;
+        $element->ParentClass = $targetParent::class;
 
         $dirty = $this->reindex($targetSiblings, $element);
 
         $sourceSiblings = $this->excludeElement(
-            $this->elementRepository->findByAreaIds([$sourceAreaId]),
+            $this->elementRepository->findByParentIds([$sourceParentId]),
             $element,
         );
 
@@ -68,7 +69,7 @@ class ReorderExecutor implements ReorderExecutorInterface
     /**
      * Resolve where to insert the element in the siblings list.
      *
-     * @param list<BaseElement> $siblings
+     * @param list<GridElement> $siblings
      * @param positive-int|null $afterElementId
      * @return int<0, max>|null Index to splice at, or null if afterElementId not found
      */
@@ -90,27 +91,27 @@ class ReorderExecutor implements ReorderExecutorInterface
     /**
      * Remove a specific element from a siblings list.
      *
-     * @param list<BaseElement> $siblings
-     * @return list<BaseElement>
+     * @param list<GridElement> $siblings
+     * @return list<GridElement>
      */
-    private function excludeElement(array $siblings, BaseElement $element): array
+    private function excludeElement(array $siblings, GridElement $element): array
     {
         return array_values(array_filter(
             $siblings,
-            static fn (BaseElement $sibling): bool => $sibling->ID !== $element->ID,
+            static fn (GridElement $sibling): bool => $sibling->ID !== $element->ID,
         ));
     }
 
     /**
      * Assign 1-based Sort values and return only elements that changed.
      *
-     * For cross-area moves, the moved element's ParentID has changed even if its
+     * For cross-parent moves, the moved element's ParentID has changed even if its
      * Sort stays the same — pass it as $alwaysDirty to force inclusion.
      *
-     * @param list<BaseElement> $siblings
-     * @return list<BaseElement>
+     * @param list<GridElement> $siblings
+     * @return list<GridElement>
      */
-    private function reindex(array $siblings, ?BaseElement $alwaysDirty = null): array
+    private function reindex(array $siblings, ?GridElement $alwaysDirty = null): array
     {
         $dirty = [];
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 
 class ReorderService
@@ -21,16 +21,16 @@ class ReorderService
 
     /**
      * @param positive-int|null $afterElementId
-     * @return Result<BaseElement>
+     * @return Result<GridElement>
      */
-    public function reorder(BaseElement $element, ElementalArea $targetArea, ?int $afterElementId): Result
+    public function reorder(GridElement $element, DataObject $targetParent, ?int $afterElementId): Result
     {
-        $validationResult = $this->validator->validate($element, $targetArea);
+        $validationResult = $this->validator->validate($element, $targetParent);
         if ($validationResult->isErr()) {
             return $validationResult;
         }
 
-        $executeResult = $this->executor->execute($element, $targetArea, $afterElementId);
+        $executeResult = $this->executor->execute($element, $targetParent, $afterElementId);
         if ($executeResult->isErr()) {
             return Result::fail(...$executeResult->errors());
         }
