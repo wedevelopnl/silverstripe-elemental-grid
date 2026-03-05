@@ -29,6 +29,8 @@ class GridTreeBuilder
     use Extensible;
     use Injectable;
 
+    private const int MAX_HIERARCHY_DEPTH = 10;
+
     /** @var array<class-string, array<class-string, string>> */
     private array $allowedTypesCache = [];
 
@@ -80,11 +82,10 @@ class GridTreeBuilder
         /** @var list<array{id: positive-int, class: class-string}> $pendingParents */
         $pendingParents = [['id' => $rootParentId, 'class' => $rootParentClass]];
 
-        $maxDepth = 10;
         $depth = 0;
 
         while ($pendingParents !== []) {
-            if (++$depth > $maxDepth) {
+            if (++$depth > self::MAX_HIERARCHY_DEPTH) {
                 break;
             }
 

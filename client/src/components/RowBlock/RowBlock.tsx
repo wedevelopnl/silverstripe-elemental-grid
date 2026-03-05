@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedRowNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
 import { useDragContext } from '@/hooks/useDragAndDrop';
+import { buildSortableStyle } from '@/utils/sortableStyles';
+import { buildBlockClasses } from '@/utils/blockClasses';
 import { getRowClasses } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
@@ -24,18 +25,12 @@ export default function RowBlock({ row }: RowBlockProps) {
 
   const showDropTarget = isOver && activeType === 'row';
 
-  const rootClasses = [
-    'row-block',
-    `row-block--${status}`,
-    ...(isCollapsed ? ['row-block--collapsed'] : []),
-    ...(showDropTarget ? ['row-block--drop-target'] : []),
-  ].join(' ');
+  const rootClasses = buildBlockClasses('row-block', status, {
+    collapsed: isCollapsed,
+    'drop-target': showDropTarget,
+  });
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? undefined,
-    opacity: isDragging ? 0.3 : undefined,
-  };
+  const style = buildSortableStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={style} className={rootClasses} data-testid="row-block">

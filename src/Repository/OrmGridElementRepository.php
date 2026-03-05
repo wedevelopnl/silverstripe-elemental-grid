@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Repository;
 
 use WeDevelop\Grid\Model\GridElement;
-use SilverStripe\Core\Injector\Injectable;
 
 final class OrmGridElementRepository implements GridElementRepositoryInterface
 {
-    use Injectable;
-
     public function findById(int $id): ?GridElement
     {
         /** @var GridElement|null */

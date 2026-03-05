@@ -1,10 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import type { ViewportSettings } from '@/types/elements';
 import type { EnrichedColumnNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
 import { useDragContext } from '@/hooks/useDragAndDrop';
+import { buildSortableStyle } from '@/utils/sortableStyles';
+import { buildBlockClasses } from '@/utils/blockClasses';
 import { useViewportContext } from '@/hooks/ViewportContext';
 import { getColumnCount, getWidthClass, getOffsetClass } from '@/utils/gridAdapter';
 import DragHandle from '@/components/DragHandle/DragHandle';
@@ -15,6 +16,8 @@ import EmptyState from '@/components/EmptyState/EmptyState';
 interface ColumnBlockProps {
   readonly column: EnrichedColumnNode;
 }
+
+const VIEWPORT_HIDDEN_LABEL = 'hidden';
 
 function resolveViewportSettings(
   column: EnrichedColumnNode,
@@ -45,31 +48,22 @@ export default function ColumnBlock({ column }: ColumnBlockProps) {
 
   const showDropTarget = isOver && activeType === 'column';
 
-  const innerClasses = ['column-block', `column-block--${status}`];
-  if (!settings.visible) {
-    innerClasses.push('column-block--hidden');
-  }
-  if (isCollapsed) {
-    innerClasses.push('column-block--collapsed');
-  }
-  if (showDropTarget) {
-    innerClasses.push('column-block--drop-target');
-  }
+  const innerClasses = buildBlockClasses('column-block', status, {
+    hidden: !settings.visible,
+    collapsed: isCollapsed,
+    'drop-target': showDropTarget,
+  });
 
-  const sortableStyle: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? undefined,
-    opacity: isDragging ? 0.3 : undefined,
-  };
+  const sortableStyle = buildSortableStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={sortableStyle} className={outerClasses.join(' ')}>
-      <div className={innerClasses.join(' ')} data-testid="column-block">
+      <div className={innerClasses} data-testid="column-block">
         <div className="column-block__header" data-testid="column-header">
           <DragHandle listeners={listeners} attributes={attributes} label={`Move ${column.title}`} />
           <CollapseToggle isCollapsed={isCollapsed} onToggle={toggle} label={column.title} />
           <span className="column-block__badge" data-testid="column-badge">
-            {settings.visible ? `${settings.width}/${columnCount}` : 'hidden'}
+            {settings.visible ? `${settings.width}/${columnCount}` : VIEWPORT_HIDDEN_LABEL}
           </span>
         </div>
         <div className="column-block__body">

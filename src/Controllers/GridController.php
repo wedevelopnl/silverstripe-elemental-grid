@@ -378,17 +378,30 @@ class GridController extends AdminController
     }
 
     /**
-     * Parse and validate the JSON body for element creation.
+     * Decode the JSON request body into an associative array, or 400 on failure.
      *
-     * @return CreateElementBody
+     * @return array<string, mixed>
      */
-    private function parseCreateBody(HTTPRequest $request): array
+    private function parseJsonBody(HTTPRequest $request): array
     {
         $data = json_decode($request->getBody() ?? '', true);
 
         if (!is_array($data)) {
             $this->jsonError(400);
         }
+
+        /** @var array<string, mixed> $data JSON object keys are always strings */
+        return $data;
+    }
+
+    /**
+     * Parse and validate the JSON body for element creation.
+     *
+     * @return CreateElementBody
+     */
+    private function parseCreateBody(HTTPRequest $request): array
+    {
+        $data = $this->parseJsonBody($request);
 
         $elementClass = $data['elementClass'] ?? null;
         $parentId = $data['parentId'] ?? null;
@@ -426,11 +439,7 @@ class GridController extends AdminController
      */
     private function parseReorderBody(HTTPRequest $request): array
     {
-        $data = json_decode($request->getBody() ?? '', true);
-
-        if (!is_array($data)) {
-            $this->jsonError(400);
-        }
+        $data = $this->parseJsonBody($request);
 
         $elementID = $data['elementID'] ?? null;
         $targetParentId = $data['targetParentId'] ?? null;
@@ -462,11 +471,7 @@ class GridController extends AdminController
      */
     private function requireElementId(HTTPRequest $request): int
     {
-        $data = json_decode($request->getBody() ?? '', true);
-
-        if (!is_array($data)) {
-            $this->jsonError(400);
-        }
+        $data = $this->parseJsonBody($request);
 
         $id = $data['id'] ?? null;
 

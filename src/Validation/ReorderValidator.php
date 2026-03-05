@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Validation;
 
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
 use WeDevelop\Grid\Model\GridElement;
@@ -14,6 +13,7 @@ use WeDevelop\Grid\Value\ValidationError;
 
 class ReorderValidator implements ReorderValidatorInterface
 {
+    use ElementAllowanceTrait;
     /** @return Result<GridElement> */
     #[\Override]
     public function validate(GridElement $element, DataObject $targetParent): Result
@@ -58,29 +58,4 @@ class ReorderValidator implements ReorderValidatorInterface
         ));
     }
 
-    /**
-     * Check if element class is permitted by the parent's
-     * allowed_elements / disallowed_elements config.
-     *
-     * @param class-string<GridElement> $elementClass
-     */
-    private function isElementAllowed(string $elementClass, DataObject $parent): bool
-    {
-        $config = $parent->config();
-        $stopInheritance = (bool) $config->get('stop_element_inheritance');
-
-        $allowedElements = $stopInheritance
-            ? $config->get('allowed_elements', Config::UNINHERITED)
-            : $config->get('allowed_elements');
-
-        if (is_array($allowedElements) && !in_array($elementClass, $allowedElements, true)) {
-            return false;
-        }
-
-        $disallowedElements = $stopInheritance
-            ? (array) $config->get('disallowed_elements', Config::UNINHERITED)
-            : (array) $config->get('disallowed_elements');
-
-        return !in_array($elementClass, $disallowedElements, true);
-    }
 }

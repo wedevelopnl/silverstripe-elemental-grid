@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedSectionNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
 import { useDragContext } from '@/hooks/useDragAndDrop';
+import { buildSortableStyle } from '@/utils/sortableStyles';
+import { buildBlockClasses } from '@/utils/blockClasses';
 import DragHandle from '@/components/DragHandle/DragHandle';
 import CollapseToggle from '@/components/CollapseToggle/CollapseToggle';
 import RowBlock from '@/components/RowBlock/RowBlock';
@@ -22,18 +23,12 @@ export default function SectionBlock({ section }: SectionBlockProps) {
 
   const showDropTarget = isOver && activeType === 'section';
 
-  const rootClasses = [
-    'section-block',
-    `section-block--${status}`,
-    ...(isCollapsed ? ['section-block--collapsed'] : []),
-    ...(showDropTarget ? ['section-block--drop-target'] : []),
-  ].join(' ');
+  const rootClasses = buildBlockClasses('section-block', status, {
+    collapsed: isCollapsed,
+    'drop-target': showDropTarget,
+  });
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? undefined,
-    opacity: isDragging ? 0.3 : undefined,
-  };
+  const style = buildSortableStyle(transform, transition, isDragging);
 
   return (
     <section ref={setNodeRef} style={style} className={rootClasses} data-testid="section-block">
