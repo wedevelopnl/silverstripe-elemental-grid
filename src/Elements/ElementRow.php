@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Elements;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Model\ContainerElement;
 
 /**
  * Mid-level container in the Section > Row > Column hierarchy.
- * Lives inside a Section's ChildArea only. On draft-stage write,
- * auto-scaffolds a child Column when the ChildArea is empty.
+ * Lives inside a Section only. On draft-stage write, auto-scaffolds
+ * a child Column when no children exist.
+ *
+ * @method HasManyList<ElementColumn> Columns()
  */
-class ElementRow extends BaseElement implements ElementContainerInterface
+class ElementRow extends ContainerElement
 {
     private static string $table_name = 'ElementRow';
 
@@ -42,23 +43,23 @@ class ElementRow extends BaseElement implements ElementContainerInterface
     ];
 
     /** @var array<string, class-string> */
-    private static array $has_one = [
-        'ChildArea' => ElementalArea::class,
+    private static array $has_many = [
+        'Columns' => ElementColumn::class . '.Parent',
     ];
 
     /** @var list<string> */
     private static array $owns = [
-        'ChildArea',
+        'Columns',
     ];
 
     /** @var list<string> */
     private static array $cascade_deletes = [
-        'ChildArea',
+        'Columns',
     ];
 
     /** @var list<string> */
     private static array $cascade_duplicates = [
-        'ChildArea',
+        'Columns',
     ];
 
     private static string $default_column_title = '';
@@ -68,28 +69,17 @@ class ElementRow extends BaseElement implements ElementContainerInterface
         return 'Row';
     }
 
-    public function getChildCountSummary(): string
+    /** @return HasManyList<ElementColumn> */
+    #[\Override]
+    public function getChildren(): HasManyList
     {
-        $count = $this->getChildArea()->Elements()->count();
-
-        return sprintf('%d %s', $count, $count === 1 ? 'column' : 'columns');
-    }
-
-    public function getSummary(): string
-    {
-        return $this->getChildCountSummary();
+        return $this->Columns();
     }
 
     #[\Override]
-    public function getChildArea(): ElementalArea
+    public function getChildTypeName(): string
     {
-        return $this->ChildArea();
-    }
-
-    #[\Override]
-    public function hasChildren(): bool
-    {
-        return $this->getChildArea()->Elements()->exists();
+        return 'column';
     }
 
     #[\Override]
@@ -118,14 +108,14 @@ class ElementRow extends BaseElement implements ElementContainerInterface
             return;
         }
 
-        $childArea = $this->getChildArea();
-        if (!$childArea->exists() || $childArea->Elements()->count() > 0) {
+        if ($this->Columns()->count() > 0) {
             return;
         }
 
         $column = ElementColumn::create();
         $column->Title = static::config()->get('default_column_title');
-        $column->ParentID = $childArea->ID;
+        $column->ParentID = $this->ID;
+        $column->ParentClass = static::class;
         $column->write();
     }
 }
