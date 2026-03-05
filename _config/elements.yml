@@ -1,60 +1,60 @@
 ---
-Name: elemental-grid-elements
+Name: grid-elements
 ---
 
-# Apply ElementalAreasExtension so each container's ChildArea
-# is auto-created and managed (CMS fields, relation discovery)
 WeDevelop\Grid\Elements\Section:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalAreasExtension
   allowed_elements:
     - WeDevelop\Grid\Elements\Row
-  controller_template: ElementSectionHolder
+  controller_template: SectionHolder
 
 WeDevelop\Grid\Elements\Row:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   allowed_elements:
     - WeDevelop\Grid\Elements\Column
-  controller_template: ElementRowHolder
+  controller_template: RowHolder
 
 WeDevelop\Grid\Elements\Column:
-  extensions:
-    - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   disallowed_elements:
     - WeDevelop\Grid\Elements\Section
     - WeDevelop\Grid\Elements\Row
     - WeDevelop\Grid\Elements\Column
-  controller_template: ElementColumnHolder
+  controller_template: ColumnHolder
 
 ---
-Name: elemental-grid-validation
+Name: grid-validation
 After:
-  - '#elemental-grid-elements'
+  - '#grid-elements'
 ---
 
-DNADesign\Elemental\Models\BaseElement:
+WeDevelop\Grid\Model\GridElement:
   extensions:
     HierarchyValidation: WeDevelop\Grid\Validation\HierarchyValidationExtension
 
 ---
-Name: elemental-grid-services
+Name: grid-page
 After:
-  - '#elemental-grid-validation'
+  - '#grid-validation'
+---
+
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    Grid: WeDevelop\Grid\Extensions\GridPageExtension
+
+---
+Name: grid-services
+After:
+  - '#grid-page'
 ---
 
 SilverStripe\Core\Injector\Injector:
   WeDevelop\Grid\Validation\HierarchyValidatorInterface:
     class: WeDevelop\Grid\Validation\HierarchyValidationService
-  WeDevelop\Grid\Repository\ElementRepositoryInterface:
-    class: WeDevelop\Grid\Repository\OrmElementRepository
-  WeDevelop\Grid\Repository\ElementalAreaRepositoryInterface:
-    class: WeDevelop\Grid\Repository\OrmElementalAreaRepository
+  WeDevelop\Grid\Repository\GridElementRepositoryInterface:
+    class: WeDevelop\Grid\Repository\OrmGridElementRepository
   WeDevelop\Grid\Service\GridTreeBuilder:
     constructor:
-      elementRepository: '%$WeDevelop\Grid\Repository\ElementRepositoryInterface'
+      elementRepository: '%$WeDevelop\Grid\Repository\GridElementRepositoryInterface'
       logger: '%$Psr\Log\LoggerInterface'
   WeDevelop\Grid\Service\ElementPersistenceService: ~
   WeDevelop\Grid\Contract\ReorderValidatorInterface:
@@ -62,7 +62,7 @@ SilverStripe\Core\Injector\Injector:
   WeDevelop\Grid\Contract\ReorderExecutorInterface:
     class: WeDevelop\Grid\Service\ReorderExecutor
     constructor:
-      elementRepository: '%$WeDevelop\Grid\Repository\ElementRepositoryInterface'
+      elementRepository: '%$WeDevelop\Grid\Repository\GridElementRepositoryInterface'
   WeDevelop\Grid\Service\ReorderService:
     constructor:
       validator: '%$WeDevelop\Grid\Contract\ReorderValidatorInterface'

@@ -106,8 +106,8 @@ class FixtureLoader
     /**
      * Remove all E2E pages (identified by URLSegment prefix).
      *
-     * Uses doArchive() which cascades through ElementalArea → Elements
-     * via existing cascade_deletes, removing from both Draft and Live.
+     * Uses doArchive() which cascades through cascade_deletes,
+     * removing from both Draft and Live.
      */
     public function reset(): void
     {

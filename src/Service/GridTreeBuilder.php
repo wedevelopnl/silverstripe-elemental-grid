@@ -192,8 +192,7 @@ class GridTreeBuilder
     /**
      * Get allowed child element types for a container, cached by class name.
      *
-     * Reads allowed_elements / disallowed_elements config directly instead of
-     * relying on elemental's getElementalTypes().
+     * Reads allowed_elements / disallowed_elements config directly.
      *
      * @return array<class-string, string> FQCN → display label
      */

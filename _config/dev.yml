@@ -1,5 +1,5 @@
 ---
-Name: elemental-grid-dev
+Name: grid-dev
 Only:
   environment: dev
 ---
@@ -11,9 +11,9 @@ SilverStripe\Control\Session:
 
 SilverStripe\Dev\DevelopmentAdmin:
   controllers:
-    elemental-grid-fixtures:
+    grid-fixtures:
       class: 'WeDevelop\Grid\Dev\FixtureController'
-      description: 'Load and reset E2E fixtures for elemental grid'
+      description: 'Load and reset E2E fixtures for grid'
 
 WeDevelop\Grid\Dev\FixtureLoader:
   fixtures:
@@ -38,10 +38,10 @@ WeDevelop\Grid\Dev\FixtureLoader:
           class: Page
           identifier: e2e_page
         - action: unpublish
-          class: 'DNADesign\Elemental\Models\BaseElement'
+          class: 'WeDevelop\Grid\Model\ContentElement'
           identifier: draft_leaf
         - action: modify
-          class: 'DNADesign\Elemental\Models\BaseElement'
+          class: 'WeDevelop\Grid\Model\ContentElement'
           identifier: modified_leaf
           fields:
             Title: 'Modified Text Block (draft)'

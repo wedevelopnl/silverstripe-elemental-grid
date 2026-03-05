@@ -8,7 +8,7 @@ namespace WeDevelop\Grid\Contract;
  * Stateless adapter that translates grid layout intent into framework-specific CSS classes.
  *
  * Methods receive viewport keys and numeric values, return CSS class strings.
- * No BaseElement dependency — the adapter has no knowledge of the data model.
+ * No data model dependency — the adapter has no knowledge of elements.
  *
  * Each adapter defines its own viewport set via {@see getViewports()}. Class
  * generation methods accept string viewport keys from that set, keeping the API

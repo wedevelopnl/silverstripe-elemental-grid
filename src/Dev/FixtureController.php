@@ -12,7 +12,7 @@ use SilverStripe\Control\HTTPResponse;
 /**
  * Dev-only HTTP controller for loading and resetting E2E fixtures.
  *
- * Registered with DevelopmentAdmin at /dev/elemental-grid-fixtures
+ * Registered with DevelopmentAdmin at /dev/grid-fixtures
  * via _config/dev.yml (gated by Only: environment: dev).
  *
  * Playwright calls POST /load with a fixture name and gets back JSON

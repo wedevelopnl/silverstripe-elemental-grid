@@ -1,20 +1,10 @@
 ---
-Name: elemental-grid-cms
+Name: grid-cms
 After:
-  - '#elemental-grid-elements'
-  - '#elemental'
+  - '#grid-elements'
 ---
 
-# Replace stock ElementalAreaField via Injector so our lightweight
-# GridEditorField is used instead of the GridField-based original.
-SilverStripe\Core\Injector\Injector:
-  DNADesign\Elemental\Forms\ElementalAreaField:
-    class: WeDevelop\Grid\Forms\GridEditorField
-
-# Block stock elemental bundles and load our own
 SilverStripe\Admin\LeftAndMain:
-  extensions:
-    ElementalGrid: WeDevelop\Grid\Extensions\GridLeftAndMainExtension
   extra_requirements_javascript:
     - 'wedevelopnl/silverstripe-grid:client/dist/js/bundle.js'
   extra_requirements_css:
