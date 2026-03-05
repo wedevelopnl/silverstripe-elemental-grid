@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Unit\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
+use WeDevelop\Grid\Model\GridElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\Core\Validation\ValidationException;
@@ -16,7 +16,7 @@ final class ElementPersistenceServiceTest extends TestCase
 {
     public function testPersistNewReturnsOkOnSuccess(): void
     {
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->expects($this->once())->method('write');
 
         $service = new ElementPersistenceService();
@@ -32,7 +32,7 @@ final class ElementPersistenceServiceTest extends TestCase
             ['message' => 'Row cannot be placed inside Page.', 'fieldName' => ''],
         ]);
 
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->expects($this->once())
             ->method('write')
             ->willThrowException($exception);
@@ -52,7 +52,7 @@ final class ElementPersistenceServiceTest extends TestCase
             ['message' => 'Second error.', 'fieldName' => ''],
         ]);
 
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->method('write')->willThrowException($exception);
 
         $service = new ElementPersistenceService();
@@ -69,7 +69,7 @@ final class ElementPersistenceServiceTest extends TestCase
             ['message' => 'Invalid parent.', 'fieldName' => 'ParentID'],
         ]);
 
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->method('write')->willThrowException($exception);
 
         $service = new ElementPersistenceService();
@@ -87,7 +87,7 @@ final class ElementPersistenceServiceTest extends TestCase
             ['message' => 'General error.', 'fieldName' => ''],
         ]);
 
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->method('write')->willThrowException($exception);
 
         $service = new ElementPersistenceService();
@@ -100,7 +100,7 @@ final class ElementPersistenceServiceTest extends TestCase
     {
         $exception = $this->createValidationException([]);
 
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
         $element->method('write')->willThrowException($exception);
 
         $service = new ElementPersistenceService();
@@ -113,9 +113,9 @@ final class ElementPersistenceServiceTest extends TestCase
 
     public function testPersistBatchWritesAllElements(): void
     {
-        $a = $this->createMock(BaseElement::class);
-        $b = $this->createMock(BaseElement::class);
-        $c = $this->createMock(BaseElement::class);
+        $a = $this->createMock(GridElement::class);
+        $b = $this->createMock(GridElement::class);
+        $c = $this->createMock(GridElement::class);
 
         $a->expects($this->once())->method('write');
         $b->expects($this->once())->method('write');
@@ -130,8 +130,8 @@ final class ElementPersistenceServiceTest extends TestCase
 
     public function testPersistBatchReturnsFailOnValidationException(): void
     {
-        $a = $this->createMock(BaseElement::class);
-        $b = $this->createMock(BaseElement::class);
+        $a = $this->createMock(GridElement::class);
+        $b = $this->createMock(GridElement::class);
 
         $a->expects($this->once())->method('write');
         $b->expects($this->once())

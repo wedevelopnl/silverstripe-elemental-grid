@@ -25,129 +25,105 @@
 #
 # Bottom-up ordering: children before parents to prevent auto-scaffolding.
 # All pages use 'e2e-' URLSegment prefix for cleanup identification.
-
-DNADesign\Elemental\Models\ElementalArea:
-  page_area: {}
-  section_alpha_area: {}
-  section_beta_area: {}
-  row_a1_area: {}
-  row_a2_area: {}
-  row_b1_area: {}
-  row_b2_area: {}
-  col_a1a_area: {}
-  col_a1b_area: {}
-  col_a2a_area: {}
-  col_b1a_area: {}
-  col_b2a_area: {}
+#
+# Elements parent directly to their container via polymorphic has_one (Parent).
 
 Page:
   e2e_page:
     Title: 'E2E DnD Test Page'
     URLSegment: 'e2e-dnd-test'
-    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
 
 # --- Leaves ---
-DNADesign\Elemental\Models\BaseElement:
+WeDevelop\Grid\Model\GridElement:
   block_1:
     Title: 'Block 1'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a1a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1a
   block_2:
     Title: 'Block 2'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a1a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1a
   block_3:
     Title: 'Block 3'
     Sort: 3
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a1a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1a
   block_4:
     Title: 'Block 4'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a1b_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1b
   block_5:
     Title: 'Block 5'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a1b_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1b
   block_6:
     Title: 'Block 6'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_a2a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a2a
   block_7:
     Title: 'Block 7'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_b1a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_b1a
   block_8:
     Title: 'Block 8'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col_b2a_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col_b2a
 
 # --- Columns ---
-WeDevelop\Grid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\Column:
   col_a1a:
     Title: 'Column A1-A'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_a1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col_a1a_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row_a1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":6,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col_a1b:
     Title: 'Column A1-B'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_a1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col_a1b_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row_a1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":6,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col_a2a:
     Title: 'Column A2-A'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_a2_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col_a2a_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row_a2
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
   col_b1a:
     Title: 'Column B1-A'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_b1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col_b1a_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row_b1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
   col_b2a:
     Title: 'Column B2-A'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_b2_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col_b2a_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row_b2
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
 # --- Rows ---
-WeDevelop\Grid\Elements\ElementRow:
+WeDevelop\Grid\Elements\Row:
   row_a1:
     Title: 'Row Alpha-1'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_alpha_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_a1_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section_alpha
   row_a2:
     Title: 'Row Alpha-2'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_alpha_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_a2_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section_alpha
   row_b1:
     Title: 'Row Beta-1'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_beta_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_b1_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section_beta
   row_b2:
     Title: 'Row Beta-2'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_beta_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_b2_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section_beta
 
 # --- Sections ---
-WeDevelop\Grid\Elements\ElementSection:
+WeDevelop\Grid\Elements\Section:
   section_alpha:
     Title: 'Section Alpha'
     ShowTitle: 1
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_alpha_area
+    Parent: =>Page.e2e_page
   section_beta:
     Title: 'Section Beta'
     ShowTitle: 1
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_beta_area
+    Parent: =>Page.e2e_page

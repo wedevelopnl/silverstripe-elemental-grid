@@ -15,85 +15,69 @@
 #
 # Bottom-up ordering: children written before parents to prevent
 # auto-scaffolding of Row/Column elements.
-
-DNADesign\Elemental\Models\ElementalArea:
-  page_area: {}
-  section_area: {}
-  row_area: {}
-  col1_area: {}
-  col2_area: {}
-  section2_area: {}
-  row2_area: {}
-  col3_area: {}
+#
+# Elements parent directly to their container via polymorphic has_one (Parent).
 
 Page:
   e2e_page:
     Title: 'E2E Complex Page'
     URLSegment: 'e2e-complex-page'
-    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
 
-# --- Leaves first (into column areas) ---
-DNADesign\Elemental\Models\BaseElement:
+# --- Leaves first (into columns) ---
+WeDevelop\Grid\Model\GridElement:
   draft_leaf:
     Title: 'Draft Only Block'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
   published_leaf:
     Title: 'Published Block'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
   modified_leaf:
     Title: 'Modified Text Block'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col2
   section2_leaf:
     Title: 'Section Two Block'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col3_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col3
 
-# --- Columns (into row area) ---
-WeDevelop\Grid\Elements\ElementColumn:
+# --- Columns (into rows) ---
+WeDevelop\Grid\Elements\Column:
   col1:
     Title: 'Left Column'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col2:
     Title: 'Right Column'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col3:
     Title: 'Draft Section Column'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row2_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col3_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row2
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
-# --- Row (into section area) ---
-WeDevelop\Grid\Elements\ElementRow:
+# --- Rows (into sections) ---
+WeDevelop\Grid\Elements\Row:
   row1:
     Title: 'First Row'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section1
   row2:
     Title: 'Second Row'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section2_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row2_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section2
 
-# --- Section (into page area) ---
-WeDevelop\Grid\Elements\ElementSection:
+# --- Sections (into page) ---
+WeDevelop\Grid\Elements\Section:
   section1:
     Title: 'Main Section'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_area
+    Parent: =>Page.e2e_page
   section2:
     Title: 'Draft Section'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section2_area
+    Parent: =>Page.e2e_page

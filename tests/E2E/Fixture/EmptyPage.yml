@@ -1,11 +1,7 @@
-# E2E fixture: page with an ElementalArea but no elements.
+# E2E fixture: page with no elements.
 # Used for testing creation workflows (adding elements to an empty page).
-
-DNADesign\Elemental\Models\ElementalArea:
-  page_area: {}
 
 Page:
   e2e_page:
     Title: 'E2E Empty Page'
     URLSegment: 'e2e-empty-page'
-    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area

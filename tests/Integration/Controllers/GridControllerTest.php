@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Integration\Controllers;
 
-use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Controllers\ElementalGridController;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
-use WeDevelop\Grid\Service\ElementTreeBuilder;
+use WeDevelop\Grid\Controllers\GridController;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Extensions\GridPageExtension;
+use WeDevelop\Grid\Service\GridTreeBuilder;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
-#[CoversClass(ElementalGridController::class)]
-final class ElementalGridControllerTest extends FunctionalTest
+#[CoversClass(GridController::class)]
+final class GridControllerTest extends FunctionalTest
 {
     protected static $fixture_file = __DIR__ . '/../Fixture/ElementTreeTest.yml';
 
@@ -29,13 +29,13 @@ final class ElementalGridControllerTest extends FunctionalTest
     /** @var array<class-string, list<class-string>> */
     protected static $required_extensions = [
         TestPage::class => [
-            ElementalPageExtension::class,
+            GridPageExtension::class,
         ],
     ];
 
     private function apiUrl(int $pageId): string
     {
-        return '/admin/elemental-grid/api/readTree/' . $pageId;
+        return '/admin/grid/api/readTree/' . $pageId;
     }
 
     /**
@@ -130,7 +130,7 @@ final class ElementalGridControllerTest extends FunctionalTest
     {
         $this->logInForHttp();
 
-        // SiteTree without ElementalPageExtension has no getElementalRelations()
+        // SiteTree without GridPageExtension has no grid relations
         $page = SiteTree::create();
         $page->Title = 'Non-Elemental Page';
         $page->write();
@@ -193,23 +193,25 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         $page = $this->objFromFixture(TestPage::class, 'testpage');
 
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
+        $response = $this->postJson('/admin/grid/api/create', [
             'elementClass' => \stdClass::class,
-            'elementalAreaID' => $page->ElementalArea()->ID,
+            'parentId' => (int) $page->ID,
+            'parentClass' => $page::class,
             'insertAfterElementID' => null,
         ]);
 
         $this->assertSame(400, $response->getStatusCode());
     }
 
-    public function testCreateRejects400ForFloatAreaId(): void
+    public function testCreateRejects400ForFloatParentId(): void
     {
         $this->logInForHttp();
         Versioned::set_stage(Versioned::DRAFT);
 
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
-            'elementClass' => ElementSection::class,
-            'elementalAreaID' => 5.5,
+        $response = $this->postJson('/admin/grid/api/create', [
+            'elementClass' => Section::class,
+            'parentId' => 5.5,
+            'parentClass' => TestPage::class,
             'insertAfterElementID' => null,
         ]);
 
@@ -223,9 +225,10 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         $page = $this->objFromFixture(TestPage::class, 'testpage');
 
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
-            'elementClass' => ElementSection::class,
-            'elementalAreaID' => $page->ElementalArea()->ID,
+        $response = $this->postJson('/admin/grid/api/create', [
+            'elementClass' => Section::class,
+            'parentId' => (int) $page->ID,
+            'parentClass' => $page::class,
             'insertAfterElementID' => 0,
         ]);
 
@@ -239,9 +242,10 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         $page = $this->objFromFixture(TestPage::class, 'testpage');
 
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
-            'elementClass' => ElementSection::class,
-            'elementalAreaID' => $page->ElementalArea()->ID,
+        $response = $this->postJson('/admin/grid/api/create', [
+            'elementClass' => Section::class,
+            'parentId' => (int) $page->ID,
+            'parentClass' => $page::class,
             'insertAfterElementID' => 5.5,
         ]);
 
@@ -254,11 +258,12 @@ final class ElementalGridControllerTest extends FunctionalTest
         Versioned::set_stage(Versioned::DRAFT);
 
         $page = $this->objFromFixture(TestPage::class, 'testpage');
-        $section = $this->objFromFixture(ElementSection::class, 'section1');
+        $section = $this->objFromFixture(Section::class, 'section1');
 
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
-            'elementClass' => ElementSection::class,
-            'elementalAreaID' => $page->ElementalArea()->ID,
+        $response = $this->postJson('/admin/grid/api/create', [
+            'elementClass' => Section::class,
+            'parentId' => (int) $page->ID,
+            'parentClass' => $page::class,
             'insertAfterElementID' => $section->ID,
         ]);
 
@@ -275,10 +280,11 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         $page = $this->objFromFixture(TestPage::class, 'testpage');
 
-        // ElementRow has can_be_root: false — placing it in the page area triggers validation
-        $response = $this->postJson('/admin/elemental-grid/api/create', [
-            'elementClass' => ElementRow::class,
-            'elementalAreaID' => $page->ElementalArea()->ID,
+        // Row has can_be_root: false — placing it in the page area triggers validation
+        $response = $this->postJson('/admin/grid/api/create', [
+            'elementClass' => Row::class,
+            'parentId' => (int) $page->ID,
+            'parentClass' => $page::class,
             'insertAfterElementID' => null,
         ]);
 
@@ -292,7 +298,7 @@ final class ElementalGridControllerTest extends FunctionalTest
         $this->logInForHttp();
         Versioned::set_stage(Versioned::DRAFT);
 
-        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+        $response = $this->postJson('/admin/grid/api/duplicate', [
             'id' => 5.5,
         ]);
 
@@ -304,16 +310,16 @@ final class ElementalGridControllerTest extends FunctionalTest
         $this->logInForHttp();
         Versioned::set_stage(Versioned::DRAFT);
 
-        $section = $this->objFromFixture(ElementSection::class, 'section1');
+        $section = $this->objFromFixture(Section::class, 'section1');
 
-        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+        $response = $this->postJson('/admin/grid/api/duplicate', [
             'id' => $section->ID,
         ]);
 
         $this->assertSame(204, $response->getStatusCode());
 
         // Find the cloned element — highest ID section
-        $clone = ElementSection::get()->sort('ID', 'DESC')->first();
+        $clone = Section::get()->sort('ID', 'DESC')->first();
         $this->assertSame('First Section copy', $clone->Title);
     }
 
@@ -324,18 +330,18 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         // Create a section titled "Block copy" to trigger the copy-number path
         $page = $this->objFromFixture(TestPage::class, 'testpage');
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->Title = 'Block copy';
-        $section->ParentID = $page->ElementalArea()->ID;
+        $section->ParentID = $page->ID;
         $section->write();
 
-        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+        $response = $this->postJson('/admin/grid/api/duplicate', [
             'id' => $section->ID,
         ]);
 
         $this->assertSame(204, $response->getStatusCode());
 
-        $clone = ElementSection::get()->sort('ID', 'DESC')->first();
+        $clone = Section::get()->sort('ID', 'DESC')->first();
         $this->assertSame('Block copy 2', $clone->Title);
     }
 
@@ -348,12 +354,12 @@ final class ElementalGridControllerTest extends FunctionalTest
 
         // Create a Row directly in the page area, bypassing validation
         // so we have an "invalid" record to duplicate via the API
-        $row = ElementRow::create();
+        $row = Row::create();
         $row->Title = 'Invalid Row';
-        $row->ParentID = $page->ElementalArea()->ID;
+        $row->ParentID = $page->ID;
         $row->write(skipValidation: true);
 
-        $response = $this->postJson('/admin/elemental-grid/api/duplicate', [
+        $response = $this->postJson('/admin/grid/api/duplicate', [
             'id' => $row->ID,
         ]);
 
@@ -369,7 +375,7 @@ final class ElementalGridControllerTest extends FunctionalTest
         $page = $this->objFromFixture(TestPage::class, 'testpage');
 
         // Build tree directly
-        $tree = ElementTreeBuilder::create()->buildForPage($page);
+        $tree = GridTreeBuilder::create()->buildForPage($page);
         $expected = json_decode(
             json_encode($tree, JSON_THROW_ON_ERROR),
             associative: true,

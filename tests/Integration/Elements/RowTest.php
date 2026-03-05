@@ -9,17 +9,17 @@ use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\ElementContainerInterface;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
 use WeDevelop\Grid\Tests\Integration\Fixture\OnAfterWriteSpy;
 
-#[CoversClass(ElementRow::class)]
-final class ElementRowTest extends ElementContainerContractTestCase
+#[CoversClass(Row::class)]
+final class RowTest extends ContainerContractTestCase
 {
     protected function createContainer(): ElementContainerInterface
     {
-        $row = ElementRow::create();
+        $row = Row::create();
         $row->write();
 
         return $row;
@@ -38,8 +38,8 @@ final class ElementRowTest extends ElementContainerContractTestCase
         $page->Title = 'Test Page';
         $page->write();
 
-        $row = ElementRow::create();
-        $row->ParentID = $page->ElementalArea()->ID;
+        $row = Row::create();
+        $row->ParentID = $page->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Page.');
@@ -48,14 +48,14 @@ final class ElementRowTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideRow(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $parentRow = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $parentRow);
+        $parentRow = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $parentRow);
 
-        $childRow = ElementRow::create();
-        $childRow->ParentID = $parentRow->getChildArea()->ID;
+        $childRow = Row::create();
+        $childRow->ParentID = $parentRow->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Row.');
@@ -64,17 +64,17 @@ final class ElementRowTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideColumn(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
-        $childRow = ElementRow::create();
-        $childRow->ParentID = $column->getChildArea()->ID;
+        $childRow = Row::create();
+        $childRow->ParentID = $column->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Column.');
@@ -83,11 +83,11 @@ final class ElementRowTest extends ElementContainerContractTestCase
 
     public function testWriteSucceedsInsideSection(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
         $row->write();
 
@@ -97,50 +97,50 @@ final class ElementRowTest extends ElementContainerContractTestCase
     public function testScaffoldsColumnOnWrite(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
         $this->assertTrue($row->hasChildren());
 
-        $children = $row->getChildArea()->Elements();
+        $children = $row->getChildren();
         $this->assertCount(1, $children);
-        $this->assertInstanceOf(ElementColumn::class, $children->first());
+        $this->assertInstanceOf(Column::class, $children->first());
     }
 
     public function testPublishDoesNotDuplicateScaffoldedColumn(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
         $row->publishRecursive();
 
         // Re-read draft version
-        $row = ElementRow::get()->byID($row->ID);
-        $this->assertCount(1, $row->getChildArea()->Elements());
+        $row = Row::get()->byID($row->ID);
+        $this->assertCount(1, $row->getChildren());
     }
 
     public function testDefaultColumnTitleConfigIsRespected(): void
     {
-        ElementRow::config()->set('default_column_title', 'Custom Column');
+        Row::config()->set('default_column_title', 'Custom Column');
 
-        $row = ElementRow::create();
+        $row = Row::create();
         $row->write();
 
-        $column = $row->getChildArea()->Elements()->first();
+        $column = $row->getChildren()->first();
         $this->assertSame('Custom Column', $column->Title);
     }
 
     public function testSubsequentWriteDoesNotDuplicateScaffoldedChildren(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
-        $this->assertCount(1, $row->getChildArea()->Elements());
+        $this->assertCount(1, $row->getChildren());
 
         $row->Title = 'Updated';
         $row->write();
 
-        $row = ElementRow::get()->byID($row->ID);
-        $this->assertCount(1, $row->getChildArea()->Elements());
+        $row = Row::get()->byID($row->ID);
+        $this->assertCount(1, $row->getChildren());
     }
 
     public function testDoesNotScaffoldOnNonDraftStage(): void
@@ -148,7 +148,7 @@ final class ElementRowTest extends ElementContainerContractTestCase
         Versioned::withVersionedMode(function (): void {
             Versioned::set_stage(Versioned::LIVE);
 
-            $row = ElementRow::create();
+            $row = Row::create();
             $row->write();
 
             $this->assertFalse($row->hasChildren());
@@ -157,26 +157,26 @@ final class ElementRowTest extends ElementContainerContractTestCase
 
     public function testIconConfig(): void
     {
-        $this->assertSame('font-icon-columns', ElementRow::config()->get('icon'));
+        $this->assertSame('font-icon-columns', Row::config()->get('icon'));
     }
 
     public function testPluralNameConfig(): void
     {
-        $this->assertSame('Rows', ElementRow::config()->get('plural_name'));
+        $this->assertSame('Rows', Row::config()->get('plural_name'));
     }
 
     public function testClassDescriptionConfig(): void
     {
         $this->assertSame(
             'Horizontal container that holds columns within a section',
-            ElementRow::config()->get('class_description'),
+            Row::config()->get('class_description'),
         );
     }
 
     public function testGetTypeReturnsRow(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
         $this->assertSame('Row', $row->getType());
     }
@@ -184,7 +184,7 @@ final class ElementRowTest extends ElementContainerContractTestCase
     public function testGetSummaryReturnsSingularColumnCount(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
         // Scaffolding creates 1 column
         $this->assertSame('1 column', $row->getSummary());
@@ -193,10 +193,10 @@ final class ElementRowTest extends ElementContainerContractTestCase
     public function testGetSummaryReturnsPluralColumnCount(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
-        $extraColumn = ElementColumn::create();
-        $extraColumn->ParentID = $row->getChildArea()->ID;
+        $extraColumn = Column::create();
+        $extraColumn->ParentID = $row->ID;
         $extraColumn->write();
 
         $this->assertSame('2 columns', $row->getSummary());
@@ -205,14 +205,14 @@ final class ElementRowTest extends ElementContainerContractTestCase
     public function testGetChildCountSummaryIsPubliclyCallable(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
         $this->assertSame('1 column', $row->getChildCountSummary());
     }
 
     public function testSummaryFieldsIncludesContentsColumn(): void
     {
-        $fields = ElementRow::config()->get('summary_fields');
+        $fields = Row::config()->get('summary_fields');
 
         $this->assertArrayHasKey('getChildCountSummary', $fields);
         $this->assertSame('Contents', $fields['getChildCountSummary']);
@@ -225,17 +225,17 @@ final class ElementRowTest extends ElementContainerContractTestCase
      */
     public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnColumn(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
         // Attempt to reparent the row into its own column's child area
-        $row->ParentID = $column->getChildArea()->ID;
+        $row->ParentID = $column->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Column.');
@@ -245,29 +245,29 @@ final class ElementRowTest extends ElementContainerContractTestCase
     public function testOnAfterWriteInvokesParentHook(): void
     {
         OnAfterWriteSpy::$called = false;
-        ElementRow::add_extension(OnAfterWriteSpy::class);
+        Row::add_extension(OnAfterWriteSpy::class);
 
         try {
-            $row = ElementRow::create();
+            $row = Row::create();
             $row->write();
 
             $this->assertTrue(OnAfterWriteSpy::$called);
         } finally {
-            ElementRow::remove_extension(OnAfterWriteSpy::class);
+            Row::remove_extension(OnAfterWriteSpy::class);
         }
     }
 
     public function testRewriteOnNonDraftStageDoesNotScaffold(): void
     {
         $row = $this->createContainer();
-        /** @var ElementRow $row */
+        /** @var Row $row */
 
-        // Remove the scaffolded child so ChildArea is empty
-        $child = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $child);
+        // Remove the scaffolded child so container has no children
+        $child = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $child);
         $child->delete();
 
-        $this->assertCount(0, $row->getChildArea()->Elements());
+        $this->assertCount(0, $row->getChildren());
 
         // Re-write on LIVE stage — should NOT scaffold a new child
         Versioned::withVersionedMode(function () use ($row): void {
@@ -276,6 +276,6 @@ final class ElementRowTest extends ElementContainerContractTestCase
             $row->write();
         });
 
-        $this->assertCount(0, $row->getChildArea()->Elements());
+        $this->assertCount(0, $row->getChildren());
     }
 }

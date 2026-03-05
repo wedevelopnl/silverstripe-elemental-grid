@@ -1,21 +1,13 @@
-DNADesign\Elemental\Models\ElementalArea:
-  section_child_area: {}
-  row_child_area: {}
-  column_child_area: {}
-
-WeDevelop\Grid\Elements\ElementSection:
+WeDevelop\Grid\Elements\Section:
   section1:
     Title: 'Cascade Test Section'
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section_child_area
 
-WeDevelop\Grid\Elements\ElementRow:
+WeDevelop\Grid\Elements\Row:
   row1:
     Title: 'Cascade Test Row'
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section_child_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_child_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section1
 
-WeDevelop\Grid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\Column:
   column1:
     Title: 'Cascade Test Column'
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row_child_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.column_child_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row1

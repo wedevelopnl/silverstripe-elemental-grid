@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Unit\Validation;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SilverStripe\ORM\DataObject;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Validation\ReorderValidator;
 
 /**
@@ -33,8 +33,8 @@ final class ReorderValidatorTest extends TestCase
 
     public function testSameAreaMoveIsAlwaysValid(): void
     {
-        $area = $this->createAreaMock(10);
-        $element = $this->createBaseElementMock(1, 10);
+        $area = $this->createParentMock(10);
+        $element = $this->createElementMock(1, 10);
 
         // Same area: no hierarchy or circular ref checks needed
         $area->expects($this->never())->method('getOwnerPage');
@@ -48,8 +48,8 @@ final class ReorderValidatorTest extends TestCase
 
     public function testOrphanedAreaAllowsAnyElement(): void
     {
-        $area = $this->createAreaMock(20);
-        $element = $this->createBaseElementMock(1, 10);
+        $area = $this->createParentMock(20);
+        $element = $this->createElementMock(1, 10);
 
         $area->method('getOwnerPage')->willReturn(null);
 
@@ -60,9 +60,9 @@ final class ReorderValidatorTest extends TestCase
 
     // -- Mock helpers --
 
-    private function createAreaMock(int $id): ElementalArea&MockObject
+    private function createParentMock(int $id): DataObject&MockObject
     {
-        $area = $this->createMock(ElementalArea::class);
+        $area = $this->createMock(DataObject::class);
 
         $fields = ['ID' => $id];
 
@@ -77,9 +77,9 @@ final class ReorderValidatorTest extends TestCase
         return $area;
     }
 
-    private function createBaseElementMock(int $id, int $parentId): BaseElement&MockObject
+    private function createElementMock(int $id, int $parentId): GridElement&MockObject
     {
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
 
         $fields = ['ID' => $id, 'ParentID' => $parentId];
 

@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Unit\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\Grid\Repository\ElementRepositoryInterface;
+use SilverStripe\ORM\DataObject;
+use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
 use WeDevelop\Grid\Service\ReorderExecutor;
 
 #[CoversClass(ReorderExecutor::class)]
 final class ReorderExecutorTest extends TestCase
 {
-    private ElementRepositoryInterface&MockObject $repository;
+    private GridElementRepositoryInterface&MockObject $repository;
 
     private ReorderExecutor $executor;
 
     protected function setUp(): void
     {
-        $this->repository = $this->createMock(ElementRepositoryInterface::class);
+        $this->repository = $this->createMock(GridElementRepositoryInterface::class);
         $this->executor = new ReorderExecutor($this->repository);
     }
 
@@ -29,7 +29,7 @@ final class ReorderExecutorTest extends TestCase
     {
         // [A(1), B(2), C(3), D(4), E(5)] → move D after A
         // Expected: [A(1), D(2), B(3), C(4), E(5)]
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b, $c, $d, $e] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
@@ -38,7 +38,7 @@ final class ReorderExecutorTest extends TestCase
             ['id' => 5, 'sort' => 5, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
 
         $result = $this->executor->execute($d, $area, $a->ID);
 
@@ -57,7 +57,7 @@ final class ReorderExecutorTest extends TestCase
     {
         // [A(1), B(2), C(3), D(4), E(5)] → move B after D
         // Expected: [A(1), C(2), D(3), B(4), E(5)]
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b, $c, $d, $e] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
@@ -66,7 +66,7 @@ final class ReorderExecutorTest extends TestCase
             ['id' => 5, 'sort' => 5, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
 
         $result = $this->executor->execute($b, $area, $d->ID);
 
@@ -84,14 +84,14 @@ final class ReorderExecutorTest extends TestCase
     public function testSamePositionIsNoOp(): void
     {
         // [A(1), B(2), C(3)] → move B after A (already there)
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b, $c] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
             ['id' => 3, 'sort' => 3, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b, $c]);
 
         $result = $this->executor->execute($b, $area, $a->ID);
 
@@ -104,14 +104,14 @@ final class ReorderExecutorTest extends TestCase
         // Source area 10: [A(1), B(2)] → move B to target area 20 at first position
         // Target area 20: [X(1), Y(2)] → [B(1), X(2), Y(3)]
         // Source area 10: [A(1)] → no gaps, A unchanged
-        $targetArea = $this->createAreaMock(20);
+        $targetArea = $this->createParentMock(20);
 
         $a = $this->createElementMock(1, 1, 10);
         $b = $this->createElementMock(2, 2, 10);
         $x = $this->createElementMock(3, 1, 20);
         $y = $this->createElementMock(4, 2, 20);
 
-        $this->repository->method('findByAreaIds')->willReturnCallback(
+        $this->repository->method('findByParentIds')->willReturnCallback(
             static fn (array $ids): array => match ($ids) {
                 [20] => [$x, $y],
                 [10] => [$a, $b],
@@ -136,13 +136,13 @@ final class ReorderExecutorTest extends TestCase
     public function testSameAreaMoveToEnd(): void
     {
         // [A(1), B(2)] → move A after B (last element)
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b]);
 
         $result = $this->executor->execute($a, $area, $b->ID);
 
@@ -158,10 +158,10 @@ final class ReorderExecutorTest extends TestCase
     {
         // Move element to empty target area → becomes sole member with Sort=1
         // Source area 10: [Element(1)] → empty after move
-        $targetArea = $this->createAreaMock(20);
+        $targetArea = $this->createParentMock(20);
         $element = $this->createElementMock(1, 1, 10);
 
-        $this->repository->method('findByAreaIds')->willReturnCallback(
+        $this->repository->method('findByParentIds')->willReturnCallback(
             static fn (array $ids): array => match ($ids) {
                 [20] => [],
                 [10] => [$element],
@@ -183,14 +183,14 @@ final class ReorderExecutorTest extends TestCase
     {
         // [A(1), B(2), C(3)] → move C to first (afterElementId=null)
         // Expected: [C(1), A(2), B(3)]
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b, $c] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
             ['id' => 3, 'sort' => 3, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b, $c]);
 
         $result = $this->executor->execute($c, $area, null);
 
@@ -208,14 +208,14 @@ final class ReorderExecutorTest extends TestCase
         // Source area 10: [A(1), B(2)] → move B to target area 20 after X
         // Target area 20: [X(1), Y(2)] → [X(1), B(2), Y(3)]
         // Source area 10: [A(1)] → no gaps
-        $targetArea = $this->createAreaMock(20);
+        $targetArea = $this->createParentMock(20);
 
         $a = $this->createElementMock(1, 1, 10);
         $b = $this->createElementMock(2, 2, 10);
         $x = $this->createElementMock(3, 1, 20);
         $y = $this->createElementMock(4, 2, 20);
 
-        $this->repository->method('findByAreaIds')->willReturnCallback(
+        $this->repository->method('findByParentIds')->willReturnCallback(
             static fn (array $ids): array => match ($ids) {
                 [20] => [$x, $y],
                 [10] => [$a, $b],
@@ -239,10 +239,10 @@ final class ReorderExecutorTest extends TestCase
     public function testSameAreaSingleElementNoOp(): void
     {
         // [A(1)] → move A to first (only element, already there)
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         $a = $this->createElementMock(1, 1, 10);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a]);
 
         $result = $this->executor->execute($a, $area, null);
 
@@ -255,14 +255,14 @@ final class ReorderExecutorTest extends TestCase
         // Container element (Section) with children in ChildArea(50).
         // Reorder Section within its parent area(10) — children must be unaffected.
         // [A(1), Section(2)] → move Section to first → [Section(1), A(2)]
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         $a = $this->createElementMock(1, 1, 10);
         $section = $this->createElementMock(2, 2, 10);
 
         // Repository must only be queried for the target area (10), never for
         // the container's child area (50) or any other area.
         $this->repository->expects($this->once())
-            ->method('findByAreaIds')
+            ->method('findByParentIds')
             ->with([10])
             ->willReturn([$a, $section]);
 
@@ -282,14 +282,14 @@ final class ReorderExecutorTest extends TestCase
         // Move Section from area(10) to area(20) — children must be unaffected.
         // Target area 20: [X(1)] → [Section(1), X(2)]
         // Source area 10: [] → empty after move (was only element)
-        $targetArea = $this->createAreaMock(20);
+        $targetArea = $this->createParentMock(20);
         $section = $this->createElementMock(2, 1, 10);
         $x = $this->createElementMock(3, 1, 20);
 
         // Repository queried twice: target area (20) then source area (10).
         // Never for child area (50).
         $this->repository->expects($this->exactly(2))
-            ->method('findByAreaIds')
+            ->method('findByParentIds')
             ->willReturnCallback(
                 static fn (array $ids): array => match ($ids) {
                     [20] => [$x],
@@ -312,13 +312,13 @@ final class ReorderExecutorTest extends TestCase
     public function testAfterElementNotFoundReturnsError(): void
     {
         // Pass a non-existent afterElementId → Result::fail
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b]);
 
         $result = $this->executor->execute($a, $area, 999);
 
@@ -331,13 +331,13 @@ final class ReorderExecutorTest extends TestCase
         // Source area 10: [A(1), B(2), C(3)] → move B to target area 20
         // Target area 20: [] → [B(1)]
         // Source area 10: [A(1), C(3)] → C re-sorts to 2, appears in dirty list
-        $targetArea = $this->createAreaMock(20);
+        $targetArea = $this->createParentMock(20);
 
         $a = $this->createElementMock(1, 1, 10);
         $b = $this->createElementMock(2, 2, 10);
         $c = $this->createElementMock(3, 3, 10);
 
-        $this->repository->method('findByAreaIds')->willReturnCallback(
+        $this->repository->method('findByParentIds')->willReturnCallback(
             static fn (array $ids): array => match ($ids) {
                 [20] => [],
                 [10] => [$a, $b, $c],
@@ -364,7 +364,7 @@ final class ReorderExecutorTest extends TestCase
     {
         // [A(1), B(2), C(3), D(4), E(5)] → move B after C
         // Expected: [A(1), C(2), B(3), D(4), E(5)]
-        $area = $this->createAreaMock(10);
+        $area = $this->createParentMock(10);
         [$a, $b, $c, $d, $e] = $this->createElementMocks([
             ['id' => 1, 'sort' => 1, 'parentId' => 10],
             ['id' => 2, 'sort' => 2, 'parentId' => 10],
@@ -373,7 +373,7 @@ final class ReorderExecutorTest extends TestCase
             ['id' => 5, 'sort' => 5, 'parentId' => 10],
         ]);
 
-        $this->repository->method('findByAreaIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
+        $this->repository->method('findByParentIds')->with([10])->willReturn([$a, $b, $c, $d, $e]);
 
         $result = $this->executor->execute($b, $area, $c->ID);
 
@@ -391,19 +391,19 @@ final class ReorderExecutorTest extends TestCase
 
     /**
      * @param list<array{id: int, sort: int, parentId: int}> $specs
-     * @return list<BaseElement&MockObject>
+     * @return list<GridElement&MockObject>
      */
     private function createElementMocks(array $specs): array
     {
         return array_map(
-            fn (array $spec): BaseElement&MockObject => $this->createElementMock($spec['id'], $spec['sort'], $spec['parentId']),
+            fn (array $spec): GridElement&MockObject => $this->createElementMock($spec['id'], $spec['sort'], $spec['parentId']),
             $specs,
         );
     }
 
-    private function createElementMock(int $id, int $sort, int $parentId): BaseElement&MockObject
+    private function createElementMock(int $id, int $sort, int $parentId): GridElement&MockObject
     {
-        $element = $this->createMock(BaseElement::class);
+        $element = $this->createMock(GridElement::class);
 
         $fields = ['ID' => $id, 'Sort' => $sort, 'ParentID' => $parentId];
 
@@ -422,9 +422,9 @@ final class ReorderExecutorTest extends TestCase
         return $element;
     }
 
-    private function createAreaMock(int $id): ElementalArea&MockObject
+    private function createParentMock(int $id): DataObject&MockObject
     {
-        $area = $this->createMock(ElementalArea::class);
+        $area = $this->createMock(DataObject::class);
 
         $fields = ['ID' => $id];
 

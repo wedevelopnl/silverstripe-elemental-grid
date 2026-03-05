@@ -14,7 +14,7 @@ final class FixtureControllerTest extends FunctionalTest
 {
     protected $usesDatabase = true;
 
-    private const BASE_URL = '/dev/elemental-grid-fixtures';
+    private const BASE_URL = '/dev/grid-fixtures';
 
     #[\Override]
     protected function setUp(): void

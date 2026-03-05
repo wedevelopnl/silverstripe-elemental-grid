@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Unit\Service;
 
-use DNADesign\Elemental\Models\BaseElement;
-use DNADesign\Elemental\Models\ElementalArea;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SilverStripe\ORM\DataObject;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
 use WeDevelop\Grid\Model\Result;
@@ -37,8 +37,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testHappyPathCallsValidatorThenExecutorThenPersist(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
         $dirtyElements = [$element];
 
         $this->validator->expects($this->once())
@@ -64,8 +64,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testValidationFailureShortCircuitsExecution(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
 
         $this->validator->method('validate')
             ->willReturn(Result::fail(new ValidationError(message: 'Not allowed.')));
@@ -81,8 +81,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testValidationErrorsPropagatedToResult(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
 
         $this->validator->method('validate')
             ->willReturn(Result::fail(
@@ -101,8 +101,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testPersistenceFailurePropagated(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
         $this->executor->method('execute')->willReturn(Result::ok([$element]));
@@ -118,8 +118,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testEmptyDirtyListStillCallsPersistBatch(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
         $this->executor->method('execute')->willReturn(Result::ok([]));
@@ -137,8 +137,8 @@ final class ReorderServiceTest extends TestCase
 
     public function testExecutorFailurePropagated(): void
     {
-        $element = $this->createMock(BaseElement::class);
-        $area = $this->createMock(ElementalArea::class);
+        $element = $this->createMock(GridElement::class);
+        $area = $this->createMock(DataObject::class);
 
         $this->validator->method('validate')->willReturn(Result::ok($element));
 

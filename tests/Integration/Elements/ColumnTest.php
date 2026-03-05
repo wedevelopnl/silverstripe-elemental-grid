@@ -8,16 +8,17 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\ElementContainerInterface;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\GridElement;
 
-#[CoversClass(ElementColumn::class)]
-final class ElementColumnTest extends ElementContainerContractTestCase
+#[CoversClass(Column::class)]
+final class ColumnTest extends ContainerContractTestCase
 {
     protected function createContainer(): ElementContainerInterface
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->write();
 
         return $column;
@@ -36,8 +37,8 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         $page->Title = 'Test Page';
         $page->write();
 
-        $column = ElementColumn::create();
-        $column->ParentID = $page->ElementalArea()->ID;
+        $column = Column::create();
+        $column->ParentID = $page->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Column cannot be placed inside Page.');
@@ -46,11 +47,11 @@ final class ElementColumnTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideSection(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $column = ElementColumn::create();
-        $column->ParentID = $section->getChildArea()->ID;
+        $column = Column::create();
+        $column->ParentID = $section->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Column cannot be placed inside Section.');
@@ -59,17 +60,17 @@ final class ElementColumnTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideColumn(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
-        $innerColumn = ElementColumn::create();
-        $innerColumn->ParentID = $column->getChildArea()->ID;
+        $innerColumn = Column::create();
+        $innerColumn->ParentID = $column->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Column cannot be placed inside Column.');
@@ -78,14 +79,14 @@ final class ElementColumnTest extends ElementContainerContractTestCase
 
     public function testWriteSucceedsInsideRow(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = ElementColumn::create();
-        $column->ParentID = $row->getChildArea()->ID;
+        $column = Column::create();
+        $column->ParentID = $row->ID;
         $column->write();
 
         $this->assertGreaterThan(0, $column->ID);
@@ -94,33 +95,33 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testDoesNotScaffoldChildren(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $this->assertFalse($column->hasChildren());
     }
 
     public function testIconConfig(): void
     {
-        $this->assertSame('font-icon-block-content', ElementColumn::config()->get('icon'));
+        $this->assertSame('font-icon-block-content', Column::config()->get('icon'));
     }
 
     public function testPluralNameConfig(): void
     {
-        $this->assertSame('Columns', ElementColumn::config()->get('plural_name'));
+        $this->assertSame('Columns', Column::config()->get('plural_name'));
     }
 
     public function testClassDescriptionConfig(): void
     {
         $this->assertSame(
             'Responsive grid column that holds content blocks',
-            ElementColumn::config()->get('class_description'),
+            Column::config()->get('class_description'),
         );
     }
 
     public function testGetTypeReturnsColumn(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $this->assertSame('Column', $column->getType());
     }
@@ -128,7 +129,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetSummaryReturnsZeroElementsForEmptyColumn(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $this->assertSame('0 elements', $column->getSummary());
     }
@@ -136,7 +137,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetGridWidthSummaryWithDefaultSettings(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $this->assertSame('12/12', $column->getGridWidthSummary());
     }
@@ -144,7 +145,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetGridWidthSummaryWithCustomSettings(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $settings = $column->getGridSettingsData();
         $settings['xs']['width'] = 6;
@@ -157,7 +158,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetChildCountSummaryIsPubliclyCallable(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $this->assertSame('0 elements', $column->getChildCountSummary());
     }
@@ -165,11 +166,11 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetChildCountSummarySingularWithOneChild(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
-        $leaf = \DNADesign\Elemental\Models\BaseElement::create();
+        $leaf = GridElement::create();
         $leaf->Title = 'Test Leaf';
-        $leaf->ParentID = $column->getChildArea()->ID;
+        $leaf->ParentID = $column->ID;
         $leaf->write();
 
         $this->assertSame('1 element', $column->getChildCountSummary());
@@ -178,7 +179,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testGetGridWidthSummaryReturnsEmptyForEmptyGridSettings(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
         $column->setField('GridSettings', '[]');
         $column->write();
@@ -188,7 +189,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
 
     public function testSummaryFieldsIncludesContentsAndWidthColumns(): void
     {
-        $fields = ElementColumn::config()->get('summary_fields');
+        $fields = Column::config()->get('summary_fields');
 
         $this->assertArrayHasKey('getChildCountSummary', $fields);
         $this->assertSame('Contents', $fields['getChildCountSummary']);
@@ -199,9 +200,9 @@ final class ElementColumnTest extends ElementContainerContractTestCase
     public function testDefaultGridSettingsAppliedFromConfig(): void
     {
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
 
-        $expected = ElementColumn::config()->get('default_grid_settings');
+        $expected = Column::config()->get('default_grid_settings');
         $this->assertSame($expected, $column->getGridSettingsData());
     }
 
@@ -216,12 +217,12 @@ final class ElementColumnTest extends ElementContainerContractTestCase
         ];
 
         $column = $this->createContainer();
-        /** @var ElementColumn $column */
+        /** @var Column $column */
         $column->setGridSettingsData($settings);
         $column->write();
 
         // Re-fetch from DB to verify persistence
-        $reloaded = ElementColumn::get()->byID($column->ID);
+        $reloaded = Column::get()->byID($column->ID);
         $this->assertSame($settings, $reloaded->getGridSettingsData());
     }
 
@@ -235,9 +236,9 @@ final class ElementColumnTest extends ElementContainerContractTestCase
             'xl' => ['width' => 6, 'offset' => 0, 'visible' => true],
         ];
 
-        ElementColumn::config()->set('default_grid_settings', $custom);
+        Column::config()->set('default_grid_settings', $custom);
 
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->write();
 
         $this->assertSame($custom, $column->getGridSettingsData());
@@ -245,7 +246,7 @@ final class ElementColumnTest extends ElementContainerContractTestCase
 
     public function testOnBeforeWritePersistsGridSettingsFieldForNewRecord(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $this->assertNull($column->getField('GridSettings'));
 
         $column->write();
@@ -265,11 +266,11 @@ final class ElementColumnTest extends ElementContainerContractTestCase
             'xl' => ['width' => 6, 'offset' => 0, 'visible' => true],
         ];
 
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData($custom);
         $column->write();
 
-        $reloaded = ElementColumn::get()->byID($column->ID);
+        $reloaded = Column::get()->byID($column->ID);
         $this->assertSame($custom, $reloaded->getGridSettingsData());
     }
 }

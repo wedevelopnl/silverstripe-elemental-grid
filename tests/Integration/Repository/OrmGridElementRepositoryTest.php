@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Integration\Repository;
 
-use DNADesign\Elemental\Extensions\ElementalPageExtension;
-use DNADesign\Elemental\Models\BaseElement;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Repository\OrmElementRepository;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Extensions\GridPageExtension;
+use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Repository\OrmGridElementRepository;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
-#[CoversClass(OrmElementRepository::class)]
-final class OrmElementRepositoryTest extends SapphireTest
+#[CoversClass(OrmGridElementRepository::class)]
+final class OrmGridElementRepositoryTest extends SapphireTest
 {
     protected static $fixture_file = __DIR__ . '/../Fixture/ElementTreeTest.yml';
 
@@ -25,25 +26,25 @@ final class OrmElementRepositoryTest extends SapphireTest
     /** @var array<class-string, list<class-string>> */
     protected static $required_extensions = [
         TestPage::class => [
-            ElementalPageExtension::class,
+            GridPageExtension::class,
         ],
     ];
 
-    private OrmElementRepository $repository;
+    private OrmGridElementRepository $repository;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         Versioned::set_stage(Versioned::DRAFT);
-        $this->repository = new OrmElementRepository();
+        $this->repository = new OrmGridElementRepository();
     }
 
     // ---- findById ----
 
     public function testFindByIdReturnsElementWhenExists(): void
     {
-        $expectedId = $this->idFromFixture(BaseElement::class, 'leaf1');
+        $expectedId = $this->idFromFixture(GridElement::class, 'leaf1');
 
         $element = $this->repository->findById($expectedId);
 
@@ -59,38 +60,38 @@ final class OrmElementRepositoryTest extends SapphireTest
         $this->assertNull($element);
     }
 
-    // ---- findByAreaIds ----
+    // ---- findByParentIds ----
 
-    public function testFindByAreaIdsReturnsSortedElements(): void
+    public function testFindByParentIdsReturnsSortedElements(): void
     {
-        $col1AreaId = $this->idFromFixture(\DNADesign\Elemental\Models\ElementalArea::class, 'col1_area');
+        $col1Id = $this->idFromFixture(Column::class, 'col1');
 
-        $elements = $this->repository->findByAreaIds([$col1AreaId]);
+        $elements = $this->repository->findByParentIds([$col1Id]);
 
         $this->assertCount(2, $elements);
         $this->assertSame('Text Block', $elements[0]->Title);
         $this->assertSame('Image Block', $elements[1]->Title);
     }
 
-    public function testFindByAreaIdsReturnsElementsFromMultipleAreas(): void
+    public function testFindByParentIdsReturnsElementsFromMultipleParents(): void
     {
-        $col1AreaId = $this->idFromFixture(\DNADesign\Elemental\Models\ElementalArea::class, 'col1_area');
-        $col2AreaId = $this->idFromFixture(\DNADesign\Elemental\Models\ElementalArea::class, 'col2_area');
+        $col1Id = $this->idFromFixture(Column::class, 'col1');
+        $col2Id = $this->idFromFixture(Column::class, 'col2');
 
-        $elements = $this->repository->findByAreaIds([$col1AreaId, $col2AreaId]);
+        $elements = $this->repository->findByParentIds([$col1Id, $col2Id]);
 
         $this->assertCount(3, $elements);
 
-        $titles = array_map(static fn (BaseElement $e): string => $e->Title, $elements);
+        $titles = array_map(static fn (GridElement $e): string => $e->Title, $elements);
         $this->assertContains('Text Block', $titles);
         $this->assertContains('Image Block', $titles);
         $this->assertContains('Video Block', $titles);
     }
 
-    public function testFindByAreaIdsSortsBySortFieldNotId(): void
+    public function testFindByParentIdsSortsBySortFieldNotId(): void
     {
-        $leaf1 = $this->objFromFixture(BaseElement::class, 'leaf1');
-        $leaf2 = $this->objFromFixture(BaseElement::class, 'leaf2');
+        $leaf1 = $this->objFromFixture(GridElement::class, 'leaf1');
+        $leaf2 = $this->objFromFixture(GridElement::class, 'leaf2');
 
         // Swap sort values so lower-ID element has higher Sort
         $leaf1->Sort = 2;
@@ -98,9 +99,9 @@ final class OrmElementRepositoryTest extends SapphireTest
         $leaf2->Sort = 1;
         $leaf2->write();
 
-        $col1AreaId = $this->idFromFixture(\DNADesign\Elemental\Models\ElementalArea::class, 'col1_area');
+        $col1Id = $this->idFromFixture(Column::class, 'col1');
 
-        $elements = $this->repository->findByAreaIds([$col1AreaId]);
+        $elements = $this->repository->findByParentIds([$col1Id]);
 
         $this->assertCount(2, $elements);
         // leaf2 (Sort=1) should come first despite having a higher ID than leaf1
@@ -108,16 +109,16 @@ final class OrmElementRepositoryTest extends SapphireTest
         $this->assertSame('Text Block', $elements[1]->Title);
     }
 
-    public function testFindByAreaIdsReturnsEmptyArrayForEmptyInput(): void
+    public function testFindByParentIdsReturnsEmptyArrayForEmptyInput(): void
     {
-        $elements = $this->repository->findByAreaIds([]);
+        $elements = $this->repository->findByParentIds([]);
 
         $this->assertSame([], $elements);
     }
 
-    public function testFindByAreaIdsReturnsEmptyArrayForNonExistentArea(): void
+    public function testFindByParentIdsReturnsEmptyArrayForNonExistentParent(): void
     {
-        $elements = $this->repository->findByAreaIds([999999]);
+        $elements = $this->repository->findByParentIds([999999]);
 
         $this->assertSame([], $elements);
     }

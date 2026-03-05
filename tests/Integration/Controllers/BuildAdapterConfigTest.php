@@ -7,15 +7,15 @@ namespace WeDevelop\Grid\Tests\Integration\Controllers;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
 use WeDevelop\Grid\Adapter\BootstrapAdapter;
-use WeDevelop\Grid\Controllers\ElementalGridController;
+use WeDevelop\Grid\Controllers\GridController;
 
 /**
- * Tests {@see ElementalGridController::buildAdapterConfig()} in isolation.
+ * Tests {@see GridController::buildAdapterConfig()} in isolation.
  *
  * Requires the SilverStripe config system because adapters now use
  * the Configurable trait (instantiation reads from config).
  */
-#[CoversClass(ElementalGridController::class)]
+#[CoversClass(GridController::class)]
 final class BuildAdapterConfigTest extends SapphireTest
 {
     protected $usesDatabase = false;
@@ -27,7 +27,7 @@ final class BuildAdapterConfigTest extends SapphireTest
     {
         parent::setUp();
 
-        $this->config = ElementalGridController::buildAdapterConfig(new BootstrapAdapter());
+        $this->config = GridController::buildAdapterConfig(new BootstrapAdapter());
     }
 
     // --- Structure -----------------------------------------------------------
@@ -259,7 +259,7 @@ final class BuildAdapterConfigTest extends SapphireTest
             }
         };
 
-        $config = ElementalGridController::buildAdapterConfig($adapter);
+        $config = GridController::buildAdapterConfig($adapter);
 
         self::assertSame('base-w-1', $config['baseWidthClasses']->{'1'});
         self::assertSame('base-w-2', $config['baseWidthClasses']->{'2'});
@@ -334,6 +334,6 @@ final class BuildAdapterConfigTest extends SapphireTest
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Adapter must define at least one viewport.');
 
-        ElementalGridController::buildAdapterConfig($adapter);
+        GridController::buildAdapterConfig($adapter);
     }
 }

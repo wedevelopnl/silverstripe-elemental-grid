@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Integration\Dev;
 
-use DNADesign\Elemental\Models\BaseElement;
 use Page;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
@@ -13,9 +12,10 @@ use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Dev\FixtureLoader;
 use WeDevelop\Grid\Dev\FixturePostAction;
 use WeDevelop\Grid\Dev\FixtureResult;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\GridElement;
 
 #[CoversClass(FixtureLoader::class)]
 #[CoversClass(FixturePostAction::class)]
@@ -42,12 +42,12 @@ final class FixtureLoaderTest extends SapphireTest
                     ],
                     [
                         'action' => 'unpublish',
-                        'class' => BaseElement::class,
+                        'class' => GridElement::class,
                         'identifier' => 'draft_leaf',
                     ],
                     [
                         'action' => 'modify',
-                        'class' => BaseElement::class,
+                        'class' => GridElement::class,
                         'identifier' => 'modified_leaf',
                         'fields' => ['Title' => 'Modified Text Block (draft)'],
                     ],
@@ -77,49 +77,49 @@ final class FixtureLoaderTest extends SapphireTest
 
         // Verify fixture map contains expected classes
         $this->assertArrayHasKey(Page::class, $result->fixtureMap);
-        $this->assertArrayHasKey(ElementSection::class, $result->fixtureMap);
-        $this->assertArrayHasKey(ElementRow::class, $result->fixtureMap);
-        $this->assertArrayHasKey(ElementColumn::class, $result->fixtureMap);
-        $this->assertArrayHasKey(BaseElement::class, $result->fixtureMap);
+        $this->assertArrayHasKey(Section::class, $result->fixtureMap);
+        $this->assertArrayHasKey(Row::class, $result->fixtureMap);
+        $this->assertArrayHasKey(Column::class, $result->fixtureMap);
+        $this->assertArrayHasKey(GridElement::class, $result->fixtureMap);
 
         // Verify hierarchy: section → row → columns → leaves
         Versioned::withVersionedMode(function () use ($result): void {
             Versioned::set_stage(Versioned::DRAFT);
 
-            $sectionId = $result->fixtureMap[ElementSection::class]['section1'];
-            $section = ElementSection::get()->byID($sectionId);
+            $sectionId = $result->fixtureMap[Section::class]['section1'];
+            $section = Section::get()->byID($sectionId);
             $this->assertNotNull($section, 'Section should exist');
 
-            $rowId = $result->fixtureMap[ElementRow::class]['row1'];
-            $row = ElementRow::get()->byID($rowId);
+            $rowId = $result->fixtureMap[Row::class]['row1'];
+            $row = Row::get()->byID($rowId);
             $this->assertNotNull($row, 'Row should exist');
 
-            // Row should be in section's child area
+            // Row should be parented to section
             $this->assertSame(
-                $section->ChildArea()->ID,
-                $row->ParentID,
-                'Row should be in section child area',
+                (int) $section->ID,
+                (int) $row->ParentID,
+                'Row should be parented to section',
             );
 
-            $col1Id = $result->fixtureMap[ElementColumn::class]['col1'];
-            $col1 = ElementColumn::get()->byID($col1Id);
+            $col1Id = $result->fixtureMap[Column::class]['col1'];
+            $col1 = Column::get()->byID($col1Id);
             $this->assertNotNull($col1, 'Column 1 should exist');
 
-            // Column should be in row's child area
+            // Column should be parented to row
             $this->assertSame(
-                $row->ChildArea()->ID,
-                $col1->ParentID,
-                'Column should be in row child area',
+                (int) $row->ID,
+                (int) $col1->ParentID,
+                'Column should be parented to row',
             );
 
-            // Leaves should be in column's child area
-            $leaf1Id = $result->fixtureMap[BaseElement::class]['leaf1'];
-            $leaf1 = BaseElement::get()->byID($leaf1Id);
+            // Leaves should be parented to column
+            $leaf1Id = $result->fixtureMap[GridElement::class]['leaf1'];
+            $leaf1 = GridElement::get()->byID($leaf1Id);
             $this->assertNotNull($leaf1, 'Leaf 1 should exist');
             $this->assertSame(
-                $col1->ChildArea()->ID,
-                $leaf1->ParentID,
-                'Leaf should be in column child area',
+                (int) $col1->ID,
+                (int) $leaf1->ParentID,
+                'Leaf should be parented to column',
             );
         });
     }
@@ -129,21 +129,21 @@ final class FixtureLoaderTest extends SapphireTest
         $loader = FixtureLoader::create();
         $result = $loader->load('complex-page');
 
-        $draftLeafId = $result->fixtureMap[BaseElement::class]['draft_leaf'];
-        $publishedLeafId = $result->fixtureMap[BaseElement::class]['published_leaf'];
-        $modifiedLeafId = $result->fixtureMap[BaseElement::class]['modified_leaf'];
+        $draftLeafId = $result->fixtureMap[GridElement::class]['draft_leaf'];
+        $publishedLeafId = $result->fixtureMap[GridElement::class]['published_leaf'];
+        $modifiedLeafId = $result->fixtureMap[GridElement::class]['modified_leaf'];
 
         // draft_leaf should exist in draft but NOT on live
         Versioned::withVersionedMode(function () use ($draftLeafId): void {
             Versioned::set_stage(Versioned::DRAFT);
             $this->assertNotNull(
-                BaseElement::get()->byID($draftLeafId),
+                GridElement::get()->byID($draftLeafId),
                 'draft_leaf should exist in draft',
             );
 
             Versioned::set_stage(Versioned::LIVE);
             $this->assertNull(
-                BaseElement::get()->byID($draftLeafId),
+                GridElement::get()->byID($draftLeafId),
                 'draft_leaf should NOT exist on live (was unpublished)',
             );
         });
@@ -151,11 +151,11 @@ final class FixtureLoaderTest extends SapphireTest
         // published_leaf should exist on both draft and live with same title
         Versioned::withVersionedMode(function () use ($publishedLeafId): void {
             Versioned::set_stage(Versioned::DRAFT);
-            $draft = BaseElement::get()->byID($publishedLeafId);
+            $draft = GridElement::get()->byID($publishedLeafId);
             $this->assertNotNull($draft, 'published_leaf should exist in draft');
 
             Versioned::set_stage(Versioned::LIVE);
-            $live = BaseElement::get()->byID($publishedLeafId);
+            $live = GridElement::get()->byID($publishedLeafId);
             $this->assertNotNull($live, 'published_leaf should exist on live');
             $this->assertSame($draft->Title, $live->Title, 'published_leaf title should match');
         });
@@ -163,12 +163,12 @@ final class FixtureLoaderTest extends SapphireTest
         // modified_leaf should differ between draft and live
         Versioned::withVersionedMode(function () use ($modifiedLeafId): void {
             Versioned::set_stage(Versioned::LIVE);
-            $live = BaseElement::get()->byID($modifiedLeafId);
+            $live = GridElement::get()->byID($modifiedLeafId);
             $this->assertNotNull($live, 'modified_leaf should exist on live');
             $this->assertSame('Modified Text Block', $live->Title);
 
             Versioned::set_stage(Versioned::DRAFT);
-            $draft = BaseElement::get()->byID($modifiedLeafId);
+            $draft = GridElement::get()->byID($modifiedLeafId);
             $this->assertNotNull($draft, 'modified_leaf should exist in draft');
             $this->assertSame('Modified Text Block (draft)', $draft->Title);
         });
@@ -181,7 +181,7 @@ final class FixtureLoaderTest extends SapphireTest
 
         FixturePostAction::fromConfig([
             'action' => 'delete_all',
-            'class' => BaseElement::class,
+            'class' => GridElement::class,
             'identifier' => 'leaf1',
         ]);
     }

@@ -8,18 +8,18 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
 
 /**
  * Tests the grid CSS class accessor methods on each container element.
  *
  * Uses the default Bootstrap adapter (wired via Injector in the test environment).
  */
-#[CoversClass(ElementSection::class)]
-#[CoversClass(ElementRow::class)]
-#[CoversClass(ElementColumn::class)]
+#[CoversClass(Section::class)]
+#[CoversClass(Row::class)]
+#[CoversClass(Column::class)]
 final class GridClassesTest extends SapphireTest
 {
     protected $usesDatabase = true;
@@ -36,7 +36,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testContainerClassesForSection(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
         $this->assertSame('container', $section->getContainerClasses());
@@ -44,9 +44,9 @@ final class GridClassesTest extends SapphireTest
 
     public function testFluidContainerClasses(): void
     {
-        Config::modify()->set(ElementSection::class, 'fluid_container', true);
+        Config::modify()->set(Section::class, 'fluid_container', true);
 
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
         $this->assertSame('container-fluid', $section->getContainerClasses());
@@ -56,11 +56,11 @@ final class GridClassesTest extends SapphireTest
 
     public function testRowClassesForRow(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
         $this->assertSame('row', $row->getRowClasses());
     }
@@ -69,14 +69,14 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesWithDefaultSettings(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
         $classes = $column->getColumnClasses();
 
@@ -89,7 +89,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesWithCustomWidths(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData([
             'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
             'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],
@@ -107,7 +107,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesWithOffset(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData([
             'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
             'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],
@@ -126,7 +126,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesWithHiddenViewport(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData([
             'xs' => ['width' => 12, 'offset' => 0, 'visible' => false],
             'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],
@@ -147,7 +147,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesPreserveEarlierClassesAfterHiddenViewport(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData([
             'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
             'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],
@@ -170,7 +170,7 @@ final class GridClassesTest extends SapphireTest
 
     public function testColumnClassesZeroOffsetExcluded(): void
     {
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData([
             'xs' => ['width' => 12, 'offset' => 0, 'visible' => true],
             'sm' => ['width' => 12, 'offset' => 0, 'visible' => true],

@@ -7,7 +7,7 @@ import {
 } from '@/types/elements';
 import { loadFixture, resetFixtures } from '../helpers/fixtures';
 
-const API_BASE = '/admin/elemental-grid/api/readTree';
+const API_BASE = '/admin/grid/api/readTree';
 
 test.describe('API contract', () => {
   test.afterAll(async ({ request }) => {

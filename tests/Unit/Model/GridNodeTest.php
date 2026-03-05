@@ -7,16 +7,16 @@ namespace WeDevelop\Grid\Tests\Unit\Model;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Model\ElementNode;
+use WeDevelop\Grid\Model\GridNode;
 
-#[CoversClass(ElementNode::class)]
-final class ElementNodeTest extends TestCase
+#[CoversClass(GridNode::class)]
+final class GridNodeTest extends TestCase
 {
-    private function createLeafNode(int $id = 1, string $title = 'Leaf', int $parentAreaId = 1): ElementNode
+    private function createLeafNode(int $id = 1, string $title = 'Leaf', int $parentId = 1): GridNode
     {
-        return new ElementNode(
+        return new GridNode(
             id: $id,
-            parentAreaId: $parentAreaId,
+            parentId: $parentId,
             title: $title,
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -32,12 +32,11 @@ final class ElementNodeTest extends TestCase
     private function createContainerNode(
         ContainerType $containerType = ContainerType::Section,
         ?array $children = [],
-        int $childAreaId = 10,
-        int $parentAreaId = 1,
-    ): ElementNode {
-        return new ElementNode(
+        int $parentId = 1,
+    ): GridNode {
+        return new GridNode(
             id: 10,
-            parentAreaId: $parentAreaId,
+            parentId: $parentId,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -50,7 +49,6 @@ final class ElementNodeTest extends TestCase
             containerType: $containerType,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: $children,
-            childAreaId: $childAreaId,
         );
     }
 
@@ -125,30 +123,30 @@ final class ElementNodeTest extends TestCase
         $this->assertArrayNotHasKey('children', $decoded['children'][0]);
     }
 
-    public function testLeafNodeSerializesParentAreaId(): void
+    public function testLeafNodeSerializesParentId(): void
     {
-        $node = $this->createLeafNode(parentAreaId: 42);
+        $node = $this->createLeafNode(parentId: 42);
         $data = $node->jsonSerialize();
 
-        $this->assertSame(42, $data['parentAreaId']);
+        $this->assertSame(42, $data['parentId']);
     }
 
-    public function testContainerNodeSerializesParentAreaId(): void
+    public function testContainerNodeSerializesParentId(): void
     {
-        $node = $this->createContainerNode(parentAreaId: 55);
+        $node = $this->createContainerNode(parentId: 55);
         $data = $node->jsonSerialize();
 
-        $this->assertSame(55, $data['parentAreaId']);
+        $this->assertSame(55, $data['parentId']);
     }
 
-    public function testConstructorRejectsZeroParentAreaId(): void
+    public function testConstructorRejectsZeroParentId(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('parentAreaId must be a positive integer');
+        $this->expectExceptionMessage('parentId must be a positive integer');
 
-        new ElementNode(
+        new GridNode(
             id: 1,
-            parentAreaId: 0,
+            parentId: 0,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -161,14 +159,14 @@ final class ElementNodeTest extends TestCase
         );
     }
 
-    public function testConstructorRejectsNegativeParentAreaId(): void
+    public function testConstructorRejectsNegativeParentId(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('parentAreaId must be a positive integer');
+        $this->expectExceptionMessage('parentId must be a positive integer');
 
-        new ElementNode(
+        new GridNode(
             id: 1,
-            parentAreaId: -1,
+            parentId: -1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -183,9 +181,9 @@ final class ElementNodeTest extends TestCase
 
     public function testExtensionsIncludedInSerialization(): void
     {
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 1,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -214,9 +212,9 @@ final class ElementNodeTest extends TestCase
 
     public function testExtensionsOnLeafNode(): void
     {
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 1,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -240,9 +238,9 @@ final class ElementNodeTest extends TestCase
 
     public function testExtensionsOnContainerNode(): void
     {
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 10,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -255,7 +253,6 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Section,
             allowedTypes: ['App\\Elements\\Row' => 'Row'],
             children: [],
-            childAreaId: 10,
             extensions: ['layout' => 'fluid'],
         );
 
@@ -275,9 +272,9 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Column,
             children: [$leaf],
         );
-        $outerContainer = new ElementNode(
+        $outerContainer = new GridNode(
             id: 50,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Outer',
             blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -290,7 +287,8 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Row,
             allowedTypes: ['App\\Elements\\Column' => 'Column'],
             children: [$innerContainer],
-            childAreaId: 50,
+
+
         );
 
         $json = json_encode($outerContainer, JSON_THROW_ON_ERROR);
@@ -317,9 +315,9 @@ final class ElementNodeTest extends TestCase
             'md' => ['width' => 6, 'offset' => 0, 'visible' => true],
         ];
 
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 1,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Test Column',
             blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
@@ -333,7 +331,8 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: $gridSettings,
-            childAreaId: 1,
+
+
         );
 
         $serialized = $node->jsonSerialize();
@@ -346,9 +345,9 @@ final class ElementNodeTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('gridSettings may only be provided for Column container type');
 
-        new ElementNode(
+        new GridNode(
             id: 99,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Row with grid settings',
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -362,15 +361,16 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: ['xs' => ['width' => 12, 'offset' => 0, 'visible' => true]],
-            childAreaId: 99,
+
+
         );
     }
 
     public function testColumnWithNullGridSettingsOmitsGridSettingsKey(): void
     {
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 1,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Column No Grid',
             blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
@@ -384,7 +384,8 @@ final class ElementNodeTest extends TestCase
             allowedTypes: null,
             children: [],
             gridSettings: null,
-            childAreaId: 1,
+
+
         );
 
         $serialized = $node->jsonSerialize();
@@ -393,9 +394,9 @@ final class ElementNodeTest extends TestCase
 
     public function testNonColumnNodeOmitsGridSettings(): void
     {
-        $node = new ElementNode(
+        $node = new GridNode(
             id: 2,
-            parentAreaId: 1,
+            parentId: 1,
             title: 'Test Row',
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -408,112 +409,12 @@ final class ElementNodeTest extends TestCase
             containerType: ContainerType::Row,
             allowedTypes: null,
             children: [],
-            childAreaId: 2,
+
+
         );
 
         $serialized = $node->jsonSerialize();
         self::assertArrayNotHasKey('gridSettings', $serialized);
     }
 
-    public function testContainerNodeSerializesChildAreaId(): void
-    {
-        $node = new ElementNode(
-            id: 10,
-            parentAreaId: 1,
-            title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
-            obsoleteClassName: null,
-            version: 1,
-            canDelete: true,
-            canPublish: true,
-            canUnpublish: false,
-            canCreate: true,
-            statusFlags: [],
-            containerType: ContainerType::Section,
-            allowedTypes: ['App\\Elements\\Row' => 'Row'],
-            children: [],
-            childAreaId: 42,
-        );
-
-        $data = $node->jsonSerialize();
-
-        $this->assertArrayHasKey('childAreaId', $data);
-        $this->assertSame(42, $data['childAreaId']);
-    }
-
-    public function testContainerWithNullChildAreaIdThrows(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Container nodes must have a positive childAreaId');
-
-        new ElementNode(
-            id: 10,
-            parentAreaId: 1,
-            title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
-            obsoleteClassName: null,
-            version: 1,
-            canDelete: true,
-            canPublish: true,
-            canUnpublish: false,
-            canCreate: true,
-            statusFlags: [],
-            containerType: ContainerType::Section,
-            allowedTypes: ['App\\Elements\\Row' => 'Row'],
-            children: [],
-        );
-    }
-
-    public function testContainerWithZeroChildAreaIdThrows(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Container nodes must have a positive childAreaId');
-
-        new ElementNode(
-            id: 10,
-            parentAreaId: 1,
-            title: 'Container',
-            blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
-            obsoleteClassName: null,
-            version: 1,
-            canDelete: true,
-            canPublish: true,
-            canUnpublish: false,
-            canCreate: true,
-            statusFlags: [],
-            containerType: ContainerType::Section,
-            allowedTypes: ['App\\Elements\\Row' => 'Row'],
-            children: [],
-            childAreaId: 0,
-        );
-    }
-
-    public function testLeafNodeOmitsChildAreaId(): void
-    {
-        $node = $this->createLeafNode();
-        $data = $node->jsonSerialize();
-
-        $this->assertArrayNotHasKey('childAreaId', $data);
-    }
-
-    public function testChildAreaIdOnLeafNodeThrows(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('childAreaId may only be provided for container types');
-
-        new ElementNode(
-            id: 99,
-            parentAreaId: 1,
-            title: 'Leaf',
-            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Content'],
-            obsoleteClassName: null,
-            version: 1,
-            canDelete: true,
-            canPublish: true,
-            canUnpublish: false,
-            canCreate: true,
-            statusFlags: [],
-            childAreaId: 42,
-        );
-    }
 }

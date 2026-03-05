@@ -14,17 +14,17 @@ use WeDevelop\Grid\Adapter\BootstrapAdapter;
 use WeDevelop\Grid\Adapter\BulmaAdapter;
 use WeDevelop\Grid\Adapter\TailwindAdapter;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
 
 /**
  * Tests the full template rendering pipeline (element -> holder -> HTML output)
  * for each grid adapter. Uses the element's controller forTemplate() to render.
  */
-#[CoversClass(ElementSection::class)]
-#[CoversClass(ElementRow::class)]
-#[CoversClass(ElementColumn::class)]
+#[CoversClass(Section::class)]
+#[CoversClass(Row::class)]
+#[CoversClass(Column::class)]
 final class GridTemplateRenderingTest extends SapphireTest
 {
     protected $usesDatabase = true;
@@ -50,7 +50,7 @@ final class GridTemplateRenderingTest extends SapphireTest
     }
 
     /** Render an element through its controller (holder + content template). */
-    private function render(ElementSection|ElementRow|ElementColumn $element): string
+    private function render(Section|Row|Column $element): string
     {
         $controller = $element->getController();
 
@@ -74,7 +74,7 @@ final class GridTemplateRenderingTest extends SapphireTest
     {
         $this->useAdapter($adapterClass);
 
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->Title = 'Test Section';
         $section->write();
 
@@ -97,9 +97,9 @@ final class GridTemplateRenderingTest extends SapphireTest
     public function testSectionRendersFluidContainerPerAdapter(string $adapterClass, string $expected): void
     {
         $this->useAdapter($adapterClass);
-        Config::modify()->set(ElementSection::class, 'fluid_container', true);
+        Config::modify()->set(Section::class, 'fluid_container', true);
 
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->Title = 'Fluid Section';
         $section->write();
 
@@ -110,7 +110,7 @@ final class GridTemplateRenderingTest extends SapphireTest
 
     public function testSectionRendersSectionTag(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
         $html = $this->render($section);
@@ -120,7 +120,7 @@ final class GridTemplateRenderingTest extends SapphireTest
 
     public function testSectionTitleRendersWhenShowTitleTrue(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->Title = 'Visible Title';
         $section->ShowTitle = true;
         $section->write();
@@ -133,7 +133,7 @@ final class GridTemplateRenderingTest extends SapphireTest
 
     public function testSectionTitleAbsentWhenShowTitleFalse(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->Title = 'Hidden Title';
         $section->ShowTitle = false;
         $section->write();
@@ -160,11 +160,11 @@ final class GridTemplateRenderingTest extends SapphireTest
     {
         $this->useAdapter($adapterClass);
 
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
         $html = $this->render($row);
 
@@ -222,7 +222,7 @@ final class GridTemplateRenderingTest extends SapphireTest
     {
         $this->useAdapter($adapterClass);
 
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData($settings);
         $column->write();
 
@@ -280,7 +280,7 @@ final class GridTemplateRenderingTest extends SapphireTest
     {
         $this->useAdapter($adapterClass);
 
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData($settings);
         $column->write();
 
@@ -338,7 +338,7 @@ final class GridTemplateRenderingTest extends SapphireTest
     {
         $this->useAdapter($adapterClass);
 
-        $column = ElementColumn::create();
+        $column = Column::create();
         $column->setGridSettingsData($settings);
         $column->write();
 

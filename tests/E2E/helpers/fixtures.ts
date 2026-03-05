@@ -26,7 +26,7 @@ interface FixtureResetResponse {
   success: true;
 }
 
-const FIXTURE_ENDPOINT = '/dev/elemental-grid-fixtures';
+const FIXTURE_ENDPOINT = '/dev/grid-fixtures';
 
 /**
  * Load a named fixture via the FixtureController endpoint.

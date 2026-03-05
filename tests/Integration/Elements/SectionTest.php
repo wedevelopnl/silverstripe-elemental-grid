@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Tests\Integration\Elements;
 
-use DNADesign\Elemental\Extensions\ElementalPageExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\ElementContainerInterface;
-use WeDevelop\Grid\Elements\ElementColumn;
-use WeDevelop\Grid\Elements\ElementRow;
-use WeDevelop\Grid\Elements\ElementSection;
+use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Extensions\GridPageExtension;
 use WeDevelop\Grid\Tests\Integration\Fixture\OnAfterWriteSpy;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
-#[CoversClass(ElementSection::class)]
-final class ElementSectionTest extends ElementContainerContractTestCase
+#[CoversClass(Section::class)]
+final class SectionTest extends ContainerContractTestCase
 {
     /** @var list<class-string> */
     protected static $extra_dataobjects = [
@@ -27,13 +27,13 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     /** @var array<class-string, list<class-string>> */
     protected static $required_extensions = [
         TestPage::class => [
-            ElementalPageExtension::class,
+            GridPageExtension::class,
         ],
     ];
 
     protected function createContainer(): ElementContainerInterface
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
         return $section;
@@ -52,8 +52,8 @@ final class ElementSectionTest extends ElementContainerContractTestCase
         $page->Title = 'Test Page';
         $page->write();
 
-        $section = ElementSection::create();
-        $section->ParentID = $page->ElementalAreaID;
+        $section = Section::create();
+        $section->ParentID = $page->ID;
         $section->write();
 
         $this->assertGreaterThan(0, $section->ID);
@@ -61,11 +61,11 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideSection(): void
     {
-        $outerSection = ElementSection::create();
+        $outerSection = Section::create();
         $outerSection->write();
 
-        $innerSection = ElementSection::create();
-        $innerSection->ParentID = $outerSection->getChildArea()->ID;
+        $innerSection = Section::create();
+        $innerSection->ParentID = $outerSection->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Section.');
@@ -74,14 +74,14 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideRow(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $innerSection = ElementSection::create();
-        $innerSection->ParentID = $row->getChildArea()->ID;
+        $innerSection = Section::create();
+        $innerSection->ParentID = $row->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Row.');
@@ -90,17 +90,17 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
     public function testWriteBlockedInsideColumn(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
-        $innerSection = ElementSection::create();
-        $innerSection->ParentID = $column->getChildArea()->ID;
+        $innerSection = Section::create();
+        $innerSection->ParentID = $column->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Column.');
@@ -110,66 +110,66 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     public function testScaffoldsRowOnWrite(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
         $this->assertTrue($section->hasChildren());
 
-        $children = $section->getChildArea()->Elements();
+        $children = $section->getChildren();
         $this->assertCount(1, $children);
-        $this->assertInstanceOf(ElementRow::class, $children->first());
+        $this->assertInstanceOf(Row::class, $children->first());
     }
 
     public function testScaffoldingCascadesToColumn(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
         $this->assertTrue($row->hasChildren());
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
     }
 
     public function testPublishDoesNotDuplicateScaffoldedChildren(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
         $section->publishRecursive();
 
         // Re-read draft version
-        $section = ElementSection::get()->byID($section->ID);
-        $this->assertCount(1, $section->getChildArea()->Elements());
+        $section = Section::get()->byID($section->ID);
+        $this->assertCount(1, $section->getChildren());
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertCount(1, $row->getChildArea()->Elements());
+        $row = $section->getChildren()->first();
+        $this->assertCount(1, $row->getChildren());
     }
 
     public function testDefaultRowTitleConfigIsRespected(): void
     {
-        ElementSection::config()->set('default_row_title', 'Custom Row');
+        Section::config()->set('default_row_title', 'Custom Row');
 
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
+        $row = $section->getChildren()->first();
         $this->assertSame('Custom Row', $row->Title);
     }
 
     public function testSubsequentWriteDoesNotDuplicateScaffoldedChildren(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
-        $this->assertCount(1, $section->getChildArea()->Elements());
+        $this->assertCount(1, $section->getChildren());
 
         $section->Title = 'Updated';
         $section->write();
 
-        $section = ElementSection::get()->byID($section->ID);
-        $this->assertCount(1, $section->getChildArea()->Elements());
+        $section = Section::get()->byID($section->ID);
+        $this->assertCount(1, $section->getChildren());
     }
 
     public function testDoesNotScaffoldOnNonDraftStage(): void
@@ -177,7 +177,7 @@ final class ElementSectionTest extends ElementContainerContractTestCase
         Versioned::withVersionedMode(function (): void {
             Versioned::set_stage(Versioned::LIVE);
 
-            $section = ElementSection::create();
+            $section = Section::create();
             $section->write();
 
             $this->assertFalse($section->hasChildren());
@@ -187,29 +187,29 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     public function testOnAfterWriteInvokesParentHook(): void
     {
         OnAfterWriteSpy::$called = false;
-        ElementSection::add_extension(OnAfterWriteSpy::class);
+        Section::add_extension(OnAfterWriteSpy::class);
 
         try {
-            $section = ElementSection::create();
+            $section = Section::create();
             $section->write();
 
             $this->assertTrue(OnAfterWriteSpy::$called);
         } finally {
-            ElementSection::remove_extension(OnAfterWriteSpy::class);
+            Section::remove_extension(OnAfterWriteSpy::class);
         }
     }
 
     public function testRewriteOnNonDraftStageDoesNotScaffold(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
-        // Remove the scaffolded child so ChildArea is empty
-        $child = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $child);
+        // Remove the scaffolded child so container has no children
+        $child = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $child);
         $child->delete();
 
-        $this->assertCount(0, $section->getChildArea()->Elements());
+        $this->assertCount(0, $section->getChildren());
 
         // Re-write on LIVE stage — should NOT scaffold a new child
         Versioned::withVersionedMode(function () use ($section): void {
@@ -218,7 +218,7 @@ final class ElementSectionTest extends ElementContainerContractTestCase
             $section->write();
         });
 
-        $this->assertCount(0, $section->getChildArea()->Elements());
+        $this->assertCount(0, $section->getChildren());
     }
 
     public function testValidationPassesInsidePage(): void
@@ -226,8 +226,8 @@ final class ElementSectionTest extends ElementContainerContractTestCase
         $page = TestPage::create();
         $page->write();
 
-        $section = ElementSection::create();
-        $section->ParentID = $page->ElementalAreaID;
+        $section = Section::create();
+        $section->ParentID = $page->ID;
 
         $result = $section->validate();
 
@@ -236,26 +236,26 @@ final class ElementSectionTest extends ElementContainerContractTestCase
 
     public function testIconConfig(): void
     {
-        $this->assertSame('font-icon-block-layout', ElementSection::config()->get('icon'));
+        $this->assertSame('font-icon-block-layout', Section::config()->get('icon'));
     }
 
     public function testPluralNameConfig(): void
     {
-        $this->assertSame('Sections', ElementSection::config()->get('plural_name'));
+        $this->assertSame('Sections', Section::config()->get('plural_name'));
     }
 
     public function testClassDescriptionConfig(): void
     {
         $this->assertSame(
             'Top-level layout container that holds rows',
-            ElementSection::config()->get('class_description'),
+            Section::config()->get('class_description'),
         );
     }
 
     public function testGetTypeReturnsSection(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
         $this->assertSame('Section', $section->getType());
     }
@@ -263,7 +263,7 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     public function testGetSummaryReturnsSingularRowCount(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
         // Scaffolding creates 1 row
         $this->assertSame('1 row', $section->getSummary());
@@ -272,10 +272,10 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     public function testGetSummaryReturnsPluralRowCount(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
-        $extraRow = ElementRow::create();
-        $extraRow->ParentID = $section->getChildArea()->ID;
+        $extraRow = Row::create();
+        $extraRow->ParentID = $section->ID;
         $extraRow->write();
 
         $this->assertSame('2 rows', $section->getSummary());
@@ -284,14 +284,14 @@ final class ElementSectionTest extends ElementContainerContractTestCase
     public function testGetChildCountSummaryIsPubliclyCallable(): void
     {
         $section = $this->createContainer();
-        /** @var ElementSection $section */
+        /** @var Section $section */
 
         $this->assertSame('1 row', $section->getChildCountSummary());
     }
 
     public function testSummaryFieldsIncludesContentsColumn(): void
     {
-        $fields = ElementSection::config()->get('summary_fields');
+        $fields = Section::config()->get('summary_fields');
 
         $this->assertArrayHasKey('getChildCountSummary', $fields);
         $this->assertSame('Contents', $fields['getChildCountSummary']);
@@ -304,14 +304,14 @@ final class ElementSectionTest extends ElementContainerContractTestCase
      */
     public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnRow(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
         // Attempt to reparent the section into its own row's child area
-        $section->ParentID = $row->getChildArea()->ID;
+        $section->ParentID = $row->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Row.');
@@ -325,17 +325,17 @@ final class ElementSectionTest extends ElementContainerContractTestCase
      */
     public function testCircularReferenceBlockedByTypeRulesWhenMovedIntoOwnColumn(): void
     {
-        $section = ElementSection::create();
+        $section = Section::create();
         $section->write();
 
-        $row = $section->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementRow::class, $row);
+        $row = $section->getChildren()->first();
+        $this->assertInstanceOf(Row::class, $row);
 
-        $column = $row->getChildArea()->Elements()->first();
-        $this->assertInstanceOf(ElementColumn::class, $column);
+        $column = $row->getChildren()->first();
+        $this->assertInstanceOf(Column::class, $column);
 
         // Attempt to reparent the section into its own column's child area
-        $section->ParentID = $column->getChildArea()->ID;
+        $section->ParentID = $column->ID;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Column.');

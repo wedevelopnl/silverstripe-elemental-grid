@@ -4,67 +4,58 @@
 # at runtime — only during PHPUnit execution.
 #
 # Bottom-up ordering: children are written before parent containers so that
-# onAfterWrite scaffolding checks see a non-empty ChildArea and skip
+# onAfterWrite scaffolding checks see existing children and skip
 # auto-creation of Row/Column elements.
 #
 # All pages use the 'e2e-' URLSegment prefix for cleanup identification.
-
-DNADesign\Elemental\Models\ElementalArea:
-  page_area: {}
-  section1_area: {}
-  row1_area: {}
-  col1_area: {}
-  col2_area: {}
+#
+# Elements parent directly to their container via polymorphic has_one (Parent).
+# No ElementalArea intermediary.
 
 Page:
   e2e_page:
     Title: 'E2E Grid Test Page'
     URLSegment: 'e2e-grid-test'
-    ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
 
-# --- Leaves first (into column areas) ---
-DNADesign\Elemental\Models\BaseElement:
+# --- Leaves first (into columns) ---
+WeDevelop\Grid\Model\GridElement:
   leaf1:
     Title: 'Text Block'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
   leaf2:
     Title: 'Image Block'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
   leaf3:
     Title: 'Video Block'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    Parent: =>WeDevelop\Grid\Elements\Column.col2
 
-# --- Columns (into row area; ChildAreas already have leaves) ---
-WeDevelop\Grid\Elements\ElementColumn:
+# --- Columns (into row; children already have leaves) ---
+WeDevelop\Grid\Elements\Column:
   col1:
     Title: 'Left Column'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col1_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col2:
     Title: 'Right Column'
     Sort: 2
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.row1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.col2_area
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
 
-# --- Row (into section area; ChildArea already has columns) ---
-WeDevelop\Grid\Elements\ElementRow:
+# --- Row (into section; children already have columns) ---
+WeDevelop\Grid\Elements\Row:
   row1:
     Title: 'First Row'
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.section1_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row1_area
+    Parent: =>WeDevelop\Grid\Elements\Section.section1
 
-# --- Section (into page area; section1_area already has row) ---
-WeDevelop\Grid\Elements\ElementSection:
+# --- Section (into page) ---
+WeDevelop\Grid\Elements\Section:
   section1:
     Title: 'Main Section'
     ShowTitle: 1
     Sort: 1
-    Parent: =>DNADesign\Elemental\Models\ElementalArea.page_area
-    ChildArea: =>DNADesign\Elemental\Models\ElementalArea.section1_area
+    Parent: =>Page.e2e_page
