@@ -45,6 +45,7 @@ vi.mock('@/utils/gridAdapter', () => ({
 function makeRow(id: number, title: string, overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
   return {
     id,
+    parentAreaId: 300,
     title,
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Row',
@@ -76,6 +77,7 @@ function makeSection(overrides: Partial<EnrichedSectionNode> = {}): EnrichedSect
   const children = overrides.children ?? null;
   return {
     id,
+    parentAreaId: 42,
     title: 'Section',
     blockSchema: {
       typeName: 'WeDevelop\\ElementalGrid\\Section',
@@ -255,6 +257,7 @@ describe('SectionBlock', () => {
           children: [
             {
               id: 30,
+              parentAreaId: 200,
               title: 'Column',
               blockSchema: {
                 typeName: 'WeDevelop\\ElementalGrid\\Column',

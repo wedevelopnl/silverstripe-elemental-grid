@@ -12,10 +12,11 @@ use WeDevelop\ElementalGrid\Model\ElementNode;
 #[CoversClass(ElementNode::class)]
 final class ElementNodeTest extends TestCase
 {
-    private function createLeafNode(int $id = 1, string $title = 'Leaf'): ElementNode
+    private function createLeafNode(int $id = 1, string $title = 'Leaf', int $parentAreaId = 1): ElementNode
     {
         return new ElementNode(
             id: $id,
+            parentAreaId: $parentAreaId,
             title: $title,
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -32,9 +33,11 @@ final class ElementNodeTest extends TestCase
         ContainerType $containerType = ContainerType::Section,
         ?array $children = [],
         int $childAreaId = 10,
+        int $parentAreaId = 1,
     ): ElementNode {
         return new ElementNode(
             id: 10,
+            parentAreaId: $parentAreaId,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -122,10 +125,67 @@ final class ElementNodeTest extends TestCase
         $this->assertArrayNotHasKey('children', $decoded['children'][0]);
     }
 
+    public function testLeafNodeSerializesParentAreaId(): void
+    {
+        $node = $this->createLeafNode(parentAreaId: 42);
+        $data = $node->jsonSerialize();
+
+        $this->assertSame(42, $data['parentAreaId']);
+    }
+
+    public function testContainerNodeSerializesParentAreaId(): void
+    {
+        $node = $this->createContainerNode(parentAreaId: 55);
+        $data = $node->jsonSerialize();
+
+        $this->assertSame(55, $data['parentAreaId']);
+    }
+
+    public function testConstructorRejectsZeroParentAreaId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('parentAreaId must be a positive integer');
+
+        new ElementNode(
+            id: 1,
+            parentAreaId: 0,
+            title: 'Leaf',
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+        );
+    }
+
+    public function testConstructorRejectsNegativeParentAreaId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('parentAreaId must be a positive integer');
+
+        new ElementNode(
+            id: 1,
+            parentAreaId: -1,
+            title: 'Leaf',
+            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            obsoleteClassName: null,
+            version: 1,
+            canDelete: true,
+            canPublish: true,
+            canUnpublish: false,
+            canCreate: true,
+            statusFlags: [],
+        );
+    }
+
     public function testExtensionsIncludedInSerialization(): void
     {
         $node = new ElementNode(
             id: 1,
+            parentAreaId: 1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -156,6 +216,7 @@ final class ElementNodeTest extends TestCase
     {
         $node = new ElementNode(
             id: 1,
+            parentAreaId: 1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
             obsoleteClassName: null,
@@ -181,6 +242,7 @@ final class ElementNodeTest extends TestCase
     {
         $node = new ElementNode(
             id: 10,
+            parentAreaId: 1,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -215,6 +277,7 @@ final class ElementNodeTest extends TestCase
         );
         $outerContainer = new ElementNode(
             id: 50,
+            parentAreaId: 1,
             title: 'Outer',
             blockSchema: ['typeName' => 'ElementRow', 'actions' => ['edit' => '/edit/50'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -256,6 +319,7 @@ final class ElementNodeTest extends TestCase
 
         $node = new ElementNode(
             id: 1,
+            parentAreaId: 1,
             title: 'Test Column',
             blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
@@ -284,6 +348,7 @@ final class ElementNodeTest extends TestCase
 
         new ElementNode(
             id: 99,
+            parentAreaId: 1,
             title: 'Row with grid settings',
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -305,6 +370,7 @@ final class ElementNodeTest extends TestCase
     {
         $node = new ElementNode(
             id: 1,
+            parentAreaId: 1,
             title: 'Column No Grid',
             blockSchema: ['typeName' => 'Column', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Column'],
             obsoleteClassName: null,
@@ -329,6 +395,7 @@ final class ElementNodeTest extends TestCase
     {
         $node = new ElementNode(
             id: 2,
+            parentAreaId: 1,
             title: 'Test Row',
             blockSchema: ['typeName' => 'Row', 'actions' => ['edit' => '/edit/2'], 'content' => '', 'label' => 'Row'],
             obsoleteClassName: null,
@@ -352,6 +419,7 @@ final class ElementNodeTest extends TestCase
     {
         $node = new ElementNode(
             id: 10,
+            parentAreaId: 1,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -380,6 +448,7 @@ final class ElementNodeTest extends TestCase
 
         new ElementNode(
             id: 10,
+            parentAreaId: 1,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -402,6 +471,7 @@ final class ElementNodeTest extends TestCase
 
         new ElementNode(
             id: 10,
+            parentAreaId: 1,
             title: 'Container',
             blockSchema: ['typeName' => 'ElementSection', 'actions' => ['edit' => '/edit/10'], 'content' => '', 'label' => 'Section'],
             obsoleteClassName: null,
@@ -433,6 +503,7 @@ final class ElementNodeTest extends TestCase
 
         new ElementNode(
             id: 99,
+            parentAreaId: 1,
             title: 'Leaf',
             blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/99'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,

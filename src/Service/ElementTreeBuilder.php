@@ -122,6 +122,7 @@ class ElementTreeBuilder
      * Recursively assemble tree nodes from pre-loaded element data.
      *
      * @param array<int, list<BaseElement>> $elementsByParent
+     * @param positive-int $areaId
      * @return list<ElementNode>
      */
     private function assembleSubTree(array $elementsByParent, int $areaId): array
@@ -133,7 +134,7 @@ class ElementTreeBuilder
                 continue;
             }
 
-            $nodes[] = $this->buildElementNode($element, $elementsByParent);
+            $nodes[] = $this->buildElementNode($element, $elementsByParent, $areaId);
         }
 
         return array_values(array_filter($nodes));
@@ -145,8 +146,9 @@ class ElementTreeBuilder
      * Returns null for containers with missing ChildArea (data corruption).
      *
      * @param array<int, list<BaseElement>> $elementsByParent
+     * @param positive-int $parentAreaId
      */
-    private function buildElementNode(BaseElement $element, array $elementsByParent): ?ElementNode
+    private function buildElementNode(BaseElement $element, array $elementsByParent, int $parentAreaId): ?ElementNode
     {
         $containerType = null;
         $allowedTypes = null;
@@ -204,6 +206,7 @@ class ElementTreeBuilder
 
         return new ElementNode(
             id: $id,
+            parentAreaId: $parentAreaId,
             title: $title,
             blockSchema: $blockSchema,
             obsoleteClassName: $obsoleteClassName,

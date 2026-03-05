@@ -36,9 +36,10 @@ function storageKey(): string {
   return `elemental-grid:collapsed:${String(AREA_ID)}`;
 }
 
-function makeElement(id: number): SimpleElementNode {
+function makeElement(id: number, parentAreaId: number): SimpleElementNode {
   return {
     id,
+    parentAreaId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Content',
@@ -56,9 +57,10 @@ function makeElement(id: number): SimpleElementNode {
   };
 }
 
-function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode {
+function makeColumn(id: number, overrides: Partial<ColumnNode> = {}, parentAreaId: number = 200): ColumnNode {
   return {
     id,
+    parentAreaId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -82,9 +84,10 @@ function makeColumn(id: number, overrides: Partial<ColumnNode> = {}): ColumnNode
   };
 }
 
-function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
+function makeRow(id: number, overrides: Partial<RowNode> = {}, parentAreaId: number = 300): RowNode {
   return {
     id,
+    parentAreaId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -107,9 +110,10 @@ function makeRow(id: number, overrides: Partial<RowNode> = {}): RowNode {
   };
 }
 
-function makeSection(id: number, overrides: Partial<SectionNode> = {}): SectionNode {
+function makeSection(id: number, overrides: Partial<SectionNode> = {}, parentAreaId: number = 42): SectionNode {
   return {
     id,
+    parentAreaId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -390,7 +394,7 @@ describe('useTreeEnrichment', () => {
             makeRow(10, {
               children: [
                 makeColumn(20, {
-                  children: [makeElement(99)],
+                  children: [makeElement(99, 100)],
                 }),
               ],
             }),
@@ -439,7 +443,7 @@ describe('useTreeEnrichment', () => {
             makeRow(10, {
               children: [
                 makeColumn(20, {
-                  children: [makeElement(50), makeElement(51)],
+                  children: [makeElement(50, 100), makeElement(51, 100)],
                 }),
               ],
             }),

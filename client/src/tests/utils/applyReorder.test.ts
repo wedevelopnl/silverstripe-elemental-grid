@@ -9,9 +9,10 @@ import type {
 
 // --- Test factories ---
 
-function makeElement(id: number): SimpleElementNode {
+function makeElement(id: number, parentAreaId: number): SimpleElementNode {
   return {
     id,
+    parentAreaId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -33,9 +34,11 @@ function makeColumn(
   id: number,
   children: SimpleElementNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): ColumnNode {
   return {
     id,
+    parentAreaId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -62,9 +65,11 @@ function makeRow(
   id: number,
   children: ColumnNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): RowNode {
   return {
     id,
+    parentAreaId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -90,9 +95,11 @@ function makeSection(
   id: number,
   children: RowNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): SectionNode {
   return {
     id,
+    parentAreaId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -119,7 +126,7 @@ describe('applyReorder', () => {
     it('moves an element after another element in the same container', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200), makeElement(12, 200)], 200, 100),
         ],
       };
 
@@ -133,7 +140,7 @@ describe('applyReorder', () => {
     it('moves an element to the start when afterElementId is null', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200), makeElement(12, 200)], 200, 100),
         ],
       };
 
@@ -147,7 +154,7 @@ describe('applyReorder', () => {
     it('moves an element to the end', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200), makeElement(12, 200)], 200, 100),
         ],
       };
 
@@ -163,8 +170,8 @@ describe('applyReorder', () => {
     it('moves an element from one column to another', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
-          makeColumn(2, [makeElement(20)], 300),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
+          makeColumn(2, [makeElement(20, 300)], 300, 100),
         ],
       };
 
@@ -180,8 +187,8 @@ describe('applyReorder', () => {
     it('moves an element to an empty container', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10)], 200),
-          makeColumn(2, [], 300),
+          makeColumn(1, [makeElement(10, 200)], 200, 100),
+          makeColumn(2, [], 300, 100),
         ],
       };
 
@@ -193,15 +200,30 @@ describe('applyReorder', () => {
       expect(col1.children!.map((c) => c.id)).toEqual([]);
       expect(col2.children!.map((c) => c.id)).toEqual([10]);
     });
+
+    it('updates parentAreaId on the moved element', () => {
+      const tree: ElementTreeResponse = {
+        '100': [
+          makeColumn(1, [makeElement(10, 200)], 200, 100),
+          makeColumn(2, [makeElement(20, 300)], 300, 100),
+        ],
+      };
+
+      const result = applyReorder(tree, 10, 300, 20);
+
+      const col2 = result['100'][1] as ColumnNode;
+      const movedElement = col2.children!.find((c) => c.id === 10)!;
+      expect(movedElement.parentAreaId).toBe(300);
+    });
   });
 
   describe('section reorder within root area', () => {
     it('reorders sections in the root area', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeSection(1, [], 200),
-          makeSection(2, [], 300),
-          makeSection(3, [], 400),
+          makeSection(1, [], 200, 100),
+          makeSection(2, [], 300, 100),
+          makeSection(3, [], 400, 100),
         ],
       };
 
@@ -214,9 +236,9 @@ describe('applyReorder', () => {
     it('moves a section to the start of the root area', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeSection(1, [], 200),
-          makeSection(2, [], 300),
-          makeSection(3, [], 400),
+          makeSection(1, [], 200, 100),
+          makeSection(2, [], 300, 100),
+          makeSection(3, [], 400, 100),
         ],
       };
 
@@ -231,8 +253,8 @@ describe('applyReorder', () => {
     it('moves a row between sections', () => {
       const tree: ElementTreeResponse = {
         '1': [
-          makeSection(10, [makeRow(100, [], 1000)], 500),
-          makeSection(20, [makeRow(200, [], 2000)], 600),
+          makeSection(10, [makeRow(100, [], 1000, 500)], 500, 1),
+          makeSection(20, [makeRow(200, [], 2000, 600)], 600, 1),
         ],
       };
 
@@ -254,13 +276,15 @@ describe('applyReorder', () => {
               makeRow(
                 100,
                 [
-                  makeColumn(1000, [makeElement(50), makeElement(51)], 5000),
-                  makeColumn(1001, [makeElement(60)], 6000),
+                  makeColumn(1000, [makeElement(50, 5000), makeElement(51, 5000)], 5000, 4000),
+                  makeColumn(1001, [makeElement(60, 6000)], 6000, 4000),
                 ],
                 4000,
+                3000,
               ),
             ],
             3000,
+            1,
           ),
         ],
       };
@@ -281,7 +305,7 @@ describe('applyReorder', () => {
     it('returns the same reference when element is already at the target position', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200), makeElement(12, 200)], 200, 100),
         ],
       };
 
@@ -294,7 +318,7 @@ describe('applyReorder', () => {
     it('returns the same reference when moving to start and already at start', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
         ],
       };
 
@@ -307,8 +331,8 @@ describe('applyReorder', () => {
     it('returns the same reference for root area no-op', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeSection(1, [], 200),
-          makeSection(2, [], 300),
+          makeSection(1, [], 200, 100),
+          makeSection(2, [], 300, 100),
         ],
       };
 
@@ -323,7 +347,7 @@ describe('applyReorder', () => {
     it('does not mutate the original tree', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
         ],
       };
 
@@ -336,10 +360,10 @@ describe('applyReorder', () => {
     });
 
     it('preserves references to unaffected branches', () => {
-      const unaffectedSection = makeSection(99, [], 9000);
+      const unaffectedSection = makeSection(99, [], 9000, 999);
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
         ],
         '999': [unaffectedSection],
       };
@@ -354,7 +378,7 @@ describe('applyReorder', () => {
   describe('edge cases', () => {
     it('returns the same tree when element is not found', () => {
       const tree: ElementTreeResponse = {
-        '100': [makeElement(10)],
+        '100': [makeElement(10, 100)],
       };
 
       const result = applyReorder(tree, 999, 100, null);
@@ -364,7 +388,7 @@ describe('applyReorder', () => {
 
     it('returns the same tree when target area is not found', () => {
       const tree: ElementTreeResponse = {
-        '100': [makeElement(10)],
+        '100': [makeElement(10, 100)],
       };
 
       const result = applyReorder(tree, 10, 999, null);
@@ -375,8 +399,8 @@ describe('applyReorder', () => {
     it('appends to end when afterElementId is not found in target area', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
-          makeColumn(2, [makeElement(20)], 300),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
+          makeColumn(2, [makeElement(20, 300)], 300, 100),
         ],
       };
 
@@ -391,13 +415,12 @@ describe('applyReorder', () => {
     it('handles target area that only exists as a container childAreaId', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeSection(1, [makeRow(10, [], 500)], 200),
-          makeElement(50),
+          makeSection(1, [makeRow(10, [], 500, 200)], 200, 100),
+          makeElement(50, 100),
         ],
       };
 
       // Area 500 is not a root key, it's row 10's childAreaId
-      // areaExists must find it via findChildrenForArea
       const result = applyReorder(tree, 50, 500, null);
 
       const section = result['100'][0] as SectionNode;
@@ -412,8 +435,8 @@ describe('applyReorder', () => {
   describe('isAreaAffected — reference preservation', () => {
     it('marks root area as affected when source element is at root level', () => {
       const tree: ElementTreeResponse = {
-        '100': [makeSection(1, [], 200), makeSection(2, [], 300)],
-        '999': [makeSection(99, [], 9000)],
+        '100': [makeSection(1, [], 200, 100), makeSection(2, [], 300, 100)],
+        '999': [makeSection(99, [], 9000, 999)],
       };
 
       // Move section 1 after section 2 within root area 100
@@ -430,11 +453,12 @@ describe('applyReorder', () => {
         '100': [
           makeSection(
             1,
-            [makeRow(10, [makeColumn(100, [makeElement(50)], 5000)], 2000)],
+            [makeRow(10, [makeColumn(100, [makeElement(50, 5000)], 5000, 2000)], 2000, 1000)],
             1000,
+            100,
           ),
         ],
-        '200': [makeElement(60)],
+        '200': [makeElement(60, 200)],
       };
 
       // Move element 60 from root area 200 into nested container area 5000
@@ -451,11 +475,12 @@ describe('applyReorder', () => {
         '100': [
           makeSection(
             1,
-            [makeRow(10, [makeColumn(100, [makeElement(50), makeElement(51)], 5000)], 2000)],
+            [makeRow(10, [makeColumn(100, [makeElement(50, 5000), makeElement(51, 5000)], 5000, 2000)], 2000, 1000)],
             1000,
+            100,
           ),
         ],
-        '200': [makeElement(60)],
+        '200': [makeElement(60, 200)],
       };
 
       // Move element 50 from nested area 5000 to root area 200
@@ -470,11 +495,11 @@ describe('applyReorder', () => {
     it('does not affect root areas unrelated to source or target', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
-          makeColumn(2, [makeElement(20)], 300),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
+          makeColumn(2, [makeElement(20, 300)], 300, 100),
         ],
-        '400': [makeSection(40, [], 4000)],
-        '500': [makeElement(50)],
+        '400': [makeSection(40, [], 4000, 400)],
+        '500': [makeElement(50, 500)],
       };
 
       // Move within root area 100's containers
@@ -490,7 +515,7 @@ describe('applyReorder', () => {
     it('is not a no-op when afterElementId does not exist in target area', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
         ],
       };
 
@@ -504,7 +529,7 @@ describe('applyReorder', () => {
     it('detects no-op for element at the end of its container', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10), makeElement(11), makeElement(12)], 200),
+          makeColumn(1, [makeElement(10, 200), makeElement(11, 200), makeElement(12, 200)], 200, 100),
         ],
       };
 
@@ -517,8 +542,8 @@ describe('applyReorder', () => {
     it('is not a no-op when element is in a different area', () => {
       const tree: ElementTreeResponse = {
         '100': [
-          makeColumn(1, [makeElement(10)], 200),
-          makeColumn(2, [makeElement(20)], 300),
+          makeColumn(1, [makeElement(10, 200)], 200, 100),
+          makeColumn(2, [makeElement(20, 300)], 300, 100),
         ],
       };
 
@@ -539,14 +564,16 @@ describe('applyReorder', () => {
               makeRow(
                 100,
                 [
-                  makeColumn(1000, [makeElement(50), makeElement(51)], 5000),
+                  makeColumn(1000, [makeElement(50, 5000), makeElement(51, 5000)], 5000, 4000),
                 ],
                 4000,
+                3000,
               ),
             ],
             3000,
+            1,
           ),
-          makeSection(20, [makeRow(200, [makeColumn(2000, [], 6000)], 4500)], 3500),
+          makeSection(20, [makeRow(200, [makeColumn(2000, [], 6000, 4500)], 4500, 3500)], 3500, 1),
         ],
       };
 

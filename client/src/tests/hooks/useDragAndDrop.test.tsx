@@ -14,18 +14,15 @@ import type {
   SectionNode,
   ElementTreeResponse,
 } from '@/types/elements';
-import {
-  useDragAndDrop,
-  findNodeById,
-  findContainerForNode,
-} from '@/hooks/useDragAndDrop';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 import type { DragState } from '@/hooks/useDragAndDrop';
 
 // --- Test factories ---
 
-function makeElement(id: number): SimpleElementNode {
+function makeElement(id: number, parentAreaId: number): SimpleElementNode {
   return {
     id,
+    parentAreaId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -47,9 +44,11 @@ function makeColumn(
   id: number,
   children: SimpleElementNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): ColumnNode {
   return {
     id,
+    parentAreaId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -76,9 +75,11 @@ function makeRow(
   id: number,
   children: ColumnNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): RowNode {
   return {
     id,
+    parentAreaId,
     title: `Row ${id}`,
     blockSchema: {
       typeName: 'Row',
@@ -104,9 +105,11 @@ function makeSection(
   id: number,
   children: RowNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): SectionNode {
   return {
     id,
+    parentAreaId,
     title: `Section ${id}`,
     blockSchema: {
       typeName: 'Section',
@@ -185,91 +188,23 @@ function makeDragCancelEvent(activeId: string): DragCancelEvent {
 //
 // Structure:
 //   area 42:
-//     Section 1 (id=1, childAreaId=100)
-//       Row 10 (id=10, childAreaId=200)
-//         Column 20 (id=20, childAreaId=300, children: [Element 30, Element 31])
-//         Column 21 (id=21, childAreaId=301, children: [Element 32])
+//     Section 1 (id=1, childAreaId=100, parentAreaId=42)
+//       Row 10 (id=10, childAreaId=200, parentAreaId=100)
+//         Column 20 (id=20, childAreaId=300, parentAreaId=200, children: [Element 30, Element 31])
+//         Column 21 (id=21, childAreaId=301, parentAreaId=200, children: [Element 32])
 
 const testTree: ElementTreeResponse = {
   '42': [
     makeSection(1, [
       makeRow(10, [
-        makeColumn(20, [makeElement(30), makeElement(31)], 300),
-        makeColumn(21, [makeElement(32)], 301),
-      ], 200),
-    ], 100),
+        makeColumn(20, [makeElement(30, 300), makeElement(31, 300)], 300, 200),
+        makeColumn(21, [makeElement(32, 301)], 301, 200),
+      ], 200, 100),
+    ], 100, 42),
   ],
 };
 
 const ROOT_AREA_ID = 42;
-
-// --- findNodeById tests ---
-
-describe('findNodeById', () => {
-  it('finds a root-level node', () => {
-    const node = findNodeById(testTree, 1);
-    expect(node).not.toBeNull();
-    expect(node!.id).toBe(1);
-  });
-
-  it('finds a deeply nested leaf node', () => {
-    const node = findNodeById(testTree, 31);
-    expect(node).not.toBeNull();
-    expect(node!.id).toBe(31);
-    expect(node!.title).toBe('Element 31');
-  });
-
-  it('finds an intermediate container node', () => {
-    const node = findNodeById(testTree, 20);
-    expect(node).not.toBeNull();
-    expect(node!.id).toBe(20);
-  });
-
-  it('returns null for a non-existent ID', () => {
-    expect(findNodeById(testTree, 999)).toBeNull();
-  });
-
-  it('returns null for an empty tree', () => {
-    expect(findNodeById({}, 1)).toBeNull();
-  });
-});
-
-// --- findContainerForNode tests ---
-
-describe('findContainerForNode', () => {
-  it('finds a root-level node in its area', () => {
-    const info = findContainerForNode(testTree, 1, ROOT_AREA_ID);
-    expect(info).not.toBeNull();
-    expect(info!.areaId).toBe(42);
-    expect(info!.index).toBe(0);
-  });
-
-  it('finds a nested element in its column container', () => {
-    const info = findContainerForNode(testTree, 30, ROOT_AREA_ID);
-    expect(info).not.toBeNull();
-    expect(info!.areaId).toBe(300);
-    expect(info!.index).toBe(0);
-    expect(info!.items).toHaveLength(2);
-  });
-
-  it('finds a sibling at the correct index', () => {
-    const info = findContainerForNode(testTree, 31, ROOT_AREA_ID);
-    expect(info).not.toBeNull();
-    expect(info!.areaId).toBe(300);
-    expect(info!.index).toBe(1);
-  });
-
-  it('finds a column inside its row container', () => {
-    const info = findContainerForNode(testTree, 21, ROOT_AREA_ID);
-    expect(info).not.toBeNull();
-    expect(info!.areaId).toBe(200);
-    expect(info!.index).toBe(1);
-  });
-
-  it('returns null for a non-existent node', () => {
-    expect(findContainerForNode(testTree, 999, ROOT_AREA_ID)).toBeNull();
-  });
-});
 
 // --- useDragAndDrop hook tests ---
 
@@ -433,10 +368,10 @@ describe('useDragAndDrop', () => {
         '42': [
           makeSection(1, [
             makeRow(10, [
-              makeColumn(20, [makeElement(30)], 300),
-              makeColumn(21, [], 301),
-            ], 200),
-          ], 100),
+              makeColumn(20, [makeElement(30, 300)], 300, 200),
+              makeColumn(21, [], 301, 200),
+            ], 200, 100),
+          ], 100, 42),
         ],
       };
 

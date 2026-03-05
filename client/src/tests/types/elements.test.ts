@@ -26,6 +26,7 @@ const validBlockSchema = {
 function makeSimpleNode(overrides: Record<string, unknown> = {}) {
   return {
     id: 1,
+    parentAreaId: 42,
     title: 'Text block',
     blockSchema: validBlockSchema,
     obsoleteClassName: null,
@@ -46,6 +47,7 @@ function makeColumnNode(
   return {
     ...makeSimpleNode(),
     id: 10,
+    parentAreaId: 200,
     title: 'Column',
     containerType: 'column',
     allowedTypes: { 'App\\Model\\ElementContent': 'Content' },
@@ -69,6 +71,7 @@ function makeRowNode(
   return {
     ...makeSimpleNode(),
     id: 20,
+    parentAreaId: 300,
     title: 'Row',
     containerType: 'row',
     allowedTypes: null,
@@ -85,6 +88,7 @@ function makeSectionNode(
   return {
     ...makeSimpleNode(),
     id: 30,
+    parentAreaId: 42,
     title: 'Section',
     containerType: 'section',
     allowedTypes: null,
@@ -164,6 +168,7 @@ describe('columnNodeSchema', () => {
   it('parses column node with gridSettings', () => {
     const input = {
       id: 3,
+      parentAreaId: 200,
       title: 'Left Column',
       containerType: 'column',
       allowedTypes: null,
