@@ -418,6 +418,44 @@ describe('useDragAndDrop', () => {
       expect(onReorder).not.toHaveBeenCalled();
     });
 
+    it('uses correct source index for non-first elements in cross-container move', () => {
+      const onReorder = vi.fn();
+      const { result } = renderHook(() =>
+        useDragAndDrop({ ...defaultOptions, onReorder }),
+      );
+
+      // Move element-31 (index 1 in column 20) to element-32 (in column 21)
+      act(() => {
+        result.current.handleDragEnd(makeDragEndEvent('element-31', 'element-32'));
+      });
+
+      expect(onReorder).toHaveBeenCalledTimes(1);
+      expect(onReorder).toHaveBeenCalledWith(
+        31,   // elementID
+        21,   // targetParentId (column 21's id)
+        null, // afterElementID (takes position of element-32 at index 0)
+      );
+    });
+
+    it('calls onReorder for same-container reorder of non-first element to front', () => {
+      const onReorder = vi.fn();
+      const { result } = renderHook(() =>
+        useDragAndDrop({ ...defaultOptions, onReorder }),
+      );
+
+      // Move element-31 (index 1) before element-30 (index 0) within column 20
+      act(() => {
+        result.current.handleDragEnd(makeDragEndEvent('element-31', 'element-30'));
+      });
+
+      expect(onReorder).toHaveBeenCalledTimes(1);
+      expect(onReorder).toHaveBeenCalledWith(
+        31,   // elementID
+        20,   // targetParentId (same container)
+        null, // afterElementID (moved to front)
+      );
+    });
+
     it('does not call onReorder when over is a non-container with different type', () => {
       const onReorder = vi.fn();
       // Attempting to drop an element onto a row (which is not the direct parent type)

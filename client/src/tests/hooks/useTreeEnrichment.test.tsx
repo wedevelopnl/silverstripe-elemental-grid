@@ -457,12 +457,40 @@ describe('useTreeEnrichment', () => {
       expect(result.current[0].children![0].children![0].childSortableIds).toEqual(['element-50', 'element-51']);
     });
 
-    it('returns empty childSortableIds when children is null', () => {
+    it('returns empty childSortableIds when section children is null', () => {
       const sections = [makeSection(1, { children: null })];
 
       const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
 
       expect(result.current[0].childSortableIds).toEqual([]);
+    });
+
+    it('returns empty childSortableIds when row children is null', () => {
+      const sections = [
+        makeSection(1, {
+          children: [makeRow(10, { children: null })],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].childSortableIds).toEqual([]);
+    });
+
+    it('returns empty childSortableIds when column children is null', () => {
+      const sections = [
+        makeSection(1, {
+          children: [
+            makeRow(10, {
+              children: [makeColumn(20, { children: null })],
+            }),
+          ],
+        }),
+      ];
+
+      const { result } = renderHook(() => useTreeEnrichment(sections, AREA_ID));
+
+      expect(result.current[0].children![0].children![0].childSortableIds).toEqual([]);
     });
   });
 });

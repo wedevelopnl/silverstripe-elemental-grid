@@ -34,6 +34,10 @@ describe('parseDraggableId', () => {
     expect(parseDraggableId('section-0')).toBeNull();
     expect(parseDraggableId('section--1')).toBeNull();
   });
+
+  it('returns null when separator is at the start', () => {
+    expect(parseDraggableId('-42')).toBeNull();
+  });
 });
 
 describe('getDraggableType', () => {

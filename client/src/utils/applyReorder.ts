@@ -30,11 +30,10 @@ export function applyReorder(
   const sourceIndex = sourceChildren.findIndex((n) => n.id === elementId);
   if (sourceIndex === -1) return tree;
 
-  // Check target parent exists
+  // Check target parent exists (either as a mapped container or a root tree key)
   const targetChildren = maps.childrenByParentId.get(targetParentId);
   if (!targetChildren && !Object.prototype.hasOwnProperty.call(tree, String(targetParentId))) {
-    // Target parent must exist either as root key or as a container's ID
-    if (!targetChildren) return tree;
+    return tree;
   }
 
   // No-op detection

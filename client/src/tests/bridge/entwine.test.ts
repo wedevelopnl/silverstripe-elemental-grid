@@ -89,6 +89,7 @@ describe('entwine bridge', () => {
     capturedRules.onmatch!.call(context as never);
 
     expect(mockLoadComponent).toHaveBeenCalledWith('GridEditor');
+    expect(context.data).toHaveBeenCalledWith('schema');
     expect(mockCreateRoot).toHaveBeenCalledWith(domElement);
     expect(setReactRoot).toHaveBeenCalledWith(mockRoot);
     expect(mockRoot.render).toHaveBeenCalledWith(

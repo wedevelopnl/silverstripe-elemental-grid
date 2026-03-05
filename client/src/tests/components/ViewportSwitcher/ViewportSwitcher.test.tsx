@@ -84,6 +84,7 @@ describe('ViewportSwitcher', () => {
     for (const label of inactiveLabels) {
       const button = screen.getByText(label);
       expect(button.classList.contains('viewport-switcher__button--active')).toBe(false);
+      expect(button.classList.contains('viewport-switcher__button')).toBe(true);
     }
   });
 

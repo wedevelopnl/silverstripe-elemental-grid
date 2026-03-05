@@ -46,6 +46,17 @@ describe('showToast', () => {
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 
+  it('falls back to console.warn when window.ss is undefined', () => {
+    window.ss = undefined as unknown as typeof window.ss;
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    showToast('Something went wrong');
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[GridEditor] error: Something went wrong',
+    );
+  });
+
   it('sets stay: true for error type', () => {
     showToast('Error occurred', 'error');
 

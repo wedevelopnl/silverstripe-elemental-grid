@@ -49,4 +49,17 @@ describe('adapterConfigSchema', () => {
 
     expect(() => adapterConfigSchema.parse(input)).toThrow();
   });
+
+  it('validates viewport items have key and label', () => {
+    const input = {
+      viewports: [{ key: 'md' }],
+      defaultViewport: 'md',
+      columnCount: 12,
+      rowClasses: 'row',
+      baseWidthClasses: {},
+      baseOffsetClasses: {},
+    };
+
+    expect(() => adapterConfigSchema.parse(input)).toThrow();
+  });
 });

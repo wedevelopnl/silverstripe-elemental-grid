@@ -207,14 +207,17 @@ describe('DragOverlayContent', () => {
     expect(screen.getByText('0 columns')).toBeDefined();
   });
 
-  it('renders the drag-overlay container with type-specific testid', () => {
+  it('renders the drag-overlay container with type-specific testid and className', () => {
     const section = makeSection(1);
 
     render(
       <DragOverlayContent node={section} type="section" />,
     );
 
-    expect(screen.getByTestId('drag-overlay-section')).toBeDefined();
+    const container = screen.getByTestId('drag-overlay-section');
+    expect(container).toBeDefined();
+    expect(container.classList.contains('drag-overlay-content')).toBe(true);
+    expect(container.classList.contains('drag-overlay-content--section')).toBe(true);
   });
 
   it('renders type-specific title testid', () => {
@@ -225,5 +228,32 @@ describe('DragOverlayContent', () => {
     );
 
     expect(screen.getByTestId('drag-overlay-section-title')).toBeDefined();
+  });
+
+  it('renders type-specific testids for row', () => {
+    const row = makeRow(1, { title: 'Test Row' });
+
+    render(<DragOverlayContent node={row} type="row" />);
+
+    expect(screen.getByTestId('drag-overlay-row')).toBeDefined();
+    expect(screen.getByTestId('drag-overlay-row-title')).toBeDefined();
+  });
+
+  it('renders type-specific testids for column', () => {
+    const column = makeColumn(1, { title: 'Test Column' });
+
+    render(<DragOverlayContent node={column} type="column" />);
+
+    expect(screen.getByTestId('drag-overlay-column')).toBeDefined();
+    expect(screen.getByTestId('drag-overlay-column-title')).toBeDefined();
+  });
+
+  it('renders type-specific testids for element', () => {
+    const element = makeElement(1, { title: 'Test Element' });
+
+    render(<DragOverlayContent node={element} type="element" />);
+
+    expect(screen.getByTestId('drag-overlay-element')).toBeDefined();
+    expect(screen.getByTestId('drag-overlay-element-title')).toBeDefined();
   });
 });
