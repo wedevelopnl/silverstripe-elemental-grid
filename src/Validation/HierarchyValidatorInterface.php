@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Validation;
 
-use DNADesign\Elemental\Models\BaseElement;
+use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\Result;
 
 interface HierarchyValidatorInterface
 {
-    /** @return Result<BaseElement> */
-    public function validate(BaseElement $element): Result;
+    /** @return Result<GridElement> */
+    public function validate(GridElement $element): Result;
 }
