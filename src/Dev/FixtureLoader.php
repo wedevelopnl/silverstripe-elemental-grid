@@ -7,9 +7,11 @@ namespace WeDevelop\Grid\Dev;
 use Page;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
+use SilverStripe\Dev\FixtureBlueprint;
 use SilverStripe\Dev\FixtureFactory;
 use SilverStripe\Dev\YamlFixture;
 use SilverStripe\ORM\DataObject;
@@ -57,22 +59,13 @@ class FixtureLoader
         $this->reset();
 
         $factory = new FixtureFactory();
+        $this->registerScaffoldSuppression($factory);
         $fixture = YamlFixture::create($path);
 
-        // Suppress auto-scaffolding so YAML can define the exact tree structure
-        // without containers creating duplicate children on write.
-        Section::$autoScaffold = false;
-        Row::$autoScaffold = false;
-
-        try {
-            Versioned::withVersionedMode(static function () use ($fixture, $factory): void {
-                Versioned::set_stage(Versioned::DRAFT);
-                $fixture->writeInto($factory);
-            });
-        } finally {
-            Section::$autoScaffold = true;
-            Row::$autoScaffold = true;
-        }
+        Versioned::withVersionedMode(static function () use ($fixture, $factory): void {
+            Versioned::set_stage(Versioned::DRAFT);
+            $fixture->writeInto($factory);
+        });
 
         $postActions = $this->resolvePostActions($name);
         if ($postActions !== []) {
@@ -146,6 +139,22 @@ class FixtureLoader
         $fixtures = static::config()->get('fixtures');
 
         return array_keys($fixtures);
+    }
+
+    /**
+     * Register FixtureBlueprint callbacks that suppress auto-scaffolding
+     * during fixture creation. The suppression is scoped to each record's
+     * write via FixtureBlueprint's internal Config::nest()/unnest().
+     */
+    private function registerScaffoldSuppression(FixtureFactory $factory): void
+    {
+        foreach ([Section::class, Row::class] as $class) {
+            $blueprint = new FixtureBlueprint($class);
+            $blueprint->addCallback('beforeCreate', static function () use ($class): void {
+                Config::modify()->set($class, 'auto_scaffold', false);
+            });
+            $factory->define($class, $blueprint);
+        }
     }
 
     /**

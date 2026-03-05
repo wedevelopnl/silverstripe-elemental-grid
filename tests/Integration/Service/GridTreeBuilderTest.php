@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Tests\Integration\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
@@ -37,13 +38,16 @@ final class GridTreeBuilderTest extends SapphireTest
 
     protected function setUp(): void
     {
-        Section::$autoScaffold = false;
-        Row::$autoScaffold = false;
         parent::setUp();
-        Section::$autoScaffold = true;
-        Row::$autoScaffold = true;
 
         Versioned::set_stage(Versioned::DRAFT);
+    }
+
+    public function onBeforeLoadFixtures(): void
+    {
+        parent::onBeforeLoadFixtures();
+        Config::modify()->set(Section::class, 'auto_scaffold', false);
+        Config::modify()->set(Row::class, 'auto_scaffold', false);
     }
 
     /**

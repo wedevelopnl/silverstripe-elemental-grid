@@ -1,6 +1,6 @@
 # Top-down ordering: parents written before children so =>ClassName.id
-# references resolve. Auto-scaffolding is suppressed via Section/Row::$autoScaffold
-# in test setUp().
+# references resolve. Auto-scaffolding is suppressed via Config::modify()
+# in onBeforeLoadFixtures().
 #
 # Elements parent directly to their container via polymorphic has_one (Parent).
 

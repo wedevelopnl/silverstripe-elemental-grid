@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Tests\Integration\Repository;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Elements\Column;
@@ -36,14 +37,17 @@ final class OrmGridElementRepositoryTest extends SapphireTest
 
     protected function setUp(): void
     {
-        Section::$autoScaffold = false;
-        Row::$autoScaffold = false;
         parent::setUp();
-        Section::$autoScaffold = true;
-        Row::$autoScaffold = true;
 
         Versioned::set_stage(Versioned::DRAFT);
         $this->repository = new OrmGridElementRepository();
+    }
+
+    public function onBeforeLoadFixtures(): void
+    {
+        parent::onBeforeLoadFixtures();
+        Config::modify()->set(Section::class, 'auto_scaffold', false);
+        Config::modify()->set(Row::class, 'auto_scaffold', false);
     }
 
     // ---- findById ----

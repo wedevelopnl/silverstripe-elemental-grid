@@ -6,6 +6,7 @@ namespace WeDevelop\Grid\Tests\Integration\Controllers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
@@ -33,13 +34,11 @@ final class GridControllerTest extends FunctionalTest
         ],
     ];
 
-    protected function setUp(): void
+    public function onBeforeLoadFixtures(): void
     {
-        Section::$autoScaffold = false;
-        Row::$autoScaffold = false;
-        parent::setUp();
-        Section::$autoScaffold = true;
-        Row::$autoScaffold = true;
+        parent::onBeforeLoadFixtures();
+        Config::modify()->set(Section::class, 'auto_scaffold', false);
+        Config::modify()->set(Row::class, 'auto_scaffold', false);
     }
 
     private function apiUrl(int $pageId): string

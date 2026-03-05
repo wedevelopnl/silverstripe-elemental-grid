@@ -70,8 +70,7 @@ class Row extends GridElement implements ContainerInterface
 
     private static string $default_column_title = '';
 
-    /** Set to false to suppress auto-scaffolding during fixture loading. */
-    public static bool $autoScaffold = true;
+    private static bool $auto_scaffold = true;
 
     public function getType(): string
     {
@@ -133,7 +132,7 @@ class Row extends GridElement implements ContainerInterface
     {
         parent::onAfterWrite();
 
-        if (!static::$autoScaffold) {
+        if (!static::config()->get('auto_scaffold')) {
             return;
         }
 
