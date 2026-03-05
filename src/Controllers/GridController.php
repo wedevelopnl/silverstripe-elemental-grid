@@ -56,6 +56,7 @@ use WeDevelop\Grid\Service\ReorderService;
  * @property GridTreeBuilder $treeBuilder
  * @property ElementPersistenceService $persistenceService
  * @property ReorderService $reorderService
+ * @property GridAdapterInterface $gridAdapter
  */
 class GridController extends AdminController
 {
@@ -248,7 +249,7 @@ class GridController extends AdminController
         }
 
         $parent = $element->Parent();
-        if (!$parent instanceof DataObject || !$parent->exists() || !$parent->canEdit()) {
+        if (!$parent->exists() || !$parent->canEdit()) {
             $this->jsonError(403);
         }
 
@@ -299,7 +300,7 @@ class GridController extends AdminController
 
         if ($isCrossParent) {
             $sourceParent = $element->Parent();
-            if (!$sourceParent instanceof DataObject || !$sourceParent->exists() || !$sourceParent->canEdit()) {
+            if (!$sourceParent->exists() || !$sourceParent->canEdit()) {
                 $this->jsonError(403);
             }
         }

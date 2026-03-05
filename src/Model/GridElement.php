@@ -128,7 +128,7 @@ abstract class GridElement extends DataObject
     {
         $parent = $this->Parent();
 
-        if (!$parent instanceof DataObject || !$parent->exists()) {
+        if (!$parent->exists()) {
             return null;
         }
 
@@ -152,7 +152,7 @@ abstract class GridElement extends DataObject
     {
         $page = $this->getPage();
 
-        return $page instanceof DataObject ? $page->canView($member) : Permission::check('CMS_ACCESS', 'any', $member);
+        return $page !== null ? (bool) $page->canView($member) : (bool) Permission::check('CMS_ACCESS', 'any', $member);
     }
 
     /**
@@ -163,7 +163,7 @@ abstract class GridElement extends DataObject
     {
         $page = $this->getPage();
 
-        return $page instanceof DataObject ? $page->canEdit($member) : Permission::check('CMS_ACCESS', 'any', $member);
+        return $page !== null ? (bool) $page->canEdit($member) : (bool) Permission::check('CMS_ACCESS', 'any', $member);
     }
 
     /**
@@ -174,7 +174,7 @@ abstract class GridElement extends DataObject
     {
         $page = $this->getPage();
 
-        return $page instanceof DataObject ? $page->canDelete($member) : Permission::check('CMS_ACCESS', 'any', $member);
+        return $page !== null ? (bool) $page->canDelete($member) : (bool) Permission::check('CMS_ACCESS', 'any', $member);
     }
 
     /**
@@ -184,7 +184,7 @@ abstract class GridElement extends DataObject
      */
     public function canCreate($member = null, $context = []): bool|null
     {
-        return Permission::check('CMS_ACCESS', 'any', $member);
+        return (bool) Permission::check('CMS_ACCESS', 'any', $member);
     }
 
     /**
@@ -205,7 +205,7 @@ abstract class GridElement extends DataObject
             ])
             ->max('Sort');
 
-        $this->Sort = ((int) $max) + 1;
+        $this->Sort = (is_numeric($max) ? (int) $max : 0) + 1;
     }
 
     #[\Override]

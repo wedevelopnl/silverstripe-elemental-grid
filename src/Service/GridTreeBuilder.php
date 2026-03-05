@@ -14,7 +14,6 @@ use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\GridNode;
-use Psr\Log\LoggerInterface;
 use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
 
 /**
@@ -35,7 +34,6 @@ class GridTreeBuilder
 
     public function __construct(
         private readonly GridElementRepositoryInterface $elementRepository,
-        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -113,10 +111,7 @@ class GridTreeBuilder
                 continue;
             }
 
-            $node = $this->buildElementNode($element, $elementsByParent, $parentId);
-            if ($node !== null) {
-                $nodes[] = $node;
-            }
+            $nodes[] = $this->buildElementNode($element, $elementsByParent, $parentId);
         }
 
         return $nodes;
@@ -128,7 +123,7 @@ class GridTreeBuilder
      * @param array<int, list<GridElement>> $elementsByParent
      * @param positive-int $parentId
      */
-    private function buildElementNode(GridElement $element, array $elementsByParent, int $parentId): ?GridNode
+    private function buildElementNode(GridElement $element, array $elementsByParent, int $parentId): GridNode
     {
         $containerType = null;
         $allowedTypes = null;
@@ -150,19 +145,19 @@ class GridTreeBuilder
 
         $id = (int) $element->ID;
         $title = $element->Title ?: _t(GridElement::class . '.UNTITLED', '(untitled)');
-        $obsoleteClassName = $element->getObsoleteClassName(); // @phpstan-ignore method.notFound (from Versioned)
-        $version = (int) $element->Version; // @phpstan-ignore cast.int (from Versioned)
-        $canDelete = $element->canDelete();
-        $canPublish = $element->canPublish(); // @phpstan-ignore method.notFound (from Versioned)
-        $canUnpublish = (bool) $element->canUnpublish(); // @phpstan-ignore method.notFound (from Versioned)
-        $canCreate = $element->canCreate();
+        $obsoleteClassName = $element->getObsoleteClassName();
+        $version = (int) $element->Version;
+        $canDelete = (bool) $element->canDelete();
+        $canPublish = (bool) $element->canPublish();
+        $canUnpublish = (bool) $element->canUnpublish();
+        $canCreate = (bool) $element->canCreate();
 
         /** @var array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema */
         $blockSchema = $element->getBlockSchema();
         $blockSchema['label'] = $element->getType();
 
         /** @var array<string, array{text: string, title: string}> $statusFlags */
-        $statusFlags = $element->getStatusFlags(); // @phpstan-ignore method.notFound (from Versioned)
+        $statusFlags = $element->getStatusFlags();
 
         /** @var array<string, mixed> $extensions */
         $extensions = [];
@@ -226,6 +221,7 @@ class GridTreeBuilder
         } else {
             // No allowlist — all GridElement subclasses except disallowed
             foreach (ClassInfo::subclassesFor(GridElement::class, false) as $class) {
+                /** @var class-string<GridElement> $class */
                 if (!in_array($class, $disallowedElements, true)) {
                     $types[$class] = $this->getElementLabel($class);
                 }
@@ -244,6 +240,8 @@ class GridTreeBuilder
      */
     private function getElementLabel(string $class): string
     {
-        return (string) Config::forClass($class)->get('singular_name') ?: ClassInfo::shortName($class);
+        $name = Config::forClass($class)->get('singular_name');
+
+        return is_string($name) && $name !== '' ? $name : ClassInfo::shortName($class);
     }
 }

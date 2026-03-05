@@ -55,7 +55,6 @@ SilverStripe\Core\Injector\Injector:
   WeDevelop\Grid\Service\GridTreeBuilder:
     constructor:
       elementRepository: '%$WeDevelop\Grid\Repository\GridElementRepositoryInterface'
-      logger: '%$Psr\Log\LoggerInterface'
   WeDevelop\Grid\Service\ElementPersistenceService: ~
   WeDevelop\Grid\Contract\ReorderValidatorInterface:
     class: WeDevelop\Grid\Validation\ReorderValidator

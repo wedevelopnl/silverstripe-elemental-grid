@@ -18,7 +18,7 @@ class HierarchyValidationService implements HierarchyValidatorInterface
     public function validate(GridElement $element): Result
     {
         $parent = $element->Parent();
-        if (!$parent instanceof DataObject || !$parent->exists()) {
+        if (!$parent->exists()) {
             return Result::ok($element);
         }
 
