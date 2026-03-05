@@ -1,15 +1,14 @@
 {
-  "name": "wedevelopnl/silverstripe-elemental-grid",
-  "description": "Elemental grid module",
+  "name": "wedevelopnl/silverstripe-grid",
+  "description": "Grid-based content block system for SilverStripe",
   "type": "silverstripe-vendormodule",
   "license": "BSD-3-Clause",
   "homepage": "https://wedevelop.nl",
   "keywords": [
     "silverstripe",
-    "element",
-    "elemental",
     "content blocks",
-    "grid"
+    "grid",
+    "layout"
   ],
   "authors": [
     {
@@ -21,13 +20,14 @@
   "prefer-stable": true,
   "require": {
     "php": "^8.3",
-    "dnadesign/silverstripe-elemental": "^6.0",
     "silverstripe/admin": "^3.0",
+    "silverstripe/cms": "^6.0",
     "silverstripe/framework": "^6.0",
-    "silverstripe/vendor-plugin": "^3.0"
+    "silverstripe/vendor-plugin": "^3.0",
+    "silverstripe/versioned": "^3.0"
   },
   "conflict": {
-    "dnadesign/silverstripe-elemental-list": "*"
+    "dnadesign/silverstripe-elemental": "*"
   },
   "extra": {
     "expose": [
@@ -48,12 +48,12 @@
   },
   "autoload": {
     "psr-4": {
-      "WeDevelop\\ElementalGrid\\": "src/"
+      "WeDevelop\\Grid\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "WeDevelop\\ElementalGrid\\Tests\\": "tests/"
+      "WeDevelop\\Grid\\Tests\\": "tests/"
     }
   },
   "config": {

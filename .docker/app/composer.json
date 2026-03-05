@@ -3,7 +3,7 @@
     "prefer-stable": true,
     "require": {
         "silverstripe/recipe-cms": "^6.0",
-        "wedevelopnl/silverstripe-elemental-grid": "*"
+        "wedevelopnl/silverstripe-grid": "*"
     },
     "repositories": [
         {
@@ -31,7 +31,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "WeDevelop\\ElementalGrid\\Tests\\": "vendor/wedevelopnl/silverstripe-elemental-grid/tests/"
+            "WeDevelop\\Grid\\Tests\\": "vendor/wedevelopnl/silverstripe-grid/tests/"
         }
     },
     "extra": {

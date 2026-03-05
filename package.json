@@ -1,5 +1,5 @@
 {
-  "name": "@wedevelopnl/silverstripe-elemental-grid",
+  "name": "@wedevelopnl/silverstripe-grid",
   "version": "6.0.0",
   "description": "Elemental grid module for SilverStripe",
   "engines": {
