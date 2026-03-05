@@ -12,5 +12,7 @@ export {
   useReorderElement,
 } from './useElementMutations';
 export { useTreeEnrichment, buildStorageKey } from './useTreeEnrichment';
-export { useDragAndDrop, findNodeById, findContainerForNode } from './useDragAndDrop';
+export { useDragAndDrop } from './useDragAndDrop';
 export type { DragState, UseDragAndDropOptions, UseDragAndDropReturn } from './useDragAndDrop';
+export { useElementMaps, buildMaps } from './useElementMaps';
+export type { ElementMaps } from './useElementMaps';

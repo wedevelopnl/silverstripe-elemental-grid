@@ -13,9 +13,10 @@ import type { ReorderElementParams } from '@/api/endpoints';
 
 // --- Test factories ---
 
-function makeElement(id: number): SimpleElementNode {
+function makeElement(id: number, parentAreaId: number): SimpleElementNode {
   return {
     id,
+    parentAreaId,
     title: `Element ${id}`,
     blockSchema: {
       typeName: 'Element',
@@ -37,9 +38,11 @@ function makeColumn(
   id: number,
   children: SimpleElementNode[],
   childAreaId: number,
+  parentAreaId: number,
 ): ColumnNode {
   return {
     id,
+    parentAreaId,
     title: `Column ${id}`,
     blockSchema: {
       typeName: 'Column',
@@ -121,7 +124,7 @@ describe('useReorderElement', () => {
     };
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     await act(() => result.current.mutateAsync({ params, tree }));
@@ -136,7 +139,7 @@ describe('useReorderElement', () => {
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
       '100': [
-        makeColumn(1, [makeElement(10), makeElement(11)], 200),
+        makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
       ],
     };
 
@@ -175,7 +178,7 @@ describe('useReorderElement', () => {
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
       '100': [
-        makeColumn(1, [makeElement(10), makeElement(11)], 200),
+        makeColumn(1, [makeElement(10, 200), makeElement(11, 200)], 200, 100),
       ],
     };
 
@@ -216,7 +219,7 @@ describe('useReorderElement', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
@@ -243,7 +246,7 @@ describe('useReorderElement', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
@@ -274,7 +277,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -299,7 +302,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -326,7 +329,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
@@ -353,7 +356,7 @@ describe('useReorderElement', () => {
 
     const wrapper = createWrapper();
     const tree: ElementTreeResponse = {
-      '100': [makeColumn(1, [makeElement(10)], 200)],
+      '100': [makeColumn(1, [makeElement(10, 200)], 200, 100)],
     };
 
     const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });

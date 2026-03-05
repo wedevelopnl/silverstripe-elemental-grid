@@ -30,6 +30,7 @@ export const statusFlagsSchema = z.object({
 
 const baseFieldsSchema = z.object({
   id: z.number().int(),
+  parentAreaId: z.number().int().positive(),
   title: z.string().min(1),
   blockSchema: blockSchemaSchema,
   obsoleteClassName: z.string().nullable(),

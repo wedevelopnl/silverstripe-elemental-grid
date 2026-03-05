@@ -120,6 +120,48 @@ final class ElementTreeBuilderTest extends SapphireTest
         $this->assertSame($this->idFromFixture(BaseElement::class, 'leaf3'), $col2Leaves[0]->id);
     }
 
+    // ---- parentAreaId threading ----
+
+    public function testParentAreaIdMatchesContainingArea(): void
+    {
+        $tree = $this->buildTree();
+        $areaId = $this->getAreaId();
+
+        // Root sections: parentAreaId equals the page's area ID
+        $sections = $tree[$areaId];
+        foreach ($sections as $section) {
+            $this->assertSame($areaId, $section->parentAreaId, 'Root section parentAreaId should equal page area ID');
+        }
+
+        // Rows: parentAreaId equals parent section's childAreaId
+        $section1 = $sections[0];
+        foreach ($section1->children as $row) {
+            $this->assertSame(
+                $section1->childAreaId,
+                $row->parentAreaId,
+                'Row parentAreaId should equal parent section childAreaId',
+            );
+
+            // Columns: parentAreaId equals parent row's childAreaId
+            foreach ($row->children ?? [] as $column) {
+                $this->assertSame(
+                    $row->childAreaId,
+                    $column->parentAreaId,
+                    'Column parentAreaId should equal parent row childAreaId',
+                );
+
+                // Leaves: parentAreaId equals parent column's childAreaId
+                foreach ($column->children ?? [] as $leaf) {
+                    $this->assertSame(
+                        $column->childAreaId,
+                        $leaf->parentAreaId,
+                        'Leaf parentAreaId should equal parent column childAreaId',
+                    );
+                }
+            }
+        }
+    }
+
     // ---- Sort ordering ----
 
     public function testSiblingsOrderedBySort(): void

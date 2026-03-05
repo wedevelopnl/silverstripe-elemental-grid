@@ -8,6 +8,7 @@ function makeElement(overrides: Partial<EnrichedSimpleElementNode> = {}): Enrich
   const id = overrides.id ?? 1;
   return {
     id,
+    parentAreaId: 100,
     title: 'My Element',
     blockSchema: {
       typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,

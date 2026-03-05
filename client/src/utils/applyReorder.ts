@@ -1,133 +1,8 @@
 import type {
   ElementTreeResponse,
   ElementNode,
-  ContainerNode,
 } from '@/types/elements';
-import { isContainerNode } from '@/types/elements';
-
-interface FoundLocation {
-  /** 'root' if found in a top-level area array, 'child' if in a container's children */
-  kind: 'root' | 'child';
-  /** The area key (root) or parent container reference path */
-  areaKey: string;
-  /** Index within the array where the element was found */
-  index: number;
-}
-
-/**
- * Searches for a container (by childAreaId) that owns the given target area.
- * Returns the children array of that container, or null if not found.
- */
-function findChildrenForArea(
-  nodes: ElementNode[],
-  targetAreaId: number,
-): ElementNode[] | null {
-  for (const node of nodes) {
-    if (isContainerNode(node) && node.childAreaId === targetAreaId) {
-      return node.children ?? [];
-    }
-    if (isContainerNode(node) && node.children) {
-      const found = findChildrenForArea(node.children, targetAreaId);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-/**
- * Finds the location of an element by ID anywhere in the tree.
- * Returns the area key and index, or null if not found.
- */
-function findElement(
-  tree: ElementTreeResponse,
-  elementId: number,
-): FoundLocation | null {
-  // Check root areas first
-  for (const [areaKey, nodes] of Object.entries(tree)) {
-    const index = nodes.findIndex((n) => n.id === elementId);
-    if (index !== -1) {
-      return { kind: 'root', areaKey, index };
-    }
-  }
-
-  // Recursive search in container children
-  for (const nodes of Object.values(tree)) {
-    const result = findInChildren(nodes, elementId);
-    if (result) return result;
-  }
-
-  return null;
-}
-
-function findInChildren(
-  nodes: ElementNode[],
-  elementId: number,
-): FoundLocation | null {
-  for (const node of nodes) {
-    if (!isContainerNode(node) || !node.children) continue;
-
-    const index = node.children.findIndex((c) => c.id === elementId);
-    if (index !== -1) {
-      return {
-        kind: 'child',
-        areaKey: String(node.childAreaId),
-        index,
-      };
-    }
-
-    const deeper = findInChildren(node.children, elementId);
-    if (deeper) return deeper;
-  }
-  return null;
-}
-
-/**
- * Determines whether the element is already at the desired position,
- * making the reorder a no-op.
- */
-function isNoOp(
-  tree: ElementTreeResponse,
-  elementId: number,
-  targetAreaId: number,
-  afterElementId: number | null,
-  location: FoundLocation,
-): boolean {
-  const sourceAreaId = Number(location.areaKey);
-  if (sourceAreaId !== targetAreaId) return false;
-
-  // Get the sibling list to check current position
-  const siblings = getSiblingList(tree, targetAreaId);
-  if (!siblings) return false;
-
-  if (afterElementId === null) {
-    // Target: first position — already there if element is at index 0
-    return siblings[0]?.id === elementId;
-  }
-
-  // Target: after afterElementId — find afterElementId's index
-  const afterIndex = siblings.findIndex((n) => n.id === afterElementId);
-  if (afterIndex === -1) return false;
-
-  // The element should be at afterIndex + 1
-  return siblings[afterIndex + 1]?.id === elementId;
-}
-
-/**
- * Gets the sibling list for a given area ID (either root array or container children).
- */
-function getSiblingList(
-  tree: ElementTreeResponse,
-  areaId: number,
-): ElementNode[] | null {
-  const areaKey = String(areaId);
-  if (areaKey in tree) return tree[areaKey];
-
-  for (const nodes of Object.values(tree)) {
-    const found = findChildrenForArea(nodes, areaId);
-    if (found) return found;
-  }
-  return null;
-}
+import { buildMaps } from '@/hooks/useElementMaps';
 
 /**
  * Applies a reorder operation to the element tree, returning a new tree
@@ -142,28 +17,58 @@ export function applyReorder(
   targetAreaId: number,
   afterElementId: number | null,
 ): ElementTreeResponse {
-  const location = findElement(tree, elementId);
-  if (!location) return tree;
+  const maps = buildMaps(tree);
 
-  if (isNoOp(tree, elementId, targetAreaId, afterElementId, location)) {
+  const element = maps.nodeMap.get(elementId);
+  if (!element) return tree;
+
+  const sourceAreaId = element.parentAreaId;
+  const sourceChildren = maps.childrenByAreaId.get(sourceAreaId);
+  if (!sourceChildren) return tree;
+
+  const sourceIndex = sourceChildren.findIndex((n) => n.id === elementId);
+  if (sourceIndex === -1) return tree;
+
+  // Check target area exists
+  const targetChildren = maps.childrenByAreaId.get(targetAreaId);
+  if (!targetChildren && !Object.prototype.hasOwnProperty.call(tree, String(targetAreaId))) {
+    // Target area must exist either as root key or as a container's childAreaId
+    if (!targetChildren) return tree;
+  }
+
+  // No-op detection
+  if (isNoOp(sourceAreaId, sourceIndex, sourceChildren, targetAreaId, afterElementId)) {
     return tree;
   }
 
-  // Deep clone the tree so we can mutate it safely
+  // Deep clone the tree, then build maps from the clone so references point into the clone
   const cloned = structuredClone(tree);
+  const clonedMaps = buildMaps(cloned);
 
-  // Remove element from its current position
-  const element = removeElement(cloned, elementId, location);
-  if (!element) return tree;
+  // Remove element from its current position in the clone
+  const clonedSourceChildren = clonedMaps.childrenByAreaId.get(sourceAreaId);
+  if (!clonedSourceChildren) return tree;
+
+  const clonedSourceIndex = clonedSourceChildren.findIndex((n) => n.id === elementId);
+  if (clonedSourceIndex === -1) return tree;
+
+  const [movedElement] = clonedSourceChildren.splice(clonedSourceIndex, 1);
+
+  // Update parentAreaId on the moved element if crossing areas
+  if (sourceAreaId !== targetAreaId) {
+    (movedElement as { parentAreaId: number }).parentAreaId = targetAreaId;
+  }
 
   // Insert at new position
-  const inserted = insertElement(cloned, element, targetAreaId, afterElementId);
-  if (!inserted) return tree;
+  const clonedTargetChildren = clonedMaps.childrenByAreaId.get(targetAreaId);
+  if (!clonedTargetChildren) return tree;
+
+  insertIntoArray(clonedTargetChildren, movedElement, afterElementId);
 
   // Preserve references for unaffected root areas
   const result: ElementTreeResponse = {};
   for (const key of Object.keys(tree)) {
-    if (isAreaAffected(tree, key, targetAreaId, location)) {
+    if (isAreaAffected(maps, key, sourceAreaId, targetAreaId)) {
       result[key] = cloned[key];
     } else {
       result[key] = tree[key];
@@ -174,131 +79,67 @@ export function applyReorder(
 }
 
 /**
+ * Determines whether the element is already at the desired position.
+ */
+function isNoOp(
+  sourceAreaId: number,
+  sourceIndex: number,
+  sourceChildren: ElementNode[],
+  targetAreaId: number,
+  afterElementId: number | null,
+): boolean {
+  if (sourceAreaId !== targetAreaId) return false;
+
+  if (afterElementId === null) {
+    return sourceIndex === 0;
+  }
+
+  const afterIndex = sourceChildren.findIndex((n) => n.id === afterElementId);
+  if (afterIndex === -1) return false;
+
+  return afterIndex + 1 === sourceIndex;
+}
+
+/**
  * Checks whether a root area key is affected by the reorder operation.
+ * Uses the maps to check containment via parentAreaId chain instead of recursion.
  */
 function isAreaAffected(
-  tree: ElementTreeResponse,
+  maps: ReturnType<typeof buildMaps>,
   areaKey: string,
+  sourceAreaId: number,
   targetAreaId: number,
-  sourceLocation: FoundLocation,
 ): boolean {
-  const areaId = Number(areaKey);
+  const rootAreaId = Number(areaKey);
 
-  // Root area directly contains the source or target
-  if (sourceLocation.kind === 'root' && sourceLocation.areaKey === areaKey) {
-    return true;
-  }
-  if (areaId === targetAreaId) return true;
+  // Direct match: root area IS the source or target
+  if (rootAreaId === sourceAreaId || rootAreaId === targetAreaId) return true;
 
-  // Check if any container in this root area contains the source or target area
-  const nodes = tree[areaKey];
+  // Check if any container in this root area owns the source or target area
+  const rootNodes = maps.childrenByAreaId.get(rootAreaId);
+  if (!rootNodes) return false;
 
-  const sourceAreaId = Number(sourceLocation.areaKey);
-  if (containsArea(nodes, sourceAreaId)) return true;
-  if (containsArea(nodes, targetAreaId)) return true;
+  if (containsArea(rootNodes, sourceAreaId, maps)) return true;
+  if (containsArea(rootNodes, targetAreaId, maps)) return true;
 
-  return false;
-}
-
-function containsArea(nodes: ElementNode[], areaId: number): boolean {
-  for (const node of nodes) {
-    if (isContainerNode(node)) {
-      if (node.childAreaId === areaId) return true;
-      if (node.children && containsArea(node.children, areaId)) return true;
-    }
-  }
   return false;
 }
 
 /**
- * Removes an element from the cloned tree and returns it.
+ * Checks if any node in the given array (or its descendants) has a childAreaId
+ * matching the target area.
  */
-function removeElement(
-  cloned: ElementTreeResponse,
-  elementId: number,
-  location: FoundLocation,
-): ElementNode | null {
-  if (location.kind === 'root') {
-    const arr = cloned[location.areaKey];
-    const [element] = arr.splice(location.index, 1);
-    return element ?? null;
-  }
-
-  // Remove from container children
-  for (const nodes of Object.values(cloned)) {
-    const result = removeFromChildren(nodes, elementId);
-    if (result) return result;
-  }
-  return null;
-}
-
-function removeFromChildren(
+function containsArea(
   nodes: ElementNode[],
-  elementId: number,
-): ElementNode | null {
-  for (const node of nodes) {
-    if (!isContainerNode(node) || !node.children) continue;
-
-    const index = node.children.findIndex((c) => c.id === elementId);
-    if (index !== -1) {
-      const [removed] = node.children.splice(index, 1);
-      return removed ?? null;
-    }
-
-    const deeper = removeFromChildren(node.children, elementId);
-    if (deeper) return deeper;
-  }
-  return null;
-}
-
-/**
- * Inserts an element at the target position in the cloned tree.
- */
-function insertElement(
-  cloned: ElementTreeResponse,
-  element: ElementNode,
-  targetAreaId: number,
-  afterElementId: number | null,
-): boolean {
-  const areaKey = String(targetAreaId);
-
-  // Check root areas
-  if (areaKey in cloned) {
-    const arr = cloned[areaKey];
-    insertIntoArray(arr, element, afterElementId);
-    return true;
-  }
-
-  // Check container children
-  for (const nodes of Object.values(cloned)) {
-    if (insertIntoContainerChildren(nodes, element, targetAreaId, afterElementId)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function insertIntoContainerChildren(
-  nodes: ElementNode[],
-  element: ElementNode,
-  targetAreaId: number,
-  afterElementId: number | null,
+  areaId: number,
+  maps: ReturnType<typeof buildMaps>,
 ): boolean {
   for (const node of nodes) {
-    if (!isContainerNode(node)) continue;
-
-    if (node.childAreaId === targetAreaId) {
-      if (!node.children) {
-        (node as ContainerNode).children = [] as unknown as ContainerNode['children'];
-      }
-      insertIntoArray(node.children!, element, afterElementId);
-      return true;
-    }
-
-    if (node.children) {
-      if (insertIntoContainerChildren(node.children, element, targetAreaId, afterElementId)) {
-        return true;
+    if ('childAreaId' in node) {
+      const containerNode = node as { childAreaId: number; children?: ElementNode[] | null };
+      if (containerNode.childAreaId === areaId) return true;
+      if (containerNode.children) {
+        if (containsArea(containerNode.children, areaId, maps)) return true;
       }
     }
   }
@@ -317,7 +158,6 @@ function insertIntoArray(
 
   const afterIndex = arr.findIndex((n) => n.id === afterElementId);
   if (afterIndex === -1) {
-    // Fallback: append to end
     arr.push(element);
     return;
   }

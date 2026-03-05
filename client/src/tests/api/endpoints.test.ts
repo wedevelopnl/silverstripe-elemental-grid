@@ -39,6 +39,7 @@ describe('endpoints', () => {
         ElementalArea: [
           {
             id: 1,
+            parentAreaId: 1,
             title: 'Section',
             containerType: 'section',
             allowedTypes: null,

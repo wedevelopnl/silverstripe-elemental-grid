@@ -14,6 +14,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
  *
  * @phpstan-type SerializedNode array{
  *     id: int,
+ *     parentAreaId: positive-int,
  *     title: string,
  *     blockSchema: array{typeName: string, actions: array{edit: string}, content: string, label: string},
  *     obsoleteClassName: string|null,
@@ -34,6 +35,7 @@ use WeDevelop\ElementalGrid\Contract\ContainerType;
 final readonly class ElementNode implements \JsonSerializable
 {
     /**
+     * @param positive-int $parentAreaId
      * @param array{typeName: string, actions: array{edit: string}, content: string, label: string} $blockSchema
      * @param array<string, array{text: string, title: string}> $statusFlags
      * @param array<class-string, string>|null $allowedTypes
@@ -44,6 +46,7 @@ final readonly class ElementNode implements \JsonSerializable
      */
     public function __construct(
         public int $id,
+        public int $parentAreaId,
         public string $title,
         public array $blockSchema,
         public ?string $obsoleteClassName,
@@ -60,6 +63,12 @@ final readonly class ElementNode implements \JsonSerializable
         public ?int $childAreaId = null,
         public array $extensions = [],
     ) {
+        if ($parentAreaId <= 0) { // @phpstan-ignore smallerOrEqual.alwaysFalse (runtime guard: native type is int)
+            throw new \InvalidArgumentException(
+                'parentAreaId must be a positive integer',
+            );
+        }
+
         if ($gridSettings !== null && $containerType !== ContainerType::Column) {
             throw new \InvalidArgumentException(
                 'gridSettings may only be provided for Column container type',
@@ -88,6 +97,7 @@ final readonly class ElementNode implements \JsonSerializable
 
         $data = [
             'id' => $this->id,
+            'parentAreaId' => $this->parentAreaId,
             'title' => $this->title,
             'blockSchema' => $this->blockSchema,
             'obsoleteClassName' => $this->obsoleteClassName,
