@@ -7,7 +7,7 @@ namespace WeDevelop\Grid\Tests\Integration\Elements;
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Elements\Row;
 use WeDevelop\Grid\Elements\Section;
@@ -16,7 +16,7 @@ use WeDevelop\Grid\Model\GridElement;
 #[CoversClass(Column::class)]
 final class ColumnTest extends ContainerContractTestCase
 {
-    protected function createContainer(): ElementContainerInterface
+    protected function createContainer(): ContainerInterface
     {
         $column = Column::create();
         $column->write();
@@ -39,9 +39,10 @@ final class ColumnTest extends ContainerContractTestCase
 
         $column = Column::create();
         $column->ParentID = $page->ID;
+        $column->ParentClass = \Page::class;
 
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Column cannot be placed inside Page.');
+        $this->expectExceptionMessage('Column cannot be placed at page level.');
         $column->write();
     }
 
@@ -52,6 +53,7 @@ final class ColumnTest extends ContainerContractTestCase
 
         $column = Column::create();
         $column->ParentID = $section->ID;
+        $column->ParentClass = Section::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Column cannot be placed inside Section.');
@@ -71,6 +73,7 @@ final class ColumnTest extends ContainerContractTestCase
 
         $innerColumn = Column::create();
         $innerColumn->ParentID = $column->ID;
+        $innerColumn->ParentClass = Column::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Column cannot be placed inside Column.');
@@ -87,6 +90,7 @@ final class ColumnTest extends ContainerContractTestCase
 
         $column = Column::create();
         $column->ParentID = $row->ID;
+        $column->ParentClass = Row::class;
         $column->write();
 
         $this->assertGreaterThan(0, $column->ID);
@@ -171,6 +175,7 @@ final class ColumnTest extends ContainerContractTestCase
         $leaf = GridElement::create();
         $leaf->Title = 'Test Leaf';
         $leaf->ParentID = $column->ID;
+        $leaf->ParentClass = Column::class;
         $leaf->write();
 
         $this->assertSame('1 element', $column->getChildCountSummary());

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Elements;
 
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Model\ContainerElement;
+use WeDevelop\Grid\Model\ContainerElementTrait;
 use WeDevelop\Grid\Model\GridElement;
 
 /**
@@ -16,8 +19,10 @@ use WeDevelop\Grid\Model\GridElement;
  *
  * @method HasManyList<GridElement> Elements()
  */
-class Column extends ContainerElement
+class Column extends GridElement implements ContainerInterface
 {
+    use ContainerElementTrait;
+
     private static string $table_name = 'Column';
 
     private static string $singular_name = 'Column';
@@ -103,6 +108,27 @@ class Column extends ContainerElement
     public function getType(): string
     {
         return 'Column';
+    }
+
+    /** Render through the holder template. */
+    public function forTemplate(): string
+    {
+        /** @var DBHTMLText $result */
+        $result = $this->renderWith('WeDevelop/Grid/Layout/ColumnHolder');
+
+        return (string) $result;
+    }
+
+    /** Inner content rendered by `$Element` in the holder template. */
+    public function Element(): DBHTMLText
+    {
+        return $this->renderWith('WeDevelop/Grid/Elements/Column');
+    }
+
+    /** Short class name for CSS class generation in templates. */
+    public function getSimpleClassName(): string
+    {
+        return ClassInfo::shortName(static::class);
     }
 
     /** Returns the first viewport's width as a fraction, e.g. '6/12'. */

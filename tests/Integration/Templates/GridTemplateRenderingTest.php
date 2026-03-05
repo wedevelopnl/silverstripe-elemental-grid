@@ -49,12 +49,10 @@ final class GridTemplateRenderingTest extends SapphireTest
         );
     }
 
-    /** Render an element through its controller (holder + content template). */
+    /** Render an element through its holder template. */
     private function render(Section|Row|Column $element): string
     {
-        $controller = $element->getController();
-
-        return (string) $controller->forTemplate();
+        return $element->forTemplate();
     }
 
     // --- Section rendering ---

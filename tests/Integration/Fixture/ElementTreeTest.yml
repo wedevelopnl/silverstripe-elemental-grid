@@ -1,6 +1,6 @@
-# Bottom-up ordering: children are written before parent containers so that
-# onAfterWrite scaffolding checks see existing children and skip
-# auto-creation of Row/Column elements.
+# Top-down ordering: parents written before children so =>ClassName.id
+# references resolve. Auto-scaffolding is suppressed via Section/Row::$autoScaffold
+# in test setUp().
 #
 # Elements parent directly to their container via polymorphic has_one (Parent).
 
@@ -8,38 +8,20 @@ WeDevelop\Grid\Tests\Integration\Fixture\TestPage:
   testpage:
     Title: 'Tree Test Page'
 
-# --- Leaves first (into columns) ---
-WeDevelop\Grid\Model\GridElement:
-  leaf1:
-    Title: 'Text Block'
+# --- Sections (into page) ---
+# section2 has no children
+WeDevelop\Grid\Elements\Section:
+  section1:
+    Title: 'First Section'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
-  leaf2:
-    Title: 'Image Block'
+    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
+  section2:
+    Title: 'Second Section'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
-  leaf3:
-    Title: 'Video Block'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col2
+    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
 
-# --- Columns (into row; children already have leaves) ---
-WeDevelop\Grid\Elements\Column:
-  col1:
-    Title: 'Left Column'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
-  col2:
-    Title: 'Right Column'
-    Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
-  col3:
-    Title: 'Full Width Column'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row2
-
-# --- Rows (into sections; children already have columns) ---
-# row3 has no children — prevents auto-scaffolding of a Column
+# --- Rows (into sections) ---
+# row3 has no children
 WeDevelop\Grid\Elements\Row:
   row1:
     Title: 'First Row'
@@ -54,14 +36,33 @@ WeDevelop\Grid\Elements\Row:
     Sort: 3
     Parent: =>WeDevelop\Grid\Elements\Section.section1
 
-# --- Sections (into page; children already have rows) ---
-# section2 has no children — prevents auto-scaffolding of a Row
-WeDevelop\Grid\Elements\Section:
-  section1:
-    Title: 'First Section'
+# --- Columns (into rows) ---
+# col3 has no children
+WeDevelop\Grid\Elements\Column:
+  col1:
+    Title: 'Left Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
-  section2:
-    Title: 'Second Section'
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
+  col2:
+    Title: 'Right Column'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
+  col3:
+    Title: 'Full Width Column'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Row.row2
+
+# --- Leaves (into columns) ---
+WeDevelop\Grid\Model\GridElement:
+  leaf1:
+    Title: 'Text Block'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
+  leaf2:
+    Title: 'Image Block'
+    Sort: 2
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
+  leaf3:
+    Title: 'Video Block'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Column.col2

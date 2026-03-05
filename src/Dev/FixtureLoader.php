@@ -14,6 +14,8 @@ use SilverStripe\Dev\FixtureFactory;
 use SilverStripe\Dev\YamlFixture;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
 
 /**
  * Loads and resets YAML fixtures at runtime for E2E tests.
@@ -57,10 +59,20 @@ class FixtureLoader
         $factory = new FixtureFactory();
         $fixture = YamlFixture::create($path);
 
-        Versioned::withVersionedMode(static function () use ($fixture, $factory): void {
-            Versioned::set_stage(Versioned::DRAFT);
-            $fixture->writeInto($factory);
-        });
+        // Suppress auto-scaffolding so YAML can define the exact tree structure
+        // without containers creating duplicate children on write.
+        Section::$autoScaffold = false;
+        Row::$autoScaffold = false;
+
+        try {
+            Versioned::withVersionedMode(static function () use ($fixture, $factory): void {
+                Versioned::set_stage(Versioned::DRAFT);
+                $fixture->writeInto($factory);
+            });
+        } finally {
+            Section::$autoScaffold = true;
+            Row::$autoScaffold = true;
+        }
 
         $postActions = $this->resolvePostActions($name);
         if ($postActions !== []) {

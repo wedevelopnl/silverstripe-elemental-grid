@@ -8,6 +8,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -27,7 +28,7 @@ use SilverStripe\Versioned\Versioned;
  * @method DataObject Parent()
  * @mixin Versioned
  */
-abstract class GridElement extends DataObject
+class GridElement extends DataObject
 {
     private static string $table_name = 'GridElement';
 
@@ -72,7 +73,10 @@ abstract class GridElement extends DataObject
     ];
 
     /** Human-readable element type identifier (e.g., "Section", "Row", "Text"). */
-    abstract public function getType(): string;
+    public function getType(): string
+    {
+        return 'Unknown';
+    }
 
     /** Anchor-safe identifier for linking within a page. */
     public function getAnchor(): string
@@ -128,7 +132,7 @@ abstract class GridElement extends DataObject
     {
         $parent = $this->Parent();
 
-        if (!$parent->exists()) {
+        if ($parent === null || !$parent->exists()) { // @phpstan-ignore identical.alwaysFalse (polymorphic has_one returns null when ParentClass is empty)
             return null;
         }
 
@@ -150,6 +154,15 @@ abstract class GridElement extends DataObject
      */
     public function canView(mixed $member = null): bool|null
     {
+        $member = $member ?: Security::getCurrentUser();
+
+        if ($member !== null) {
+            $extended = $this->extendedCan(__FUNCTION__, $member);
+            if ($extended !== null) {
+                return $extended;
+            }
+        }
+
         $page = $this->getPage();
 
         return $page !== null ? (bool) $page->canView($member) : (bool) Permission::check('CMS_ACCESS', 'any', $member);

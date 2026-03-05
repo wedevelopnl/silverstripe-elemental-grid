@@ -8,6 +8,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Elements\Row;
+use WeDevelop\Grid\Elements\Section;
 use WeDevelop\Grid\Extensions\GridPageExtension;
 use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Repository\OrmGridElementRepository;
@@ -34,7 +36,11 @@ final class OrmGridElementRepositoryTest extends SapphireTest
 
     protected function setUp(): void
     {
+        Section::$autoScaffold = false;
+        Row::$autoScaffold = false;
         parent::setUp();
+        Section::$autoScaffold = true;
+        Row::$autoScaffold = true;
 
         Versioned::set_stage(Versioned::DRAFT);
         $this->repository = new OrmGridElementRepository();

@@ -13,8 +13,7 @@
 #
 # Post-actions are configured in dev.yml.
 #
-# Bottom-up ordering: children written before parents to prevent
-# auto-scaffolding of Row/Column elements.
+# Top-down ordering: parents before children. Auto-scaffolding suppressed by FixtureLoader.
 #
 # Elements parent directly to their container via polymorphic has_one (Parent).
 
@@ -23,24 +22,27 @@ Page:
     Title: 'E2E Complex Page'
     URLSegment: 'e2e-complex-page'
 
-# --- Leaves first (into columns) ---
-WeDevelop\Grid\Model\GridElement:
-  draft_leaf:
-    Title: 'Draft Only Block'
+# --- Sections (into page) ---
+WeDevelop\Grid\Elements\Section:
+  section1:
+    Title: 'Main Section'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
-  published_leaf:
-    Title: 'Published Block'
+    Parent: =>Page.e2e_page
+  section2:
+    Title: 'Draft Section'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
-  modified_leaf:
-    Title: 'Modified Text Block'
+    Parent: =>Page.e2e_page
+
+# --- Rows (into sections) ---
+WeDevelop\Grid\Elements\Row:
+  row1:
+    Title: 'First Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col2
-  section2_leaf:
-    Title: 'Section Two Block'
+    Parent: =>WeDevelop\Grid\Elements\Section.section1
+  row2:
+    Title: 'Second Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col3
+    Parent: =>WeDevelop\Grid\Elements\Section.section2
 
 # --- Columns (into rows) ---
 WeDevelop\Grid\Elements\Column:
@@ -60,24 +62,21 @@ WeDevelop\Grid\Elements\Column:
     Parent: =>WeDevelop\Grid\Elements\Row.row2
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
-# --- Rows (into sections) ---
-WeDevelop\Grid\Elements\Row:
-  row1:
-    Title: 'First Row'
+# --- Leaves (into columns) ---
+WeDevelop\Grid\Model\GridElement:
+  draft_leaf:
+    Title: 'Draft Only Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
-  row2:
-    Title: 'Second Row'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section2
-
-# --- Sections (into page) ---
-WeDevelop\Grid\Elements\Section:
-  section1:
-    Title: 'Main Section'
-    Sort: 1
-    Parent: =>Page.e2e_page
-  section2:
-    Title: 'Draft Section'
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
+  published_leaf:
+    Title: 'Published Block'
     Sort: 2
-    Parent: =>Page.e2e_page
+    Parent: =>WeDevelop\Grid\Elements\Column.col1
+  modified_leaf:
+    Title: 'Modified Text Block'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Column.col2
+  section2_leaf:
+    Title: 'Section Two Block'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Column.col3

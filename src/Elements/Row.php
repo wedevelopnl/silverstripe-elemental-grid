@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Elements;
 
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Model\ContainerElement;
+use WeDevelop\Grid\Model\ContainerElementTrait;
+use WeDevelop\Grid\Model\GridElement;
 
 /**
  * Mid-level container in the Section > Row > Column hierarchy.
@@ -17,8 +21,10 @@ use WeDevelop\Grid\Model\ContainerElement;
  *
  * @method HasManyList<Column> Columns()
  */
-class Row extends ContainerElement
+class Row extends GridElement implements ContainerInterface
 {
+    use ContainerElementTrait;
+
     private static string $table_name = 'Row';
 
     private static string $singular_name = 'Row';
@@ -64,6 +70,9 @@ class Row extends ContainerElement
 
     private static string $default_column_title = '';
 
+    /** Set to false to suppress auto-scaffolding during fixture loading. */
+    public static bool $autoScaffold = true;
+
     public function getType(): string
     {
         return 'Row';
@@ -88,6 +97,27 @@ class Row extends ContainerElement
         return ContainerType::Row;
     }
 
+    /** Render through the holder template. */
+    public function forTemplate(): string
+    {
+        /** @var DBHTMLText $result */
+        $result = $this->renderWith('WeDevelop/Grid/Layout/RowHolder');
+
+        return (string) $result;
+    }
+
+    /** Inner content rendered by `$Element` in the holder template. */
+    public function Element(): DBHTMLText
+    {
+        return $this->renderWith('WeDevelop/Grid/Elements/Row');
+    }
+
+    /** Short class name for CSS class generation in templates. */
+    public function getSimpleClassName(): string
+    {
+        return ClassInfo::shortName(static::class);
+    }
+
     /** CSS classes for the grid row wrapper. */
     public function getRowClasses(): string
     {
@@ -102,6 +132,10 @@ class Row extends ContainerElement
     protected function onAfterWrite(): void
     {
         parent::onAfterWrite();
+
+        if (!static::$autoScaffold) {
+            return;
+        }
 
         // Only scaffold on draft stage to avoid duplicates during publish
         if (Versioned::get_stage() !== Versioned::DRAFT) {

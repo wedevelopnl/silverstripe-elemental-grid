@@ -5,30 +5,29 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Model;
 
 use SilverStripe\ORM\HasManyList;
-use WeDevelop\Grid\Contract\ContainerInterface;
+use WeDevelop\Grid\Contract\ContainerType;
 
 /**
- * Abstract base for structural container elements (Section, Row, Column).
+ * Shared behavior for structural container elements (Section, Row, Column).
  *
- * Containers define a typed has_many to their specific children and
- * implement the ContainerInterface for polymorphic container operations.
+ * Provides default implementations for ContainerInterface methods that
+ * depend on getChildren() and getChildTypeName(), which each container
+ * must define itself.
+ *
+ * This is a trait rather than a base class because SilverStripe's ORM
+ * cannot handle intermediate DataObject classes that add no DB columns:
+ * abstract classes crash TableBuilder, and concrete classes create
+ * empty tables with table-name conflicts.
  */
-abstract class ContainerElement extends GridElement implements ContainerInterface
+trait ContainerElementTrait
 {
-    private static string $table_name = 'ContainerElement';
-
-    /**
-     * Return the typed has_many list of child elements.
-     * Subclasses define the concrete relationship (e.g., Section->Rows, Row->Columns).
-     *
-     * @return HasManyList<GridElement>
-     */
+    /** @return HasManyList<GridElement> */
     abstract public function getChildren(): HasManyList;
 
-    /** Human-readable child type name for summaries (e.g., "row", "column", "element"). */
     abstract public function getChildTypeName(): string;
 
-    #[\Override]
+    abstract public function getContainerType(): ContainerType;
+
     public function hasChildren(): bool
     {
         return $this->getChildren()->exists();

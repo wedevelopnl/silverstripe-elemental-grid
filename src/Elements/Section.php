@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Elements;
 
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Model\ContainerElement;
+use WeDevelop\Grid\Model\ContainerElementTrait;
+use WeDevelop\Grid\Model\GridElement;
 
 /**
  * Top-level container in the Section > Row > Column hierarchy.
@@ -18,8 +22,10 @@ use WeDevelop\Grid\Model\ContainerElement;
  *
  * @method HasManyList<Row> Rows()
  */
-class Section extends ContainerElement
+class Section extends GridElement implements ContainerInterface
 {
+    use ContainerElementTrait;
+
     private static string $table_name = 'Section';
 
     private static string $singular_name = 'Section';
@@ -67,6 +73,9 @@ class Section extends ContainerElement
 
     private static string $default_row_title = '';
 
+    /** Set to false to suppress auto-scaffolding during fixture loading. */
+    public static bool $autoScaffold = true;
+
     public function getType(): string
     {
         return 'Section';
@@ -91,6 +100,27 @@ class Section extends ContainerElement
         return ContainerType::Section;
     }
 
+    /** Render through the holder template. */
+    public function forTemplate(): string
+    {
+        /** @var DBHTMLText $result */
+        $result = $this->renderWith('WeDevelop/Grid/Layout/SectionHolder');
+
+        return (string) $result;
+    }
+
+    /** Inner content rendered by `$Element` in the holder template. */
+    public function Element(): DBHTMLText
+    {
+        return $this->renderWith('WeDevelop/Grid/Elements/Section');
+    }
+
+    /** Short class name for CSS class generation in templates. */
+    public function getSimpleClassName(): string
+    {
+        return ClassInfo::shortName(static::class);
+    }
+
     /** CSS classes for the grid container wrapper. */
     public function getContainerClasses(): string
     {
@@ -107,6 +137,10 @@ class Section extends ContainerElement
     protected function onAfterWrite(): void
     {
         parent::onAfterWrite();
+
+        if (!static::$autoScaffold) {
+            return;
+        }
 
         // Only scaffold on draft stage to avoid duplicates during publish
         if (Versioned::get_stage() !== Versioned::DRAFT) {

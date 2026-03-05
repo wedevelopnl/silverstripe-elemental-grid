@@ -31,29 +31,12 @@ final class ReorderValidatorTest extends TestCase
 
     // -- Same-area moves --
 
-    public function testSameAreaMoveIsAlwaysValid(): void
+    public function testSameParentMoveIsAlwaysValid(): void
     {
-        $area = $this->createParentMock(10);
+        $parent = $this->createParentMock(10);
         $element = $this->createElementMock(1, 10);
 
-        // Same area: no hierarchy or circular ref checks needed
-        $area->expects($this->never())->method('getOwnerPage');
-
-        $result = $this->validator->validate($element, $area);
-
-        $this->assertTrue($result->isOk());
-    }
-
-    // -- Orphaned area --
-
-    public function testOrphanedAreaAllowsAnyElement(): void
-    {
-        $area = $this->createParentMock(20);
-        $element = $this->createElementMock(1, 10);
-
-        $area->method('getOwnerPage')->willReturn(null);
-
-        $result = $this->validator->validate($element, $area);
+        $result = $this->validator->validate($element, $parent);
 
         $this->assertTrue($result->isOk());
     }

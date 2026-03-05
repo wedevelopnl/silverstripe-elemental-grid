@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Elements\Row;
 use WeDevelop\Grid\Elements\Section;
@@ -17,7 +17,7 @@ use WeDevelop\Grid\Tests\Integration\Fixture\OnAfterWriteSpy;
 #[CoversClass(Row::class)]
 final class RowTest extends ContainerContractTestCase
 {
-    protected function createContainer(): ElementContainerInterface
+    protected function createContainer(): ContainerInterface
     {
         $row = Row::create();
         $row->write();
@@ -40,9 +40,10 @@ final class RowTest extends ContainerContractTestCase
 
         $row = Row::create();
         $row->ParentID = $page->ID;
+        $row->ParentClass = \Page::class;
 
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Row cannot be placed inside Page.');
+        $this->expectExceptionMessage('Row cannot be placed at page level.');
         $row->write();
     }
 
@@ -56,6 +57,7 @@ final class RowTest extends ContainerContractTestCase
 
         $childRow = Row::create();
         $childRow->ParentID = $parentRow->ID;
+        $childRow->ParentClass = Row::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Row.');
@@ -75,6 +77,7 @@ final class RowTest extends ContainerContractTestCase
 
         $childRow = Row::create();
         $childRow->ParentID = $column->ID;
+        $childRow->ParentClass = Column::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Column.');
@@ -197,6 +200,7 @@ final class RowTest extends ContainerContractTestCase
 
         $extraColumn = Column::create();
         $extraColumn->ParentID = $row->ID;
+        $extraColumn->ParentClass = Row::class;
         $extraColumn->write();
 
         $this->assertSame('2 columns', $row->getSummary());
@@ -236,6 +240,7 @@ final class RowTest extends ContainerContractTestCase
 
         // Attempt to reparent the row into its own column's child area
         $row->ParentID = $column->ID;
+        $row->ParentClass = Column::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Row cannot be placed inside Column.');

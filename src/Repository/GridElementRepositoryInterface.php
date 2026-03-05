@@ -18,4 +18,15 @@ interface GridElementRepositoryInterface
      * @return list<GridElement>
      */
     public function findByParentIds(array $parentIds): array;
+
+    /**
+     * Find all elements matching the given parent ID+class pairs, ordered by Sort ASC, ID ASC.
+     *
+     * Uses both ParentID and ParentClass to avoid false matches when IDs from
+     * different tables (e.g. SiteTree and GridElement) collide.
+     *
+     * @param array<class-string, list<positive-int>> $idsByClass Map of parent class → parent IDs
+     * @return list<GridElement>
+     */
+    public function findByParents(array $idsByClass): array;
 }

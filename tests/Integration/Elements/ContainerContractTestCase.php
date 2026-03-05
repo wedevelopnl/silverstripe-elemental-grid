@@ -7,11 +7,11 @@ namespace WeDevelop\Grid\Tests\Integration\Elements;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Extensions\GridPageExtension;
 
 /**
- * Abstract contract test for ElementContainerInterface implementations.
+ * Abstract contract test for ContainerInterface implementations.
  *
  * Extend this in each concrete container's test class and implement
  * {@see createContainer()} to return a configured instance.
@@ -35,13 +35,13 @@ abstract class ContainerContractTestCase extends SapphireTest
         Versioned::set_stage(Versioned::DRAFT);
     }
 
-    abstract protected function createContainer(): ElementContainerInterface;
+    abstract protected function createContainer(): ContainerInterface;
 
-    public function testImplementsElementContainerInterface(): void
+    public function testImplementsContainerInterface(): void
     {
         $container = $this->createContainer();
 
-        $this->assertInstanceOf(ElementContainerInterface::class, $container);
+        $this->assertInstanceOf(ContainerInterface::class, $container);
     }
 
     public function testGetContainerTypeReturnsValidCase(): void

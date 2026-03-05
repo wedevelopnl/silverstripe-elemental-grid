@@ -33,6 +33,7 @@ use WeDevelop\Grid\Service\ReorderService;
  * @phpstan-type ReorderBody array{
  *   elementID: positive-int,
  *   targetParentId: positive-int,
+ *   targetParentClass: class-string<DataObject>,
  *   afterElementID: positive-int|null,
  * }
  * @phpstan-type AdapterConfig array{
@@ -138,7 +139,7 @@ class GridController extends AdminController
         $body = $this->parseCreateBody($request);
 
         /** @var DataObject|null $parent */
-        $parent = DataObject::get()->byID($body['parentId']);
+        $parent = $body['parentClass']::get()->byID($body['parentId']);
         if ($parent === null) {
             $this->jsonError(400);
         }
@@ -249,7 +250,7 @@ class GridController extends AdminController
         }
 
         $parent = $element->Parent();
-        if (!$parent->exists() || !$parent->canEdit()) {
+        if ($parent === null || !$parent->exists() || !$parent->canEdit()) { // @phpstan-ignore identical.alwaysFalse
             $this->jsonError(403);
         }
 
@@ -285,7 +286,7 @@ class GridController extends AdminController
         }
 
         /** @var DataObject|null $targetParent */
-        $targetParent = DataObject::get()->byID($body['targetParentId']);
+        $targetParent = $body['targetParentClass']::get()->byID($body['targetParentId']);
         if ($targetParent === null) {
             $this->jsonError(400);
         }
@@ -300,7 +301,7 @@ class GridController extends AdminController
 
         if ($isCrossParent) {
             $sourceParent = $element->Parent();
-            if (!$sourceParent->exists() || !$sourceParent->canEdit()) {
+            if ($sourceParent === null || !$sourceParent->exists() || !$sourceParent->canEdit()) { // @phpstan-ignore identical.alwaysFalse
                 $this->jsonError(403);
             }
         }
@@ -435,6 +436,7 @@ class GridController extends AdminController
 
         $elementID = $data['elementID'] ?? null;
         $targetParentId = $data['targetParentId'] ?? null;
+        $targetParentClass = $data['targetParentClass'] ?? null;
         $afterElementID = $data['afterElementID'] ?? null;
 
         if (!is_int($elementID) || $elementID < 1) {
@@ -445,6 +447,10 @@ class GridController extends AdminController
             $this->jsonError(400);
         }
 
+        if (!is_string($targetParentClass) || !is_subclass_of($targetParentClass, DataObject::class, true)) {
+            $this->jsonError(400);
+        }
+
         if ($afterElementID !== null && (!is_int($afterElementID) || $afterElementID < 1)) {
             $this->jsonError(400);
         }
@@ -452,6 +458,7 @@ class GridController extends AdminController
         return [
             'elementID' => $elementID,
             'targetParentId' => $targetParentId,
+            'targetParentClass' => $targetParentClass,
             'afterElementID' => $afterElementID,
         ];
     }

@@ -33,6 +33,15 @@ final class GridControllerTest extends FunctionalTest
         ],
     ];
 
+    protected function setUp(): void
+    {
+        Section::$autoScaffold = false;
+        Row::$autoScaffold = false;
+        parent::setUp();
+        Section::$autoScaffold = true;
+        Row::$autoScaffold = true;
+    }
+
     private function apiUrl(int $pageId): string
     {
         return '/admin/grid/api/readTree/' . $pageId;
@@ -126,22 +135,23 @@ final class GridControllerTest extends FunctionalTest
         );
     }
 
-    public function testReadTreeReturns404ForPageWithoutGridRelations(): void
+    public function testReadTreeReturnsEmptyTreeForPageWithoutElements(): void
     {
         $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
 
-        // SiteTree without GridPageExtension has no grid relations
         $page = SiteTree::create();
         $page->Title = 'Non-Grid Page';
         $page->write();
 
         $response = $this->get($this->apiUrl($page->ID));
 
-        $this->assertJsonError(
-            404,
-            "Sorry, it seems you were trying to access a section or object that doesn't exist.",
-            $response,
-        );
+        $this->assertSame(200, $response->getStatusCode());
+
+        $body = json_decode($response->getBody(), associative: true, flags: JSON_THROW_ON_ERROR);
+        $pageId = (int) $page->ID;
+        $this->assertArrayHasKey($pageId, $body);
+        $this->assertSame([], $body[$pageId]);
     }
 
     public function testReadTreeFindsPageRegardlessOfAmbientStage(): void
@@ -288,7 +298,7 @@ final class GridControllerTest extends FunctionalTest
             'insertAfterElementID' => null,
         ]);
 
-        $this->assertJsonError(422, 'Row cannot be placed inside Test Page.', $response);
+        $this->assertJsonError(422, 'Row cannot be placed at page level.', $response);
     }
 
     // --- apiDuplicate --------------------------------------------------------
@@ -333,6 +343,7 @@ final class GridControllerTest extends FunctionalTest
         $section = Section::create();
         $section->Title = 'Block copy';
         $section->ParentID = $page->ID;
+        $section->ParentClass = $page::class;
         $section->write();
 
         $response = $this->postJson('/admin/grid/api/duplicate', [
@@ -357,13 +368,14 @@ final class GridControllerTest extends FunctionalTest
         $row = Row::create();
         $row->Title = 'Invalid Row';
         $row->ParentID = $page->ID;
+        $row->ParentClass = $page::class;
         $row->write(skipValidation: true);
 
         $response = $this->postJson('/admin/grid/api/duplicate', [
             'id' => $row->ID,
         ]);
 
-        $this->assertJsonError(422, 'Row cannot be placed inside Test Page.', $response);
+        $this->assertJsonError(422, 'Row cannot be placed at page level.', $response);
     }
 
 

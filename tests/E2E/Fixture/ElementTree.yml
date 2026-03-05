@@ -3,9 +3,8 @@
 # Uses Page (not TestPage) because TestOnly classes are not available
 # at runtime — only during PHPUnit execution.
 #
-# Bottom-up ordering: children are written before parent containers so that
-# onAfterWrite scaffolding checks see existing children and skip
-# auto-creation of Row/Column elements.
+# Top-down ordering: parents written before children so =>ClassName.id
+# references resolve. Auto-scaffolding is suppressed by FixtureLoader.
 #
 # All pages use the 'e2e-' URLSegment prefix for cleanup identification.
 #
@@ -17,7 +16,35 @@ Page:
     Title: 'E2E Grid Test Page'
     URLSegment: 'e2e-grid-test'
 
-# --- Leaves first (into columns) ---
+# --- Section (into page) ---
+WeDevelop\Grid\Elements\Section:
+  section1:
+    Title: 'Main Section'
+    ShowTitle: 1
+    Sort: 1
+    Parent: =>Page.e2e_page
+
+# --- Row (into section) ---
+WeDevelop\Grid\Elements\Row:
+  row1:
+    Title: 'First Row'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Section.section1
+
+# --- Columns (into row) ---
+WeDevelop\Grid\Elements\Column:
+  col1:
+    Title: 'Left Column'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
+  col2:
+    Title: 'Right Column'
+    Sort: 2
+    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
+
+# --- Leaves (into columns) ---
 WeDevelop\Grid\Model\GridElement:
   leaf1:
     Title: 'Text Block'
@@ -31,31 +58,3 @@ WeDevelop\Grid\Model\GridElement:
     Title: 'Video Block'
     Sort: 1
     Parent: =>WeDevelop\Grid\Elements\Column.col2
-
-# --- Columns (into row; children already have leaves) ---
-WeDevelop\Grid\Elements\Column:
-  col1:
-    Title: 'Left Column'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
-    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
-  col2:
-    Title: 'Right Column'
-    Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
-    GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
-
-# --- Row (into section; children already have columns) ---
-WeDevelop\Grid\Elements\Row:
-  row1:
-    Title: 'First Row'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
-
-# --- Section (into page) ---
-WeDevelop\Grid\Elements\Section:
-  section1:
-    Title: 'Main Section'
-    ShowTitle: 1
-    Sort: 1
-    Parent: =>Page.e2e_page

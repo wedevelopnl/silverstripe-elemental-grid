@@ -29,4 +29,28 @@ final class OrmGridElementRepository implements GridElementRepositoryInterface
             ->sort(['Sort' => 'ASC', 'ID' => 'ASC'])
             ->toArray();
     }
+
+    public function findByParents(array $idsByClass): array
+    {
+        if ($idsByClass === []) {
+            return [];
+        }
+
+        // Collect all parent IDs and classes for a combined filter
+        $allParentIds = [];
+        $allParentClasses = [];
+        foreach ($idsByClass as $class => $ids) {
+            $allParentClasses[] = $class;
+            $allParentIds = array_merge($allParentIds, $ids);
+        }
+
+        /** @var list<GridElement> */
+        return GridElement::get()
+            ->filter([
+                'ParentID' => array_unique($allParentIds),
+                'ParentClass' => array_unique($allParentClasses),
+            ])
+            ->sort(['Sort' => 'ASC', 'ID' => 'ASC'])
+            ->toArray();
+    }
 }

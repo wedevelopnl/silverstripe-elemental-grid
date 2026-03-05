@@ -12,7 +12,7 @@
 #
 # Provides sibling coverage: 2 sections, 2 rows in section A, 2 columns in row A1.
 #
-# Bottom-up ordering: children before parents to prevent auto-scaffolding.
+# Top-down ordering: parents before children. Auto-scaffolding suppressed by FixtureLoader.
 # All pages use 'e2e-' URLSegment prefix for cleanup identification.
 #
 # Elements parent directly to their container via polymorphic has_one (Parent).
@@ -25,24 +25,31 @@ Page:
     Title: 'E2E Other Page'
     URLSegment: 'e2e-other-page'
 
-# --- Leaves ---
-WeDevelop\Grid\Model\GridElement:
-  leaf_a1l:
-    Title: 'Block A1-Left'
+# --- Sections ---
+WeDevelop\Grid\Elements\Section:
+  section_a:
+    Title: 'Section A'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col_a1l
-  leaf_a1r:
-    Title: 'Block A1-Right'
+    Parent: =>Page.e2e_page
+  section_b:
+    Title: 'Section B'
+    Sort: 2
+    Parent: =>Page.e2e_page
+
+# --- Rows ---
+WeDevelop\Grid\Elements\Row:
+  row_a1:
+    Title: 'Row A1'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col_a1r
-  leaf_a2:
-    Title: 'Block A2'
+    Parent: =>WeDevelop\Grid\Elements\Section.section_a
+  row_a2:
+    Title: 'Row A2'
+    Sort: 2
+    Parent: =>WeDevelop\Grid\Elements\Section.section_a
+  row_b1:
+    Title: 'Row B1'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col_a2
-  leaf_b1:
-    Title: 'Block B1'
-    Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col_b1
+    Parent: =>WeDevelop\Grid\Elements\Section.section_b
 
 # --- Columns ---
 WeDevelop\Grid\Elements\Column:
@@ -67,28 +74,21 @@ WeDevelop\Grid\Elements\Column:
     Parent: =>WeDevelop\Grid\Elements\Row.row_b1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
-# --- Rows ---
-WeDevelop\Grid\Elements\Row:
-  row_a1:
-    Title: 'Row A1'
+# --- Leaves ---
+WeDevelop\Grid\Model\GridElement:
+  leaf_a1l:
+    Title: 'Block A1-Left'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section_a
-  row_a2:
-    Title: 'Row A2'
-    Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Section.section_a
-  row_b1:
-    Title: 'Row B1'
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1l
+  leaf_a1r:
+    Title: 'Block A1-Right'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section_b
-
-# --- Sections ---
-WeDevelop\Grid\Elements\Section:
-  section_a:
-    Title: 'Section A'
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a1r
+  leaf_a2:
+    Title: 'Block A2'
     Sort: 1
-    Parent: =>Page.e2e_page
-  section_b:
-    Title: 'Section B'
-    Sort: 2
-    Parent: =>Page.e2e_page
+    Parent: =>WeDevelop\Grid\Elements\Column.col_a2
+  leaf_b1:
+    Title: 'Block B1'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Elements\Column.col_b1

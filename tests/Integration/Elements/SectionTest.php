@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Contract\ElementContainerInterface;
+use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Elements\Row;
 use WeDevelop\Grid\Elements\Section;
@@ -31,7 +31,7 @@ final class SectionTest extends ContainerContractTestCase
         ],
     ];
 
-    protected function createContainer(): ElementContainerInterface
+    protected function createContainer(): ContainerInterface
     {
         $section = Section::create();
         $section->write();
@@ -66,6 +66,7 @@ final class SectionTest extends ContainerContractTestCase
 
         $innerSection = Section::create();
         $innerSection->ParentID = $outerSection->ID;
+        $innerSection->ParentClass = Section::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Section.');
@@ -82,6 +83,7 @@ final class SectionTest extends ContainerContractTestCase
 
         $innerSection = Section::create();
         $innerSection->ParentID = $row->ID;
+        $innerSection->ParentClass = Row::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Row.');
@@ -101,6 +103,7 @@ final class SectionTest extends ContainerContractTestCase
 
         $innerSection = Section::create();
         $innerSection->ParentID = $column->ID;
+        $innerSection->ParentClass = Column::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Column.');
@@ -276,6 +279,7 @@ final class SectionTest extends ContainerContractTestCase
 
         $extraRow = Row::create();
         $extraRow->ParentID = $section->ID;
+        $extraRow->ParentClass = Section::class;
         $extraRow->write();
 
         $this->assertSame('2 rows', $section->getSummary());
@@ -312,6 +316,7 @@ final class SectionTest extends ContainerContractTestCase
 
         // Attempt to reparent the section into its own row's child area
         $section->ParentID = $row->ID;
+        $section->ParentClass = Row::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Row.');
@@ -336,6 +341,7 @@ final class SectionTest extends ContainerContractTestCase
 
         // Attempt to reparent the section into its own column's child area
         $section->ParentID = $column->ID;
+        $section->ParentClass = Column::class;
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('Section cannot be placed inside Column.');

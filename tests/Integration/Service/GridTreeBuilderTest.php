@@ -16,7 +16,6 @@ use WeDevelop\Grid\Extensions\GridPageExtension;
 use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\GridNode;
 use WeDevelop\Grid\Service\GridTreeBuilder;
-use WeDevelop\Grid\Tests\Integration\Fixture\MultiAreaTestPage;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
 #[CoversClass(GridTreeBuilder::class)]
@@ -27,7 +26,6 @@ final class GridTreeBuilderTest extends SapphireTest
     /** @var list<class-string> */
     protected static $extra_dataobjects = [
         TestPage::class,
-        MultiAreaTestPage::class,
     ];
 
     /** @var array<class-string, list<class-string>> */
@@ -35,14 +33,15 @@ final class GridTreeBuilderTest extends SapphireTest
         TestPage::class => [
             GridPageExtension::class,
         ],
-        MultiAreaTestPage::class => [
-            GridPageExtension::class,
-        ],
     ];
 
     protected function setUp(): void
     {
+        Section::$autoScaffold = false;
+        Row::$autoScaffold = false;
         parent::setUp();
+        Section::$autoScaffold = true;
+        Row::$autoScaffold = true;
 
         Versioned::set_stage(Versioned::DRAFT);
     }
@@ -248,11 +247,11 @@ final class GridTreeBuilderTest extends SapphireTest
         $this->assertIsString($schema['typeName']);
         $this->assertNotEmpty($schema['typeName']);
 
-        $this->assertArrayHasKey('actions', $schema);
-        $this->assertArrayHasKey('edit', $schema['actions']);
+        $this->assertArrayHasKey('type', $schema);
+        $this->assertIsString($schema['type']);
 
-        $this->assertArrayHasKey('content', $schema);
-        $this->assertIsString($schema['content']);
+        $this->assertArrayHasKey('summary', $schema);
+        $this->assertIsString($schema['summary']);
 
         $this->assertArrayHasKey('label', $schema);
         $this->assertIsString($schema['label']);
@@ -348,34 +347,6 @@ final class GridTreeBuilderTest extends SapphireTest
             GridElement::remove_extension(DenySpecificViewExtension::class);
             DenySpecificViewExtension::$denyId = 0;
         }
-    }
-
-    // ---- Multi-area pages ----
-
-    public function testBuildForPageReturnsMultipleAreaKeys(): void
-    {
-        $page = MultiAreaTestPage::create();
-        $page->Title = 'Multi Area Test';
-        $page->write();
-
-        // Create sections in both areas
-        $primarySection = Section::create();
-        $primarySection->Title = 'Primary Section';
-        $primarySection->ParentID = $page->ID;
-        $primarySection->write();
-
-        $secondarySection = Section::create();
-        $secondarySection->Title = 'Secondary Section';
-        $secondarySection->ParentID = $page->SecondaryAreaID;
-        $secondarySection->write();
-
-        /** @var GridTreeBuilder $builder */
-        $builder = Injector::inst()->get(GridTreeBuilder::class);
-        $tree = $builder->buildForPage($page);
-
-        $this->assertCount(2, $tree, 'Tree should have entries for both parent pages');
-        $this->assertArrayHasKey((int) $page->ID, $tree);
-        $this->assertArrayHasKey((int) $page->SecondaryAreaID, $tree);
     }
 
     // ---- Empty title fallback ----

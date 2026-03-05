@@ -24,7 +24,11 @@ class CascadeDeleteTest extends SapphireTest
 
     protected function setUp(): void
     {
+        Section::$autoScaffold = false;
+        Row::$autoScaffold = false;
         parent::setUp();
+        Section::$autoScaffold = true;
+        Row::$autoScaffold = true;
 
         Versioned::set_stage(Versioned::DRAFT);
     }

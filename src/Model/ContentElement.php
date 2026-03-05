@@ -7,12 +7,12 @@ namespace WeDevelop\Grid\Model;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 
 /**
- * Abstract base for leaf content elements that render visible content.
+ * Base class for leaf content elements that render visible content.
  *
  * Content elements sit inside columns and produce template output.
  * They are never containers — they do not hold child elements.
  */
-abstract class ContentElement extends GridElement
+class ContentElement extends GridElement
 {
     private static string $table_name = 'ContentElement';
 

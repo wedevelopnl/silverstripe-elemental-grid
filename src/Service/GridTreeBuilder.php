@@ -47,15 +47,13 @@ class GridTreeBuilder
         /** @var positive-int $pageId */
         $pageId = $page->ID;
 
-        $elementsByParent = $this->loadAllElements($pageId);
+        $elementsByParent = $this->loadAllElements($pageId, $page::class);
 
-        if ($elementsByParent === []) {
-            return [];
-        }
+        $rootKey = $page::class . ':' . $pageId;
 
         /** @var array<int, list<GridNode>> $tree */
         $tree = [];
-        $tree[$pageId] = $this->assembleSubTree($elementsByParent, $pageId);
+        $tree[$pageId] = $this->assembleSubTree($elementsByParent, $rootKey, $pageId);
 
         return $tree;
     }
@@ -63,33 +61,58 @@ class GridTreeBuilder
     /**
      * Breadth-first batch loading: one query per hierarchy depth level.
      *
+     * Filters by both ParentID and ParentClass to avoid false matches when
+     * a page ID coincides with a GridElement ID (they share no ID namespace
+     * separation after the ElementalArea intermediary was removed).
+     *
+     * Elements are keyed by a composite "ParentClass:ParentID" string to
+     * prevent collisions when a page ID equals a GridElement ID.
+     *
      * @param positive-int $rootParentId
-     * @return array<int, list<GridElement>> Map of parent ID → elements under that parent
+     * @param class-string $rootParentClass
+     * @return array<string, list<GridElement>> Map of "ParentClass:ParentID" → elements
      */
-    private function loadAllElements(int $rootParentId): array
+    private function loadAllElements(int $rootParentId, string $rootParentClass): array
     {
-        /** @var array<int, list<GridElement>> $elementsByParent */
+        /** @var array<string, list<GridElement>> $elementsByParent */
         $elementsByParent = [];
-        $pendingParentIds = [$rootParentId];
 
-        while ($pendingParentIds !== []) {
-            $elements = $this->elementRepository->findByParentIds($pendingParentIds);
+        /** @var list<array{id: positive-int, class: class-string}> $pendingParents */
+        $pendingParents = [['id' => $rootParentId, 'class' => $rootParentClass]];
 
-            $nextParentIds = [];
+        $maxDepth = 10;
+        $depth = 0;
+
+        while ($pendingParents !== []) {
+            if (++$depth > $maxDepth) {
+                break;
+            }
+
+            /** @var array<class-string, list<positive-int>> $idsByClass */
+            $idsByClass = [];
+            foreach ($pendingParents as $parent) {
+                $idsByClass[$parent['class']] ??= [];
+                $idsByClass[$parent['class']][] = $parent['id'];
+            }
+
+            $elements = $this->elementRepository->findByParents($idsByClass);
+
+            /** @var list<array{id: positive-int, class: class-string}> $nextParents */
+            $nextParents = [];
 
             foreach ($elements as $element) {
-                $parentId = (int) $element->ParentID;
-                $elementsByParent[$parentId] ??= [];
-                $elementsByParent[$parentId][] = $element;
+                $key = $element->ParentClass . ':' . $element->ParentID;
+                $elementsByParent[$key] ??= [];
+                $elementsByParent[$key][] = $element;
 
                 if ($element instanceof ContainerInterface) {
                     /** @var positive-int $elementId */
                     $elementId = $element->ID;
-                    $nextParentIds[] = $elementId;
+                    $nextParents[] = ['id' => $elementId, 'class' => $element::class];
                 }
             }
 
-            $pendingParentIds = $nextParentIds;
+            $pendingParents = $nextParents;
         }
 
         return $elementsByParent;
@@ -98,15 +121,15 @@ class GridTreeBuilder
     /**
      * Recursively assemble tree nodes from pre-loaded element data.
      *
-     * @param array<int, list<GridElement>> $elementsByParent
-     * @param positive-int $parentId
+     * @param array<string, list<GridElement>> $elementsByParent
+     * @param positive-int $parentId Numeric parent ID for the GridNode
      * @return list<GridNode>
      */
-    private function assembleSubTree(array $elementsByParent, int $parentId): array
+    private function assembleSubTree(array $elementsByParent, string $parentKey, int $parentId): array
     {
         $nodes = [];
 
-        foreach ($elementsByParent[$parentId] ?? [] as $element) {
+        foreach ($elementsByParent[$parentKey] ?? [] as $element) {
             if (!$element->canView()) {
                 continue;
             }
@@ -120,7 +143,7 @@ class GridTreeBuilder
     /**
      * Build a single element node with base fields and optional container fields.
      *
-     * @param array<int, list<GridElement>> $elementsByParent
+     * @param array<string, list<GridElement>> $elementsByParent
      * @param positive-int $parentId
      */
     private function buildElementNode(GridElement $element, array $elementsByParent, int $parentId): GridNode
@@ -133,10 +156,11 @@ class GridTreeBuilder
         if ($element instanceof ContainerInterface) {
             /** @var positive-int $elementId */
             $elementId = (int) $element->ID;
+            $childKey = $element::class . ':' . $elementId;
 
             $containerType = $element->getContainerType();
             $allowedTypes = $this->getAllowedTypes($element);
-            $children = $this->assembleSubTree($elementsByParent, $elementId);
+            $children = $this->assembleSubTree($elementsByParent, $childKey, $elementId);
         }
 
         if ($element instanceof Column) {
