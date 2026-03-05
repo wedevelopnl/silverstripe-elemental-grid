@@ -12,7 +12,7 @@ namespace WeDevelop\Grid\Contract;
  *
  * Each adapter defines its own viewport set via {@see getViewports()}. Class
  * generation methods accept string viewport keys from that set, keeping the API
- * aligned with the JSON grid settings stored on ElementColumn.
+ * aligned with the JSON grid settings stored on Column.
  */
 interface GridAdapterInterface
 {

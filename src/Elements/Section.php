@@ -11,23 +11,26 @@ use WeDevelop\Grid\Contract\GridAdapterInterface;
 use WeDevelop\Grid\Model\ContainerElement;
 
 /**
- * Mid-level container in the Section > Row > Column hierarchy.
- * Lives inside a Section only. On draft-stage write, auto-scaffolds
- * a child Column when no children exist.
+ * Top-level container in the Section > Row > Column hierarchy.
+ * Lives under a page (via polymorphic Parent), never inside another container.
+ * On draft-stage write, auto-scaffolds a child Row (which cascades
+ * to create a Column) when no children exist.
  *
- * @method HasManyList<ElementColumn> Columns()
+ * @method HasManyList<Row> Rows()
  */
-class ElementRow extends ContainerElement
+class Section extends ContainerElement
 {
-    private static string $table_name = 'ElementRow';
+    private static string $table_name = 'Section';
 
-    private static string $singular_name = 'Row';
+    private static string $singular_name = 'Section';
 
-    private static string $plural_name = 'Rows';
+    private static string $plural_name = 'Sections';
 
-    private static string $icon = 'font-icon-columns';
+    private static string $icon = 'font-icon-block-layout';
 
-    private static string $class_description = 'Horizontal container that holds columns within a section';
+    private static string $class_description = 'Top-level layout container that holds rows';
+
+    private static bool $fluid_container = false;
 
     /** @var array<string, string> */
     private static array $dependencies = [
@@ -44,56 +47,58 @@ class ElementRow extends ContainerElement
 
     /** @var array<string, class-string> */
     private static array $has_many = [
-        'Columns' => ElementColumn::class . '.Parent',
+        'Rows' => Row::class . '.Parent',
     ];
 
     /** @var list<string> */
     private static array $owns = [
-        'Columns',
+        'Rows',
     ];
 
     /** @var list<string> */
     private static array $cascade_deletes = [
-        'Columns',
+        'Rows',
     ];
 
     /** @var list<string> */
     private static array $cascade_duplicates = [
-        'Columns',
+        'Rows',
     ];
 
-    private static string $default_column_title = '';
+    private static string $default_row_title = '';
 
     public function getType(): string
     {
-        return 'Row';
+        return 'Section';
     }
 
-    /** @return HasManyList<ElementColumn> */
+    /** @return HasManyList<Row> */
     #[\Override]
     public function getChildren(): HasManyList
     {
-        return $this->Columns();
+        return $this->Rows();
     }
 
     #[\Override]
     public function getChildTypeName(): string
     {
-        return 'column';
+        return 'row';
     }
 
     #[\Override]
     public function getContainerType(): ContainerType
     {
-        return ContainerType::Row;
+        return ContainerType::Section;
     }
 
-    /** CSS classes for the grid row wrapper. */
-    public function getRowClasses(): string
+    /** CSS classes for the grid container wrapper. */
+    public function getContainerClasses(): string
     {
-        $classes = $this->gridAdapter->getRowClasses();
+        /** @var bool $fluid */
+        $fluid = static::config()->get('fluid_container');
+        $classes = $this->gridAdapter->getContainerClass($fluid);
 
-        $this->extend('updateRowClasses', $classes);
+        $this->extend('updateContainerClasses', $classes);
 
         return $classes;
     }
@@ -108,14 +113,14 @@ class ElementRow extends ContainerElement
             return;
         }
 
-        if ($this->Columns()->count() > 0) {
+        if ($this->Rows()->count() > 0) {
             return;
         }
 
-        $column = ElementColumn::create();
-        $column->Title = static::config()->get('default_column_title');
-        $column->ParentID = $this->ID;
-        $column->ParentClass = static::class;
-        $column->write();
+        $row = Row::create();
+        $row->Title = static::config()->get('default_row_title');
+        $row->ParentID = $this->ID;
+        $row->ParentClass = static::class;
+        $row->write();
     }
 }

@@ -11,7 +11,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\Grid\Contract\ContainerInterface;
-use WeDevelop\Grid\Elements\ElementColumn;
+use WeDevelop\Grid\Elements\Column;
 use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Model\GridNode;
 use Psr\Log\LoggerInterface;
@@ -144,7 +144,7 @@ class GridTreeBuilder
             $children = $this->assembleSubTree($elementsByParent, $elementId);
         }
 
-        if ($element instanceof ElementColumn) {
+        if ($element instanceof Column) {
             $gridSettings = $element->getGridSettingsData();
         }
 

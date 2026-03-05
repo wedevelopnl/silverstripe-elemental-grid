@@ -16,9 +16,9 @@ use WeDevelop\Grid\Model\GridElement;
  *
  * @method HasManyList<GridElement> Elements()
  */
-class ElementColumn extends ContainerElement
+class Column extends ContainerElement
 {
-    private static string $table_name = 'ElementColumn';
+    private static string $table_name = 'Column';
 
     private static string $singular_name = 'Column';
 

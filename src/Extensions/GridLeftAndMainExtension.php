@@ -13,7 +13,7 @@ use SilverStripe\View\Requirements;
  *
  * @extends Extension<\SilverStripe\Admin\LeftAndMain>
  */
-class ElementalGridLeftAndMainExtension extends Extension
+class GridLeftAndMainExtension extends Extension
 {
     public function onAfterInit(): void
     {

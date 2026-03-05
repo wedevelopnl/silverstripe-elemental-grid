@@ -4,29 +4,29 @@ Name: elemental-grid-elements
 
 # Apply ElementalAreasExtension so each container's ChildArea
 # is auto-created and managed (CMS fields, relation discovery)
-WeDevelop\Grid\Elements\ElementSection:
+WeDevelop\Grid\Elements\Section:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   allowed_elements:
-    - WeDevelop\Grid\Elements\ElementRow
+    - WeDevelop\Grid\Elements\Row
   controller_template: ElementSectionHolder
 
-WeDevelop\Grid\Elements\ElementRow:
+WeDevelop\Grid\Elements\Row:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   allowed_elements:
-    - WeDevelop\Grid\Elements\ElementColumn
+    - WeDevelop\Grid\Elements\Column
   controller_template: ElementRowHolder
 
-WeDevelop\Grid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\Column:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   disallowed_elements:
-    - WeDevelop\Grid\Elements\ElementSection
-    - WeDevelop\Grid\Elements\ElementRow
-    - WeDevelop\Grid\Elements\ElementColumn
+    - WeDevelop\Grid\Elements\Section
+    - WeDevelop\Grid\Elements\Row
+    - WeDevelop\Grid\Elements\Column
   controller_template: ElementColumnHolder
 
 ---
@@ -52,7 +52,7 @@ SilverStripe\Core\Injector\Injector:
     class: WeDevelop\Grid\Repository\OrmElementRepository
   WeDevelop\Grid\Repository\ElementalAreaRepositoryInterface:
     class: WeDevelop\Grid\Repository\OrmElementalAreaRepository
-  WeDevelop\Grid\Service\ElementTreeBuilder:
+  WeDevelop\Grid\Service\GridTreeBuilder:
     constructor:
       elementRepository: '%$WeDevelop\Grid\Repository\ElementRepositoryInterface'
       logger: '%$Psr\Log\LoggerInterface'

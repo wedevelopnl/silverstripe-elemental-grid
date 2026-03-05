@@ -11,26 +11,23 @@ use WeDevelop\Grid\Contract\GridAdapterInterface;
 use WeDevelop\Grid\Model\ContainerElement;
 
 /**
- * Top-level container in the Section > Row > Column hierarchy.
- * Lives under a page (via polymorphic Parent), never inside another container.
- * On draft-stage write, auto-scaffolds a child Row (which cascades
- * to create a Column) when no children exist.
+ * Mid-level container in the Section > Row > Column hierarchy.
+ * Lives inside a Section only. On draft-stage write, auto-scaffolds
+ * a child Column when no children exist.
  *
- * @method HasManyList<ElementRow> Rows()
+ * @method HasManyList<Column> Columns()
  */
-class ElementSection extends ContainerElement
+class Row extends ContainerElement
 {
-    private static string $table_name = 'ElementSection';
+    private static string $table_name = 'Row';
 
-    private static string $singular_name = 'Section';
+    private static string $singular_name = 'Row';
 
-    private static string $plural_name = 'Sections';
+    private static string $plural_name = 'Rows';
 
-    private static string $icon = 'font-icon-block-layout';
+    private static string $icon = 'font-icon-columns';
 
-    private static string $class_description = 'Top-level layout container that holds rows';
-
-    private static bool $fluid_container = false;
+    private static string $class_description = 'Horizontal container that holds columns within a section';
 
     /** @var array<string, string> */
     private static array $dependencies = [
@@ -47,58 +44,56 @@ class ElementSection extends ContainerElement
 
     /** @var array<string, class-string> */
     private static array $has_many = [
-        'Rows' => ElementRow::class . '.Parent',
+        'Columns' => Column::class . '.Parent',
     ];
 
     /** @var list<string> */
     private static array $owns = [
-        'Rows',
+        'Columns',
     ];
 
     /** @var list<string> */
     private static array $cascade_deletes = [
-        'Rows',
+        'Columns',
     ];
 
     /** @var list<string> */
     private static array $cascade_duplicates = [
-        'Rows',
+        'Columns',
     ];
 
-    private static string $default_row_title = '';
+    private static string $default_column_title = '';
 
     public function getType(): string
     {
-        return 'Section';
+        return 'Row';
     }
 
-    /** @return HasManyList<ElementRow> */
+    /** @return HasManyList<Column> */
     #[\Override]
     public function getChildren(): HasManyList
     {
-        return $this->Rows();
+        return $this->Columns();
     }
 
     #[\Override]
     public function getChildTypeName(): string
     {
-        return 'row';
+        return 'column';
     }
 
     #[\Override]
     public function getContainerType(): ContainerType
     {
-        return ContainerType::Section;
+        return ContainerType::Row;
     }
 
-    /** CSS classes for the grid container wrapper. */
-    public function getContainerClasses(): string
+    /** CSS classes for the grid row wrapper. */
+    public function getRowClasses(): string
     {
-        /** @var bool $fluid */
-        $fluid = static::config()->get('fluid_container');
-        $classes = $this->gridAdapter->getContainerClass($fluid);
+        $classes = $this->gridAdapter->getRowClasses();
 
-        $this->extend('updateContainerClasses', $classes);
+        $this->extend('updateRowClasses', $classes);
 
         return $classes;
     }
@@ -113,14 +108,14 @@ class ElementSection extends ContainerElement
             return;
         }
 
-        if ($this->Rows()->count() > 0) {
+        if ($this->Columns()->count() > 0) {
             return;
         }
 
-        $row = ElementRow::create();
-        $row->Title = static::config()->get('default_row_title');
-        $row->ParentID = $this->ID;
-        $row->ParentClass = static::class;
-        $row->write();
+        $column = Column::create();
+        $column->Title = static::config()->get('default_column_title');
+        $column->ParentID = $this->ID;
+        $column->ParentClass = static::class;
+        $column->write();
     }
 }

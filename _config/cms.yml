@@ -14,7 +14,7 @@ SilverStripe\Core\Injector\Injector:
 # Block stock elemental bundles and load our own
 SilverStripe\Admin\LeftAndMain:
   extensions:
-    ElementalGrid: WeDevelop\Grid\Extensions\ElementalGridLeftAndMainExtension
+    ElementalGrid: WeDevelop\Grid\Extensions\GridLeftAndMainExtension
   extra_requirements_javascript:
     - 'wedevelopnl/silverstripe-grid:client/dist/js/bundle.js'
   extra_requirements_css:
