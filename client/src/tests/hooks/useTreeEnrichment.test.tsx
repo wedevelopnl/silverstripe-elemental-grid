@@ -33,7 +33,7 @@ afterEach(() => {
 const AREA_ID = 42;
 
 function storageKey(): string {
-  return `elemental-grid:collapsed:${String(AREA_ID)}`;
+  return `grid:collapsed:${String(AREA_ID)}`;
 }
 
 function makeElement(id: number, parentId: number): SimpleElementNode {
@@ -135,12 +135,12 @@ function makeSection(id: number, overrides: Partial<SectionNode> = {}, parentId:
 
 describe('buildStorageKey', () => {
   it('returns a key scoped to the area ID', () => {
-    expect(buildStorageKey(42)).toBe('elemental-grid:collapsed:42');
+    expect(buildStorageKey(42)).toBe('grid:collapsed:42');
   });
 
   it('handles different area IDs', () => {
-    expect(buildStorageKey(1)).toBe('elemental-grid:collapsed:1');
-    expect(buildStorageKey(999)).toBe('elemental-grid:collapsed:999');
+    expect(buildStorageKey(1)).toBe('grid:collapsed:1');
+    expect(buildStorageKey(999)).toBe('grid:collapsed:999');
   });
 });
 
@@ -301,8 +301,8 @@ describe('useTreeEnrichment', () => {
   });
 
   it('scopes storage per areaId', () => {
-    mockStorage.setItem('elemental-grid:collapsed:10', JSON.stringify([1]));
-    mockStorage.setItem('elemental-grid:collapsed:20', JSON.stringify([2]));
+    mockStorage.setItem('grid:collapsed:10', JSON.stringify([1]));
+    mockStorage.setItem('grid:collapsed:20', JSON.stringify([2]));
 
     const sections = [makeSection(1), makeSection(2)];
 

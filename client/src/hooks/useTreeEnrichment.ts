@@ -9,7 +9,7 @@ import type {
 import { buildDraggableId, getDraggableTypeForNode } from '@/types/dnd';
 
 export function buildStorageKey(areaId: number): string {
-  return `elemental-grid:collapsed:${String(areaId)}`;
+  return `grid:collapsed:${String(areaId)}`;
 }
 
 function readCollapsedIds(key: string): ReadonlySet<number> {

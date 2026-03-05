@@ -11,7 +11,7 @@ function makeElement(overrides: Partial<EnrichedSimpleElementNode> = {}): Enrich
     parentId: 100,
     title: 'My Element',
     blockSchema: {
-      typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,
+      typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
       label: 'Base Element',
       actions: { edit: '/admin/elemental/edit/1' },
       content: 'Some preview text',
@@ -75,7 +75,7 @@ describe('ElementCard', () => {
   it('renders blockSchema.label as the type display name', () => {
     const element = makeElement({
       blockSchema: {
-        typeName: String.raw`DNADesign\Elemental\Models\BaseElement`,
+        typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
         label: 'Content Block',
         actions: { edit: '/edit/1' },
         content: 'preview',

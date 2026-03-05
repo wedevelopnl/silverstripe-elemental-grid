@@ -18,7 +18,7 @@ final class GridNodeTest extends TestCase
             id: $id,
             parentId: $parentId,
             title: $title,
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,
             version: 1,
             canDelete: true,
@@ -69,7 +69,7 @@ final class GridNodeTest extends TestCase
 
         $this->assertSame(42, $data['id']);
         $this->assertSame('My Block', $data['title']);
-        $this->assertSame(['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'], $data['blockSchema']);
+        $this->assertSame(['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'], $data['blockSchema']);
         $this->assertNull($data['obsoleteClassName']);
         $this->assertSame(1, $data['version']);
         $this->assertTrue($data['canDelete']);
@@ -148,7 +148,7 @@ final class GridNodeTest extends TestCase
             id: 1,
             parentId: 0,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,
             version: 1,
             canDelete: true,
@@ -168,7 +168,7 @@ final class GridNodeTest extends TestCase
             id: 1,
             parentId: -1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,
             version: 1,
             canDelete: true,
@@ -185,7 +185,7 @@ final class GridNodeTest extends TestCase
             id: 1,
             parentId: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,
             version: 1,
             canDelete: true,
@@ -216,7 +216,7 @@ final class GridNodeTest extends TestCase
             id: 1,
             parentId: 1,
             title: 'Leaf',
-            blockSchema: ['typeName' => 'BaseElement', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Base Element'],
+            blockSchema: ['typeName' => 'Content', 'actions' => ['edit' => '/edit/1'], 'content' => '', 'label' => 'Content'],
             obsoleteClassName: null,
             version: 1,
             canDelete: true,

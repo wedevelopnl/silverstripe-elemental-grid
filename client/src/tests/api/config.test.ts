@@ -8,7 +8,7 @@ import { ConfigError } from '@/api/errors';
 import { ZodError } from 'zod';
 
 const CONTROLLER_FQCN =
-  'WeDevelop\\ElementalGrid\\Controllers\\ElementalGridController';
+  'WeDevelop\\Grid\\Controllers\\GridController';
 
 const validAdapterConfig = {
   viewports: [
@@ -28,7 +28,7 @@ function gridSection(
 ) {
   return {
     name: CONTROLLER_FQCN,
-    url: 'admin/elemental-grid',
+    url: 'admin/grid',
     controllerLink,
     ...(gridAdapter !== undefined ? { gridAdapter } : {}),
   };
@@ -86,23 +86,23 @@ describe('config accessors', () => {
           SecurityID: 'x',
           sections: [
             { name: 'Other\\Controller', url: 'admin/other', controllerLink: '/admin/other/' },
-            gridSection('/admin/elemental-grid/'),
+            gridSection('/admin/grid/'),
           ],
         },
       };
 
-      expect(getControllerLink()).toBe('/admin/elemental-grid');
+      expect(getControllerLink()).toBe('/admin/grid');
     });
 
     it('strips trailing slashes', () => {
       window.ss = {
         config: {
           SecurityID: 'x',
-          sections: [gridSection('/admin/elemental-grid///')],
+          sections: [gridSection('/admin/grid///')],
         },
       };
 
-      expect(getControllerLink()).toBe('/admin/elemental-grid');
+      expect(getControllerLink()).toBe('/admin/grid');
     });
 
     it('throws ConfigError when section is missing', () => {
@@ -112,7 +112,7 @@ describe('config accessors', () => {
 
       expect(() => getControllerLink()).toThrow(ConfigError);
       expect(() => getControllerLink()).toThrow('Controller section');
-      expect(() => getControllerLink()).toThrow('elemental grid module is installed');
+      expect(() => getControllerLink()).toThrow('grid module is installed');
     });
   });
 
@@ -123,7 +123,7 @@ describe('config accessors', () => {
           SecurityID: 'x',
           sections: [
             { name: 'Other\\Controller', url: 'admin/other', controllerLink: '/admin/other/' },
-            gridSection('/admin/elemental-grid/', validAdapterConfig),
+            gridSection('/admin/grid/', validAdapterConfig),
           ],
         },
       };
@@ -149,7 +149,7 @@ describe('config accessors', () => {
       window.ss = {
         config: {
           SecurityID: 'x',
-          sections: [gridSection('/admin/elemental-grid/')],
+          sections: [gridSection('/admin/grid/')],
         },
       };
 
@@ -161,7 +161,7 @@ describe('config accessors', () => {
         config: {
           SecurityID: 'x',
           sections: [
-            gridSection('/admin/elemental-grid/', { columnCount: 'not-a-number' }),
+            gridSection('/admin/grid/', { columnCount: 'not-a-number' }),
           ],
         },
       };

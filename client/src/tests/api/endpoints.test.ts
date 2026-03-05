@@ -21,7 +21,7 @@ vi.mock('@/api/client', () => ({
 }));
 
 vi.mock('@/api/config', () => ({
-  getControllerLink: () => '/admin/elemental-grid',
+  getControllerLink: () => '/admin/grid',
 }));
 
 describe('endpoints', () => {
@@ -36,7 +36,7 @@ describe('endpoints', () => {
   describe('fetchElementTree', () => {
     it('calls GET with correct URL and validates response', async () => {
       const mockTree = {
-        ElementalArea: [
+        '42': [
           {
             id: 1,
             parentId: 1,
@@ -60,7 +60,7 @@ describe('endpoints', () => {
       const result = await fetchElementTree(42);
 
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/readTree/42',
+        '/admin/grid/api/readTree/42',
       );
       expect(result).toEqual(mockTree);
     });
@@ -84,7 +84,7 @@ describe('endpoints', () => {
       });
 
       expect(mockApiPost).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/create',
+        '/admin/grid/api/create',
         {
           elementClass: 'App\\MyElement',
           parentId: 10,
@@ -102,7 +102,7 @@ describe('endpoints', () => {
       await publishElement(7);
 
       expect(mockApiPatch).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/publish',
+        '/admin/grid/api/publish',
         { id: 7 },
       );
     });
@@ -115,7 +115,7 @@ describe('endpoints', () => {
       await unpublishElement(7);
 
       expect(mockApiPatch).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/unpublish',
+        '/admin/grid/api/unpublish',
         { id: 7 },
       );
     });
@@ -128,7 +128,7 @@ describe('endpoints', () => {
       await deleteElement(3);
 
       expect(mockApiDelete).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/delete',
+        '/admin/grid/api/delete',
         { id: 3 },
       );
     });
@@ -141,7 +141,7 @@ describe('endpoints', () => {
       await duplicateElement(9);
 
       expect(mockApiPost).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/duplicate',
+        '/admin/grid/api/duplicate',
         { id: 9 },
       );
     });
@@ -158,7 +158,7 @@ describe('endpoints', () => {
       });
 
       expect(mockApiPatch).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/reorder',
+        '/admin/grid/api/reorder',
         {
           elementID: 5,
           targetParentId: 10,
@@ -177,7 +177,7 @@ describe('endpoints', () => {
       });
 
       expect(mockApiPatch).toHaveBeenCalledWith(
-        '/admin/elemental-grid/api/reorder',
+        '/admin/grid/api/reorder',
         {
           elementID: 5,
           targetParentId: 10,

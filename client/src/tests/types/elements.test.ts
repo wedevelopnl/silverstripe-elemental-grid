@@ -19,7 +19,7 @@ import type { ColumnNode } from '@/types/elements';
 const validBlockSchema = {
   typeName: String.raw`SilverStripe\ElementalGrid\Model\ElementContent`,
   label: 'Content',
-  actions: { edit: '/admin/elemental-grid/api/edit/1' },
+  actions: { edit: '/admin/grid/api/edit/1' },
   content: '<p>Hello world</p>',
 };
 

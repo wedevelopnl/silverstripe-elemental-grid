@@ -3,7 +3,7 @@ import { adapterConfigSchema, type AdapterConfig } from '@/types/adapter';
 import { ConfigError } from './errors';
 
 const CONTROLLER_FQCN =
-  'WeDevelop\\ElementalGrid\\Controllers\\ElementalGridController';
+  'WeDevelop\\Grid\\Controllers\\GridController';
 
 /**
  * Returns the global SilverStripe CMS configuration object.
@@ -33,7 +33,7 @@ export function getSecurityId(): string {
 }
 
 /**
- * Returns the base URL for the ElementalGridController API.
+ * Returns the base URL for the GridController API.
  * Strips trailing slash for consistent URL construction.
  *
  * @throws ConfigError if config is not available or the controller section is missing
@@ -47,7 +47,7 @@ export function getControllerLink(): string {
   if (section === undefined) {
     throw new ConfigError(
       `Controller section "${CONTROLLER_FQCN}" not found in CMS config. ` +
-        'Ensure the elemental grid module is installed.',
+        'Ensure the grid module is installed.',
     );
   }
 
