@@ -1,4 +1,4 @@
 <h1>$Title</h1>
 $Content
 $Form
-$ElementalArea
+<% loop $Sections %>$Me<% end_loop %>

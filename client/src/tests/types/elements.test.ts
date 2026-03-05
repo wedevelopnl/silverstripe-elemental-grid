@@ -17,7 +17,7 @@ import type { ColumnNode } from '@/types/elements';
 // --- Test fixtures ---
 
 const validBlockSchema = {
-  typeName: String.raw`SilverStripe\ElementalGrid\Model\ElementContent`,
+  typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
   label: 'Content',
   actions: { edit: '/admin/grid/api/edit/1' },
   content: '<p>Hello world</p>',

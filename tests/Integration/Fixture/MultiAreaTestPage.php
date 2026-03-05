@@ -9,7 +9,7 @@ use WeDevelop\Grid\Elements\Section;
 
 class MultiAreaTestPage extends \Page implements TestOnly
 {
-    private static string $table_name = 'ElementalGridMultiAreaTestPage';
+    private static string $table_name = 'GridMultiAreaTestPage';
 
     /** @var array<string, class-string> */
     private static array $has_many = [

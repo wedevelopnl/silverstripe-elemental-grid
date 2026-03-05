@@ -126,13 +126,13 @@ final class GridControllerTest extends FunctionalTest
         );
     }
 
-    public function testReadTreeReturns404ForPageWithoutElementalRelations(): void
+    public function testReadTreeReturns404ForPageWithoutGridRelations(): void
     {
         $this->logInForHttp();
 
         // SiteTree without GridPageExtension has no grid relations
         $page = SiteTree::create();
-        $page->Title = 'Non-Elemental Page';
+        $page->Title = 'Non-Grid Page';
         $page->write();
 
         $response = $this->get($this->apiUrl($page->ID));

@@ -13,7 +13,7 @@ function makeElement(overrides: Partial<EnrichedSimpleElementNode> = {}): Enrich
     blockSchema: {
       typeName: String.raw`WeDevelop\Grid\Model\ContentElement`,
       label: 'Base Element',
-      actions: { edit: '/admin/elemental/edit/1' },
+      actions: { edit: '/admin/grid/edit/1' },
       content: 'Some preview text',
     },
     obsoleteClassName: null,

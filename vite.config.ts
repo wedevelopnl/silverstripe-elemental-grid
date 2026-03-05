@@ -25,7 +25,7 @@ export default defineConfig({
     copyPublicDir: false,
     lib: {
       entry: resolve(__dirname, 'client/src/bundles/bundle.ts'),
-      name: 'ElementalGrid',
+      name: 'Grid',
       formats: ['iife'],
       fileName: () => 'js/bundle.js',
     },

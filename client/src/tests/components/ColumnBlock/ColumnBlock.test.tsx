@@ -45,9 +45,9 @@ function makeColumn(overrides: Partial<EnrichedColumnNode> = {}): EnrichedColumn
     parentId: 200,
     title: 'Column',
     blockSchema: {
-      typeName: 'WeDevelop\\ElementalGrid\\Column',
+      typeName: 'WeDevelop\\Grid\\Elements\\Column',
       label: 'Column',
-      actions: { edit: '/admin/elemental/edit/10' },
+      actions: { edit: '/admin/grid/edit/10' },
       content: '',
     },
     obsoleteClassName: null,

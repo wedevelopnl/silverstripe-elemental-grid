@@ -373,7 +373,7 @@ final class GridTreeBuilderTest extends SapphireTest
         $builder = Injector::inst()->get(GridTreeBuilder::class);
         $tree = $builder->buildForPage($page);
 
-        $this->assertCount(2, $tree, 'Tree should have entries for both elemental areas');
+        $this->assertCount(2, $tree, 'Tree should have entries for both parent pages');
         $this->assertArrayHasKey((int) $page->ID, $tree);
         $this->assertArrayHasKey((int) $page->SecondaryAreaID, $tree);
     }

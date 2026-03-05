@@ -8,5 +8,5 @@ use SilverStripe\Dev\TestOnly;
 
 class TestPage extends \Page implements TestOnly
 {
-    private static string $table_name = 'ElementalGridTestPage';
+    private static string $table_name = 'GridTestPage';
 }

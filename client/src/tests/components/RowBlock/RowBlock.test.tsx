@@ -49,9 +49,9 @@ function makeColumn(id: number, title: string, overrides: Partial<EnrichedColumn
     parentId: 200,
     title,
     blockSchema: {
-      typeName: 'WeDevelop\\ElementalGrid\\Column',
+      typeName: 'WeDevelop\\Grid\\Elements\\Column',
       label: 'Column',
-      actions: { edit: `/admin/elemental/edit/${id}` },
+      actions: { edit: `/admin/grid/edit/${id}` },
       content: '',
     },
     obsoleteClassName: null,
@@ -83,9 +83,9 @@ function makeRow(overrides: Partial<EnrichedRowNode> = {}): EnrichedRowNode {
     parentId: 300,
     title: 'Row',
     blockSchema: {
-      typeName: 'WeDevelop\\ElementalGrid\\Row',
+      typeName: 'WeDevelop\\Grid\\Elements\\Row',
       label: 'Row',
-      actions: { edit: '/admin/elemental/edit/20' },
+      actions: { edit: '/admin/grid/edit/20' },
       content: '',
     },
     obsoleteClassName: null,

@@ -10,7 +10,7 @@
 # All pages use the 'e2e-' URLSegment prefix for cleanup identification.
 #
 # Elements parent directly to their container via polymorphic has_one (Parent).
-# No ElementalArea intermediary.
+# No intermediary area model.
 
 Page:
   e2e_page:

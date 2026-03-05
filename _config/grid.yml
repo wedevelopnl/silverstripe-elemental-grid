@@ -1,5 +1,5 @@
 ---
-Name: elemental-grid-adapter
+Name: grid-adapter
 ---
 
 SilverStripe\Core\Injector\Injector:
