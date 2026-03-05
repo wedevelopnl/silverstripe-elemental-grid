@@ -22,7 +22,7 @@ final class FixtureControllerTest extends FunctionalTest
         parent::setUp();
 
         FixtureLoader::config()->set('fixtures', [
-            'element-tree' => 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml',
+            'element-tree' => 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ElementTree.yml',
         ]);
     }
 

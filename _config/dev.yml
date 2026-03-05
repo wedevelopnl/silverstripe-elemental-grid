@@ -12,27 +12,27 @@ SilverStripe\Control\Session:
 SilverStripe\Dev\DevelopmentAdmin:
   controllers:
     elemental-grid-fixtures:
-      class: 'WeDevelop\ElementalGrid\Dev\FixtureController'
+      class: 'WeDevelop\Grid\Dev\FixtureController'
       description: 'Load and reset E2E fixtures for elemental grid'
 
-WeDevelop\ElementalGrid\Dev\FixtureLoader:
+WeDevelop\Grid\Dev\FixtureLoader:
   fixtures:
     element-tree:
-      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml'
+      path: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ElementTree.yml'
       post_actions:
         - action: publish_recursive
           class: Page
           identifier: e2e_page
-    empty-page: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/EmptyPage.yml'
-    collapse-test: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/CollapseTest.yml'
+    empty-page: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/EmptyPage.yml'
+    collapse-test: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/CollapseTest.yml'
     drag-and-drop:
-      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/DragAndDrop.yml'
+      path: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/DragAndDrop.yml'
       post_actions:
         - action: publish_recursive
           class: Page
           identifier: e2e_page
     complex-page:
-      path: 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ComplexPage.yml'
+      path: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ComplexPage.yml'
       post_actions:
         - action: publish_recursive
           class: Page
@@ -46,10 +46,10 @@ WeDevelop\ElementalGrid\Dev\FixtureLoader:
           fields:
             Title: 'Modified Text Block (draft)'
         - action: modify
-          class: 'WeDevelop\ElementalGrid\Elements\ElementRow'
+          class: 'WeDevelop\Grid\Elements\ElementRow'
           identifier: row1
           fields:
             Title: 'First Row (modified)'
         - action: unpublish
-          class: 'WeDevelop\ElementalGrid\Elements\ElementSection'
+          class: 'WeDevelop\Grid\Elements\ElementSection'
           identifier: section2

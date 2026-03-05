@@ -30,10 +30,10 @@ final class FixtureLoaderTest extends SapphireTest
         parent::setUp();
 
         FixtureLoader::config()->set('fixtures', [
-            'element-tree' => 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ElementTree.yml',
-            'empty-page' => 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/EmptyPage.yml',
+            'element-tree' => 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ElementTree.yml',
+            'empty-page' => 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/EmptyPage.yml',
             'complex-page' => [
-                'path' => 'wedevelopnl/silverstripe-elemental-grid:tests/E2E/Fixture/ComplexPage.yml',
+                'path' => 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ComplexPage.yml',
                 'post_actions' => [
                     [
                         'action' => 'publish_recursive',

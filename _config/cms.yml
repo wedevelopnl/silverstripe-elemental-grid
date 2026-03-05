@@ -9,13 +9,13 @@ After:
 # GridEditorField is used instead of the GridField-based original.
 SilverStripe\Core\Injector\Injector:
   DNADesign\Elemental\Forms\ElementalAreaField:
-    class: WeDevelop\ElementalGrid\Forms\GridEditorField
+    class: WeDevelop\Grid\Forms\GridEditorField
 
 # Block stock elemental bundles and load our own
 SilverStripe\Admin\LeftAndMain:
   extensions:
-    ElementalGrid: WeDevelop\ElementalGrid\Extensions\ElementalGridLeftAndMainExtension
+    ElementalGrid: WeDevelop\Grid\Extensions\ElementalGridLeftAndMainExtension
   extra_requirements_javascript:
-    - 'wedevelopnl/silverstripe-elemental-grid:client/dist/js/bundle.js'
+    - 'wedevelopnl/silverstripe-grid:client/dist/js/bundle.js'
   extra_requirements_css:
-    - 'wedevelopnl/silverstripe-elemental-grid:client/dist/styles/bundle.css'
+    - 'wedevelopnl/silverstripe-grid:client/dist/styles/bundle.css'

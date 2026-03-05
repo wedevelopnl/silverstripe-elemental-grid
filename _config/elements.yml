@@ -4,29 +4,29 @@ Name: elemental-grid-elements
 
 # Apply ElementalAreasExtension so each container's ChildArea
 # is auto-created and managed (CMS fields, relation discovery)
-WeDevelop\ElementalGrid\Elements\ElementSection:
+WeDevelop\Grid\Elements\ElementSection:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   allowed_elements:
-    - WeDevelop\ElementalGrid\Elements\ElementRow
+    - WeDevelop\Grid\Elements\ElementRow
   controller_template: ElementSectionHolder
 
-WeDevelop\ElementalGrid\Elements\ElementRow:
+WeDevelop\Grid\Elements\ElementRow:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   allowed_elements:
-    - WeDevelop\ElementalGrid\Elements\ElementColumn
+    - WeDevelop\Grid\Elements\ElementColumn
   controller_template: ElementRowHolder
 
-WeDevelop\ElementalGrid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\ElementColumn:
   extensions:
     - DNADesign\Elemental\Extensions\ElementalAreasExtension
   can_be_root: false
   disallowed_elements:
-    - WeDevelop\ElementalGrid\Elements\ElementSection
-    - WeDevelop\ElementalGrid\Elements\ElementRow
-    - WeDevelop\ElementalGrid\Elements\ElementColumn
+    - WeDevelop\Grid\Elements\ElementSection
+    - WeDevelop\Grid\Elements\ElementRow
+    - WeDevelop\Grid\Elements\ElementColumn
   controller_template: ElementColumnHolder
 
 ---
@@ -37,7 +37,7 @@ After:
 
 DNADesign\Elemental\Models\BaseElement:
   extensions:
-    HierarchyValidation: WeDevelop\ElementalGrid\Validation\HierarchyValidationExtension
+    HierarchyValidation: WeDevelop\Grid\Validation\HierarchyValidationExtension
 
 ---
 Name: elemental-grid-services
@@ -46,25 +46,25 @@ After:
 ---
 
 SilverStripe\Core\Injector\Injector:
-  WeDevelop\ElementalGrid\Validation\HierarchyValidatorInterface:
-    class: WeDevelop\ElementalGrid\Validation\HierarchyValidationService
-  WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface:
-    class: WeDevelop\ElementalGrid\Repository\OrmElementRepository
-  WeDevelop\ElementalGrid\Repository\ElementalAreaRepositoryInterface:
-    class: WeDevelop\ElementalGrid\Repository\OrmElementalAreaRepository
-  WeDevelop\ElementalGrid\Service\ElementTreeBuilder:
+  WeDevelop\Grid\Validation\HierarchyValidatorInterface:
+    class: WeDevelop\Grid\Validation\HierarchyValidationService
+  WeDevelop\Grid\Repository\ElementRepositoryInterface:
+    class: WeDevelop\Grid\Repository\OrmElementRepository
+  WeDevelop\Grid\Repository\ElementalAreaRepositoryInterface:
+    class: WeDevelop\Grid\Repository\OrmElementalAreaRepository
+  WeDevelop\Grid\Service\ElementTreeBuilder:
     constructor:
-      elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
+      elementRepository: '%$WeDevelop\Grid\Repository\ElementRepositoryInterface'
       logger: '%$Psr\Log\LoggerInterface'
-  WeDevelop\ElementalGrid\Service\ElementPersistenceService: ~
-  WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface:
-    class: WeDevelop\ElementalGrid\Validation\ReorderValidator
-  WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface:
-    class: WeDevelop\ElementalGrid\Service\ReorderExecutor
+  WeDevelop\Grid\Service\ElementPersistenceService: ~
+  WeDevelop\Grid\Contract\ReorderValidatorInterface:
+    class: WeDevelop\Grid\Validation\ReorderValidator
+  WeDevelop\Grid\Contract\ReorderExecutorInterface:
+    class: WeDevelop\Grid\Service\ReorderExecutor
     constructor:
-      elementRepository: '%$WeDevelop\ElementalGrid\Repository\ElementRepositoryInterface'
-  WeDevelop\ElementalGrid\Service\ReorderService:
+      elementRepository: '%$WeDevelop\Grid\Repository\ElementRepositoryInterface'
+  WeDevelop\Grid\Service\ReorderService:
     constructor:
-      validator: '%$WeDevelop\ElementalGrid\Contract\ReorderValidatorInterface'
-      executor: '%$WeDevelop\ElementalGrid\Contract\ReorderExecutorInterface'
-      persistenceService: '%$WeDevelop\ElementalGrid\Service\ElementPersistenceService'
+      validator: '%$WeDevelop\Grid\Contract\ReorderValidatorInterface'
+      executor: '%$WeDevelop\Grid\Contract\ReorderExecutorInterface'
+      persistenceService: '%$WeDevelop\Grid\Service\ElementPersistenceService'

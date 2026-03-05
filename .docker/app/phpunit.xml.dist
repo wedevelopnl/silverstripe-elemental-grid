@@ -7,15 +7,15 @@
          beStrictAboutTestsThatDoNotTestAnything="true">
     <testsuites>
         <testsuite name="unit">
-            <directory>vendor/wedevelopnl/silverstripe-elemental-grid/tests/Unit</directory>
+            <directory>vendor/wedevelopnl/silverstripe-grid/tests/Unit</directory>
         </testsuite>
         <testsuite name="integration">
-            <directory>vendor/wedevelopnl/silverstripe-elemental-grid/tests/Integration</directory>
+            <directory>vendor/wedevelopnl/silverstripe-grid/tests/Integration</directory>
         </testsuite>
     </testsuites>
     <source>
         <include>
-            <directory suffix=".php">vendor/wedevelopnl/silverstripe-elemental-grid/src</directory>
+            <directory suffix=".php">vendor/wedevelopnl/silverstripe-grid/src</directory>
         </include>
     </source>
 </phpunit>

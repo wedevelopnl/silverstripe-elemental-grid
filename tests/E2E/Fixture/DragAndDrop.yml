@@ -82,7 +82,7 @@ DNADesign\Elemental\Models\BaseElement:
     Parent: =>DNADesign\Elemental\Models\ElementalArea.col_b2a_area
 
 # --- Columns ---
-WeDevelop\ElementalGrid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\ElementColumn:
   col_a1a:
     Title: 'Column A1-A'
     Sort: 1
@@ -115,7 +115,7 @@ WeDevelop\ElementalGrid\Elements\ElementColumn:
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
 # --- Rows ---
-WeDevelop\ElementalGrid\Elements\ElementRow:
+WeDevelop\Grid\Elements\ElementRow:
   row_a1:
     Title: 'Row Alpha-1'
     Sort: 1
@@ -138,7 +138,7 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
     ChildArea: =>DNADesign\Elemental\Models\ElementalArea.row_b2_area
 
 # --- Sections ---
-WeDevelop\ElementalGrid\Elements\ElementSection:
+WeDevelop\Grid\Elements\ElementSection:
   section_alpha:
     Title: 'Section Alpha'
     ShowTitle: 1

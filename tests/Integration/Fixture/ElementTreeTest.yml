@@ -13,7 +13,7 @@ DNADesign\Elemental\Models\ElementalArea:
   col2_area: {}
   col3_area: {}
 
-WeDevelop\ElementalGrid\Tests\Integration\Fixture\TestPage:
+WeDevelop\Grid\Tests\Integration\Fixture\TestPage:
   testpage:
     Title: 'Tree Test Page'
     ElementalArea: =>DNADesign\Elemental\Models\ElementalArea.page_area
@@ -34,7 +34,7 @@ DNADesign\Elemental\Models\BaseElement:
     Parent: =>DNADesign\Elemental\Models\ElementalArea.col2_area
 
 # --- Columns (into row areas; ChildAreas already have leaves) ---
-WeDevelop\ElementalGrid\Elements\ElementColumn:
+WeDevelop\Grid\Elements\ElementColumn:
   col1:
     Title: 'Left Column'
     Sort: 1
@@ -53,7 +53,7 @@ WeDevelop\ElementalGrid\Elements\ElementColumn:
 
 # --- Rows (into section area; ChildAreas already have columns) ---
 # row3 has no ChildArea — prevents auto-scaffolding of a Column
-WeDevelop\ElementalGrid\Elements\ElementRow:
+WeDevelop\Grid\Elements\ElementRow:
   row1:
     Title: 'First Row'
     Sort: 1
@@ -72,7 +72,7 @@ WeDevelop\ElementalGrid\Elements\ElementRow:
 
 # --- Sections (into page area; section1_area already has rows) ---
 # section2 has no ChildArea — prevents auto-scaffolding of a Row
-WeDevelop\ElementalGrid\Elements\ElementSection:
+WeDevelop\Grid\Elements\ElementSection:
   section1:
     Title: 'First Section'
     Sort: 1

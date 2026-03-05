@@ -3,12 +3,12 @@ Name: elemental-grid-adapter
 ---
 
 SilverStripe\Core\Injector\Injector:
-  WeDevelop\ElementalGrid\Contract\GridAdapterInterface:
-    class: WeDevelop\ElementalGrid\Adapter\BootstrapAdapter
+  WeDevelop\Grid\Contract\GridAdapterInterface:
+    class: WeDevelop\Grid\Adapter\BootstrapAdapter
 
 # To configure the active adapter:
 #
-# WeDevelop\ElementalGrid\Adapter\BootstrapAdapter:
+# WeDevelop\Grid\Adapter\BootstrapAdapter:
 #   enabled_viewports:
 #     - sm
 #     - md
