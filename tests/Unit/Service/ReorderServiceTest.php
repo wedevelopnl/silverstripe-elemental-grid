@@ -11,8 +11,8 @@ use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Model\GridElement;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
-use WeDevelop\Grid\Model\Result;
-use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Value\Result;
+use WeDevelop\Grid\Value\ValidationError;
 use WeDevelop\Grid\Service\ElementPersistenceService;
 use WeDevelop\Grid\Service\ReorderService;
 

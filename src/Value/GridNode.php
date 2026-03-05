@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\Grid\Model;
-
-use WeDevelop\Grid\Contract\ContainerType;
+namespace WeDevelop\Grid\Value;
 
 /**
  * Readonly DTO representing a single element in the tree.

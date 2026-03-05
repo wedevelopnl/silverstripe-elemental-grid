@@ -6,7 +6,7 @@ namespace WeDevelop\Grid\Tests\Integration\Elements;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Value\ContainerType;
 use WeDevelop\Grid\Contract\ContainerInterface;
 use WeDevelop\Grid\Extensions\GridPageExtension;
 

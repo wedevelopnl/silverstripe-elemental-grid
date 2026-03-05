@@ -2,7 +2,7 @@ WeDevelop\Grid\Tests\Integration\Fixture\MultiAreaTestPage:
   multipage:
     Title: 'Multi Area Page'
 
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   primary_section:
     Title: 'Primary Section'
     Sort: 1

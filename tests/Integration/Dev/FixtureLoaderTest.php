@@ -12,9 +12,9 @@ use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Dev\FixtureLoader;
 use WeDevelop\Grid\Dev\FixturePostAction;
 use WeDevelop\Grid\Dev\FixtureResult;
-use WeDevelop\Grid\Elements\Column;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Column;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Model\ContentElement;
 use WeDevelop\Grid\Model\GridElement;
 

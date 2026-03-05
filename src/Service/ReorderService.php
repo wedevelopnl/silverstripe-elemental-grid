@@ -8,7 +8,7 @@ use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Contract\ReorderValidatorInterface;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Value\Result;
 
 class ReorderService
 {

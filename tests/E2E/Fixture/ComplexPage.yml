@@ -23,7 +23,7 @@ Page:
     URLSegment: 'e2e-complex-page'
 
 # --- Sections (into page) ---
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   section1:
     Title: 'Main Section'
     Sort: 1
@@ -34,32 +34,32 @@ WeDevelop\Grid\Elements\Section:
     Parent: =>Page.e2e_page
 
 # --- Rows (into sections) ---
-WeDevelop\Grid\Elements\Row:
+WeDevelop\Grid\Model\Row:
   row1:
     Title: 'First Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
   row2:
     Title: 'Second Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section2
+    Parent: =>WeDevelop\Grid\Model\Section.section2
 
 # --- Columns (into rows) ---
-WeDevelop\Grid\Elements\Column:
+WeDevelop\Grid\Model\Column:
   col1:
     Title: 'Left Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col2:
     Title: 'Right Column'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col3:
     Title: 'Draft Section Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row2
+    Parent: =>WeDevelop\Grid\Model\Row.row2
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
 
 # --- Leaves (into columns) ---
@@ -67,16 +67,16 @@ WeDevelop\Grid\Model\ContentElement:
   draft_leaf:
     Title: 'Draft Only Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   published_leaf:
     Title: 'Published Block'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   modified_leaf:
     Title: 'Modified Text Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col2
+    Parent: =>WeDevelop\Grid\Model\Column.col2
   section2_leaf:
     Title: 'Section Two Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col3
+    Parent: =>WeDevelop\Grid\Model\Column.col3

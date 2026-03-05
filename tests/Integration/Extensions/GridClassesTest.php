@@ -8,9 +8,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Elements\Column;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Column;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 
 /**
  * Tests the grid CSS class accessor methods on each container element.

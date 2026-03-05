@@ -6,8 +6,8 @@ namespace WeDevelop\Grid\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\Grid\Contract\ContainerType;
-use WeDevelop\Grid\Model\GridNode;
+use WeDevelop\Grid\Value\ContainerType;
+use WeDevelop\Grid\Value\GridNode;
 
 #[CoversClass(GridNode::class)]
 final class GridNodeTest extends TestCase

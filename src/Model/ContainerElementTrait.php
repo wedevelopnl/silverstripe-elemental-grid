@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Model;
 
 use SilverStripe\ORM\HasManyList;
-use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Value\ContainerType;
 
 /**
  * Shared behavior for structural container elements (Section, Row, Column).

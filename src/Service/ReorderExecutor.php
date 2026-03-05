@@ -7,8 +7,8 @@ namespace WeDevelop\Grid\Service;
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
-use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Value\Result;
+use WeDevelop\Grid\Value\ValidationError;
 use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
 
 class ReorderExecutor implements ReorderExecutorInterface

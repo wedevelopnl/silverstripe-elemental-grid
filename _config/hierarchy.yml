@@ -1,30 +1,30 @@
 ---
-Name: grid-elements
+Name: grid-hierarchy
 ---
 
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   allowed_elements:
-    - WeDevelop\Grid\Elements\Row
+    - WeDevelop\Grid\Model\Row
   controller_template: SectionHolder
 
-WeDevelop\Grid\Elements\Row:
+WeDevelop\Grid\Model\Row:
   can_be_root: false
   allowed_elements:
-    - WeDevelop\Grid\Elements\Column
+    - WeDevelop\Grid\Model\Column
   controller_template: RowHolder
 
-WeDevelop\Grid\Elements\Column:
+WeDevelop\Grid\Model\Column:
   can_be_root: false
   disallowed_elements:
-    - WeDevelop\Grid\Elements\Section
-    - WeDevelop\Grid\Elements\Row
-    - WeDevelop\Grid\Elements\Column
+    - WeDevelop\Grid\Model\Section
+    - WeDevelop\Grid\Model\Row
+    - WeDevelop\Grid\Model\Column
   controller_template: ColumnHolder
 
 ---
 Name: grid-validation
 After:
-  - '#grid-elements'
+  - '#grid-hierarchy'
 ---
 
 WeDevelop\Grid\Model\GridElement:

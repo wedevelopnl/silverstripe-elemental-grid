@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\Grid\Elements;
+namespace WeDevelop\Grid\Model;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use WeDevelop\Grid\Contract\ContainerInterface;
-use WeDevelop\Grid\Contract\ContainerType;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Model\ContainerElementTrait;
-use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Value\ContainerType;
 
 /**
  * Leaf container in the Section > Row > Column hierarchy.
@@ -122,7 +120,7 @@ class Column extends GridElement implements ContainerInterface
     /** Inner content rendered by `$Element` in the holder template. */
     public function Element(): DBHTMLText
     {
-        return $this->renderWith('WeDevelop/Grid/Elements/Column');
+        return $this->renderWith('WeDevelop/Grid/Model/Column');
     }
 
     /** Short class name for CSS class generation in templates. */

@@ -10,7 +10,7 @@ WeDevelop\Grid\Tests\Integration\Fixture\TestPage:
 
 # --- Sections (into page) ---
 # section2 has no children
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   section1:
     Title: 'First Section'
     Sort: 1
@@ -22,47 +22,47 @@ WeDevelop\Grid\Elements\Section:
 
 # --- Rows (into sections) ---
 # row3 has no children
-WeDevelop\Grid\Elements\Row:
+WeDevelop\Grid\Model\Row:
   row1:
     Title: 'First Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
   row2:
     Title: 'Second Row'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
   row3:
     Title: 'Empty Row'
     Sort: 3
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
 
 # --- Columns (into rows) ---
 # col3 has no children
-WeDevelop\Grid\Elements\Column:
+WeDevelop\Grid\Model\Column:
   col1:
     Title: 'Left Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
   col2:
     Title: 'Right Column'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
   col3:
     Title: 'Full Width Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row2
+    Parent: =>WeDevelop\Grid\Model\Row.row2
 
 # --- Leaves (into columns) ---
 WeDevelop\Grid\Model\GridElement:
   leaf1:
     Title: 'Text Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   leaf2:
     Title: 'Image Block'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   leaf3:
     Title: 'Video Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col2
+    Parent: =>WeDevelop\Grid\Model\Column.col2

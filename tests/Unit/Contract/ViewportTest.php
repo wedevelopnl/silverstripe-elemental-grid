@@ -7,7 +7,7 @@ namespace WeDevelop\Grid\Tests\Unit\Contract;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Value\Viewport;
 
 #[CoversClass(Viewport::class)]
 final class ViewportTest extends TestCase

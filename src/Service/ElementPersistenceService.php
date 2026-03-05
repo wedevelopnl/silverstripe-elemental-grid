@@ -7,8 +7,8 @@ namespace WeDevelop\Grid\Service;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Validation\ValidationException;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
-use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Value\Result;
+use WeDevelop\Grid\Value\ValidationError;
 
 /**
  * Wraps SilverStripe write operations, translating framework

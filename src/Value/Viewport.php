@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\Grid\Contract;
+namespace WeDevelop\Grid\Value;
 
 /**
  * Adapter-defined viewport breakpoint.

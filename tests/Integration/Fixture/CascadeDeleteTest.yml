@@ -1,13 +1,13 @@
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   section1:
     Title: 'Cascade Test Section'
 
-WeDevelop\Grid\Elements\Row:
+WeDevelop\Grid\Model\Row:
   row1:
     Title: 'Cascade Test Row'
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
 
-WeDevelop\Grid\Elements\Column:
+WeDevelop\Grid\Model\Column:
   column1:
     Title: 'Cascade Test Column'
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1

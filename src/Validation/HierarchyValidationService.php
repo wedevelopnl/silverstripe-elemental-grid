@@ -8,8 +8,8 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
-use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Value\Result;
+use WeDevelop\Grid\Value\ValidationError;
 
 class HierarchyValidationService implements HierarchyValidatorInterface
 {

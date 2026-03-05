@@ -10,7 +10,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 use WeDevelop\Grid\Adapter\BulmaAdapter;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Value\Viewport;
 use WeDevelop\Grid\Exception\InvalidGridValueException;
 
 #[CoversClass(BulmaAdapter::class)]

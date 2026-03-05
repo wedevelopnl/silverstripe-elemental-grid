@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Validation;
 
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Value\Result;
 
 interface HierarchyValidatorInterface
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Adapter;
 
 use SilverStripe\Core\Config\Configurable;
-use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Value\Viewport;
 use WeDevelop\Grid\Exception\InvalidGridValueException;
 
 /**

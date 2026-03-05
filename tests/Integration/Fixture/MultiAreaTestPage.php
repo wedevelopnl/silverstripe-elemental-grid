@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Tests\Integration\Fixture;
 
 use SilverStripe\Dev\TestOnly;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Section;
 
 class MultiAreaTestPage extends \Page implements TestOnly
 {

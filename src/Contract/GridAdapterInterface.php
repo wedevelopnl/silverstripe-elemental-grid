@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Contract;
 
+use WeDevelop\Grid\Value\Viewport;
+
 /**
  * Stateless adapter that translates grid layout intent into framework-specific CSS classes.
  *

@@ -6,7 +6,7 @@ namespace WeDevelop\Grid\Contract;
 
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\Result;
+use WeDevelop\Grid\Value\Result;
 
 interface ReorderValidatorInterface
 {

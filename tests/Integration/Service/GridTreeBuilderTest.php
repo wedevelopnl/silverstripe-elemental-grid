@@ -10,12 +10,12 @@ use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Elements\Column;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Column;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Extensions\GridPageExtension;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\GridNode;
+use WeDevelop\Grid\Value\GridNode;
 use WeDevelop\Grid\Service\GridTreeBuilder;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 

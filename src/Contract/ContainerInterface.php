@@ -6,6 +6,7 @@ namespace WeDevelop\Grid\Contract;
 
 use SilverStripe\ORM\HasManyList;
 use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Value\ContainerType;
 
 interface ContainerInterface
 {

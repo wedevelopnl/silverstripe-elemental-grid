@@ -17,7 +17,7 @@ Page:
     URLSegment: 'e2e-grid-test'
 
 # --- Section (into page) ---
-WeDevelop\Grid\Elements\Section:
+WeDevelop\Grid\Model\Section:
   section1:
     Title: 'Main Section'
     ShowTitle: 1
@@ -25,23 +25,23 @@ WeDevelop\Grid\Elements\Section:
     Parent: =>Page.e2e_page
 
 # --- Row (into section) ---
-WeDevelop\Grid\Elements\Row:
+WeDevelop\Grid\Model\Row:
   row1:
     Title: 'First Row'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Section.section1
+    Parent: =>WeDevelop\Grid\Model\Section.section1
 
 # --- Columns (into row) ---
-WeDevelop\Grid\Elements\Column:
+WeDevelop\Grid\Model\Column:
   col1:
     Title: 'Left Column'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":8,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
   col2:
     Title: 'Right Column'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Row.row1
+    Parent: =>WeDevelop\Grid\Model\Row.row1
     GridSettings: '{"xs":{"width":12,"offset":0,"visible":false},"sm":{"width":12,"offset":0,"visible":false},"md":{"width":4,"offset":0,"visible":true},"lg":{"width":6,"offset":0,"visible":true},"xl":{"width":6,"offset":0,"visible":true},"xxl":{"width":6,"offset":0,"visible":true}}'
 
 # --- Leaves (into columns) ---
@@ -49,12 +49,12 @@ WeDevelop\Grid\Model\ContentElement:
   leaf1:
     Title: 'Text Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   leaf2:
     Title: 'Image Block'
     Sort: 2
-    Parent: =>WeDevelop\Grid\Elements\Column.col1
+    Parent: =>WeDevelop\Grid\Model\Column.col1
   leaf3:
     Title: 'Video Block'
     Sort: 1
-    Parent: =>WeDevelop\Grid\Elements\Column.col2
+    Parent: =>WeDevelop\Grid\Model\Column.col2

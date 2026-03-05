@@ -11,9 +11,9 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use WeDevelop\Grid\Contract\ContainerInterface;
-use WeDevelop\Grid\Elements\Column;
+use WeDevelop\Grid\Model\Column;
 use WeDevelop\Grid\Model\GridElement;
-use WeDevelop\Grid\Model\GridNode;
+use WeDevelop\Grid\Value\GridNode;
 use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
 
 /**

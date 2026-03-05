@@ -198,8 +198,8 @@ final class BuildAdapterConfigTest extends SapphireTest
             public function getViewports(): array
             {
                 return [
-                    new \WeDevelop\Grid\Contract\Viewport('sm', 'Small'),
-                    new \WeDevelop\Grid\Contract\Viewport('md', 'Medium'),
+                    new \WeDevelop\Grid\Value\Viewport('sm', 'Small'),
+                    new \WeDevelop\Grid\Value\Viewport('md', 'Medium'),
                 ];
             }
 
@@ -208,7 +208,7 @@ final class BuildAdapterConfigTest extends SapphireTest
                 return 2;
             }
 
-            public function getDefaultViewport(): \WeDevelop\Grid\Contract\Viewport
+            public function getDefaultViewport(): \WeDevelop\Grid\Value\Viewport
             {
                 return $this->getViewports()[0];
             }
@@ -280,9 +280,9 @@ final class BuildAdapterConfigTest extends SapphireTest
                 return 12;
             }
 
-            public function getDefaultViewport(): \WeDevelop\Grid\Contract\Viewport
+            public function getDefaultViewport(): \WeDevelop\Grid\Value\Viewport
             {
-                return new \WeDevelop\Grid\Contract\Viewport('xs', 'XS');
+                return new \WeDevelop\Grid\Value\Viewport('xs', 'XS');
             }
 
             public function getWidthClass(string $viewport, int $width): string

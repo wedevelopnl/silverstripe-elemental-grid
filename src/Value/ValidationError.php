@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WeDevelop\Grid\Model;
-
-use WeDevelop\Grid\Contract\ValidationSeverity;
+namespace WeDevelop\Grid\Value;
 
 /**
  * Structured validation error with optional field context for frontend mapping.

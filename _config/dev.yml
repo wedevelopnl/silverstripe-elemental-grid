@@ -46,10 +46,10 @@ WeDevelop\Grid\Dev\FixtureLoader:
           fields:
             Title: 'Modified Text Block (draft)'
         - action: modify
-          class: 'WeDevelop\Grid\Elements\Row'
+          class: 'WeDevelop\Grid\Model\Row'
           identifier: row1
           fields:
             Title: 'First Row (modified)'
         - action: unpublish
-          class: 'WeDevelop\Grid\Elements\Section'
+          class: 'WeDevelop\Grid\Model\Section'
           identifier: section2

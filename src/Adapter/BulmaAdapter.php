@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Adapter;
 
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Contract\Viewport;
+use WeDevelop\Grid\Value\Viewport;
 
 /**
  * Grid adapter for the Bulma CSS framework (Flexbox column system).

@@ -8,7 +8,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\HasManyList;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Forms\GridEditorField;
 
 /**

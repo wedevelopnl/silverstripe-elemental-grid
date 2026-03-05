@@ -6,11 +6,11 @@ namespace WeDevelop\Grid\Tests\Integration\Elements;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use SilverStripe\Core\Validation\ValidationException;
-use WeDevelop\Grid\Contract\ContainerType;
+use WeDevelop\Grid\Value\ContainerType;
 use WeDevelop\Grid\Contract\ContainerInterface;
-use WeDevelop\Grid\Elements\Column;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Column;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Model\GridElement;
 
 #[CoversClass(Column::class)]

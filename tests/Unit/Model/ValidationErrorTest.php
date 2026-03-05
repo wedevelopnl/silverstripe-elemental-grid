@@ -6,8 +6,8 @@ namespace WeDevelop\Grid\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use WeDevelop\Grid\Contract\ValidationSeverity;
-use WeDevelop\Grid\Model\ValidationError;
+use WeDevelop\Grid\Value\ValidationSeverity;
+use WeDevelop\Grid\Value\ValidationError;
 
 #[CoversClass(ValidationError::class)]
 final class ValidationErrorTest extends TestCase

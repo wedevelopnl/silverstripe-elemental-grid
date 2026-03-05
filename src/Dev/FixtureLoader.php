@@ -16,8 +16,8 @@ use SilverStripe\Dev\FixtureFactory;
 use SilverStripe\Dev\YamlFixture;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 
 /**
  * Loads and resets YAML fixtures at runtime for E2E tests.

@@ -14,9 +14,9 @@ use WeDevelop\Grid\Adapter\BootstrapAdapter;
 use WeDevelop\Grid\Adapter\BulmaAdapter;
 use WeDevelop\Grid\Adapter\TailwindAdapter;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
-use WeDevelop\Grid\Elements\Column;
-use WeDevelop\Grid\Elements\Row;
-use WeDevelop\Grid\Elements\Section;
+use WeDevelop\Grid\Model\Column;
+use WeDevelop\Grid\Model\Row;
+use WeDevelop\Grid\Model\Section;
 
 /**
  * Tests the full template rendering pipeline (element -> holder -> HTML output)
