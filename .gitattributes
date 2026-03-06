@@ -1,24 +1,40 @@
+# Enforce LF line endings
+* text=auto eol=lf
+
 # Use bd merge for beads JSONL files
 /.beads/issues.jsonl merge=beads
 
-# Clean package
+# Mark generated build output
+/client/dist/**   linguist-generated
+
+# Clean package — exclude dev/build/test files from distribution
+
+# Dotfiles and dotdirs
 /.apm             export-ignore
 /.beads           export-ignore
 /.claude          export-ignore
 /.docker          export-ignore
-/.vscode          export-ignore
-/client/src       export-ignore
-/phpstan          export-ignore
-/tests            export-ignore
+/.editorconfig    export-ignore
 /.gitattributes   export-ignore
 /.gitignore       export-ignore
 /.nvmrc           export-ignore
+/.vscode          export-ignore
+
+# Dev and test directories
+/client/src       export-ignore
+/docs             export-ignore
+/phpstan          export-ignore
+/src/Dev          export-ignore
+/tests            export-ignore
+
+# Dev and build config files
 /AGENTS.md        export-ignore
+/apm.lock         export-ignore
+/apm.yml          export-ignore
 /CLAUDE.md        export-ignore
 /Makefile         export-ignore
 /package.json     export-ignore
 /playwright.config.ts   export-ignore
-/README.md        export-ignore
 /stryker.config.mjs     export-ignore
 /tsconfig.json    export-ignore
 /vite.config.ts   export-ignore
