@@ -101,7 +101,7 @@ final class TailwindAdapter implements GridAdapterInterface
 
     public function getRowClasses(): string
     {
-        return sprintf('grid grid-cols-%d', 12);
+        return sprintf('grid grid-cols-%d', $this->columnCount);
     }
 
     public function getContainerClass(bool $fluid): string

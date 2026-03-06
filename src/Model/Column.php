@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Model;
 
-use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use WeDevelop\Grid\Contract\ContainerInterface;
@@ -121,12 +120,6 @@ class Column extends GridElement implements ContainerInterface
     public function Element(): DBHTMLText
     {
         return $this->renderWith('WeDevelop/Grid/Model/Column');
-    }
-
-    /** Short class name for CSS class generation in templates. */
-    public function getSimpleClassName(): string
-    {
-        return ClassInfo::shortName(static::class);
     }
 
     /** Returns the first viewport's width as a fraction, e.g. '6/12'. */

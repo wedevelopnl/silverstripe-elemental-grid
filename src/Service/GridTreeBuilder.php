@@ -29,8 +29,6 @@ class GridTreeBuilder
     use Extensible;
     use Injectable;
 
-    private const int MAX_HIERARCHY_DEPTH = 10;
-
     /** @var array<class-string, array<class-string, string>> */
     private array $allowedTypesCache = [];
 
@@ -79,27 +77,12 @@ class GridTreeBuilder
         /** @var array<string, list<GridElement>> $elementsByParent */
         $elementsByParent = [];
 
-        /** @var list<array{id: positive-int, class: class-string}> $pendingParents */
-        $pendingParents = [['id' => $rootParentId, 'class' => $rootParentClass]];
+        /** @var array<class-string, list<positive-int>> $parentIdsByClass */
+        $parentIdsByClass = [$rootParentClass => [$rootParentId]];
 
-        $depth = 0;
-
-        while ($pendingParents !== []) {
-            if (++$depth > self::MAX_HIERARCHY_DEPTH) {
-                break;
-            }
-
-            /** @var array<class-string, list<positive-int>> $idsByClass */
-            $idsByClass = [];
-            foreach ($pendingParents as $parent) {
-                $idsByClass[$parent['class']] ??= [];
-                $idsByClass[$parent['class']][] = $parent['id'];
-            }
-
-            $elements = $this->elementRepository->findByParents($idsByClass);
-
-            /** @var list<array{id: positive-int, class: class-string}> $nextParents */
-            $nextParents = [];
+        while ($parentIdsByClass !== []) {
+            $elements = $this->elementRepository->findByParents($parentIdsByClass);
+            $parentIdsByClass = [];
 
             foreach ($elements as $element) {
                 $key = $element->ParentClass . ':' . $element->ParentID;
@@ -109,11 +92,10 @@ class GridTreeBuilder
                 if ($element instanceof ContainerInterface) {
                     /** @var positive-int $elementId */
                     $elementId = $element->ID;
-                    $nextParents[] = ['id' => $elementId, 'class' => $element::class];
+                    $parentIdsByClass[$element::class] ??= [];
+                    $parentIdsByClass[$element::class][] = $elementId;
                 }
             }
-
-            $pendingParents = $nextParents;
         }
 
         return $elementsByParent;

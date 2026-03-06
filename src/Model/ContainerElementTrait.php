@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Model;
 
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\HasManyList;
 use WeDevelop\Grid\Value\ContainerType;
 
@@ -46,5 +47,11 @@ trait ContainerElementTrait
     public function getSummary(): string
     {
         return $this->getChildCountSummary();
+    }
+
+    /** Short class name for CSS class generation in templates. */
+    public function getSimpleClassName(): string
+    {
+        return ClassInfo::shortName(static::class);
     }
 }

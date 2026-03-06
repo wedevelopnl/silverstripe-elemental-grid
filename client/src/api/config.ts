@@ -33,15 +33,12 @@ export function getSecurityId(): string {
 }
 
 /**
- * Returns the base URL for the GridController API.
- * Strips trailing slash for consistent URL construction.
+ * Returns the GridController section from CMS config.
  *
- * @throws ConfigError if config is not available or the controller section is missing
+ * @throws ConfigError if the controller section is missing
  */
-export function getControllerLink(): string {
+function getControllerSection() {
   const config = getConfig();
-
-  // sections is an array of config objects; each has a `name` set to the FQCN
   const section = config.sections.find((s) => s.name === CONTROLLER_FQCN);
 
   if (section === undefined) {
@@ -51,7 +48,17 @@ export function getControllerLink(): string {
     );
   }
 
-  return section.controllerLink.replace(/\/+$/, '');
+  return section;
+}
+
+/**
+ * Returns the base URL for the GridController API.
+ * Strips trailing slash for consistent URL construction.
+ *
+ * @throws ConfigError if config is not available or the controller section is missing
+ */
+export function getControllerLink(): string {
+  return getControllerSection().controllerLink.replace(/\/+$/, '');
 }
 
 /**
@@ -62,14 +69,5 @@ export function getControllerLink(): string {
  * @throws ZodError if the adapter config does not match the expected shape
  */
 export function getAdapterConfig(): AdapterConfig {
-  const config = getConfig();
-  const section = config.sections.find((s) => s.name === CONTROLLER_FQCN);
-
-  if (section === undefined) {
-    throw new ConfigError(
-      `Controller section "${CONTROLLER_FQCN}" not found in CMS config.`,
-    );
-  }
-
-  return adapterConfigSchema.parse(section.gridAdapter);
+  return adapterConfigSchema.parse(getControllerSection().gridAdapter);
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WeDevelop\Grid\Model;
 
-use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\Versioned;
@@ -107,12 +106,6 @@ class Row extends GridElement implements ContainerInterface
     public function Element(): DBHTMLText
     {
         return $this->renderWith('WeDevelop/Grid/Model/Row');
-    }
-
-    /** Short class name for CSS class generation in templates. */
-    public function getSimpleClassName(): string
-    {
-        return ClassInfo::shortName(static::class);
     }
 
     /** CSS classes for the grid row wrapper. */

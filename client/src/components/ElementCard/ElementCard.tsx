@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import type { EnrichedSimpleElementNode } from '@/types/enriched';
 import { getElementStatus } from '@/types/status';
+import { buildSortableStyle } from '@/utils/sortableStyles';
 import DragHandle from '@/components/DragHandle/DragHandle';
 
 interface ElementCardProps {
@@ -18,11 +18,7 @@ export default function ElementCard({ element }: ElementCardProps) {
   const label = element.blockSchema.label;
   const content = element.blockSchema.summary;
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition ?? undefined,
-    opacity: isDragging ? 0.3 : undefined,
-  };
+  const style = buildSortableStyle(transform, transition, isDragging);
 
   return (
     <div ref={setNodeRef} style={style} className={`element-card element-card--${status}`} data-testid="element-card">
