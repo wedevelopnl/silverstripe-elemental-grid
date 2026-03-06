@@ -1,0 +1,113 @@
+# E2E fixture for multi-zone testing: two independent zones (main + sidebar)
+# on a single page. Verifies cross-zone drag isolation and backend rejection.
+#
+# Structure:
+#   MultiZonePage (E2E Multi-Zone Page):
+#     Zone "main":
+#       Section Main-Alpha (Sort: 1, ShowTitle: 1)
+#         Row → Column → Block Main-1
+#       Section Main-Beta (Sort: 2, ShowTitle: 1)
+#         Row → Column → Block Main-2
+#     Zone "sidebar":
+#       Section Sidebar-Alpha (Sort: 1, ShowTitle: 1)
+#         Row → Column → Block Sidebar-1
+#       Section Sidebar-Beta (Sort: 2, ShowTitle: 1)
+#         Row → Column → Block Sidebar-2
+#
+# Top-down ordering (auto-scaffolding suppressed by FixtureLoader).
+# All pages use 'e2e-' URLSegment prefix for cleanup identification.
+#
+# Elements parent directly to their container via polymorphic has_one (Parent).
+
+WeDevelop\Grid\Dev\MultiZonePage:
+  e2e_multi_zone_page:
+    Title: 'E2E Multi-Zone Page'
+    URLSegment: 'e2e-multi-zone'
+
+# --- Sections (main zone) ---
+WeDevelop\Grid\Model\Section:
+  main_alpha:
+    Title: 'Main-Alpha'
+    ShowTitle: 1
+    Sort: 1
+    Zone: main
+    Parent: =>WeDevelop\Grid\Dev\MultiZonePage.e2e_multi_zone_page
+  main_beta:
+    Title: 'Main-Beta'
+    ShowTitle: 1
+    Sort: 2
+    Zone: main
+    Parent: =>WeDevelop\Grid\Dev\MultiZonePage.e2e_multi_zone_page
+  sidebar_alpha:
+    Title: 'Sidebar-Alpha'
+    ShowTitle: 1
+    Sort: 1
+    Zone: sidebar
+    Parent: =>WeDevelop\Grid\Dev\MultiZonePage.e2e_multi_zone_page
+  sidebar_beta:
+    Title: 'Sidebar-Beta'
+    ShowTitle: 1
+    Sort: 2
+    Zone: sidebar
+    Parent: =>WeDevelop\Grid\Dev\MultiZonePage.e2e_multi_zone_page
+
+# --- Rows ---
+WeDevelop\Grid\Model\Row:
+  mz_row_ma:
+    Title: 'Row Main-Alpha'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Section.main_alpha
+  mz_row_mb:
+    Title: 'Row Main-Beta'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Section.main_beta
+  mz_row_sa:
+    Title: 'Row Sidebar-Alpha'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Section.sidebar_alpha
+  mz_row_sb:
+    Title: 'Row Sidebar-Beta'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Section.sidebar_beta
+
+# --- Columns ---
+WeDevelop\Grid\Model\Column:
+  mz_col_ma:
+    Title: 'Col Main-Alpha'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Row.mz_row_ma
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
+  mz_col_mb:
+    Title: 'Col Main-Beta'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Row.mz_row_mb
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
+  mz_col_sa:
+    Title: 'Col Sidebar-Alpha'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Row.mz_row_sa
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
+  mz_col_sb:
+    Title: 'Col Sidebar-Beta'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Row.mz_row_sb
+    GridSettings: '{"xs":{"width":12,"offset":0,"visible":true},"sm":{"width":12,"offset":0,"visible":true},"md":{"width":12,"offset":0,"visible":true},"lg":{"width":12,"offset":0,"visible":true},"xl":{"width":12,"offset":0,"visible":true},"xxl":{"width":12,"offset":0,"visible":true}}'
+
+# --- Leaves ---
+WeDevelop\Grid\Model\ContentElement:
+  block_main_1:
+    Title: 'Block Main-1'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Column.mz_col_ma
+  block_main_2:
+    Title: 'Block Main-2'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Column.mz_col_mb
+  block_sidebar_1:
+    Title: 'Block Sidebar-1'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Column.mz_col_sa
+  block_sidebar_2:
+    Title: 'Block Sidebar-2'
+    Sort: 1
+    Parent: =>WeDevelop\Grid\Model\Column.mz_col_sb

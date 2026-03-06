@@ -31,6 +31,12 @@ WeDevelop\Grid\Dev\FixtureLoader:
         - action: publish_recursive
           class: Page
           identifier: e2e_page
+    multi-zone:
+      path: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/MultiZone.yml'
+      post_actions:
+        - action: publish_recursive
+          class: 'WeDevelop\Grid\Dev\MultiZonePage'
+          identifier: e2e_multi_zone_page
     complex-page:
       path: 'wedevelopnl/silverstripe-grid:tests/E2E/Fixture/ComplexPage.yml'
       post_actions:

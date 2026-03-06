@@ -72,17 +72,12 @@ class FixtureLoader
             $this->applyPostActions($postActions, $factory);
         }
 
-        $pageClass = Page::class;
-        /** @var array<string, int>|false $pageIds */
-        $pageIds = $factory->getIds($pageClass);
-        if ($pageIds === false || $pageIds === []) {
+        [$pageClass, $pageId] = $this->findPageInFactory($factory);
+        if ($pageClass === null || $pageId === null) {
             throw new \RuntimeException(
-                sprintf('Fixture "%s" did not create any %s records', $name, $pageClass),
+                sprintf('Fixture "%s" did not create any SiteTree records', $name),
             );
         }
-
-        $pageIdentifier = array_key_first($pageIds);
-        $pageId = $pageIds[$pageIdentifier];
 
         /** @var SiteTree|null $page */
         $page = Versioned::withVersionedMode(static function () use ($pageId): ?SiteTree {
@@ -139,6 +134,41 @@ class FixtureLoader
         $fixtures = static::config()->get('fixtures');
 
         return array_keys($fixtures);
+    }
+
+    /**
+     * Find the first SiteTree subclass page created by the fixture factory.
+     *
+     * Prefers Page::class if present, otherwise returns the first SiteTree subclass found.
+     *
+     * @return array{class-string<SiteTree>|null, int|null}
+     */
+    private function findPageInFactory(FixtureFactory $factory): array
+    {
+        /** @var array<string, array<string, int>> $fixtures */
+        $fixtures = $factory->getFixtures();
+        $fallbackClass = null;
+        $fallbackId = null;
+
+        foreach ($fixtures as $class => $ids) {
+            if (!is_a($class, SiteTree::class, true) || $ids === []) {
+                continue;
+            }
+
+            $firstId = $ids[array_key_first($ids)];
+
+            if ($class === Page::class) {
+                return [$class, $firstId];
+            }
+
+            // Remember first SiteTree subclass as fallback
+            if ($fallbackClass === null) {
+                $fallbackClass = $class;
+                $fallbackId = $firstId;
+            }
+        }
+
+        return [$fallbackClass, $fallbackId];
     }
 
     /**

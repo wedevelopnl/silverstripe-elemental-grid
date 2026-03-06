@@ -15,6 +15,7 @@ import DragOverlayContent from '@/components/DragOverlayContent/DragOverlayConte
 
 interface GridEditorProps {
   readonly pageId: number | null;
+  readonly zone: string;
 }
 
 /**
@@ -25,8 +26,8 @@ interface GridEditorProps {
  * SectionBlock (section > row > column > element card hierarchy)
  * to render the full grid editing interface.
  */
-export default function GridEditor({ pageId }: GridEditorProps) {
-  const { data, isLoading, error } = useElementTree(pageId);
+export default function GridEditor({ pageId, zone }: GridEditorProps) {
+  const { data, isLoading, error } = useElementTree(pageId, zone);
 
   const sections = data === undefined
     ? []
@@ -34,7 +35,7 @@ export default function GridEditor({ pageId }: GridEditorProps) {
 
   const enrichedSections = useTreeEnrichment(sections, pageId ?? 0);
 
-  const reorderMutation = useReorderElement(pageId ?? 0);
+  const reorderMutation = useReorderElement(pageId ?? 0, zone);
 
   const { sensors, dragState, handleDragStart, handleDragEnd, handleDragCancel } = useDragAndDrop({
     tree: data ?? {},
@@ -54,7 +55,7 @@ export default function GridEditor({ pageId }: GridEditorProps) {
   );
 
   return (
-    <div className="grid-editor" data-page-id={pageId ?? undefined} data-testid="grid-editor">
+    <div className="grid-editor" data-page-id={pageId ?? undefined} data-zone={zone} data-testid="grid-editor">
       {isLoading && <p className="grid-editor__loading" data-testid="grid-editor-loading">Loading elements...</p>}
       {error !== null && (
         <p className="grid-editor__error">
