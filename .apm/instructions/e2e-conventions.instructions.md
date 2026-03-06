@@ -32,7 +32,7 @@ The project uses a custom HTTP-based fixture system, not Playwright's built-in f
 
 ### Architecture
 
-- `FixtureController` — HTTP endpoints at `/dev/elemental-grid-fixtures/{load,reset}`, gated to dev environment only
+- `FixtureController` — HTTP endpoints at `/dev/grid-fixtures/{load,reset}`, gated to dev environment only
 - `FixtureLoader` — Loads YAML fixture files via SilverStripe's `FixtureFactory`, applies post-actions
 - `FixturePostAction` — Post-write operations: `publish_recursive`, `unpublish`, `modify` (field updates)
 - `FixtureResult` — JSON response with `pageId`, `pageUrl`, `fixtureMap`
@@ -62,7 +62,7 @@ test.describe('Feature area', () => {
 
 - All pages must use `e2e-` as the URLSegment prefix (this is how `reset()` identifies E2E data)
 - Order elements **bottom-up**: leaf elements before columns, columns before rows, rows before sections, sections before the page. This prevents `onAfterWrite` auto-scaffolding from creating duplicate children
-- `GridSettings` is stored as a JSON string on `ElementColumn`
+- `GridSettings` is stored as a JSON string on `Column`
 - Register fixtures in `_config/dev.yml` under `FixtureLoader.fixtures`
 
 ### Post-Actions
@@ -74,7 +74,7 @@ Post-actions run after YAML write, still in DRAFT stage:
 
 ### Available Fixtures
 
-Registered in `_config/dev.yml`: `element-tree`, `empty-page`, `collapse-test`, `complex-page`
+Registered in `_config/dev.yml`: `element-tree`, `empty-page`, `collapse-test`, `drag-and-drop`, `multi-zone`, `complex-page`
 
 ## Locator Strategy
 

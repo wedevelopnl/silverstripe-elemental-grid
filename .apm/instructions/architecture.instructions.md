@@ -8,19 +8,19 @@ applyTo: "**/*"
 ```
 _config/              # YAML config (DI bindings, element hierarchy, grid adapter)
 templates/            # SilverStripe .ss templates (element holders + form fields)
-src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
+src/                  # PHP source (PSR-4: WeDevelop\Grid\)
 src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma) + GridAdapterConfiguration trait
-src/Contract/         # Interfaces, enums, and value objects (GridAdapterInterface, ContainerType, Viewport)
-src/Controllers/      # API controllers (ElementalGridController)
+src/Contract/         # Interfaces (GridAdapterInterface, ContainerInterface, ReorderExecutorInterface, ReorderValidatorInterface, HierarchyValidatorInterface)
+src/Controllers/      # API controllers (GridController)
 src/Dev/              # Fixture loading for E2E tests (controller, loader, post-actions, result)
-src/Elements/         # Element models (ElementSection, ElementRow, ElementColumn)
-src/Extensions/       # SilverStripe extensions
-src/Forms/            # Form field implementations
-src/Model/            # DTOs and value objects (ElementNode, Result, ValidationError)
-src/Service/          # Domain services (tree building, persistence, reorder, grid config)
-src/Validation/       # Hierarchy validation and reorder validation
-src/Exception/        # Domain exceptions
-src/Repository/       # Repository interfaces + ORM implementations
+src/Model/            # Element models (GridElement, Section, Row, Column, ContentElement) + ContainerElementTrait
+src/Extensions/       # SilverStripe extensions (GridPageExtension)
+src/Forms/            # Form field implementations (GridEditorField)
+src/Value/            # Value objects and DTOs (GridNode, Result, ValidationError, ValidationSeverity, ContainerType, Viewport)
+src/Service/          # Domain services (GridTreeBuilder, ElementPersistenceService, ReorderService, ReorderExecutor)
+src/Validation/       # Hierarchy validation and reorder validation (HierarchyValidationService, ReorderValidator, ElementAllowanceTrait)
+src/Exception/        # Domain exceptions (GridDomainException, InvalidGridValueException)
+src/Repository/       # Repository interfaces + ORM implementations (GridElementRepositoryInterface, OrmGridElementRepository)
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
 tests/E2E/            # Playwright E2E tests
@@ -41,9 +41,10 @@ client/src/tests/     # Frontend test files (Vitest + RTL)
 client/dist/          # Vite build output (exposed, created by build)
 phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 .docker/              # Docker dev env: Caddy + PHP + MySQL 8
+docs/architecture/    # Architecture documents (backend, drag-and-drop)
 ```
 
-- PSR-4 namespace: `WeDevelop\ElementalGrid\` → `src/`
+- PSR-4 namespace: `WeDevelop\Grid\` → `src/`
 - Frontend: React 18, TypeScript 5.9, Vite 7, SCSS
 - Key frontend libs: dnd-kit (drag & drop), TanStack Query (data fetching), Zod (validation)
 - Testing: Vitest + React Testing Library (jsdom), PHPUnit 11, Playwright (E2E)
@@ -66,7 +67,7 @@ phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 
 - PHPUnit 11 — runs inside Docker via `make test`
 - PHPUnit config: `.docker/app/phpunit.xml.dist` (defines `unit` and `integration` testsuites, selected via `--testsuite` flag)
-- Test namespace: `WeDevelop\ElementalGrid\Tests\` → `tests/` (Unit/ + Integration/)
+- Test namespace: `WeDevelop\Grid\Tests\` → `tests/` (Unit/ + Integration/)
 
 ## Static Analysis
 

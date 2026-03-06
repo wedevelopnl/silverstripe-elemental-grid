@@ -3,6 +3,9 @@
 <!-- Build ID: __BUILD_ID__ -->
 <!-- APM Version: 0.7.4 -->
 
+# Dependencies
+@apm_modules/anthropics/skills/CLAUDE.md
+
 # Project Standards
 
 ## Files matching `**/*`
@@ -69,19 +72,19 @@
 ```
 _config/              # YAML config (DI bindings, element hierarchy, grid adapter)
 templates/            # SilverStripe .ss templates (element holders + form fields)
-src/                  # PHP source (PSR-4: WeDevelop\ElementalGrid\)
+src/                  # PHP source (PSR-4: WeDevelop\Grid\)
 src/Adapter/          # Grid framework adapters (Tailwind, Bootstrap, Bulma) + GridAdapterConfiguration trait
-src/Contract/         # Interfaces, enums, and value objects (GridAdapterInterface, ContainerType, Viewport)
-src/Controllers/      # API controllers (ElementalGridController)
+src/Contract/         # Interfaces (GridAdapterInterface, ContainerInterface, ReorderExecutorInterface, ReorderValidatorInterface, HierarchyValidatorInterface)
+src/Controllers/      # API controllers (GridController)
 src/Dev/              # Fixture loading for E2E tests (controller, loader, post-actions, result)
-src/Elements/         # Element models (ElementSection, ElementRow, ElementColumn)
-src/Extensions/       # SilverStripe extensions
-src/Forms/            # Form field implementations
-src/Model/            # DTOs and value objects (ElementNode, Result, ValidationError)
-src/Service/          # Domain services (tree building, persistence, reorder, grid config)
-src/Validation/       # Hierarchy validation and reorder validation
-src/Exception/        # Domain exceptions
-src/Repository/       # Repository interfaces + ORM implementations
+src/Model/            # Element models (GridElement, Section, Row, Column, ContentElement) + ContainerElementTrait
+src/Extensions/       # SilverStripe extensions (GridPageExtension)
+src/Forms/            # Form field implementations (GridEditorField)
+src/Value/            # Value objects and DTOs (GridNode, Result, ValidationError, ValidationSeverity, ContainerType, Viewport)
+src/Service/          # Domain services (GridTreeBuilder, ElementPersistenceService, ReorderService, ReorderExecutor)
+src/Validation/       # Hierarchy validation and reorder validation (HierarchyValidationService, ReorderValidator, ElementAllowanceTrait)
+src/Exception/        # Domain exceptions (GridDomainException, InvalidGridValueException)
+src/Repository/       # Repository interfaces + ORM implementations (GridElementRepositoryInterface, OrmGridElementRepository)
 tests/Unit/           # PHPUnit unit tests (no DB/framework)
 tests/Integration/    # PHPUnit integration tests (full SS env)
 tests/E2E/            # Playwright E2E tests
@@ -102,9 +105,10 @@ client/src/tests/     # Frontend test files (Vitest + RTL)
 client/dist/          # Vite build output (exposed, created by build)
 phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 .docker/              # Docker dev env: Caddy + PHP + MySQL 8
+docs/architecture/    # Architecture documents (backend, drag-and-drop)
 ```
 
-- PSR-4 namespace: `WeDevelop\ElementalGrid\` → `src/`
+- PSR-4 namespace: `WeDevelop\Grid\` → `src/`
 - Frontend: React 18, TypeScript 5.9, Vite 7, SCSS
 - Key frontend libs: dnd-kit (drag & drop), TanStack Query (data fetching), Zod (validation)
 - Testing: Vitest + React Testing Library (jsdom), PHPUnit 11, Playwright (E2E)
@@ -127,7 +131,7 @@ phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 
 - PHPUnit 11 — runs inside Docker via `make test`
 - PHPUnit config: `.docker/app/phpunit.xml.dist` (defines `unit` and `integration` testsuites, selected via `--testsuite` flag)
-- Test namespace: `WeDevelop\ElementalGrid\Tests\` → `tests/` (Unit/ + Integration/)
+- Test namespace: `WeDevelop\Grid\Tests\` → `tests/` (Unit/ + Integration/)
 
 ## Static Analysis
 
@@ -140,26 +144,42 @@ phpstan/              # PHPStan stubs (e.g. AdminController.stub)
 
 ## Structure
 
-The grid enforces a strict three-level hierarchy:
+The grid enforces a strict three-level hierarchy using polymorphic parent relationships (ParentID + ParentClass):
 
 ```
-Page (ElementalArea)
-  └── ElementSection   [ContainerType::Section]    — can_be_root: true (default)
-        └── ElementRow   [ContainerType::Row]       — can_be_root: false
-              └── ElementColumn  [ContainerType::Column]  — can_be_root: false
+Page (SiteTree)
+  └── Section   [ContainerType::Section]    — can_be_root: true (default), zone-scoped
+        └── Row   [ContainerType::Row]       — can_be_root: false
+              └── Column  [ContainerType::Column]  — can_be_root: false, stores GridSettings JSON
                     └── (any non-container content element)
 ```
 
-All three container elements implement `ElementContainerInterface`:
-- `getChildArea(): ElementalArea`
+All three container elements implement `ContainerInterface`:
+- `getChildren(): HasManyList<GridElement>`
 - `hasChildren(): bool`
 - `getContainerType(): ContainerType`
 
+Container behavior is shared via `ContainerElementTrait`.
+
 ## Hierarchy Rules (YAML Config)
 
-- **ElementSection**: `allowed_elements: [ElementRow]` — only Rows as children
-- **ElementRow**: `allowed_elements: [ElementColumn]`, `can_be_root: false` — only Columns as children, cannot be placed at page level
-- **ElementColumn**: `disallowed_elements: [ElementSection, ElementRow, ElementColumn]`, `can_be_root: false` — blacklist approach, allows any non-container content element
+- **Section**: `allowed_elements: [Row]` — only Rows as children
+- **Row**: `allowed_elements: [Column]`, `can_be_root: false` — only Columns as children, cannot be placed at page level
+- **Column**: `disallowed_elements: [Section, Row, Column]`, `can_be_root: false` — blocklist approach, allows any non-container content element
+
+## Parent Relationships
+
+Elements use a polymorphic `has_one` (`ParentID + ParentClass`) to link to any DataObject:
+- Section → parent is `SiteTree` (page)
+- Row → parent is `Section`
+- Column → parent is `Row`
+- Content element → parent is `Column`
+
+Page IDs and element IDs share no namespace separation, so lookup maps must key by composite `"ParentClass:ParentID"` strings.
+
+## Zones
+
+Sections carry a `Zone` field (e.g., `"main"`, `"sidebar"`) scoping them within a page. Sort values are independent per zone per parent. All queries (tree loading, sort assignment, reorder) filter by zone at the root level.
 
 ## Auto-Scaffolding
 
@@ -167,49 +187,46 @@ Writing a container element automatically creates its required child structure o
 
 ### Cascade Chain
 
-1. `ElementSection::onAfterWrite()` → creates an `ElementRow` if `ChildArea` is empty
-2. `ElementRow::onAfterWrite()` → creates an `ElementColumn` if `ChildArea` is empty
-3. `ElementColumn` does NOT auto-scaffold (only initializes `GridSettings` JSON on first write)
+1. `Section::onAfterWrite()` → creates a `Row` if no children exist
+2. `Row::onAfterWrite()` → creates a `Column` if no children exist
+3. `Column` does NOT auto-scaffold (only initializes `GridSettings` JSON on first write)
 
-**Result**: A single `ElementSection::create()->write()` produces the full `Section → Row → Column` tree.
+**Result**: A single `Section::create()->write()` produces the full `Section → Row → Column` tree.
 
 ### Guard Conditions (Idempotency)
 
 Both Section and Row check before scaffolding:
 1. `Versioned::get_stage() === Versioned::DRAFT` — no scaffolding on LIVE
-2. `$childArea->Elements()->count() > 0` — no scaffolding if children already exist
+2. `$this->getChildren()->count() > 0` — no scaffolding if children already exist
 
-Subsequent writes to the same element do NOT create duplicate children.
+Auto-scaffolding can be disabled per class via `auto_scaffold: false` in YAML. Subsequent writes to the same element do NOT create duplicate children.
 
 ### Configurable Default Titles
 
-- `ElementSection::$default_row_title` (default: `''`)
-- `ElementRow::$default_column_title` (default: `''`)
+- `Section::$default_row_title` (default: `''`)
+- `Row::$default_column_title` (default: `''`)
 
 ## Hierarchy Validation
 
-Validation happens in two contexts with partially duplicated logic.
+Validation happens in two contexts with shared logic via `ElementAllowanceTrait`.
 
 ### At Write Time: `HierarchyValidationExtension`
 
-Applied globally to all `BaseElement` subclasses via YAML. Hooks into `updateValidate()`:
+Applied globally to `GridElement` via YAML. Hooks into `updateValidate()`:
 
-1. No parent → pass (root-level orphan)
-2. Parent area has no owner → pass (orphaned area)
-3. Owner is a SiteTree page → check `can_be_root` on the element
-4. Otherwise → check `isElementAllowed()` against `allowed_elements`/`disallowed_elements`
+1. No parent → pass (orphan)
+2. Parent is a SiteTree page → check `can_be_root` on the element
+3. Parent is a container → check `isElementAllowed()` against `allowed_elements`/`disallowed_elements`
 
 Violation throws `ValidationException`, preventing the database write.
 
 ### At Reorder Time: `ReorderValidator`
 
-Called by `ReorderService` before executing a cross-area move:
+Called by `ReorderService` before executing a cross-parent move:
 
-1. Same-area move → always `Result::ok()` (no hierarchy change)
-2. Cross-area move → applies the same `can_be_root` and `isElementAllowed()` checks
+1. Same-parent move → always `Result::ok()` (no hierarchy change)
+2. Cross-parent move → applies the same `can_be_root` and `isElementAllowed()` checks
 3. Returns `Result::fail()` for violations (uses Result pattern, not exceptions)
-
-**Known tech debt**: `isElementAllowed()` is duplicated identically in both `HierarchyValidationService` and `ReorderValidator` (not shared via trait or base class).
 
 ## Integration Test Implications
 
@@ -219,16 +236,17 @@ Tests creating container elements **must** account for auto-scaffolded children:
 
 ```php
 // Creating a Section produces Section + Row + Column (3 elements total)
-$section = ElementSection::create();
-$section->ParentID = $area->ID;
+$section = Section::create();
+$section->ParentID = $page->ID;
+$section->ParentClass = $page::class;
 $section->write();
 
-// The child area now has 1 Row
-$this->assertCount(1, $section->getChildArea()->Elements());
+// The section now has 1 Row child
+$this->assertCount(1, $section->getChildren());
 
-// That Row's child area has 1 Column
-$row = $section->getChildArea()->Elements()->first();
-$this->assertCount(1, $row->getChildArea()->Elements());
+// That Row has 1 Column child
+$row = $section->getChildren()->first();
+$this->assertCount(1, $row->getChildren());
 ```
 
 ### Stage Setup Required
@@ -269,7 +287,7 @@ The project uses a custom HTTP-based fixture system, not Playwright's built-in f
 
 ### Architecture
 
-- `FixtureController` — HTTP endpoints at `/dev/elemental-grid-fixtures/{load,reset}`, gated to dev environment only
+- `FixtureController` — HTTP endpoints at `/dev/grid-fixtures/{load,reset}`, gated to dev environment only
 - `FixtureLoader` — Loads YAML fixture files via SilverStripe's `FixtureFactory`, applies post-actions
 - `FixturePostAction` — Post-write operations: `publish_recursive`, `unpublish`, `modify` (field updates)
 - `FixtureResult` — JSON response with `pageId`, `pageUrl`, `fixtureMap`
@@ -299,7 +317,7 @@ test.describe('Feature area', () => {
 
 - All pages must use `e2e-` as the URLSegment prefix (this is how `reset()` identifies E2E data)
 - Order elements **bottom-up**: leaf elements before columns, columns before rows, rows before sections, sections before the page. This prevents `onAfterWrite` auto-scaffolding from creating duplicate children
-- `GridSettings` is stored as a JSON string on `ElementColumn`
+- `GridSettings` is stored as a JSON string on `Column`
 - Register fixtures in `_config/dev.yml` under `FixtureLoader.fixtures`
 
 ### Post-Actions
@@ -311,7 +329,7 @@ Post-actions run after YAML write, still in DRAFT stage:
 
 ### Available Fixtures
 
-Registered in `_config/dev.yml`: `element-tree`, `empty-page`, `collapse-test`, `complex-page`
+Registered in `_config/dev.yml`: `element-tree`, `empty-page`, `collapse-test`, `drag-and-drop`, `multi-zone`, `complex-page`
 
 ## Locator Strategy
 
@@ -364,14 +382,14 @@ If a `data-testid` doesn't exist for an element you need to locate, **add one to
 <!-- Source: local .apm/instructions/project-overview.instructions.md -->
 # Project Overview
 
-SilverStripe Elemental Grid — converts `dnadesign/silverstripe-elemental` into a grid-based content block system. **SilverStripe 6** version, ground-up rewrite on an orphaned branch.
+SilverStripe Grid — a grid-based content block system for SilverStripe CMS providing structured Section > Row > Column layouts with configurable CSS framework adapters (Bootstrap, Tailwind, Bulma). **SilverStripe 6** version, ground-up rewrite on an orphaned branch.
 
 Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormodule`)
 
 ## Requirements
 
 - PHP ^8.3
-- `dnadesign/silverstripe-elemental` ^6.0, `silverstripe/framework` ^6.0, `silverstripe/admin` ^3.0, `silverstripe/vendor-plugin` ^3.0
+- `silverstripe/framework` ^6.0, `silverstripe/admin` ^3.0, `silverstripe/vendor-plugin` ^3.0
 - Conflicts with `dnadesign/silverstripe-elemental-list` (replaces its functionality)
 
 <!-- Source: local .apm/instructions/gotchas.instructions.md -->
@@ -384,8 +402,9 @@ Package: `wedevelopnl/silverstripe-elemental-grid` (type: `silverstripe-vendormo
 - `make test-js` and `make coverage-js` run locally (no Docker), unlike PHP targets
 - **No ESLint/Stylelint configs yet**: `eslint.config.*` and `stylelint.config.*` don't exist — lint commands will fail until these are scaffolded
 - **E2E tests are opt-in**: `make test-e2e` is NOT part of `make test` or `make qa` — E2E tests require running Docker services and are slow
-- **E2E fixtures**: loaded via HTTP (`/dev/elemental-grid-fixtures/{load,reset}`), gated to dev environment only
+- **E2E fixtures**: loaded via HTTP (`/dev/grid-fixtures/{load,reset}`), gated to dev environment only
 - **E2E TypeScript**: `tests/E2E/` has its own `tsconfig.json` (no vitest globals, includes Playwright types)
+- **Polymorphic parent ID collisions**: page IDs and element IDs share the same numeric space — lookup maps must key by composite `"ParentClass:ParentID"` not just ParentID
 
 <!-- Source: local .apm/instructions/code-style.instructions.md -->
 # Code Style
@@ -405,8 +424,8 @@ Grid adapters translate the abstract grid model (viewports, column widths, offse
 
 - `src/Contract/GridAdapterInterface.php` — 12 methods defining the adapter contract
 - `src/Adapter/GridAdapterConfiguration.php` — Trait providing YAML-configurable overrides
-- `src/Contract/Viewport.php` — Value object (`final readonly class`, not an enum)
-- `src/Contract/ContainerType.php` — Enum: `Section`, `Row`, `Column`
+- `src/Value/Viewport.php` — Value object (`final readonly class`, not an enum)
+- `src/Value/ContainerType.php` — Enum: `Section`, `Row`, `Column`
 - `_config/grid.yml` — DI binding (default: `BootstrapAdapter`)
 
 ### Existing Adapters
@@ -422,10 +441,10 @@ Grid adapters translate the abstract grid model (viewports, column widths, offse
 ### 1. Create the Adapter Class
 
 ```php
-namespace WeDevelop\ElementalGrid\Adapter;
+namespace WeDevelop\Grid\Adapter;
 
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Value\Viewport;
 
 final class YourAdapter implements GridAdapterInterface
 {
@@ -505,14 +524,14 @@ In `_config/grid.yml` (or project-level YAML):
 
 ```yaml
 SilverStripe\Core\Injector\Injector:
-  WeDevelop\ElementalGrid\Contract\GridAdapterInterface:
-    class: WeDevelop\ElementalGrid\Adapter\YourAdapter
+  WeDevelop\Grid\Contract\GridAdapterInterface:
+    class: WeDevelop\Grid\Adapter\YourAdapter
 ```
 
 ### 6. Optional: YAML Configuration
 
 ```yaml
-WeDevelop\ElementalGrid\Adapter\YourAdapter:
+WeDevelop\Grid\Adapter\YourAdapter:
   enabled_viewports:
     - sm
     - md
@@ -528,19 +547,19 @@ WeDevelop\ElementalGrid\Adapter\YourAdapter:
 
 ## SilverStripe Dependency Injection
 
-- **Property injection via `$dependencies`**: Controllers (`AdminController` subclasses) and Elements (`DataObject` subclasses) cannot use constructor injection — the framework instantiates them without DI args. Use `private static array $dependencies` for property injection instead. See `ElementalGridController` and `ElementSection`/`ElementRow`/`ElementColumn` for examples.
-- **Injector constructor wiring**: Injector does NOT auto-wire constructor params from YAML interface bindings. Services with constructor injection need explicit `constructor:` config in YAML (see `_config/elements.yml`).
+- **Property injection via `$dependencies`**: Controllers (`AdminController` subclasses) and Elements (`DataObject` subclasses) cannot use constructor injection — the framework instantiates them without DI args. Use `private static array $dependencies` for property injection instead. See `GridController` and `Section`/`Row`/`Column` for examples.
+- **Injector constructor wiring**: Injector does NOT auto-wire constructor params from YAML interface bindings. Services with constructor injection need explicit `constructor:` config in YAML (see `_config/hierarchy.yml`).
 
 ## Result Pattern
 
 - Service-layer validation returns `Result` objects via `Result::ok($value)` / `Result::fail($errors)` — never throws for expected validation failures.
 - Used in `ReorderService`, `ElementPersistenceService`, `ReorderExecutor`, and controller response flows.
-- Check with `$result->isOk()` / `$result->isFail()`, access value via `$result->getValue()`, errors via `$result->getErrors()`.
+- Check with `$result->isOk()` / `$result->isErr()`, access value via `$result->unwrap()`, errors via `$result->errors()`.
 
 ## Container Auto-Scaffolding
 
-- `ElementSection::onAfterWrite()` auto-creates a child `ElementRow` on draft stage if none exists.
-- `ElementRow::onAfterWrite()` auto-creates a child `ElementColumn` on draft stage if none exists.
+- `Section::onAfterWrite()` auto-creates a child `Row` on draft stage if none exists.
+- `Row::onAfterWrite()` auto-creates a child `Column` on draft stage if none exists.
 - This ensures the Section→Row→Column hierarchy is always complete. Integration tests creating elements must account for these auto-created children.
 
 ## PHPStan

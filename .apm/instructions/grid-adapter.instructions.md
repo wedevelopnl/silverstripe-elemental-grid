@@ -13,8 +13,8 @@ Grid adapters translate the abstract grid model (viewports, column widths, offse
 
 - `src/Contract/GridAdapterInterface.php` — 12 methods defining the adapter contract
 - `src/Adapter/GridAdapterConfiguration.php` — Trait providing YAML-configurable overrides
-- `src/Contract/Viewport.php` — Value object (`final readonly class`, not an enum)
-- `src/Contract/ContainerType.php` — Enum: `Section`, `Row`, `Column`
+- `src/Value/Viewport.php` — Value object (`final readonly class`, not an enum)
+- `src/Value/ContainerType.php` — Enum: `Section`, `Row`, `Column`
 - `_config/grid.yml` — DI binding (default: `BootstrapAdapter`)
 
 ### Existing Adapters
@@ -30,10 +30,10 @@ Grid adapters translate the abstract grid model (viewports, column widths, offse
 ### 1. Create the Adapter Class
 
 ```php
-namespace WeDevelop\ElementalGrid\Adapter;
+namespace WeDevelop\Grid\Adapter;
 
-use WeDevelop\ElementalGrid\Contract\GridAdapterInterface;
-use WeDevelop\ElementalGrid\Contract\Viewport;
+use WeDevelop\Grid\Contract\GridAdapterInterface;
+use WeDevelop\Grid\Value\Viewport;
 
 final class YourAdapter implements GridAdapterInterface
 {
@@ -113,14 +113,14 @@ In `_config/grid.yml` (or project-level YAML):
 
 ```yaml
 SilverStripe\Core\Injector\Injector:
-  WeDevelop\ElementalGrid\Contract\GridAdapterInterface:
-    class: WeDevelop\ElementalGrid\Adapter\YourAdapter
+  WeDevelop\Grid\Contract\GridAdapterInterface:
+    class: WeDevelop\Grid\Adapter\YourAdapter
 ```
 
 ### 6. Optional: YAML Configuration
 
 ```yaml
-WeDevelop\ElementalGrid\Adapter\YourAdapter:
+WeDevelop\Grid\Adapter\YourAdapter:
   enabled_viewports:
     - sm
     - md

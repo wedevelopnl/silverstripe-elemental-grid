@@ -1,8 +1,8 @@
-# SilverStripe Elemental Grid
+# SilverStripe Grid
 
 ## Introduction
 
-This module converts [silverstripe-elemental](https://github.com/silverstripe/silverstripe-elemental) into a grid-based content block system, enabling structured Section → Row → Column layouts with configurable CSS framework adapters (Bootstrap, Tailwind, Bulma).
+A grid-based content block system for SilverStripe CMS, enabling structured Section → Row → Column layouts with configurable CSS framework adapters (Bootstrap, Tailwind, Bulma).
 
 > **Note**: This is a ground-up rewrite for SilverStripe 6, developed on the orphaned `6` branch. The `main` branch contains the legacy SS5 version for architectural reference only — do not base new work on it.
 
@@ -10,7 +10,6 @@ This module converts [silverstripe-elemental](https://github.com/silverstripe/si
 
 * PHP ^8.3
 * silverstripe/framework ^6.0
-* dnadesign/silverstripe-elemental ^6.0
 * silverstripe/admin ^3.0
 * silverstripe/vendor-plugin ^3.0
 * Node >=24 (for frontend build)
@@ -59,6 +58,13 @@ npm run build            # Vite production build
 | `npm run lint` | ESLint + Stylelint |
 | `npm run typecheck` | TypeScript type checking |
 | `make qa` | Full QA suite (PHPStan + PHP tests + JS QA) |
+
+### Architecture
+
+See the [architecture documentation](docs/architecture/) for detailed design documents:
+
+- [Backend Architecture](docs/architecture/backend.md) — data model, API layer, service design, validation, grid adapters
+- [Drag and Drop](docs/architecture/drag-and-drop.md) — frontend dnd-kit integration and backend reorder pipeline
 
 ### Issue Tracking with Beads
 

@@ -7,26 +7,42 @@ applyTo: "**/*"
 
 ## Structure
 
-The grid enforces a strict three-level hierarchy:
+The grid enforces a strict three-level hierarchy using polymorphic parent relationships (ParentID + ParentClass):
 
 ```
-Page (ElementalArea)
-  └── ElementSection   [ContainerType::Section]    — can_be_root: true (default)
-        └── ElementRow   [ContainerType::Row]       — can_be_root: false
-              └── ElementColumn  [ContainerType::Column]  — can_be_root: false
+Page (SiteTree)
+  └── Section   [ContainerType::Section]    — can_be_root: true (default), zone-scoped
+        └── Row   [ContainerType::Row]       — can_be_root: false
+              └── Column  [ContainerType::Column]  — can_be_root: false, stores GridSettings JSON
                     └── (any non-container content element)
 ```
 
-All three container elements implement `ElementContainerInterface`:
-- `getChildArea(): ElementalArea`
+All three container elements implement `ContainerInterface`:
+- `getChildren(): HasManyList<GridElement>`
 - `hasChildren(): bool`
 - `getContainerType(): ContainerType`
 
+Container behavior is shared via `ContainerElementTrait`.
+
 ## Hierarchy Rules (YAML Config)
 
-- **ElementSection**: `allowed_elements: [ElementRow]` — only Rows as children
-- **ElementRow**: `allowed_elements: [ElementColumn]`, `can_be_root: false` — only Columns as children, cannot be placed at page level
-- **ElementColumn**: `disallowed_elements: [ElementSection, ElementRow, ElementColumn]`, `can_be_root: false` — blacklist approach, allows any non-container content element
+- **Section**: `allowed_elements: [Row]` — only Rows as children
+- **Row**: `allowed_elements: [Column]`, `can_be_root: false` — only Columns as children, cannot be placed at page level
+- **Column**: `disallowed_elements: [Section, Row, Column]`, `can_be_root: false` — blocklist approach, allows any non-container content element
+
+## Parent Relationships
+
+Elements use a polymorphic `has_one` (`ParentID + ParentClass`) to link to any DataObject:
+- Section → parent is `SiteTree` (page)
+- Row → parent is `Section`
+- Column → parent is `Row`
+- Content element → parent is `Column`
+
+Page IDs and element IDs share no namespace separation, so lookup maps must key by composite `"ParentClass:ParentID"` strings.
+
+## Zones
+
+Sections carry a `Zone` field (e.g., `"main"`, `"sidebar"`) scoping them within a page. Sort values are independent per zone per parent. All queries (tree loading, sort assignment, reorder) filter by zone at the root level.
 
 ## Auto-Scaffolding
 
@@ -34,49 +50,46 @@ Writing a container element automatically creates its required child structure o
 
 ### Cascade Chain
 
-1. `ElementSection::onAfterWrite()` → creates an `ElementRow` if `ChildArea` is empty
-2. `ElementRow::onAfterWrite()` → creates an `ElementColumn` if `ChildArea` is empty
-3. `ElementColumn` does NOT auto-scaffold (only initializes `GridSettings` JSON on first write)
+1. `Section::onAfterWrite()` → creates a `Row` if no children exist
+2. `Row::onAfterWrite()` → creates a `Column` if no children exist
+3. `Column` does NOT auto-scaffold (only initializes `GridSettings` JSON on first write)
 
-**Result**: A single `ElementSection::create()->write()` produces the full `Section → Row → Column` tree.
+**Result**: A single `Section::create()->write()` produces the full `Section → Row → Column` tree.
 
 ### Guard Conditions (Idempotency)
 
 Both Section and Row check before scaffolding:
 1. `Versioned::get_stage() === Versioned::DRAFT` — no scaffolding on LIVE
-2. `$childArea->Elements()->count() > 0` — no scaffolding if children already exist
+2. `$this->getChildren()->count() > 0` — no scaffolding if children already exist
 
-Subsequent writes to the same element do NOT create duplicate children.
+Auto-scaffolding can be disabled per class via `auto_scaffold: false` in YAML. Subsequent writes to the same element do NOT create duplicate children.
 
 ### Configurable Default Titles
 
-- `ElementSection::$default_row_title` (default: `''`)
-- `ElementRow::$default_column_title` (default: `''`)
+- `Section::$default_row_title` (default: `''`)
+- `Row::$default_column_title` (default: `''`)
 
 ## Hierarchy Validation
 
-Validation happens in two contexts with partially duplicated logic.
+Validation happens in two contexts with shared logic via `ElementAllowanceTrait`.
 
 ### At Write Time: `HierarchyValidationExtension`
 
-Applied globally to all `BaseElement` subclasses via YAML. Hooks into `updateValidate()`:
+Applied globally to `GridElement` via YAML. Hooks into `updateValidate()`:
 
-1. No parent → pass (root-level orphan)
-2. Parent area has no owner → pass (orphaned area)
-3. Owner is a SiteTree page → check `can_be_root` on the element
-4. Otherwise → check `isElementAllowed()` against `allowed_elements`/`disallowed_elements`
+1. No parent → pass (orphan)
+2. Parent is a SiteTree page → check `can_be_root` on the element
+3. Parent is a container → check `isElementAllowed()` against `allowed_elements`/`disallowed_elements`
 
 Violation throws `ValidationException`, preventing the database write.
 
 ### At Reorder Time: `ReorderValidator`
 
-Called by `ReorderService` before executing a cross-area move:
+Called by `ReorderService` before executing a cross-parent move:
 
-1. Same-area move → always `Result::ok()` (no hierarchy change)
-2. Cross-area move → applies the same `can_be_root` and `isElementAllowed()` checks
+1. Same-parent move → always `Result::ok()` (no hierarchy change)
+2. Cross-parent move → applies the same `can_be_root` and `isElementAllowed()` checks
 3. Returns `Result::fail()` for violations (uses Result pattern, not exceptions)
-
-**Known tech debt**: `isElementAllowed()` is duplicated identically in both `HierarchyValidationService` and `ReorderValidator` (not shared via trait or base class).
 
 ## Integration Test Implications
 
@@ -86,16 +99,17 @@ Tests creating container elements **must** account for auto-scaffolded children:
 
 ```php
 // Creating a Section produces Section + Row + Column (3 elements total)
-$section = ElementSection::create();
-$section->ParentID = $area->ID;
+$section = Section::create();
+$section->ParentID = $page->ID;
+$section->ParentClass = $page::class;
 $section->write();
 
-// The child area now has 1 Row
-$this->assertCount(1, $section->getChildArea()->Elements());
+// The section now has 1 Row child
+$this->assertCount(1, $section->getChildren());
 
-// That Row's child area has 1 Column
-$row = $section->getChildArea()->Elements()->first();
-$this->assertCount(1, $row->getChildArea()->Elements());
+// That Row has 1 Column child
+$row = $section->getChildren()->first();
+$this->assertCount(1, $row->getChildren());
 ```
 
 ### Stage Setup Required
