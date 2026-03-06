@@ -14,50 +14,50 @@ import { applyReorder } from '@/utils/applyReorder';
 import { showToast } from '@/utils/toast';
 import { queryKeys } from './queryKeys';
 
-function useInvalidateOnSuccess(pageId: number) {
+function useInvalidateOnSuccess(pageId: number, zone: string) {
   const queryClient = useQueryClient();
 
   return {
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.elementTree.byPage(pageId),
+        queryKey: queryKeys.elementTree.byPage(pageId, zone),
       });
     },
   };
 }
 
-export function useCreateElement(pageId: number) {
+export function useCreateElement(pageId: number, zone: string) {
   return useMutation<void, ApiError, CreateElementParams>({
     mutationFn: createElement,
-    ...useInvalidateOnSuccess(pageId),
+    ...useInvalidateOnSuccess(pageId, zone),
   });
 }
 
-export function usePublishElement(pageId: number) {
+export function usePublishElement(pageId: number, zone: string) {
   return useMutation<void, ApiError, number>({
     mutationFn: publishElement,
-    ...useInvalidateOnSuccess(pageId),
+    ...useInvalidateOnSuccess(pageId, zone),
   });
 }
 
-export function useUnpublishElement(pageId: number) {
+export function useUnpublishElement(pageId: number, zone: string) {
   return useMutation<void, ApiError, number>({
     mutationFn: unpublishElement,
-    ...useInvalidateOnSuccess(pageId),
+    ...useInvalidateOnSuccess(pageId, zone),
   });
 }
 
-export function useDeleteElement(pageId: number) {
+export function useDeleteElement(pageId: number, zone: string) {
   return useMutation<void, ApiError, number>({
     mutationFn: deleteElement,
-    ...useInvalidateOnSuccess(pageId),
+    ...useInvalidateOnSuccess(pageId, zone),
   });
 }
 
-export function useDuplicateElement(pageId: number) {
+export function useDuplicateElement(pageId: number, zone: string) {
   return useMutation<void, ApiError, number>({
     mutationFn: duplicateElement,
-    ...useInvalidateOnSuccess(pageId),
+    ...useInvalidateOnSuccess(pageId, zone),
   });
 }
 
@@ -66,9 +66,9 @@ interface ReorderMutationVariables {
   tree: ElementTreeResponse;
 }
 
-export function useReorderElement(pageId: number) {
+export function useReorderElement(pageId: number, zone: string) {
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.elementTree.byPage(pageId);
+  const queryKey = queryKeys.elementTree.byPage(pageId, zone);
 
   return useMutation<void, ApiError, ReorderMutationVariables, ElementTreeResponse | undefined>({
     mutationFn: ({ params }) => reorderElement(params),

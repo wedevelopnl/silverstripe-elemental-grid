@@ -14,10 +14,22 @@ WeDevelop\Grid\Model\Section:
   section1:
     Title: 'First Section'
     Sort: 1
+    Zone: main
     Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
   section2:
     Title: 'Second Section'
     Sort: 2
+    Zone: main
+    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
+  sidebar_section1:
+    Title: 'Sidebar Section 1'
+    Sort: 1
+    Zone: sidebar
+    Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
+  sidebar_section2:
+    Title: 'Sidebar Section 2'
+    Sort: 2
+    Zone: sidebar
     Parent: =>WeDevelop\Grid\Tests\Integration\Fixture\TestPage.testpage
 
 # --- Rows (into sections) ---

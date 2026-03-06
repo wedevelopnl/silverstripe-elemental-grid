@@ -47,9 +47,10 @@ class GridPageExtension extends Extension
         /** @var SiteTree $owner */
         $owner = $this->owner;
 
+        $fields->removeByName('Content');
         $fields->addFieldToTab(
             'Root.Main',
-            GridEditorField::create('GridEditor', (int) $owner->ID),
+            GridEditorField::create('GridEditor', (int) $owner->ID, 'main'),
         );
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WeDevelop\Grid\Repository;
 
 use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Model\Section;
 
 final class OrmGridElementRepository implements GridElementRepositoryInterface
 {
@@ -27,7 +28,7 @@ final class OrmGridElementRepository implements GridElementRepositoryInterface
             ->toArray();
     }
 
-    public function findByParents(array $idsByClass): array
+    public function findByParents(array $idsByClass, ?string $zone = null): array
     {
         if ($idsByClass === []) {
             return [];
@@ -41,12 +42,25 @@ final class OrmGridElementRepository implements GridElementRepositoryInterface
             $allParentIds = array_merge($allParentIds, $ids);
         }
 
+        $filter = [
+            'ParentID' => array_unique($allParentIds),
+            'ParentClass' => array_unique($allParentClasses),
+        ];
+
+        // Zone only exists on the Section table — query Section directly when zone-filtering
+        if ($zone !== null) {
+            $filter['Zone'] = $zone;
+
+            /** @var list<GridElement> */
+            return Section::get()
+                ->filter($filter)
+                ->sort(['Sort' => 'ASC', 'ID' => 'ASC'])
+                ->toArray();
+        }
+
         /** @var list<GridElement> */
         return GridElement::get()
-            ->filter([
-                'ParentID' => array_unique($allParentIds),
-                'ParentClass' => array_unique($allParentClasses),
-            ])
+            ->filter($filter)
             ->sort(['Sort' => 'ASC', 'ID' => 'ASC'])
             ->toArray();
     }

@@ -39,11 +39,13 @@ WeDevelop\Grid\Model\Section:
     Title: 'Section Alpha'
     ShowTitle: 1
     Sort: 1
+    Zone: main
     Parent: =>Page.e2e_page
   section_beta:
     Title: 'Section Beta'
     ShowTitle: 1
     Sort: 2
+    Zone: main
     Parent: =>Page.e2e_page
 
 # --- Rows ---

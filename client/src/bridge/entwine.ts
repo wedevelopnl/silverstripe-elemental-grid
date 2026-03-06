@@ -8,6 +8,7 @@ import { loadComponent } from './Injector';
 
 const bridgeSchemaSchema = z.object({
   'grid-page-id': z.number().int().nullable(),
+  'grid-zone': z.string().default('main'),
 });
 
 /**
@@ -24,6 +25,7 @@ window.jQuery.entwine('ss', ($) => {
         const GridEditor = loadComponent('GridEditor');
         const schema = bridgeSchemaSchema.parse(this.data('schema'));
         const pageId = schema['grid-page-id'] ?? null;
+        const zone = schema['grid-zone'];
 
         const root = createRoot(this[0]);
         this.setReactRoot(root);
@@ -34,7 +36,7 @@ window.jQuery.entwine('ss', ($) => {
             createElement(
               GridEditorErrorBoundary,
               null,
-              createElement(GridEditor, { pageId }),
+              createElement(GridEditor, { pageId, zone }),
             ),
           ),
         );

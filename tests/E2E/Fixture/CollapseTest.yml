@@ -30,10 +30,12 @@ WeDevelop\Grid\Model\Section:
   section_a:
     Title: 'Section A'
     Sort: 1
+    Zone: main
     Parent: =>Page.e2e_page
   section_b:
     Title: 'Section B'
     Sort: 2
+    Zone: main
     Parent: =>Page.e2e_page
 
 # --- Rows ---

@@ -7,6 +7,7 @@ namespace WeDevelop\Grid\Service;
 use SilverStripe\ORM\DataObject;
 use WeDevelop\Grid\Contract\ReorderExecutorInterface;
 use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Value\Result;
 use WeDevelop\Grid\Value\ValidationError;
 use WeDevelop\Grid\Repository\GridElementRepositoryInterface;
@@ -32,11 +33,15 @@ class ReorderExecutor implements ReorderExecutorInterface
         $sourceParentId = $element->ParentID;
         $isCrossParent = $sourceParentId !== $targetParentId;
 
-        // Fetch target siblings, always excluding the moved element
-        $targetSiblings = $this->excludeElement(
-            $this->elementRepository->findByParentIds([$targetParentId]),
-            $element,
-        );
+        // Fetch target siblings, excluding the moved element.
+        // For Sections, scope to the element's zone. Sort values are per-zone-per-parent:
+        // main zone has Sort 1,2,3 and sidebar zone independently has Sort 1,2,3.
+        // This is safe because all queries (readTree, ensureSortSet) filter by zone.
+        $allTargetSiblings = $this->elementRepository->findByParentIds([$targetParentId]);
+        $targetSiblings = $element instanceof Section
+            ? $this->filterByZone($allTargetSiblings, $element->Zone ?: '')
+            : $allTargetSiblings;
+        $targetSiblings = $this->excludeElement($targetSiblings, $element);
 
         $insertionIndex = $this->resolveInsertionIndex($targetSiblings, $afterElementId);
         if ($insertionIndex === null) {
@@ -58,10 +63,11 @@ class ReorderExecutor implements ReorderExecutorInterface
 
         $dirty = $this->reindex($targetSiblings, $element);
 
-        $sourceSiblings = $this->excludeElement(
-            $this->elementRepository->findByParentIds([$sourceParentId]),
-            $element,
-        );
+        $allSourceSiblings = $this->elementRepository->findByParentIds([$sourceParentId]);
+        $sourceSiblings = $element instanceof Section
+            ? $this->filterByZone($allSourceSiblings, $element->Zone ?: '')
+            : $allSourceSiblings;
+        $sourceSiblings = $this->excludeElement($sourceSiblings, $element);
 
         return Result::ok([...$dirty, ...$this->reindex($sourceSiblings)]);
     }
@@ -86,6 +92,20 @@ class ReorderExecutor implements ReorderExecutorInterface
         }
 
         return null;
+    }
+
+    /**
+     * Filter siblings to only Sections matching the given zone.
+     *
+     * @param list<GridElement> $siblings
+     * @return list<GridElement>
+     */
+    private function filterByZone(array $siblings, string $zone): array
+    {
+        return array_values(array_filter(
+            $siblings,
+            static fn (GridElement $s): bool => $s instanceof Section && ($s->Zone ?: '') === $zone,
+        ));
     }
 
     /**

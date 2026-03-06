@@ -57,10 +57,10 @@ describe('endpoints', () => {
       };
       mockApiGet.mockResolvedValue(mockTree);
 
-      const result = await fetchElementTree(42);
+      const result = await fetchElementTree(42, 'main');
 
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/admin/grid/api/readTree/42',
+        '/admin/grid/api/readTree/42/main',
       );
       expect(result).toEqual(mockTree);
     });
@@ -68,7 +68,7 @@ describe('endpoints', () => {
     it('throws on invalid response shape', async () => {
       mockApiGet.mockResolvedValue('not-an-object');
 
-      await expect(fetchElementTree(1)).rejects.toThrow();
+      await expect(fetchElementTree(1, 'main')).rejects.toThrow();
     });
   });
 

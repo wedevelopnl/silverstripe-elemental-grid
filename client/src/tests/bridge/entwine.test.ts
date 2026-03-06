@@ -99,7 +99,7 @@ describe('entwine bridge', () => {
         createElement(
           MockGridEditorErrorBoundary,
           null,
-          createElement(MockGridEditor, { pageId: 7 }),
+          createElement(MockGridEditor, { pageId: 7, zone: 'main' }),
         ),
       ),
     );

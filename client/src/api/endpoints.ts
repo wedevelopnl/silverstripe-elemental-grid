@@ -11,9 +11,10 @@ import { getControllerLink } from './config';
  */
 export async function fetchElementTree(
   pageId: number,
+  zone: string,
 ): Promise<ElementTreeResponse> {
   const base = getControllerLink();
-  const data = await apiGet<unknown>(`${base}/api/readTree/${pageId}`);
+  const data = await apiGet<unknown>(`${base}/api/readTree/${pageId}/${encodeURIComponent(zone)}`);
 
   return elementTreeResponseSchema.parse(data);
 }
@@ -23,6 +24,7 @@ export interface CreateElementParams {
   parentId: number;
   parentClass: string;
   insertAfterElementID?: number;
+  zone?: string;
 }
 
 export async function createElement(

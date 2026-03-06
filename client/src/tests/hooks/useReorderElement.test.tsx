@@ -113,7 +113,7 @@ describe('useReorderElement', () => {
 
   it('calls reorderElement endpoint with the provided params', async () => {
     mockReorderElement.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), {
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -144,9 +144,9 @@ describe('useReorderElement', () => {
     };
 
     // Seed the query cache with initial tree data
-    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
+    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID, 'main'), tree);
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     const params: ReorderElementParams = {
       elementID: 11,
@@ -161,7 +161,7 @@ describe('useReorderElement', () => {
 
     await waitFor(() => {
       const cached = queryClient.getQueryData<ElementTreeResponse>(
-        queryKeys.elementTree.byPage(PAGE_ID),
+        queryKeys.elementTree.byPage(PAGE_ID, 'main'),
       );
       expect(cached).toBeDefined();
 
@@ -183,9 +183,9 @@ describe('useReorderElement', () => {
     };
 
     // Seed the cache
-    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
+    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID, 'main'), tree);
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     const params: ReorderElementParams = {
       elementID: 11,
@@ -204,7 +204,7 @@ describe('useReorderElement', () => {
     // Cache should be restored to original order
     await waitFor(() => {
       const cached = queryClient.getQueryData<ElementTreeResponse>(
-        queryKeys.elementTree.byPage(PAGE_ID),
+        queryKeys.elementTree.byPage(PAGE_ID, 'main'),
       );
       expect(cached).toBeDefined();
 
@@ -222,9 +222,9 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
+    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID, 'main'), tree);
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(() =>
       result.current.mutateAsync({
@@ -235,7 +235,7 @@ describe('useReorderElement', () => {
 
     await waitFor(() =>
       expect(invalidateSpy).toHaveBeenCalledWith({
-        queryKey: queryKeys.elementTree.byPage(PAGE_ID),
+        queryKey: queryKeys.elementTree.byPage(PAGE_ID, 'main'),
       }),
     );
   });
@@ -249,9 +249,9 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID), tree);
+    queryClient.setQueryData(queryKeys.elementTree.byPage(PAGE_ID, 'main'), tree);
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(async () => {
       try {
@@ -266,7 +266,7 @@ describe('useReorderElement', () => {
 
     await waitFor(() =>
       expect(invalidateSpy).toHaveBeenCalledWith({
-        queryKey: queryKeys.elementTree.byPage(PAGE_ID),
+        queryKey: queryKeys.elementTree.byPage(PAGE_ID, 'main'),
       }),
     );
   });
@@ -280,7 +280,7 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(async () => {
       try {
@@ -305,7 +305,7 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(async () => {
       try {
@@ -332,7 +332,7 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(async () => {
       try {
@@ -359,7 +359,7 @@ describe('useReorderElement', () => {
       '100': [makeColumn(1, [makeElement(10, 1)], 100)],
     };
 
-    const { result } = renderHook(() => useReorderElement(PAGE_ID), { wrapper });
+    const { result } = renderHook(() => useReorderElement(PAGE_ID, 'main'), { wrapper });
 
     await act(async () => {
       try {

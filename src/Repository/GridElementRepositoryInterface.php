@@ -25,8 +25,10 @@ interface GridElementRepositoryInterface
      * Uses both ParentID and ParentClass to avoid false matches when IDs from
      * different tables (e.g. SiteTree and GridElement) collide.
      *
+     * When $zone is provided, an additional Zone filter is applied (root-level queries only).
+     *
      * @param array<class-string, list<positive-int>> $idsByClass Map of parent class → parent IDs
      * @return list<GridElement>
      */
-    public function findByParents(array $idsByClass): array;
+    public function findByParents(array $idsByClass, ?string $zone = null): array;
 }

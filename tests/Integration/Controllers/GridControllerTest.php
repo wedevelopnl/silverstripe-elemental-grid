@@ -14,6 +14,7 @@ use WeDevelop\Grid\Controllers\GridController;
 use WeDevelop\Grid\Model\Row;
 use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Extensions\GridPageExtension;
+use SilverStripe\Control\HTTPResponse;
 use WeDevelop\Grid\Service\GridTreeBuilder;
 use WeDevelop\Grid\Tests\Integration\Fixture\TestPage;
 
@@ -41,9 +42,9 @@ final class GridControllerTest extends FunctionalTest
         Config::modify()->set(Row::class, 'auto_scaffold', false);
     }
 
-    private function apiUrl(int $pageId): string
+    private function apiUrl(int $pageId, string $zone = 'main'): string
     {
-        return '/admin/grid/api/readTree/' . $pageId;
+        return '/admin/grid/api/readTree/' . $pageId . '/' . $zone;
     }
 
     /**
@@ -377,6 +378,72 @@ final class GridControllerTest extends FunctionalTest
         $this->assertJsonError(422, 'Row cannot be placed at page level.', $response);
     }
 
+
+    /**
+     * PATCH a JSON body to an API endpoint with security token disabled.
+     *
+     * FunctionalTest has no patch() method, so we use TestSession::sendRequest() directly.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function patchJson(string $url, array $body): HTTPResponse
+    {
+        SecurityToken::disable();
+
+        try {
+            return $this->mainSession->sendRequest(
+                'PATCH',
+                $url,
+                data: [],
+                headers: ['Content-Type' => 'application/json'],
+                body: json_encode($body, JSON_THROW_ON_ERROR),
+            );
+        } finally {
+            SecurityToken::enable();
+        }
+    }
+
+    // --- apiReorder: cross-zone enforcement -----------------------------------
+
+    public function testReorderRejects422ForCrossZoneSectionMove(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+        $section1 = $this->objFromFixture(Section::class, 'section1');
+        $sidebarSection1 = $this->objFromFixture(Section::class, 'sidebar_section1');
+
+        $response = $this->patchJson('/admin/grid/api/reorder', [
+            'elementID' => $section1->ID,
+            'targetParentId' => (int) $page->ID,
+            'afterElementID' => $sidebarSection1->ID,
+        ]);
+
+        $this->assertJsonError(
+            422,
+            'The reference element no longer exists in the target parent.',
+            $response,
+        );
+    }
+
+    public function testReorderSucceedsForSameZoneSectionMove(): void
+    {
+        $this->logInForHttp();
+        Versioned::set_stage(Versioned::DRAFT);
+
+        $page = $this->objFromFixture(TestPage::class, 'testpage');
+        $section1 = $this->objFromFixture(Section::class, 'section1');
+        $section2 = $this->objFromFixture(Section::class, 'section2');
+
+        $response = $this->patchJson('/admin/grid/api/reorder', [
+            'elementID' => $section1->ID,
+            'targetParentId' => (int) $page->ID,
+            'afterElementID' => $section2->ID,
+        ]);
+
+        $this->assertSame(204, $response->getStatusCode());
+    }
 
     public function testResponseMatchesTreeBuilderOutput(): void
     {

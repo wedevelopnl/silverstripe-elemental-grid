@@ -14,6 +14,7 @@ use SilverStripe\Security\SecurityToken;
 use SilverStripe\Versioned\Versioned;
 use WeDevelop\Grid\Contract\GridAdapterInterface;
 use WeDevelop\Grid\Model\GridElement;
+use WeDevelop\Grid\Model\Section;
 use WeDevelop\Grid\Value\Result;
 use WeDevelop\Grid\Value\ValidationError;
 use WeDevelop\Grid\Value\Viewport;
@@ -28,6 +29,7 @@ use WeDevelop\Grid\Service\ReorderService;
  *   parentId: positive-int,
  *   parentClass: class-string<DataObject>,
  *   insertAfterElementID: positive-int|null,
+ *   zone: string,
  * }
  * @phpstan-type ElementIdBody array{id: positive-int}
  * @phpstan-type ReorderBody array{
@@ -85,7 +87,7 @@ class GridController extends AdminController
 
     /** @var array<string, string> */
     private static array $url_handlers = [
-        'GET api/readTree/$PageID!' => 'apiReadTree',
+        'GET api/readTree/$PageID!/$Zone!' => 'apiReadTree',
         'POST api/create' => 'apiCreate',
         'PATCH api/publish' => 'apiPublish',
         'PATCH api/unpublish' => 'apiUnpublish',
@@ -124,7 +126,8 @@ class GridController extends AdminController
             $this->jsonError(403);
         }
 
-        $tree = $this->treeBuilder->buildForPage($page);
+        $zone = (string) $request->param('Zone');
+        $tree = $this->treeBuilder->buildForPage($page, $zone);
 
         return $this->jsonSuccess(200, $tree);
     }
@@ -155,6 +158,11 @@ class GridController extends AdminController
 
         $newElement->ParentID = $body['parentId'];
         $newElement->ParentClass = $body['parentClass'];
+
+        if ($newElement instanceof Section) {
+            $newElement->Zone = $body['zone'];
+        }
+
         $newElement->ensureSortSet();
 
         $result = $this->persistenceService->persistNew($newElement, $body['insertAfterElementID']);
@@ -407,6 +415,7 @@ class GridController extends AdminController
         $parentId = $data['parentId'] ?? null;
         $parentClass = $data['parentClass'] ?? null;
         $afterElementID = $data['insertAfterElementID'] ?? null;
+        $zone = $data['zone'] ?? 'main';
 
         if (!is_string($elementClass) || !is_subclass_of($elementClass, GridElement::class)) {
             $this->jsonError(400);
@@ -424,11 +433,16 @@ class GridController extends AdminController
             $this->jsonError(400);
         }
 
+        if (!is_string($zone) || $zone === '') {
+            $this->jsonError(400);
+        }
+
         return [
             'elementClass' => $elementClass,
             'parentId' => $parentId,
             'parentClass' => $parentClass,
             'insertAfterElementID' => $afterElementID,
+            'zone' => $zone,
         ];
     }
 

@@ -42,12 +42,12 @@ class GridTreeBuilder
      *
      * @return array<int, list<GridNode>>
      */
-    public function buildForPage(SiteTree $page): array
+    public function buildForPage(SiteTree $page, string $zone = 'main'): array
     {
         /** @var positive-int $pageId */
         $pageId = $page->ID;
 
-        $elementsByParent = $this->loadAllElements($pageId, $page::class);
+        $elementsByParent = $this->loadAllElements($pageId, $page::class, $zone);
 
         $rootKey = $page::class . ':' . $pageId;
 
@@ -68,11 +68,14 @@ class GridTreeBuilder
      * Elements are keyed by a composite "ParentClass:ParentID" string to
      * prevent collisions when a page ID equals a GridElement ID.
      *
+     * Zone filtering is applied only at the root level (page → sections).
+     * Child elements are scoped by their container parent, not by zone.
+     *
      * @param positive-int $rootParentId
      * @param class-string $rootParentClass
      * @return array<string, list<GridElement>> Map of "ParentClass:ParentID" → elements
      */
-    private function loadAllElements(int $rootParentId, string $rootParentClass): array
+    private function loadAllElements(int $rootParentId, string $rootParentClass, string $zone): array
     {
         /** @var array<string, list<GridElement>> $elementsByParent */
         $elementsByParent = [];
@@ -80,8 +83,14 @@ class GridTreeBuilder
         /** @var array<class-string, list<positive-int>> $parentIdsByClass */
         $parentIdsByClass = [$rootParentClass => [$rootParentId]];
 
+        $isRootLevel = true;
+
         while ($parentIdsByClass !== []) {
-            $elements = $this->elementRepository->findByParents($parentIdsByClass);
+            $elements = $this->elementRepository->findByParents(
+                $parentIdsByClass,
+                $isRootLevel ? $zone : null,
+            );
+            $isRootLevel = false;
             $parentIdsByClass = [];
 
             foreach ($elements as $element) {

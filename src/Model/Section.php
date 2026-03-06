@@ -17,6 +17,7 @@ use WeDevelop\Grid\Value\ContainerType;
  * On draft-stage write, auto-scaffolds a child Row (which cascades
  * to create a Column) when no children exist.
  *
+ * @property string $Zone
  * @method HasManyList<Row> Rows()
  */
 class Section extends GridElement implements ContainerInterface
@@ -28,6 +29,19 @@ class Section extends GridElement implements ContainerInterface
     private static string $singular_name = 'Section';
 
     private static string $plural_name = 'Sections';
+
+    /** @var array<string, string> */
+    private static array $db = [
+        'Zone' => 'Varchar(50)',
+    ];
+
+    /** @var array<string, array<string, string|list<string>>> */
+    private static array $indexes = [
+        'Zone' => [
+            'type' => 'index',
+            'columns' => ['Zone'],
+        ],
+    ];
 
     private static string $icon = 'font-icon-block-layout';
 
@@ -121,6 +135,24 @@ class Section extends GridElement implements ContainerInterface
         $this->extend('updateContainerClasses', $classes);
 
         return $classes;
+    }
+
+    #[\Override]
+    public function ensureSortSet(): void
+    {
+        if ($this->Sort > 0) {
+            return;
+        }
+
+        $max = static::get()
+            ->filter([
+                'ParentID' => $this->ParentID,
+                'ParentClass' => $this->ParentClass,
+                'Zone' => $this->Zone ?: '',
+            ])
+            ->max('Sort');
+
+        $this->Sort = (is_numeric($max) ? (int) $max : 0) + 1;
     }
 
     #[\Override]

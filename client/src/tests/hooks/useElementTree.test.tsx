@@ -37,20 +37,20 @@ describe('useElementTree', () => {
     };
     mockFetchElementTree.mockResolvedValue(mockTree);
 
-    const { result } = renderHook(() => useElementTree(42), {
+    const { result } = renderHook(() => useElementTree(42, 'main'), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockFetchElementTree).toHaveBeenCalledWith(42);
+    expect(mockFetchElementTree).toHaveBeenCalledWith(42, 'main');
     expect(result.current.data).toEqual(mockTree);
   });
 
   it('does not fetch when pageId is null', () => {
     mockFetchElementTree.mockResolvedValue({});
 
-    const { result } = renderHook(() => useElementTree(null), {
+    const { result } = renderHook(() => useElementTree(null, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -61,7 +61,7 @@ describe('useElementTree', () => {
   it('exposes error when fetch fails', async () => {
     mockFetchElementTree.mockRejectedValue(new Error('Network error'));
 
-    const { result } = renderHook(() => useElementTree(1), {
+    const { result } = renderHook(() => useElementTree(1, 'main'), {
       wrapper: createWrapper(),
     });
 

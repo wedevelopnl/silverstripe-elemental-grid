@@ -17,9 +17,12 @@ class GridEditorField extends FormField
 {
     private int $pageId;
 
-    public function __construct(string $name, int $pageId)
+    private string $zone;
+
+    public function __construct(string $name, int $pageId, string $zone = 'main')
     {
         $this->pageId = $pageId;
+        $this->zone = $zone;
 
         parent::__construct($name);
 
@@ -31,6 +34,11 @@ class GridEditorField extends FormField
         return $this->pageId;
     }
 
+    public function getZone(): string
+    {
+        return $this->zone;
+    }
+
     /** @return array<string, mixed> */
     public function getSchemaDataDefaults(): array
     {
@@ -38,6 +46,7 @@ class GridEditorField extends FormField
         $schemaData = parent::getSchemaDataDefaults();
 
         $schemaData['grid-page-id'] = $this->pageId;
+        $schemaData['grid-zone'] = $this->zone;
 
         return $schemaData;
     }

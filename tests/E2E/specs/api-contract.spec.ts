@@ -16,7 +16,7 @@ test.describe('API contract', () => {
 
   test('readTree response validates against the Zod schema', async ({ request }) => {
     const fixture = await loadFixture(request, 'complex-page');
-    const response = await request.get(`${API_BASE}/${fixture.pageId}`);
+    const response = await request.get(`${API_BASE}/${fixture.pageId}/main`);
 
     expect(response.ok()).toBe(true);
 
@@ -40,7 +40,7 @@ test.describe('API contract', () => {
 
   test('versioned state flags reflect fixture post-actions', async ({ request }) => {
     const fixture = await loadFixture(request, 'complex-page');
-    const response = await request.get(`${API_BASE}/${fixture.pageId}`);
+    const response = await request.get(`${API_BASE}/${fixture.pageId}/main`);
     const body: unknown = await response.json();
     const tree = elementTreeResponseSchema.parse(body);
 
@@ -93,9 +93,44 @@ test.describe('API contract', () => {
     expect(draftSection!.statusFlags).toHaveProperty('addedtodraft');
   });
 
+  test('reorder rejects cross-zone section move with 422', async ({ page }) => {
+    const fixture = await loadFixture(page.request, 'multi-zone');
+
+    // Navigate to CMS so we're authenticated with session cookies
+    await page.goto(`/admin/pages/edit/show/${fixture.pageId}`);
+    await expect(page.getByTestId('grid-editor-loading')).toHaveCount(0, { timeout: 15_000 });
+
+    // Extract SecurityID from the CMS config
+    const securityId = await page.evaluate(() => (window as any).ss?.config?.SecurityID ?? '');
+    expect(securityId).not.toBe('');
+
+    // Get fixture IDs for sections in different zones
+    const mainAlphaId = fixture.fixtureMap['WeDevelop\\Grid\\Model\\Section']['main_alpha'];
+    const sidebarAlphaId = fixture.fixtureMap['WeDevelop\\Grid\\Model\\Section']['sidebar_alpha'];
+
+    // Attempt cross-zone reorder via direct API call
+    const response = await page.request.patch('/admin/grid/api/reorder', {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-SecurityID': securityId,
+      },
+      data: {
+        elementID: mainAlphaId,
+        targetParentId: fixture.pageId,
+        afterElementID: sidebarAlphaId,
+      },
+    });
+
+    expect(response.status()).toBe(422);
+
+    const body = await response.json();
+    expect(body.status).toBe('error');
+    expect(body.errors[0].value).toContain('no longer exists');
+  });
+
   test('column nodes include gridSettings with per-viewport structure', async ({ request }) => {
     const fixture = await loadFixture(request, 'complex-page');
-    const response = await request.get(`${API_BASE}/${fixture.pageId}`);
+    const response = await request.get(`${API_BASE}/${fixture.pageId}/main`);
     const body: unknown = await response.json();
     const tree = elementTreeResponseSchema.parse(body);
 

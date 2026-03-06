@@ -27,10 +27,12 @@ WeDevelop\Grid\Model\Section:
   section1:
     Title: 'Main Section'
     Sort: 1
+    Zone: main
     Parent: =>Page.e2e_page
   section2:
     Title: 'Draft Section'
     Sort: 2
+    Zone: main
     Parent: =>Page.e2e_page
 
 # --- Rows (into sections) ---

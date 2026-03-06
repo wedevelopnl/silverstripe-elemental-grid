@@ -22,7 +22,6 @@ use SilverStripe\Versioned\Versioned;
  * @property int $Sort
  * @property string $ExtraClass
  * @property string $Style
- * @property string $Zone
  * @property int $ParentID
  * @property string $ParentClass
  * @method DataObject Parent()
@@ -39,7 +38,6 @@ class GridElement extends DataObject
         'Sort' => 'Int',
         'ExtraClass' => 'Varchar(255)',
         'Style' => 'Varchar(255)',
-        'Zone' => 'Varchar(50)',
     ];
 
     /** @var array<string, string> */
@@ -65,10 +63,6 @@ class GridElement extends DataObject
         'Sort' => [
             'type' => 'index',
             'columns' => ['Sort'],
-        ],
-        'ParentZone' => [
-            'type' => 'index',
-            'columns' => ['ParentID', 'ParentClass', 'Zone'],
         ],
     ];
 
@@ -201,8 +195,8 @@ class GridElement extends DataObject
     }
 
     /**
-     * Sets Sort to one past the current maximum for this parent + zone
-     * combination when no explicit Sort has been assigned.
+     * Sets Sort to one past the current maximum for this parent
+     * when no explicit Sort has been assigned.
      */
     public function ensureSortSet(): void
     {
@@ -214,7 +208,6 @@ class GridElement extends DataObject
             ->filter([
                 'ParentID' => $this->ParentID,
                 'ParentClass' => $this->ParentClass,
-                'Zone' => $this->Zone ?: '',
             ])
             ->max('Sort');
 

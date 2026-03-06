@@ -22,6 +22,7 @@ WeDevelop\Grid\Model\Section:
     Title: 'Main Section'
     ShowTitle: 1
     Sort: 1
+    Zone: main
     Parent: =>Page.e2e_page
 
 # --- Row (into section) ---

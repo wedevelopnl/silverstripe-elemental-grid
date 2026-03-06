@@ -51,7 +51,7 @@ describe('useCreateElement', () => {
 
   it('calls createElement endpoint with params as first argument', async () => {
     mockCreateElement.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useCreateElement(42), {
+    const { result } = renderHook(() => useCreateElement(42, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -74,7 +74,7 @@ describe('useCreateElement', () => {
     mockCreateElement.mockResolvedValue(undefined);
     const wrapper = createWrapper();
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-    const { result } = renderHook(() => useCreateElement(42), { wrapper });
+    const { result } = renderHook(() => useCreateElement(42, 'main'), { wrapper });
 
     await act(() =>
       result.current.mutateAsync({
@@ -86,7 +86,7 @@ describe('useCreateElement', () => {
 
     await waitFor(() =>
       expect(invalidateSpy).toHaveBeenCalledWith({
-        queryKey: queryKeys.elementTree.byPage(42),
+        queryKey: queryKeys.elementTree.byPage(42, 'main'),
       }),
     );
   });
@@ -99,7 +99,7 @@ describe('usePublishElement', () => {
 
   it('calls publishElement endpoint', async () => {
     mockPublishElement.mockResolvedValue(undefined);
-    const { result } = renderHook(() => usePublishElement(42), {
+    const { result } = renderHook(() => usePublishElement(42, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -116,7 +116,7 @@ describe('useUnpublishElement', () => {
 
   it('calls unpublishElement endpoint', async () => {
     mockUnpublishElement.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useUnpublishElement(42), {
+    const { result } = renderHook(() => useUnpublishElement(42, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -133,7 +133,7 @@ describe('useDeleteElement', () => {
 
   it('calls deleteElement endpoint', async () => {
     mockDeleteElement.mockResolvedValue(undefined);
-    const { result } = renderHook(() => useDeleteElement(42), {
+    const { result } = renderHook(() => useDeleteElement(42, 'main'), {
       wrapper: createWrapper(),
     });
 
@@ -152,14 +152,14 @@ describe('useDuplicateElement', () => {
     mockDuplicateElement.mockResolvedValue(undefined);
     const wrapper = createWrapper();
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-    const { result } = renderHook(() => useDuplicateElement(42), { wrapper });
+    const { result } = renderHook(() => useDuplicateElement(42, 'main'), { wrapper });
 
     await act(() => result.current.mutateAsync(9));
 
     expect(mockDuplicateElement).toHaveBeenCalledWith(9, expect.anything());
     await waitFor(() =>
       expect(invalidateSpy).toHaveBeenCalledWith({
-        queryKey: queryKeys.elementTree.byPage(42),
+        queryKey: queryKeys.elementTree.byPage(42, 'main'),
       }),
     );
   });
@@ -167,7 +167,7 @@ describe('useDuplicateElement', () => {
   it('exposes error when mutation fails', async () => {
     const error = new Error('Server error');
     mockDuplicateElement.mockRejectedValue(error);
-    const { result } = renderHook(() => useDuplicateElement(42), {
+    const { result } = renderHook(() => useDuplicateElement(42, 'main'), {
       wrapper: createWrapper(),
     });
 
