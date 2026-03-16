@@ -288,4 +288,29 @@ class BaseElementExtension extends DataExtension
     {
         return $this->owner->singular_name() . '_' . $this->owner->getTitle() . '_' . $this->owner->ID;
     }
+
+    public function generateGridJSON(): string
+    {
+        $gridData = [
+            'sizeXS' => $this->owner->SizeXS,
+            'sizeSM' => $this->owner->SizeSM,
+            'sizeMD' => $this->owner->SizeMD,
+            'sizeLG' => $this->owner->SizeLG,
+            'sizeXL' => $this->owner->SizeXL,
+            'offsetXS' => $this->owner->OffsetXS,
+            'offsetSM' => $this->owner->OffsetSM,
+            'offsetMD' => $this->owner->OffsetMD,
+            'offsetLG' => $this->owner->OffsetLG,
+            'offsetXL' => $this->owner->OffsetXL,
+            'visibilityXS' => $this->owner->VisibilityXS,
+            'visibilitySM' => $this->owner->VisibilitySM,
+            'visibilityMD' => $this->owner->VisibilityMD,
+            'visibilityLG' => $this->owner->VisibilityLG,
+            'visibilityXL' => $this->owner->VisibilityXL,
+            'titleClass' => $this->owner->TitleClass,
+            'titleTag' => $this->owner->TitleTag,
+        ];
+
+        return json_encode($gridData, JSON_PRETTY_PRINT);
+    }
 }

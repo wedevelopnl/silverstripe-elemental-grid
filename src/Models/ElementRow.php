@@ -122,4 +122,15 @@ class ElementRow extends BaseElement
 
         return implode(' ', $classes);
     }
+
+    public function generateGridJSON(): string
+    {
+        $gridData = [
+            'isFluid' => $this->IsFluid,
+            'customSectionClass' => $this->CustomSectionClass,
+            'extraClass' => $this->ExtraClass,
+        ];
+
+        return json_encode($gridData, JSON_PRETTY_PRINT);
+    }
 }

@@ -15,6 +15,7 @@ import { loadElementSchemaValue } from 'state/editor/loadElementSchemaValue';
 import { elementTypeType } from 'types/elementTypeType';
 import { elementType } from 'types/elementType';
 import { elementDragSource, isOverTop } from 'lib/dragHelpers';
+import Modal from 'react-modal';
 
 /**
  * The Element component used in the context of an ElementEditor shows the summary
@@ -35,6 +36,8 @@ class Element extends Component {
     this.updateFormTab = this.updateFormTab.bind(this);
     this.handleChangeSize = this.handleChangeSize.bind(this);
     this.handleChangeOffset = this.handleChangeOffset.bind(this);
+    this.handleExportJSON = this.handleExportJSON.bind(this);
+    this.closeModal = this.closeModal.bind(this);
 
     this.state = {
       previewExpanded: false,
@@ -43,6 +46,8 @@ class Element extends Component {
       childRenderingError: false,
       size: props.element.blockSchema.grid.column.size,
       offset: props.element.blockSchema.grid.column.offset,
+      modalIsOpen: false,
+      jsonRepresentation: '',
     };
   }
 
@@ -243,6 +248,21 @@ class Element extends Component {
     });
   }
 
+  handleExportJSON() {
+    const { element } = this.props;
+    const jsonRepresentation = JSON.stringify(element.blockSchema.grid, null, 2);
+    this.setState({
+      modalIsOpen: true,
+      jsonRepresentation,
+    });
+  }
+
+  closeModal() {
+    this.setState({
+      modalIsOpen: false,
+    });
+  }
+
   render() {
     const {
       element,
@@ -260,7 +280,7 @@ class Element extends Component {
       onDragEnd,
     } = this.props;
 
-    const { childRenderingError, previewExpanded } = this.state;
+    const { childRenderingError, previewExpanded, modalIsOpen, jsonRepresentation } = this.state;
 
     if (!element.id) {
       return null;
@@ -332,7 +352,19 @@ class Element extends Component {
             handleChangeOffset={this.handleChangeOffset}
           />
         }
+
+        <button onClick={this.handleExportJSON}>Export JSON</button>
       </div>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={this.closeModal}
+        contentLabel="JSON Representation"
+      >
+        <h2>JSON Representation</h2>
+        <pre>{jsonRepresentation}</pre>
+        <button onClick={this.closeModal}>Close</button>
+      </Modal>
     </div>);
 
     if (!previewExpanded) {
