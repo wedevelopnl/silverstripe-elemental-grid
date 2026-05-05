@@ -24,7 +24,7 @@
         "silverstripe/admin": "^2.0@stable",
         "silverstripe/framework": "^5@stable",
         "silverstripe/vendor-plugin": "^2.0",
-        "dnadesign/silverstripe-elemental": "^5.0",
+        "dnadesign/silverstripe-elemental": "dev-5.2-for-ss-5.4",
         "wedevelopnl/silverstripe-media-field": "^4.0",
         "jonom/focuspoint": "^5.0"
     },
